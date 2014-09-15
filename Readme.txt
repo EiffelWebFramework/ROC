@@ -1,14 +1,14 @@
-CMS Hyperemedia API and Adaptive Web Design
+CMS Hypermedia API and Adaptive Web Design
 ============================================
 
 
 A content management system is not a simple domain.
 This example shows how to build a basic Hypermedia API for a CMS using HTML5 and progressive enhacement.
-The idea is based on an existing Eiffel CMS, the goal is learn the domain and create a new modular CMS.
+The idea is based on an existing [Eiffel CMS] (https://github.com/EiffelWebFramework/cms), the goal is learn the domain and create a new modular CMS.
 
 Persistence
 ============
-The current solution uses MySQL and only handle the nodes concept.
+The current solution uses MySQL and only handle users and nodes concept.
 
 
 Authentication/Authorization
@@ -26,7 +26,7 @@ The root uri:
 	shows a predefined number of nodes the `n' most recent nodes.
 
 Guest users will be able to list all the nodes and view a particular node.
-Logged in users (There is only one user: admin)
+Logged in users.
 Logged users are able to 
 Add a new node
 Edit an existing node
@@ -35,6 +35,13 @@ Edit a node summary
 Edit a node content
 Delete a node
 
+
+Server Modes
+============
+
+api: HTML5 API
+html: api with progresive enhacements css and js, server side rendering.
+web: api with progresive enhacements css and js and Ajax calls.
 
 References
 
