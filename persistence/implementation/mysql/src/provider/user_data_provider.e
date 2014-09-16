@@ -37,6 +37,12 @@ feature -- Status Report
 			Result := db_handler.successful
 		end
 
+	has_user: BOOLEAN
+			-- Has any user?
+		do
+			Result := count > 0
+		end
+
 feature -- Basic Operations
 
 	new_user (a_user_name: READABLE_STRING_32; a_password: READABLE_STRING_32; a_email: READABLE_STRING_32)
@@ -128,6 +134,21 @@ feature -- Basic Operations
 			post_execution
 		end
 
+	count: INTEGER
+			-- Number of items users.
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".count")
+			create l_parameters.make (0)
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_count, l_parameters))
+			db_handler.execute_query
+			if db_handler.count = 1 then
+				Result := db_handler.read_integer_32 (1)
+			end
+			post_execution
+		end
+
 feature -- New Object
 
 	fetch_user: CMS_USER
@@ -148,6 +169,9 @@ feature -- New Object
 		end
 
 feature -- Sql Queries
+
+	Select_count: STRING = "select count(*) from Users;"
+		-- Number of users.
 
 	Select_user_by_id: STRING = "select * from Users where id =:id;"
 		-- Retrieve user by id if exists.

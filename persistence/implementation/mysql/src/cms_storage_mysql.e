@@ -34,7 +34,8 @@ feature -- Access: user
 	has_user: BOOLEAN
 			-- Has any user?
 		do
-			to_implement("Not implemented!!!")
+			Result := user_provider.has_user
+			post_user_provider_execution
 		end
 
 
