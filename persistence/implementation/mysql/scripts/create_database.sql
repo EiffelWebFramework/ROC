@@ -12,7 +12,7 @@ USE `cms` ;
 -- Table `cms`.`nodes`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `cms`.`nodes` (
-  `id` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `publication_date` DATE NOT NULL,
   `creation_date` DATE NOT NULL,
   `modification_date` DATE NOT NULL,
@@ -59,7 +59,7 @@ DEFAULT CHARACTER SET = latin1;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `cms`.`users_nodes` (
   `users_id` INT(10) UNSIGNED NOT NULL,
-  `nodes_id` SMALLINT(5) UNSIGNED NOT NULL,
+  `nodes_id` INT(10) UNSIGNED NOT NULL,
   PRIMARY KEY (`users_id`, `nodes_id`),
   INDEX `fk_users_has_nodes_nodes1_idx` (`nodes_id` ASC),
   INDEX `fk_users_has_nodes_users_idx` (`users_id` ASC),
