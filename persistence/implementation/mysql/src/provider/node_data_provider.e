@@ -74,13 +74,28 @@ feature -- Access
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".nodes")
+			log.write_information (generator + ".node")
 			create l_parameters.make (1)
 			l_parameters.put (a_id,"id")
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_node_by_id, l_parameters))
 			db_handler.execute_query
 			if db_handler.count = 1 then
 				Result := fetch_node
+			end
+			post_execution
+		end
+
+	count: INTEGER
+			-- Number of items nodes.
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".count")
+			create l_parameters.make (0)
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_count, l_parameters))
+			db_handler.execute_query
+			if db_handler.count = 1 then
+				Result := db_handler.read_integer_32 (1)
 			end
 			post_execution
 		end
@@ -92,7 +107,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".nodes")
+			log.write_information (generator + ".new_node")
 			create l_parameters.make (6)
 			l_parameters.put (a_node.title, "title")
 			l_parameters.put (a_node.summary, "summary")
@@ -110,7 +125,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".nodes")
+			log.write_information (generator + ".update_node_title")
 			create l_parameters.make (3)
 			l_parameters.put (a_title, "title")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
@@ -125,7 +140,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".nodes")
+			log.write_information (generator + ".update_node_summary")
 			create l_parameters.make (3)
 			l_parameters.put (a_summary, "summary")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
@@ -140,7 +155,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".nodes")
+			log.write_information (generator + ".update_node_content")
 			create l_parameters.make (3)
 			l_parameters.put (a_content, "content")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
@@ -155,7 +170,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".nodes")
+			log.write_information (generator + ".update_node")
 			create l_parameters.make (7)
 			l_parameters.put (a_node.title, "title")
 			l_parameters.put (a_node.summary, "summary")
@@ -174,7 +189,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".nodes")
+			log.write_information (generator + ".delete_node")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "id")
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (sql_delete_node, l_parameters))
@@ -201,6 +216,8 @@ feature -- Connection
 		end
 
 feature {NONE} -- Queries
+
+	Select_count: STRING = "select count(*) from Nodes;"
 
 	Select_nodes: STRING = "select * from Nodes;"
 		-- SQL Query to retrieve all nodes.

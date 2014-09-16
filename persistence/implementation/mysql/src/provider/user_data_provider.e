@@ -66,7 +66,7 @@ feature -- Basic Operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".nodes")
+			log.write_information (generator + ".user")
 			create l_parameters.make (1)
 			l_parameters.put (a_id,"id")
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_user_by_id, l_parameters))
@@ -99,7 +99,7 @@ feature -- Basic Operations
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
-			log.write_information (generator + ".user_by_name")
+			log.write_information (generator + ".user_by_email")
 			create l_parameters.make (1)
 			l_parameters.put (a_email,"email")
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_user_by_email, l_parameters))
@@ -115,7 +115,7 @@ feature -- Basic Operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".nodes")
+			log.write_information (generator + ".user_salt")
 			create l_parameters.make (1)
 			l_parameters.put (a_username,"name")
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_salt_by_username, l_parameters))
