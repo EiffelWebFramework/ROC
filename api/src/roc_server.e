@@ -158,12 +158,6 @@ feature -- Filters
 			fh.custom_header.put_header ("X-ROCServer: " + version)
 			l_filter := fh
 
-				-- Cors
-			create {WSF_CORS_FILTER}f
-			f.set_next (l_filter)
-			l_filter := f
-
-
 				-- Maintenance
 			create {WSF_MAINTENANCE_FILTER} f
 			f.set_next (l_filter)

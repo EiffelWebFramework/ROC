@@ -54,7 +54,7 @@ feature -- HTTP Methods
 		do
 
 			create l_page.make (req, "layout2.tpl")
-			l_page.set_value (api_service.recent_nodes (5), "nodes")
+			l_page.set_value (api_service.recent_nodes (0,5), "nodes")
 			l_page.set_value (is_web, "web")
 			l_page.set_value (roc_config.is_html, "html")
 			l_page.send_to (res)

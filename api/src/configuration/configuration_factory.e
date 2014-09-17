@@ -34,7 +34,7 @@ feature -- Factory
 
 				if attached (create {JSON_CONFIGURATION}).new_database_configuration (l_layout.application_config_path) as l_database_config then
 					create {DATABASE_CONNECTION_MYSQL} l_database.login_with_connection_string (l_database_config.connection_string)
-					create l_api_service.make_with_database (l_database)
+					create l_api_service.make (create {CMS_STORAGE_MYSQL}.make (l_database))
 					create Result.make (l_database, l_api_service, l_email_service, l_layout)
 					if (create {ROC_JSON_CONFIGURATION}).is_web_mode(l_layout.application_config_path) then
 						Result.mark_web
@@ -44,7 +44,7 @@ feature -- Factory
 					set_successful
 				else
 					create {DATABASE_CONNECTION_NULL} l_database.make_common
-					create l_api_service.make_with_database (l_database)
+					create l_api_service.make (create {CMS_STORAGE_NULL})
 					create Result.make (l_database, l_api_service, l_email_service, l_layout)
 					set_last_error ("Database Connections", generator + ".roc_config")
 					log.write_error (generator + ".roc_config Error database connection" )
@@ -58,7 +58,7 @@ feature -- Factory
 				create l_email_service.make ((create {JSON_CONFIGURATION}).new_smtp_configuration(l_layout.application_config_path))
 
 				create {DATABASE_CONNECTION_NULL} l_database.make_common
-				create l_api_service.make_with_database (l_database)
+				create l_api_service.make (create {CMS_STORAGE_NULL})
 				create Result.make (l_database, l_api_service, l_email_service, l_layout)
 			end
 		rescue
