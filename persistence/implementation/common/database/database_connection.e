@@ -72,6 +72,13 @@ feature -- Database Setup
 	keep_connection: BOOLEAN
 			-- Keep connection alive?
 
+feature -- Change Element
+
+	not_keep_connection
+		do
+			keep_connection := False
+		end
+
 feature -- Conection
 
 	connect

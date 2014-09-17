@@ -33,7 +33,7 @@ feature -- Factory
 				create l_email_service.make ((create {JSON_CONFIGURATION}).new_smtp_configuration(l_layout.application_config_path))
 
 				if attached (create {JSON_CONFIGURATION}).new_database_configuration (l_layout.application_config_path) as l_database_config then
-					create {DATABASE_CONNECTION_MYSQL} l_database.login_with_schema ("cms", "root", "")
+					create {DATABASE_CONNECTION_MYSQL} l_database.login_with_connection_string (l_database_config.connection_string)
 					create l_api_service.make_with_database (l_database)
 					create Result.make (l_database, l_api_service, l_email_service, l_layout)
 					if (create {ROC_JSON_CONFIGURATION}).is_web_mode(l_layout.application_config_path) then

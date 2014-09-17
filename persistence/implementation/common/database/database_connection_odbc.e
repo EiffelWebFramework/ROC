@@ -4,7 +4,7 @@ note
 	revision: "$Revision: 95678 $"
 
 class
-	DATABASE_CONNECTION_MYSQL
+	DATABASE_CONNECTION_ODBC
 
 inherit
 
@@ -14,12 +14,12 @@ inherit
 		end
 
 create
-	make, make_common, make_basic, login_with_connection_string, login_with_schema
+	make, make_common, make_basic, login_with_connection_string
 
 feature -- Initialization
 
 	make_common
-			-- Create a database handler for MYSQL with common settings.
+			-- Create a database handler for ODBC with common settings.
 		local
 			l_retried: BOOLEAN
 		do
@@ -101,45 +101,26 @@ feature -- Initialization
 
 	login_with_connection_string (a_string: STRING)
 			-- Login with `a_connection_string'and immediately connect to database.
-		local
-			l_string: LIST[STRING]
-			l_server: STRING
-			l_port: STRING
-			l_schema: STRING
-			l_user: STRING
-			l_password: STRING
 		do
-			l_string := a_string.split (';')
-			l_server := l_string.at (2).split ('=').at (2)
-			l_port := l_string.at (3).split ('=').at (2)
-			l_schema := l_string.at (4).split ('=').at (2)
-			l_user := l_string.at (5).split ('=').at (2)
-			l_password := l_string.at (6).split ('=').at (2)
-
-			create db_application
-			db_application.set_application (l_schema)
-			db_application.set_hostname (l_server + ":" + l_port)
-			db_application.login_and_connect (l_user, l_password)
+			log.write_debug (generator +".login_with_connection_string")
+			create db_application.login_with_connection_string (a_string)
 			db_application.set_base
 			create db_control.make
+			log.write_debug (generator +".login_with_connection_string, is_keep_connection? "+ is_keep_connection.out )
 			keep_connection := is_keep_connection
-
-		end
-
-	login_with_schema (a_schema: STRING; a_username: STRING; a_password: STRING)
-			-- Login with `a_connection_string'and immediately connect to database.
-		do
-			create db_application
-			db_application.set_application (a_schema)
-			db_application.login_and_connect (a_username, a_password)
-			db_application.set_base
-			create db_control.make
-			keep_connection := is_keep_connection
+			if keep_connection then
+				connect
+				if not db_control.is_ok then
+					log.write_critical (generator +".login_with_connection_string:"+ db_control.error_code.out )
+					log.write_critical (generator +".login_with_connection_string:"+ db_control.error_message_32 )
+				end
+				log.write_debug (generator +".login_with_connection_string, After connect, is_connected? "+ is_connected.out)
+			end
 		end
 
 feature -- Databse Connection
 
-	db_application: DATABASE_APPL [MYSQL]
+	db_application: DATABASE_APPL [ODBC]
 			-- Database application.
 
 end

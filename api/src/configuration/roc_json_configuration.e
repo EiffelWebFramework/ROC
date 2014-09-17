@@ -45,7 +45,4 @@ feature -- Access
 		end
 
 
-
-
-
 end
