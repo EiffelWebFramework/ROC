@@ -200,8 +200,6 @@ feature -- Test routines
 		end
 
 	test_node_does_not_exist
-		local
-			l_nodes: LIST[CMS_NODE]
 		do
 			across 1 |..| 10 as c loop
 				storage.save_node (custom_node ("Content_" + c.item.out, "Summary_" + c.item.out, "Title_" + c.item.out))
@@ -210,8 +208,6 @@ feature -- Test routines
 		end
 
 	test_node
-		local
-			l_nodes: LIST[CMS_NODE]
 		do
 			across 1 |..| 10 as c loop
 				storage.save_node (custom_node ("Content_" + c.item.out, "Summary_" + c.item.out, "Title_" + c.item.out))
@@ -221,7 +217,6 @@ feature -- Test routines
 
 	test_update_node
 		local
-			l_nodes: LIST[CMS_NODE]
 			l_node: CMS_NODE
 		do
 			storage.save_node (custom_node ("Content", "Summary", "Title"))
@@ -237,9 +232,6 @@ feature -- Test routines
 		end
 
 	test_update_node_title
-		local
-			l_nodes: LIST[CMS_NODE]
-			l_node: CMS_NODE
 		do
 			storage.save_node (custom_node ("Content", "Summary", "Title"))
 			if attached {CMS_NODE} storage.node (1) as ll_node then
@@ -249,9 +241,6 @@ feature -- Test routines
 		end
 
 	test_update_node_summary
-		local
-			l_nodes: LIST[CMS_NODE]
-			l_node: CMS_NODE
 		do
 			storage.save_node (custom_node ("Content", "Summary", "Title"))
 			if attached {CMS_NODE} storage.node (1) as ll_node then
@@ -261,9 +250,6 @@ feature -- Test routines
 		end
 
 	test_update_node_content
-		local
-			l_nodes: LIST[CMS_NODE]
-			l_node: CMS_NODE
 		do
 			storage.save_node (custom_node ("Content", "Summary", "Title"))
 			if attached {CMS_NODE} storage.node (1) as ll_node then
@@ -273,8 +259,6 @@ feature -- Test routines
 		end
 
 	test_delete_node
-		local
-			l_nodes: LIST[CMS_NODE]
 		do
 			across 1 |..| 10 as c loop
 				storage.save_node (custom_node ("Content_" + c.item.out, "Summary_" + c.item.out, "Title_" + c.item.out))

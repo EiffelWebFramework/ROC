@@ -6,6 +6,10 @@ note
 class
 	CMS_NODE
 
+inherit
+
+	REFACTORING_HELPER
+
 create
 	make
 
@@ -21,6 +25,10 @@ feature{NONE} -- Initialization
 			set_creation_date (l_time)
 			set_modification_date (l_time)
 			set_publication_date (l_time)
+			fixme ("Remove harcode format")
+			set_format ("HTML")
+			fixme ("Remove harcode content type")
+			set_content_type ("Page")
 		ensure
 			content_set: content = a_content
 			summary_set: summary = a_summary
@@ -48,9 +56,31 @@ feature -- Access
 			-- When the node was published.
 
 	publication_date_output: READABLE_STRING_32
+			-- Formatted output.
 
 	id: INTEGER_64 assign set_id
 			-- Unique id.
+
+	format:  READABLE_STRING_32
+			-- Format associated with `body'.
+			-- For example: text, mediawiki, html, etc
+
+	content_type: READABLE_STRING_32
+			-- Associated content type name.
+			-- Page, Article, Blog, News, etc.
+
+feature -- status report
+
+	has_id: BOOLEAN
+		do
+			Result := id > 0
+		end
+
+	author: detachable CMS_USER
+		-- Node's author.	
+
+	collaborators: detachable LIST[CMS_USER]
+		-- Node's collaborators.
 
 feature -- Element change
 
@@ -103,12 +133,49 @@ feature -- Element change
 			publication_date_assigned: publication_date = a_publication_date
 		end
 
+	set_content_type (a_content_type: like content_type)
+			-- Assign `content_type' with `a_content_type'.
+		do
+			content_type := a_content_type
+		ensure
+			content_type_assigned: content_type = a_content_type
+		end
+
+	set_format (a_format: like format)
+			-- Assign `format' with `a_format'.
+		do
+			format := a_format
+		ensure
+			format_assigned: format = a_format
+		end
+
 	set_id (an_id: like id)
 			-- Assign `id' with `an_id'.
 		do
 			id := an_id
 		ensure
 			id_assigned: id = an_id
+		end
+
+	set_author (u: like author)
+			-- Assign 'author' with `u'
+		do
+			author := u
+		ensure
+			auther_set: author = u
+		end
+
+	add_collaborator (a_user: CMS_USER)
+			-- Add collaborator `a_user' to the collaborators list.
+		local
+			lst: like collaborators
+		do
+			lst := collaborators
+			if lst = Void then
+				create {ARRAYED_SET [CMS_USER]} lst.make (1)
+				collaborators := lst
+			end
+			lst.force (a_user)
 		end
 
 end

@@ -65,6 +65,14 @@ feature -- Test routines
 			assert ("Not void",  attached user_provider.user_by_name ("test"))
 		end
 
+	test_new_user_with_roles
+		do
+			user_provider.new_user ("test", "test","test@admin.com")
+		    role_provider.new_role ("Admin")
+		    assert ("Empty roles for given user", user_provider.user_roles (1).after)
+		    user_provider.add_role (1, 1)
+		    assert ("Not empty roles for given user", not user_provider.user_roles (1).after)
+		end
 
 feature {NONE} -- Implementation
 
@@ -73,6 +81,13 @@ feature {NONE} -- Implementation
 		once
 			create Result.make (connection)
 		end
+
+	role_provider: ROLE_DATA_PROVIDER
+			-- user provider.
+		once
+			create Result.make (connection)
+		end
+
 end
 
 

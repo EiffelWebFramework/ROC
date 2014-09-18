@@ -149,6 +149,34 @@ feature -- Basic Operations
 			post_execution
 		end
 
+	add_role (a_user_id: INTEGER; a_role_id: INTEGER)
+			-- Add Role `a_role_id' to user `a_user_id'
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			log.write_information (generator + ".add_role")
+			create l_parameters.make (2)
+			l_parameters.put (a_user_id,"users_id")
+			l_parameters.put (a_role_id,"roles_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (slq_insert_users_roles, l_parameters))
+			db_handler.execute_change
+			post_execution
+		end
+
+	user_roles (a_id:INTEGER_64): DATABASE_ITERATION_CURSOR [INTEGER]
+			-- List of Roles id for the given user `a_id'.
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".user_roles")
+			create l_parameters.make (1)
+			l_parameters.put (a_id, "user_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Select_user_roles, l_parameters))
+			db_handler.execute_query
+			create Result.make (db_handler, agent fetch_role_id)
+			post_execution
+		end
+
 feature -- New Object
 
 	fetch_user: CMS_USER
@@ -168,7 +196,14 @@ feature -- New Object
 			end
 		end
 
-feature -- Sql Queries
+	fetch_role_id: INTEGER
+		do
+			if attached db_handler.read_integer_32 (1) as l_id then
+				Result := l_id
+			end
+		end
+
+feature {NONE} -- Sql Queries: USER
 
 	Select_count: STRING = "select count(*) from Users;"
 		-- Number of users.
@@ -188,6 +223,12 @@ feature -- Sql Queries
 	SQL_Insert_user: STRING = "insert into users (username, password, salt, email) values (:username, :password, :salt, :email);"
 		-- SQL Insert to add a new node.
 
+
+feature {NONE} -- Sql Queries: USER_ROLES
+
+	Slq_insert_users_roles: STRING = "insert into users_roles (users_id, roles_id) values (:users_id, :roles_id);"
+
+	Select_user_roles:  STRING = "Select roles_id from users_roles where users_id = :user_id"
 
 feature {NONE} -- Implementation
 

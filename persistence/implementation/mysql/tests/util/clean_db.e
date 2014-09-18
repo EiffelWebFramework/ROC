@@ -23,6 +23,20 @@ feature
 		do
 			create l_parameters.make (0)
 
+
+				-- Clean Permissions
+			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_permissions, l_parameters))
+			db_handler(a_connection).execute_change
+
+				-- Clean Users Roles
+			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_users_roles, l_parameters))
+			db_handler(a_connection).execute_change
+
+				-- Clean Roles
+			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_roles, l_parameters))
+			db_handler(a_connection).execute_change
+
+				-- Clean Nodes
 			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_nodes, l_parameters))
 			db_handler(a_connection).execute_change
 
@@ -30,12 +44,20 @@ feature
 			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_users, l_parameters))
 			db_handler(a_connection).execute_change
 
+
 				-- Reset Autoincremente
 			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Rest_users_autoincrement, l_parameters))
 			db_handler(a_connection).execute_change
 
 			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Rest_nodes_autoincrement, l_parameters))
 			db_handler(a_connection).execute_change
+
+			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Rest_roles_autoincrement, l_parameters))
+			db_handler(a_connection).execute_change
+
+			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Rest_permissions_autoincrement, l_parameters))
+			db_handler(a_connection).execute_change
+
 		end
 
 
@@ -57,10 +79,25 @@ feature -- Sql delete queries
 	Sql_delete_nodes: STRING = "delete from Nodes"
 		-- Clean Nodes.
 
+	Sql_delete_roles: STRING = "delete from Roles"
+		-- Clean Roles.
+
+	Sql_delete_permissions: STRING = "delete from Permissions"
+		-- Clean Permissions.
+
+	Sql_delete_users_roles: STRING = "delete from Users_roles"
+		-- Clean User roles.
+
 	Rest_users_autoincrement: STRING = "ALTER TABLE Users AUTO_INCREMENT = 1"
 		-- reset autoincrement
 
 	Rest_nodes_autoincrement: STRING = "ALTER TABLE Nodes AUTO_INCREMENT = 1"
+		-- reset autoincrement.
+
+	Rest_roles_autoincrement: STRING = "ALTER TABLE Roles AUTO_INCREMENT = 1"
+		-- reset autoincrement.
+
+	Rest_permissions_autoincrement: STRING = "ALTER TABLE Permissions AUTO_INCREMENT = 1"
 		-- reset autoincrement.
 
 end

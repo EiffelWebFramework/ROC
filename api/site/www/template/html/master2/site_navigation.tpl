@@ -7,8 +7,10 @@
 		 <div class="collapse navbar-collapse" id="navbarCollapse">
 	         <ul class="nav navbar-nav">
 	        	<li class="ListOfNodes"><a title="Nodes" href="{$host/}/nodes" rel="node">List of Nodes</a></li>
-		        
-	      		{if isset="$user"}
+	      	</ul>
+	      	 <ul class="nav navbar-nav navbar-right">
+	      	 	{if isset="$user"}
+	      	 		<li><a>{$user/}</a></li>
 		      		<li><a title="Node" href="{$host/}/node" rel="node">New Node</a></li>
 					<li><a title="Logoff" href="{$host/}/logoff" rel="logoff">Logoff</a></li>
 				{/if}	
@@ -16,7 +18,7 @@
 					<li><a title="Login" href="{$host/}/login" rel="login">Login</a></li>
 					<li><a title="Register" href="{$host/}/user" rel="register">Register</a></li>
 				{/unless}
-	      	</ul>
+            </ul>
 	     </div>
 	  </div>   
 </nav>
