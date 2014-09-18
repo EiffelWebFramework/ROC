@@ -10,6 +10,7 @@ note
 	date: "$Date$"
 	revision: "$Revision$"
 	EIS: "name=Database Testing", "src=http://www.agiledata.org/essays/databaseTesting.html", "protocol=uri"
+	testing:"execution/serial"
 
 class
 	CLEAN_DB
@@ -23,6 +24,10 @@ feature
 		do
 			create l_parameters.make (0)
 
+
+				-- Clean Profiles
+			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_user_profiles, l_parameters))
+			db_handler(a_connection).execute_change
 
 				-- Clean Permissions
 			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_permissions, l_parameters))
@@ -58,6 +63,9 @@ feature
 			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Rest_permissions_autoincrement, l_parameters))
 			db_handler(a_connection).execute_change
 
+			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Rest_profiles_autoincrement, l_parameters))
+			db_handler(a_connection).execute_change
+
 		end
 
 
@@ -88,6 +96,9 @@ feature -- Sql delete queries
 	Sql_delete_users_roles: STRING = "delete from Users_roles"
 		-- Clean User roles.
 
+	Sql_delete_user_profiles:  STRING = "delete from profiles"
+		-- Clean profiles.
+
 	Rest_users_autoincrement: STRING = "ALTER TABLE Users AUTO_INCREMENT = 1"
 		-- reset autoincrement
 
@@ -99,5 +110,10 @@ feature -- Sql delete queries
 
 	Rest_permissions_autoincrement: STRING = "ALTER TABLE Permissions AUTO_INCREMENT = 1"
 		-- reset autoincrement.
+
+	Rest_profiles_autoincrement: STRING = "ALTER TABLE Profiles AUTO_INCREMENT = 1"
+		-- reset autoincrement.
+
+
 
 end

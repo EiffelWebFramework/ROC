@@ -8,7 +8,7 @@ class
 
 inherit
 
-	SHARED_LOGGER
+	SHARED_ERROR
 
 	REFACTORING_HELPER
 
@@ -42,6 +42,7 @@ feature -- Intialization
 				a_base_selection.load_result
 				Result := a_base_selection.container
 			else
+				set_last_error (a_base_selection.error_message_32, generator + ".execute_reader"  )
 				log.write_error (generator + "." + a_base_selection.error_message_32)
 			end
 			unset_map_name (a_base_selection)
@@ -55,6 +56,11 @@ feature -- Intialization
 			set_map_name (a_base_change)
 			a_base_change.set_query (query)
 			a_base_change.execute_query
+			if a_base_change.is_ok then
+			else
+				set_last_error (a_base_change.error_message_32, generator + ".execute_reader"  )
+				log.write_error (generator + "." + a_base_change.error_message_32)
+			end
 			unset_map_name (a_base_change)
 		end
 

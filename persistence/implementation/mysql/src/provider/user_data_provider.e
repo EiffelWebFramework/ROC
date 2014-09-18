@@ -149,6 +149,8 @@ feature -- Basic Operations
 			post_execution
 		end
 
+feature -- Basic operations: User Roles
+
 	add_role (a_user_id: INTEGER; a_role_id: INTEGER)
 			-- Add Role `a_role_id' to user `a_user_id'
 		local
@@ -176,6 +178,72 @@ feature -- Basic Operations
 			create Result.make (db_handler, agent fetch_role_id)
 			post_execution
 		end
+
+
+feature -- Basic operations: User Profiles
+
+	save_profile_item (a_user_id: INTEGER_64; a_key: READABLE_STRING_32; a_value: READABLE_STRING_32)
+			-- Save a profile item with (a_key and a_value) to the given user `user_id'.
+		local
+				l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".save_profile_item")
+			create l_parameters.make (3)
+			l_parameters.put (a_key, "key")
+			l_parameters.put (a_value, "value")
+			l_parameters.put (a_user_id, "users_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Select_instert_profile_item, l_parameters))
+			db_handler.execute_change
+			post_execution
+		end
+
+	save_profile (a_user_id: INTEGER_64; a_user_profile: CMS_USER_PROFILE)
+			-- Save a profile item with (a_key and a_value) to the given user `user_id'.
+		local
+			l_cursor: TABLE_ITERATION_CURSOR [READABLE_STRING_8, READABLE_STRING_8]
+		do
+			log.write_information (generator + ".save_profile")
+			from
+				l_cursor := a_user_profile.new_cursor
+			until
+				l_cursor.after
+			loop
+				save_profile_item (a_user_id, l_cursor.key, l_cursor.item)
+				l_cursor.forth
+			end
+
+			post_execution
+		end
+
+	user_profile (a_user_id: INTEGER_64): CMS_USER_PROFILE
+			-- User profile for a user with id `a_user_id'.
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".user_profile")
+			create l_parameters.make (1)
+			l_parameters.put (a_user_id, "users_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Select_user_profile, l_parameters))
+			db_handler.execute_query
+			create Result.make
+			if not db_handler.after then
+				from
+					db_handler.start
+				until
+					db_handler.after
+				loop
+					if
+						attached db_handler.read_string (1) as l_key and then
+						attached db_handler.read_string (2) as l_value
+					then
+						Result.force (l_value, l_key)
+					end
+					db_handler.forth
+				end
+			end
+			post_execution
+		end
+
 
 feature -- New Object
 
@@ -229,6 +297,14 @@ feature {NONE} -- Sql Queries: USER_ROLES
 	Slq_insert_users_roles: STRING = "insert into users_roles (users_id, roles_id) values (:users_id, :roles_id);"
 
 	Select_user_roles:  STRING = "Select roles_id from users_roles where users_id = :user_id"
+
+feature {NONE} -- SQL Queries: Profile
+
+	Select_instert_profile_item: STRING = "insert into profiles (profiles.key, value, users_id) values (:key, :value, :users_id);"
+
+	Select_user_profile: STRING = "Select profiles.key, value from profiles where users_id = :users_id;"
+
+
 
 feature {NONE} -- Implementation
 
