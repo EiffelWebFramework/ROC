@@ -197,6 +197,80 @@ feature -- Basic operations
 			post_execution
 		end
 
+feature -- Basic Operations: User_Nodes
+
+	add_author (a_user_id: INTEGER_64; a_node_id: INTEGER_64)
+			-- Add author `a_user_id' to node `a_node_id'
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			log.write_information (generator + ".add_author")
+			create l_parameters.make (2)
+			l_parameters.put (a_user_id,"user_id")
+			l_parameters.put (a_node_id,"id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Sql_update_node_author, l_parameters))
+			db_handler.execute_change
+			post_execution
+		end
+
+	add_collaborator (a_user_id: INTEGER_64; a_node_id: INTEGER_64)
+			-- Add collaborator `a_user_id' to node `a_node_id'
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			log.write_information (generator + ".add_collaborator")
+			create l_parameters.make (2)
+			l_parameters.put (a_user_id,"users_id")
+			l_parameters.put (a_node_id,"nodes_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Sql_insert_users_nodes, l_parameters))
+			db_handler.execute_change
+			post_execution
+		end
+
+	user_nodes (a_id:INTEGER_64): DATABASE_ITERATION_CURSOR [CMS_NODE]
+			-- List of Nodes for the given user `a_id'. (the user is the author of the node)
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".user_nodes")
+			create l_parameters.make (1)
+			l_parameters.put (a_id, "user_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Select_user_author, l_parameters))
+			db_handler.execute_query
+			create Result.make (db_handler, agent fetch_node)
+			post_execution
+		end
+
+	node_author (a_id: INTEGER_64): detachable CMS_USER
+			-- Node's author for the given node id.
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".node_author")
+			create l_parameters.make (1)
+			l_parameters.put (a_id, "node_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_node_author, l_parameters))
+			db_handler.execute_query
+			if not db_handler.after then
+				Result := fetch_user
+			end
+			post_execution
+		end
+
+	node_collaborators (a_id: INTEGER_64): DATABASE_ITERATION_CURSOR [CMS_USER]
+			-- List of possible node's collaborator.
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".node_collaborators")
+			create l_parameters.make (1)
+			l_parameters.put (a_id, "node_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_node_collaborators, l_parameters))
+			db_handler.execute_query
+			create Result.make (db_handler, agent fetch_user)
+			post_execution
+		end
+
 feature -- Connection
 
 	connect
@@ -243,6 +317,20 @@ feature {NONE} -- Queries
 
 	SQL_Delete_node: STRING = "delete from nodes where id=:id;"
 
+	Sql_update_node_author: STRING  = "update nodes SET author_id=:user_id where id=:id;"
+
+feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
+
+	Sql_insert_users_nodes: STRING = "insert into users_nodes (users_id, nodes_id) values (:users_id, :nodes_id);"
+
+	select_node_collaborators:  STRING = "SELECT * FROM Users INNER JOIN users_nodes ON users.id=users_nodes.users_id and users_nodes.nodes_id = :nodes_id;"
+
+	Select_user_author: STRING = "SELECT * FROM Nodes INNER JOIN users ON nodes.author_id=users.id and users.id = :user_id;"
+
+	Select_node_author: STRING = "SELECT * FROM User INNER JOIN nodes ON nodes.author_id=users.id and node_id =:node_id;"
+
+feature -- 	
+
 
 feature -- New Object
 
@@ -269,6 +357,23 @@ feature -- New Object
 			end
 			if attached db_handler.read_string (7) as l_c then
 				Result.set_content (l_c)
+			end
+		end
+
+	fetch_user: CMS_USER
+		do
+			create Result.make ("")
+			if attached db_handler.read_integer_32 (1) as l_id then
+				Result.set_id (l_id)
+			end
+			if attached db_handler.read_string (2) as l_u then
+				Result.set_name (l_u)
+			end
+			if attached db_handler.read_string (3) as l_p then
+				Result.set_password (l_p)
+			end
+			if attached db_handler.read_string (5) as l_e then
+				Result.set_email (l_e)
 			end
 		end
 

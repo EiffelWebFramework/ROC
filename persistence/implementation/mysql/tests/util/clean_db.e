@@ -33,6 +33,12 @@ feature
 			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_permissions, l_parameters))
 			db_handler(a_connection).execute_change
 
+
+				-- Clean Users Nodes
+			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_users_nodes, l_parameters))
+			db_handler(a_connection).execute_change
+
+
 				-- Clean Users Roles
 			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_users_roles, l_parameters))
 			db_handler(a_connection).execute_change
@@ -96,8 +102,10 @@ feature -- Sql delete queries
 	Sql_delete_users_roles: STRING = "delete from Users_roles"
 		-- Clean User roles.
 
-	Sql_delete_user_profiles:  STRING = "delete from profiles"
+	Sql_delete_user_profiles: STRING = "delete from profiles"
 		-- Clean profiles.
+
+	Sql_delete_users_nodes: STRING = "delete from users_nodes"
 
 	Rest_users_autoincrement: STRING = "ALTER TABLE Users AUTO_INCREMENT = 1"
 		-- reset autoincrement

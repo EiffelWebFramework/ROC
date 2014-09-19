@@ -5,7 +5,7 @@ note
 	author: "EiffelStudio test wizard"
 	date: "$Date$"
 	revision: "$Revision$"
-	testing: "type/manual"
+	testing:"execution/isolated"
 
 class
 	NODE_TEST_SET
@@ -195,13 +195,59 @@ feature -- Test routines
 
 				-- Scenrario 10..10 empty
 			assert ("Empty", node_provider.recent_nodes (10, 10).after)
-
 		end
+
+
+	test_new_node_without_user
+		do
+			node_provider.new_node (default_node)
+			user_provider.new_user ("u1", "u1", "email")
+			if attached user_provider.user_by_name ("u1") as l_user then
+				assert ("Empty nodes", node_provider.user_nodes (l_user.id).after)
+			end
+		end
+
+
+	test_new_node_add_author
+		do
+			node_provider.new_node (default_node)
+			user_provider.new_user ("u1", "u1", "email")
+			if attached user_provider.user_by_name ("u1") as l_user then
+				node_provider.add_collaborator (l_user.id, 1)
+				assert ("Not Empty nodes", not node_provider.node_collaborators (1).after)
+			end
+		end
+
+	test_multiple_nodes_add_author
+		local
+			l_list: LIST[CMS_NODE]
+		do
+			create {ARRAYED_LIST[CMS_NODE]} l_list.make (0)
+			node_provider.new_node (default_node)
+			node_provider.new_node (custom_node ("content1", "summary1", "title1"))
+			node_provider.new_node (custom_node ("content2", "summary2", "title2"))
+			node_provider.new_node (custom_node ("content3", "summary3", "title3"))
+			user_provider.new_user ("u1", "u1", "email")
+			if attached user_provider.user_by_name ("u1") as l_user then
+				node_provider.add_collaborator (l_user.id, 1)
+				node_provider.add_collaborator (l_user.id, 2)
+				node_provider.add_collaborator (l_user.id, 3)
+				node_provider.add_collaborator (l_user.id, 4)
+			end
+		end
+
+
 
 feature {NONE} -- Implementation
 
 	node_provider: NODE_DATA_PROVIDER
 			-- node provider.
+		once
+			create Result.make (connection)
+		end
+
+	user_provider: USER_DATA_PROVIDER
+			-- user provider.
 		once
 			create Result.make (connection)
 		end

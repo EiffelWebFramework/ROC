@@ -5,7 +5,7 @@ note
 	author: "EiffelStudio test wizard"
 	date: "$Date$"
 	revision: "$Revision$"
-	testing:"execution/serial"
+	testing:"execution/isolated"
 
 class
 	USER_TEST_SET
