@@ -65,6 +65,14 @@ feature {NONE} -- Initialization
 				end
 
 
+				if attached user.user_by_name ("u1") as ll_user then
+					node.add_author (ll_user.id, 1)
+					if attached node.node_author (1) as l_author then
+						print (l_author.name)
+					end
+				end
+
+
 			end
 		end
 

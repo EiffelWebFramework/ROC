@@ -59,6 +59,22 @@ feature -- Access: user
 		deferred
 		end
 
+feature -- User Nodes
+
+	user_collaborator_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
+			-- Possible list of nodes where the user identified by `a_id', is a collaborator.
+		require
+			a_id > 0
+		deferred
+		end
+
+	user_author_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
+			-- Possible list of nodes where the user identified by `a_id', is the author.
+		require
+			a_id > 0
+		deferred
+		end
+
 feature -- Change: user
 
 	save_user (a_user: CMS_USER)
@@ -67,14 +83,14 @@ feature -- Change: user
 
 feature -- Access: roles and permissions
 
---	user_has_permission (u: detachable CMS_USER; s: detachable READABLE_STRING_8): BOOLEAN
---			-- Anonymous or user `u' has permission for `s' ?
---			--| `s' could be "create page",	
---		do
+	user_has_permission (u: detachable CMS_USER; s: detachable READABLE_STRING_8): BOOLEAN
+			-- Anonymous or user `u' has permission for `s' ?
+			--| `s' could be "create page",	
+		do
 --			if s = Void then
 --				Result := True
 --			elseif u = Void then
---				Result := user_role_has_permission (anonymous_user_role, s)
+----				Result := user_role_has_permission (anonymous_user_role, s)
 --			else
 --				Result := user_role_has_permission (authenticated_user_role, s)
 --				if not Result and attached u.roles as l_roles then
@@ -89,44 +105,26 @@ feature -- Access: roles and permissions
 --					end
 --				end
 --			end
---		end
+		end
 
---	anonymous_user_role: CMS_USER_ROLE
---		do
---			if attached user_role_by_id (1) as l_anonymous then
---				Result := l_anonymous
---			else
---				create Result.make ("anonymous")
---			end
---		end
+	user_role_has_permission (a_role: CMS_USER_ROLE; s: READABLE_STRING_8): BOOLEAN
+		do
+			Result := a_role.has_permission (s)
+		end
 
---	authenticated_user_role: CMS_USER_ROLE
---		do
---			if attached user_role_by_id (2) as l_authenticated then
---				Result := l_authenticated
---			else
---				create Result.make ("authenticated")
---			end
---		end
+	user_role_by_id (a_id: like {CMS_USER_ROLE}.id): detachable CMS_USER_ROLE
+		deferred
+		end
 
---	user_role_has_permission (a_role: CMS_USER_ROLE; s: READABLE_STRING_8): BOOLEAN
---		do
---			Result := a_role.has_permission (s)
---		end
-
---	user_role_by_id (a_id: like {CMS_USER_ROLE}.id): detachable CMS_USER_ROLE
---		deferred
---		end
-
---	user_roles: LIST [CMS_USER_ROLE]
---		deferred
---		end
+	user_roles: LIST [CMS_USER_ROLE]
+		deferred
+		end
 
 feature -- Change: roles and permissions		
 
---	save_user_role (a_user_role: CMS_USER_ROLE)
---		deferred
---		end
+	save_user_role (a_user_role: CMS_USER_ROLE)
+		deferred
+		end
 
 feature -- Email		
 
@@ -153,6 +151,7 @@ feature -- Email
 feature -- Access: Node
 
 	recent_nodes (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_NODE]
+			-- List of recent `a_count' nodes with an offset of `lower'.
 		deferred
 		end
 
@@ -163,6 +162,19 @@ feature -- Access: Node
 		deferred
 		end
 
+	node_author (a_id: like {CMS_NODE}.id): detachable CMS_USER
+			-- Node's author. if any.
+		require
+			valid_node: a_id >0
+		deferred
+		end
+
+	node_collaborators (a_id: like {CMS_NODE}.id): LIST [CMS_USER]
+			-- Possible list of node's collaborator.
+		require
+			valid_node: a_id > 0
+		deferred
+		end
 
 feature -- Change: Node
 
@@ -207,9 +219,21 @@ feature -- Change: Node
 		deferred
 		end
 
+	add_node_author (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
+			-- Add author `a_user_id' to the node `a_node_id'.
+		require
+			valid_node: a_node_id > 0
+			valid_user: a_user_id > 0
+		deferred
+		end
 
-
-
+	add_node_collaborator (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
+			-- Add/Update collaborator with `a_user_id' to the node `a_node_id'.
+		require
+			valid_node: a_node_id > 0
+			valid_user: a_user_id > 0
+		deferred
+		end
 
 --feature -- Misc
 

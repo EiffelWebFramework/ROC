@@ -85,6 +85,42 @@ feature -- Access: user
 			post_user_provider_execution
 		end
 
+feature -- User Nodes
+
+	user_collaborator_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
+			-- Possible list of nodes where the user identified by `a_id', is a collaborator.
+		do
+			fixme ("Not implemented!!!")
+			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
+		end
+
+	user_author_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
+			-- Possible list of nodes where the user identified by `a_id', is the author.
+		do
+			fixme ("Not implemented!!!")
+			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
+		end
+
+feature -- Access: roles and permissions
+
+	user_role_by_id (a_id: like {CMS_USER_ROLE}.id): detachable CMS_USER_ROLE
+		do
+			fixme ("Not Implemented!!!")
+		end
+
+	user_roles: LIST [CMS_USER_ROLE]
+		do
+			fixme ("Not Implemented!!!")
+			create {ARRAYED_LIST[CMS_USER_ROLE]} Result.make (0)
+		end
+
+feature -- Change: roles and permissions		
+
+	save_user_role (a_user_role: CMS_USER_ROLE)
+		do
+			fixme ("Not Implemented!!!")
+		end
+
 feature -- Change: user
 
 	save_user (a_user: CMS_USER)
@@ -123,10 +159,24 @@ feature -- Access: node
 		end
 
 	node (a_id: INTEGER_64): detachable CMS_NODE
-			--
+			-- <Precursor>
 		do
 			Result :=  node_provider.node (a_id)
 			post_node_provider_execution
+		end
+
+
+	node_author (a_id: like {CMS_NODE}.id): detachable CMS_USER
+			-- <Precursor>
+		do
+			fixme ("Not implemented")
+		end
+
+	node_collaborators (a_id: like {CMS_NODE}.id): LIST [CMS_USER]
+			-- Possible list of node's collaborator.
+		do
+			fixme ("Not implemented")
+			create {ARRAYED_LIST[CMS_USER]} Result.make (0)
 		end
 
 
@@ -169,6 +219,18 @@ feature -- Node
 			post_node_provider_execution
 		end
 
+
+	add_node_author (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
+			-- Add author `a_user_id' to the node `a_node_id'.
+		do
+			fixme ("Not Implemented")
+		end
+
+	add_node_collaborator (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
+			-- Add/Update collaborator with `a_user_id' to the node `a_node_id'.
+		do
+			fixme ("Not implemented")
+		end
 
 feature -- User
 

@@ -227,12 +227,12 @@ feature -- Basic Operations: User_Nodes
 			post_execution
 		end
 
-	user_nodes (a_id:INTEGER_64): DATABASE_ITERATION_CURSOR [CMS_NODE]
+	author_nodes (a_id:INTEGER_64): DATABASE_ITERATION_CURSOR [CMS_NODE]
 			-- List of Nodes for the given user `a_id'. (the user is the author of the node)
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".user_nodes")
+			log.write_information (generator + ".author_nodes")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "user_id")
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Select_user_author, l_parameters))
@@ -240,6 +240,21 @@ feature -- Basic Operations: User_Nodes
 			create Result.make (db_handler, agent fetch_node)
 			post_execution
 		end
+
+	collaborator_nodes (a_id:INTEGER_64): DATABASE_ITERATION_CURSOR [CMS_NODE]
+			-- List of Nodes for the given user `a_id' as collaborator.
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".collaborator_nodes")
+			create l_parameters.make (1)
+			l_parameters.put (a_id, "user_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Select_user_collaborator, l_parameters))
+			db_handler.execute_query
+			create Result.make (db_handler, agent fetch_node)
+			post_execution
+		end
+
 
 	node_author (a_id: INTEGER_64): detachable CMS_USER
 			-- Node's author for the given node id.
@@ -303,13 +318,13 @@ feature {NONE} -- Queries
 	SQL_Insert_node: STRING = "insert into nodes (title, summary, content, publication_date, creation_date, modification_date) values (:title, :summary, :content, :publication_date, :creation_date, :modification_date);"
 		-- SQL Insert to add a new node.
 
-	SQL_Update_node_title: STRING ="update nodes SET title=:title, modification_date=:modification_date where id=:id;"
+	SQL_Update_node_title: STRING ="update nodes SET title=:title, modification_date=:modification_date, version = version + 1 where id=:id;"
 		-- SQL update node title.
 
-	SQL_Update_node_summary: STRING ="update nodes SET summary=:summary, modification_date=:modification_date where id=:id;"
+	SQL_Update_node_summary: STRING ="update nodes SET summary=:summary, modification_date=:modification_date, version = version + 1 where id=:id;"
 		-- SQL update node summary.
 
-	SQL_Update_node_content: STRING ="update nodes SET content=:content, modification_date=:modification_date where id=:id;"
+	SQL_Update_node_content: STRING ="update nodes SET content=:content, modification_date=:modification_date, version = version + 1 where id=:id;"
 		-- SQL node content.
 
 	SQL_Update_node : STRING = "update nodes SET title=:title, summary=:summary, content=:content, publication_date=:publication_date, creation_date=:creation_date, modification_date=:modification_date where id=:id;"
@@ -323,11 +338,13 @@ feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 
 	Sql_insert_users_nodes: STRING = "insert into users_nodes (users_id, nodes_id) values (:users_id, :nodes_id);"
 
-	select_node_collaborators:  STRING = "SELECT * FROM Users INNER JOIN users_nodes ON users.id=users_nodes.users_id and users_nodes.nodes_id = :nodes_id;"
+	select_node_collaborators:  STRING = "SELECT * FROM Users INNER JOIN users_nodes ON users.id=users_nodes.users_id and users_nodes.nodes_id = :node_id;"
 
 	Select_user_author: STRING = "SELECT * FROM Nodes INNER JOIN users ON nodes.author_id=users.id and users.id = :user_id;"
 
-	Select_node_author: STRING = "SELECT * FROM User INNER JOIN nodes ON nodes.author_id=users.id and node_id =:node_id;"
+	Select_node_author: STRING = "SELECT * FROM Users INNER JOIN nodes ON nodes.author_id=users.id and nodes.id =:node_id;"
+
+	Select_user_collaborator: STRING = "SELECT * FROM Nodes INNER JOIN users_nodes ON users_nodes.nodes_id = nodes.id and users_nodes.users_id = :user_id;"
 
 feature -- 	
 

@@ -203,22 +203,33 @@ feature -- Test routines
 			node_provider.new_node (default_node)
 			user_provider.new_user ("u1", "u1", "email")
 			if attached user_provider.user_by_name ("u1") as l_user then
-				assert ("Empty nodes", node_provider.user_nodes (l_user.id).after)
+				assert ("Empty nodes", node_provider.author_nodes (l_user.id).after)
 			end
 		end
-
 
 	test_new_node_add_author
 		do
 			node_provider.new_node (default_node)
+			assert ("Exist node with id 1", attached {CMS_NODE} node_provider.node (1))
 			user_provider.new_user ("u1", "u1", "email")
 			if attached user_provider.user_by_name ("u1") as l_user then
-				node_provider.add_collaborator (l_user.id, 1)
-				assert ("Not Empty nodes", not node_provider.node_collaborators (1).after)
+				node_provider.add_author (l_user.id, 1)
+				assert ("Author not void for node 1", attached node_provider.node_author (1))
 			end
 		end
 
-	test_multiple_nodes_add_author
+	test_new_node_add_collaborator
+		do
+			node_provider.new_node (default_node)
+			assert ("Exist node with id 1", attached {CMS_NODE} node_provider.node (1))
+			user_provider.new_user ("u1", "u1", "email")
+			if attached user_provider.user_by_name ("u1") as l_user then
+				node_provider.add_collaborator (l_user.id, 1)
+				assert ("Not Empty Collaborator for node 1", not node_provider.node_collaborators (1).after)
+			end
+		end
+
+	test_multiple_nodes_add_collaborator
 		local
 			l_list: LIST[CMS_NODE]
 		do
@@ -233,6 +244,33 @@ feature -- Test routines
 				node_provider.add_collaborator (l_user.id, 2)
 				node_provider.add_collaborator (l_user.id, 3)
 				node_provider.add_collaborator (l_user.id, 4)
+				assert ("Not Empty Collaborator for node 1", not node_provider.node_collaborators (1).after)
+				assert ("Not Empty Collaborator for node 2", not node_provider.node_collaborators (2).after)
+				assert ("Not Empty Collaborator for node 3", not node_provider.node_collaborators (3).after)
+				assert ("Not Empty Collaborator for node 4", not node_provider.node_collaborators (4).after)
+			end
+		end
+
+	test_nodes_collaborator
+		local
+			l_list: LIST[CMS_NODE]
+		do
+			create {ARRAYED_LIST[CMS_NODE]} l_list.make (0)
+			node_provider.new_node (default_node)
+			node_provider.new_node (custom_node ("content1", "summary1", "title1"))
+			node_provider.new_node (custom_node ("content2", "summary2", "title2"))
+			node_provider.new_node (custom_node ("content3", "summary3", "title3"))
+			user_provider.new_user ("u1", "u1", "email")
+			if attached user_provider.user_by_name ("u1") as l_user then
+				node_provider.add_collaborator (l_user.id, 1)
+				node_provider.add_collaborator (l_user.id, 2)
+				node_provider.add_collaborator (l_user.id, 3)
+				node_provider.add_collaborator (l_user.id, 4)
+				across node_provider.collaborator_nodes (l_user.id) as c loop
+					l_list.force (c.item)
+				end
+
+				assert ("User is collaborating in 4 nodes", l_list.count = 4)
 			end
 		end
 

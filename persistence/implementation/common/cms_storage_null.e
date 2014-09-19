@@ -41,12 +41,42 @@ feature -- Access: user
 		do
 		end
 
+feature -- User Nodes
+
+	user_collaborator_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
+			-- Possible list of nodes where the user identified by `a_id', is a collaborator.
+		do
+		end
+
+	user_author_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
+			-- Possible list of nodes where the user identified by `a_id', is the author.
+		do
+		end
+
 feature -- Change: user
 
 	save_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.
 		do
 		end
+
+feature -- Access: roles and permissions
+
+	user_role_by_id (a_id: like {CMS_USER_ROLE}.id): detachable CMS_USER_ROLE
+		do
+		end
+
+	user_roles: LIST [CMS_USER_ROLE]
+		do
+		end
+
+
+feature -- Change: roles and permissions		
+
+	save_user_role (a_user_role: CMS_USER_ROLE)
+		do
+		end
+
 
 feature -- Access: node
 
@@ -63,10 +93,19 @@ feature -- Access: node
 		end
 
 	node (a_id: INTEGER_64): detachable CMS_NODE
-			--
+			-- <Precursor>
 		do
 		end
 
+	node_author (a_id: like {CMS_NODE}.id): detachable CMS_USER
+			-- Node's author. if any.
+		do
+		end
+
+	node_collaborators (a_id: like {CMS_NODE}.id): LIST [CMS_USER]
+			-- Possible list of node's collaborator.
+		do
+		end
 
 feature -- Node
 
@@ -76,22 +115,37 @@ feature -- Node
 		end
 
 	delete_node (a_id: INTEGER_64)
+			-- <Precursor>
 		do
 		end
 
 	update_node (a_node: CMS_NODE)
+			-- <Precursor>
 		do
 		end
 
 	update_node_title (a_id: INTEGER_64; a_title: READABLE_STRING_32)
+			-- <Precursor>
 		do
 		end
 
 	update_node_summary (a_id: INTEGER_64; a_summary: READABLE_STRING_32)
+			-- <Precursor>
 		do
 		end
 
 	update_node_content (a_id: INTEGER_64; a_content: READABLE_STRING_32)
+			-- <Precursor>
+		do
+		end
+
+	add_node_author (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
+			-- Add author `a_user_id' to the node `a_node_id'.
+		do
+		end
+
+	add_node_collaborator (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
+			-- Add/Update collaborator with `a_user_id' to the node `a_node_id'.
 		do
 		end
 
