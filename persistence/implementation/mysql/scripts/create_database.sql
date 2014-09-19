@@ -12,6 +12,24 @@ CREATE SCHEMA IF NOT EXISTS `cms_dev` DEFAULT CHARACTER SET latin1 ;
 USE `cms_dev` ;
 
 -- -----------------------------------------------------
+-- Table `cms_dev`.`users`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `cms_dev`.`users` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(100) NOT NULL,
+  `password` VARCHAR(100) NOT NULL,
+  `salt` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(250) NOT NULL,
+  `creation_date` DATETIME NULL DEFAULT NULL,
+  `last_login_date` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `username` (`username` ASC))
+ENGINE = InnoDB
+AUTO_INCREMENT = 2
+DEFAULT CHARACTER SET = latin1;
+
+
+-- -----------------------------------------------------
 -- Table `cms_dev`.`nodes`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `cms_dev`.`nodes` (
@@ -22,9 +40,16 @@ CREATE TABLE IF NOT EXISTS `cms_dev`.`nodes` (
   `title` VARCHAR(255) NOT NULL,
   `summary` TEXT NOT NULL,
   `content` MEDIUMTEXT NOT NULL,
-  PRIMARY KEY (`id`))
+  `author_id` INT(10) UNSIGNED NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_nodes_users1_idx` (`author_id` ASC),
+  CONSTRAINT `fk_nodes_users1`
+    FOREIGN KEY (`author_id`)
+    REFERENCES `cms_dev`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB
-AUTO_INCREMENT = 1
+AUTO_INCREMENT = 2
 DEFAULT CHARACTER SET = latin1;
 
 
@@ -41,20 +66,41 @@ DEFAULT CHARACTER SET = latin1;
 
 
 -- -----------------------------------------------------
--- Table `cms_dev`.`users`
+-- Table `cms_dev`.`permissions`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `cms_dev`.`users` (
-  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `username` VARCHAR(100) NOT NULL,
-  `password` VARCHAR(100) NOT NULL,
-  `salt` VARCHAR(100) NOT NULL,
-  `email` VARCHAR(250) NOT NULL,
-  `creation_date` DATETIME NULL,
-  `last_login_date` DATETIME NULL,
+CREATE TABLE IF NOT EXISTS `cms_dev`.`permissions` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
+  `roles_id` INT(10) UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `username` (`username` ASC))
+  UNIQUE INDEX `name_UNIQUE` (`name` ASC),
+  INDEX `fk_permissions_roles1_idx` (`roles_id` ASC),
+  CONSTRAINT `fk_permissions_roles1`
+    FOREIGN KEY (`roles_id`)
+    REFERENCES `cms_dev`.`roles` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB
-AUTO_INCREMENT = 2
+DEFAULT CHARACTER SET = latin1;
+
+
+-- -----------------------------------------------------
+-- Table `cms_dev`.`profiles`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `cms_dev`.`profiles` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `key` VARCHAR(45) NOT NULL,
+  `value` VARCHAR(100) NULL DEFAULT NULL,
+  `users_id` INT(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `key_UNIQUE` (`key` ASC),
+  INDEX `fk_profiles_users1_idx` (`users_id` ASC),
+  CONSTRAINT `fk_profiles_users1`
+    FOREIGN KEY (`users_id`)
+    REFERENCES `cms_dev`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
 DEFAULT CHARACTER SET = latin1;
 
 
@@ -102,43 +148,6 @@ CREATE TABLE IF NOT EXISTS `cms_dev`.`users_roles` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = latin1;
-
-
--- -----------------------------------------------------
--- Table `cms_dev`.`permissions`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `cms_dev`.`permissions` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(45) NOT NULL,
-  `roles_id` INT(10) UNSIGNED NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `name_UNIQUE` (`name` ASC),
-  INDEX `fk_permissions_roles1_idx` (`roles_id` ASC),
-  CONSTRAINT `fk_permissions_roles1`
-    FOREIGN KEY (`roles_id`)
-    REFERENCES `cms_dev`.`roles` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `cms_dev`.`profiles`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `cms_dev`.`profiles` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `key` VARCHAR(45) NOT NULL,
-  `value` VARCHAR(100) NULL,
-  `users_id` INT(10) UNSIGNED NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `key_UNIQUE` (`key` ASC),
-  INDEX `fk_profiles_users1_idx` (`users_id` ASC),
-  CONSTRAINT `fk_profiles_users1`
-    FOREIGN KEY (`users_id`)
-    REFERENCES `cms_dev`.`users` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
