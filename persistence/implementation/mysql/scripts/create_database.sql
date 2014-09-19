@@ -25,7 +25,6 @@ CREATE TABLE IF NOT EXISTS `cms_dev`.`users` (
   PRIMARY KEY (`id`),
   UNIQUE INDEX `username` (`username` ASC))
 ENGINE = InnoDB
-AUTO_INCREMENT = 2
 DEFAULT CHARACTER SET = latin1;
 
 
@@ -41,15 +40,22 @@ CREATE TABLE IF NOT EXISTS `cms_dev`.`nodes` (
   `summary` TEXT NOT NULL,
   `content` MEDIUMTEXT NOT NULL,
   `author_id` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `version` INT(10) ZEROFILL NULL,
+  `editor_id` INT(10) UNSIGNED NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_nodes_users1_idx` (`author_id` ASC),
+  INDEX `fk_nodes_users2_idx` (`editor_id` ASC),
   CONSTRAINT `fk_nodes_users1`
     FOREIGN KEY (`author_id`)
     REFERENCES `cms_dev`.`users` (`id`)
     ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_nodes_users2`
+    FOREIGN KEY (`editor_id`)
+    REFERENCES `cms_dev`.`users` (`id`)
+    ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-AUTO_INCREMENT = 2
 DEFAULT CHARACTER SET = latin1;
 
 
