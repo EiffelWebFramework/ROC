@@ -100,6 +100,22 @@ feature -- Access
 			post_execution
 		end
 
+
+	last_inserted_node_id: INTEGER
+			-- Last insert node id.
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".last_inserted_node_id")
+			create l_parameters.make (0)
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Sql_last_insert_node_id, l_parameters))
+			db_handler.execute_query
+			if db_handler.count = 1 then
+				Result := db_handler.read_integer_32 (1)
+			end
+			post_execution
+		end
+
 feature -- Basic operations
 
 	new_node (a_node: CMS_NODE)
@@ -108,16 +124,27 @@ feature -- Basic operations
 			l_parameters: STRING_TABLE [ANY]
 		do
 			log.write_information (generator + ".new_node")
-			create l_parameters.make (6)
+			create l_parameters.make (7)
 			l_parameters.put (a_node.title, "title")
 			l_parameters.put (a_node.summary, "summary")
 			l_parameters.put (a_node.content, "content")
 			l_parameters.put (a_node.publication_date, "publication_date")
 			l_parameters.put (a_node.creation_date, "creation_date")
 			l_parameters.put (a_node.modification_date, "modification_date")
+			if
+				attached a_node.author as l_author and then
+			 	l_author.id > 0
+			then
+				l_parameters.put (l_author.id, "author_id")
+			end
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (sql_insert_node, l_parameters))
 			db_handler.execute_change
+
+			a_node.set_id (last_inserted_node_id)
+
 			post_execution
+
+
 		end
 
 	update_node_title (a_id: INTEGER_64; a_title: READABLE_STRING_32)
@@ -165,7 +192,7 @@ feature -- Basic operations
 			post_execution
 		end
 
-	update_node (a_node: CMS_NODE)
+	update_node (a_id: like {CMS_USER}.id; a_node: CMS_NODE)
 			-- Update node.
 		local
 			l_parameters: STRING_TABLE [ANY]
@@ -176,9 +203,9 @@ feature -- Basic operations
 			l_parameters.put (a_node.summary, "summary")
 			l_parameters.put (a_node.content, "content")
 			l_parameters.put (a_node.publication_date, "publication_date")
-			l_parameters.put (a_node.creation_date, "creation_date")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
 			l_parameters.put (a_node.id, "id")
+			l_parameters.put (a_id, "editor")
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (sql_update_node, l_parameters))
 			db_handler.execute_change
 			post_execution
@@ -226,6 +253,21 @@ feature -- Basic Operations: User_Nodes
 			db_handler.execute_change
 			post_execution
 		end
+
+	update_node_last_editor	(a_user_id: INTEGER_64; a_node_id: INTEGER_64)
+			-- Update node last editor.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			log.write_information (generator + ".add_collaborator")
+			create l_parameters.make (2)
+			l_parameters.put (a_user_id,"users_id")
+			l_parameters.put (a_node_id,"nodes_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Slq_update_editor, l_parameters))
+			db_handler.execute_change
+			post_execution
+		end
+
 
 	author_nodes (a_id:INTEGER_64): DATABASE_ITERATION_CURSOR [CMS_NODE]
 			-- List of Nodes for the given user `a_id'. (the user is the author of the node)
@@ -286,6 +328,24 @@ feature -- Basic Operations: User_Nodes
 			post_execution
 		end
 
+	is_collaborator (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id): BOOLEAN
+			-- Is the user `a_user_id' a collaborator of node `a_node_id'
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".node_collaborators")
+			create l_parameters.make (2)
+			l_parameters.put (a_user_id, "user_id")
+			l_parameters.put (a_node_id, "node_id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_exist_user_node, l_parameters))
+			db_handler.execute_query
+			if db_handler.count = 1 then
+				Result := db_handler.read_integer_32 (1) = 1
+			end
+
+			post_execution
+		end
+
 feature -- Connection
 
 	connect
@@ -315,7 +375,7 @@ feature {NONE} -- Queries
 
 	Select_recent_nodes: STRING = "select * from Nodes order by id desc, publication_date desc Limit $offset , :rows "
 
-	SQL_Insert_node: STRING = "insert into nodes (title, summary, content, publication_date, creation_date, modification_date) values (:title, :summary, :content, :publication_date, :creation_date, :modification_date);"
+	SQL_Insert_node: STRING = "insert into nodes (title, summary, content, publication_date, creation_date, modification_date, author_id) values (:title, :summary, :content, :publication_date, :creation_date, :modification_date, :author_id);"
 		-- SQL Insert to add a new node.
 
 	SQL_Update_node_title: STRING ="update nodes SET title=:title, modification_date=:modification_date, version = version + 1 where id=:id;"
@@ -327,12 +387,17 @@ feature {NONE} -- Queries
 	SQL_Update_node_content: STRING ="update nodes SET content=:content, modification_date=:modification_date, version = version + 1 where id=:id;"
 		-- SQL node content.
 
-	SQL_Update_node : STRING = "update nodes SET title=:title, summary=:summary, content=:content, publication_date=:publication_date, creation_date=:creation_date, modification_date=:modification_date where id=:id;"
+	Slq_update_editor: STRING ="update nodes SET editor_id=:users_id  where id=:nodes_id;"
+		-- SQL node content.	
+
+	SQL_Update_node : STRING = "update nodes SET title=:title, summary=:summary, content=:content, publication_date=:publication_date,  modification_date=:modification_date, version = version + 1, editor_id=:editor where id=:id;"
 		-- SQL node.
 
 	SQL_Delete_node: STRING = "delete from nodes where id=:id;"
 
 	Sql_update_node_author: STRING  = "update nodes SET author_id=:user_id where id=:id;"
+
+	Sql_last_insert_node_id: STRING = "SELECT MAX(id) from nodes;"
 
 feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 
@@ -345,6 +410,9 @@ feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 	Select_node_author: STRING = "SELECT * FROM Users INNER JOIN nodes ON nodes.author_id=users.id and nodes.id =:node_id;"
 
 	Select_user_collaborator: STRING = "SELECT * FROM Nodes INNER JOIN users_nodes ON users_nodes.nodes_id = nodes.id and users_nodes.users_id = :user_id;"
+
+	Select_exist_user_node: STRING= "Select Count(*) from Users_nodes where users_id=:user_id and nodes_id=:node_id;"
+
 
 feature -- 	
 

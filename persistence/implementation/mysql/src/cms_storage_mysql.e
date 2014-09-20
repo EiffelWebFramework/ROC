@@ -38,7 +38,6 @@ feature -- Access: user
 			post_user_provider_execution
 		end
 
-
 	all_users: LIST [CMS_USER]
 		do
 			to_implement("Not implemented!!!")
@@ -132,7 +131,7 @@ feature -- Change: user
 			then
 				user_provider.new_user (a_user.name, l_password, l_email)
 			else
-				-- set error
+				set_last_error ("User or Password not attached", generator + ".save_user")
 			end
 		end
 
@@ -165,25 +164,24 @@ feature -- Access: node
 			post_node_provider_execution
 		end
 
-
 	node_author (a_id: like {CMS_NODE}.id): detachable CMS_USER
 			-- <Precursor>
 		do
-			fixme ("Not implemented")
+			Result := node_provider.node_author (a_id)
+			post_node_provider_execution
 		end
 
 	node_collaborators (a_id: like {CMS_NODE}.id): LIST [CMS_USER]
 			-- Possible list of node's collaborator.
 		do
-			fixme ("Not implemented")
 			create {ARRAYED_LIST[CMS_USER]} Result.make (0)
+			across node_provider.node_collaborators (a_id) as c loop Result.force (c.item) end
 		end
-
 
 feature -- Node
 
 	save_node (a_node: CMS_NODE)
-			-- Add a new node
+			-- <Precursor>
 		do
 			node_provider.new_node (a_node)
 			post_node_provider_execution
@@ -195,42 +193,48 @@ feature -- Node
 			post_node_provider_execution
 		end
 
-	update_node (a_node: CMS_NODE)
+	update_node (a_id: like {CMS_USER}.id; a_node: CMS_NODE)
+			-- <Precursor>
 		do
-			node_provider.update_node (a_node)
+			node_provider.update_node (a_id, a_node)
 			post_node_provider_execution
 		end
 
-	update_node_title (a_id: INTEGER_64; a_title: READABLE_STRING_32)
+	update_node_title (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
+			-- <Precursor>
 		do
-			node_provider.update_node_title (a_id, a_title)
+			node_provider.update_node_title (a_node_id, a_title)
+			internal_node_update (a_id, a_node_id)
 			post_node_provider_execution
 		end
 
-	update_node_summary (a_id: INTEGER_64; a_summary: READABLE_STRING_32)
+	update_node_summary (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
+			-- <Precursor>
 		do
-			node_provider.update_node_summary (a_id, a_summary)
+			node_provider.update_node_summary (a_node_id, a_summary)
+			internal_node_update (a_id, a_node_id)
 			post_node_provider_execution
 		end
 
-	update_node_content (a_id: INTEGER_64; a_content: READABLE_STRING_32)
+	update_node_content (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
+			-- <Precursor>
 		do
-			node_provider.update_node_content (a_id, a_content)
+			node_provider.update_node_content (a_node_id, a_content)
+			internal_node_update (a_id, a_node_id)
 			post_node_provider_execution
 		end
 
+feature {NONE} -- NODE Implemenation
 
-	add_node_author (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
-			-- Add author `a_user_id' to the node `a_node_id'.
-		do
-			fixme ("Not Implemented")
-		end
-
-	add_node_collaborator (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
-			-- Add/Update collaborator with `a_user_id' to the node `a_node_id'.
-		do
-			fixme ("Not implemented")
-		end
+		internal_node_update (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id)
+				-- Update node editor or add collaborator.
+			do
+				if not node_provider.is_collaborator (a_id, a_node_id) then
+					node_provider.add_collaborator (a_id, a_node_id)
+				else
+					node_provider.update_node_last_editor (a_id, a_node_id)
+				end
+			end
 
 feature -- User
 

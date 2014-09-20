@@ -27,10 +27,12 @@ feature -- Access: user
 		end
 
 	all_users: LIST [CMS_USER]
+			-- Possible list of users.
 		deferred
 		end
 
 	user_by_id (a_id: like {CMS_USER}.id): detachable CMS_USER
+			-- User with id `a_id', if any.
 		require
 			a_id > 0
 		deferred
@@ -40,6 +42,7 @@ feature -- Access: user
 		end
 
 	user_by_name (a_name: like {CMS_USER}.name): detachable CMS_USER
+			-- User with name `a_name', if any.
 		require
 			 a_name /= Void and then not a_name.is_empty
 		deferred
@@ -49,13 +52,15 @@ feature -- Access: user
 		end
 
 	user_by_email (a_email: like {CMS_USER}.email): detachable CMS_USER
+			-- User with name `a_email', if any.
 		deferred
 		ensure
 			same_email: Result /= Void implies a_email ~ Result.email
 			password: Result /= Void implies Result.password /= Void
 		end
 
-	is_valid_credential (u, p: READABLE_STRING_32): BOOLEAN
+	is_valid_credential (a_u, a_p: READABLE_STRING_32): BOOLEAN
+			-- Does account with username `a_username' and password `a_password' exist?
 		deferred
 		end
 
@@ -78,6 +83,7 @@ feature -- User Nodes
 feature -- Change: user
 
 	save_user (a_user: CMS_USER)
+			-- Save user `a_user'.
 		deferred
 		end
 
@@ -113,16 +119,19 @@ feature -- Access: roles and permissions
 		end
 
 	user_role_by_id (a_id: like {CMS_USER_ROLE}.id): detachable CMS_USER_ROLE
+			-- User role by id `a_id', if any.
 		deferred
 		end
 
 	user_roles: LIST [CMS_USER_ROLE]
+			-- Possible list of user roles.
 		deferred
 		end
 
 feature -- Change: roles and permissions		
 
 	save_user_role (a_user_role: CMS_USER_ROLE)
+			-- Save user role `a_user_role'
 		deferred
 		end
 
@@ -180,58 +189,50 @@ feature -- Change: Node
 
 	save_node (a_node: CMS_NODE)
 			-- Save node `a_node'.
+		require
+			valid_user: attached a_node.author as l_author and then l_author.id > 0
 		deferred
 		end
-
 
 	delete_node (a_id: INTEGER_64)
 			-- Remove node by id `a_id'.
 		require
-			valid_id: a_id > 0
+			valid_node_id: a_id > 0
 		deferred
 		end
 
-	update_node (a_node: CMS_NODE)
+	update_node (a_id: like {CMS_USER}.id; a_node: CMS_NODE)
 			-- Update node content `a_node'.
+			-- The user `a_id' is an existing or new collaborator.
 		require
-			valid_id: a_node.id > 0
+			valid_node_id: a_node.id > 0
+			valid_user_id: a_id > 0
 		deferred
 		end
 
-	update_node_title (a_id: INTEGER_64; a_title: READABLE_STRING_32)
-			-- Update node title to `a_title', node identified by id `a_id'.
+	update_node_title (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
+			-- Update node title to `a_title', node identified by id `a_node_id'.
+			-- The user `a_id' is an existing or new collaborator.
 		require
-			valid_id: a_id > 0
+			valid_node_id: a_node_id > 0
+			valid_user_id: a_id > 0
 		deferred
 		end
 
-	update_node_summary (a_id: INTEGER_64; a_summary: READABLE_STRING_32)
-			-- Update node summary to `a_summary', node identified by id `a_id'.
+	update_node_summary (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
+			-- Update node summary to `a_summary', node identified by id `a_node_id'.
+			-- The user `a_id' is an existing or new collaborator.
 		require
-			valid_id: a_id > 0
+			valid_id: a_node_id > 0
 		deferred
 		end
 
-	update_node_content (a_id: INTEGER_64; a_content: READABLE_STRING_32)
-			-- Update node content to `a_content', node identified by id `a_id'.
+	update_node_content (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
+			-- Update node content to `a_content', node identified by id `a_node_id'.
+			-- The user `a_id' is an existing or new collaborator.
 		require
-			valid_id: a_id > 0
-		deferred
-		end
-
-	add_node_author (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
-			-- Add author `a_user_id' to the node `a_node_id'.
-		require
-			valid_node: a_node_id > 0
-			valid_user: a_user_id > 0
-		deferred
-		end
-
-	add_node_collaborator (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
-			-- Add/Update collaborator with `a_user_id' to the node `a_node_id'.
-		require
-			valid_node: a_node_id > 0
-			valid_user: a_user_id > 0
+			valid_id: a_node_id > 0
+			valid_user_id: a_id > 0
 		deferred
 		end
 

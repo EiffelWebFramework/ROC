@@ -19,7 +19,6 @@ feature -- Access: user
 		do
 		end
 
-
 	all_users: LIST [CMS_USER]
 		do
 			create {ARRAYED_LIST[CMS_USER]} Result.make (0)
@@ -119,33 +118,23 @@ feature -- Node
 		do
 		end
 
-	update_node (a_node: CMS_NODE)
+	update_node (a_id: like {CMS_NODE}.id; a_node: CMS_NODE)
 			-- <Precursor>
 		do
 		end
 
-	update_node_title (a_id: INTEGER_64; a_title: READABLE_STRING_32)
+	update_node_title (a_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
 			-- <Precursor>
 		do
 		end
 
-	update_node_summary (a_id: INTEGER_64; a_summary: READABLE_STRING_32)
+	update_node_summary (a_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
 			-- <Precursor>
 		do
 		end
 
-	update_node_content (a_id: INTEGER_64; a_content: READABLE_STRING_32)
+	update_node_content (a_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
 			-- <Precursor>
-		do
-		end
-
-	add_node_author (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
-			-- Add author `a_user_id' to the node `a_node_id'.
-		do
-		end
-
-	add_node_collaborator (a_node_id: like {CMS_NODE}.id; a_user_id: like {CMS_USER}.id)
-			-- Add/Update collaborator with `a_user_id' to the node `a_node_id'.
 		do
 		end
 

@@ -68,7 +68,7 @@ feature -- Test routines
 			if attached {CMS_NODE} node_provider.node (1) as l_un then
 				l_un.set_content ("<h1>Updating test node udpate </h1>")
 				l_un.set_summary ("updating summary")
-				node_provider.update_node (l_un)
+				node_provider.update_node (0,l_un)
 				assert ("Exist node with id 1", attached {CMS_NODE} node_provider.node (1) as ll_node and then not (ll_node.content ~ l_node.content) and then not (ll_node.summary ~ l_node.summary)  and then ll_node.title ~ l_node.title )
 				assert ("Exist node with id 1", attached {CMS_NODE} node_provider.node (1) as ll_node and then ll_node.content ~ l_un.content and then ll_node.summary ~ l_un.summary and then ll_node.title ~ l_un.title )
 			end
@@ -78,7 +78,7 @@ feature -- Test routines
 				l_un.set_content ("<h1>Updating test node udpate </h1>")
 				l_un.set_summary ("updating summary")
 				l_un.set_title ("Updating Test case")
-				node_provider.update_node (l_un)
+				node_provider.update_node (0,l_un)
 				assert ("Exist node with id 1", attached {CMS_NODE} node_provider.node (1) as ll_node and then not (ll_node.content ~ l_node.content) and then not (ll_node.summary ~ l_node.summary)  and then not (ll_node.title ~ l_node.title) )
 				assert ("Exist node with id 1", attached {CMS_NODE} node_provider.node (1) as ll_node and then ll_node.content ~ l_un.content and then ll_node.summary ~ l_un.summary and then ll_node.title ~ l_un.title )
 			end
