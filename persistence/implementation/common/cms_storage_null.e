@@ -45,11 +45,13 @@ feature -- User Nodes
 	user_collaborator_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
 			-- Possible list of nodes where the user identified by `a_id', is a collaborator.
 		do
+			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
 		end
 
 	user_author_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
 			-- Possible list of nodes where the user identified by `a_id', is the author.
 		do
+			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
 		end
 
 feature -- Change: user
@@ -67,6 +69,7 @@ feature -- Access: roles and permissions
 
 	user_roles: LIST [CMS_USER_ROLE]
 		do
+			create {ARRAYED_LIST[CMS_USER_ROLE]} Result.make (0)
 		end
 
 
@@ -104,6 +107,7 @@ feature -- Access: node
 	node_collaborators (a_id: like {CMS_NODE}.id): LIST [CMS_USER]
 			-- Possible list of node's collaborator.
 		do
+			create {ARRAYED_LIST[CMS_USER]} Result.make (0)
 		end
 
 feature -- Node

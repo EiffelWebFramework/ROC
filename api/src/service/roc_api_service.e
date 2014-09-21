@@ -35,6 +35,8 @@ feature -- Access
 			Result := storage.is_valid_credential (l_auth_login, l_auth_password)
 		end
 
+feature -- Access: Node
+
 	nodes: LIST[CMS_NODE]
 			-- List of nodes.
 		do
@@ -56,7 +58,7 @@ feature -- Access
 		end
 
 
-feature -- Node
+feature -- Change: Node
 
 	new_node (a_node: CMS_NODE)
 			-- Add a new node
@@ -69,31 +71,37 @@ feature -- Node
 			storage.delete_node (a_id)
 		end
 
-	update_node (a_node: CMS_NODE)
+	update_node (a_id: like {CMS_USER}.id; a_node: CMS_NODE)
 		do
-			storage.update_node (a_node)
+			storage.update_node (a_id,a_node)
 		end
 
-	update_node_title (a_id: INTEGER_64; a_title: READABLE_STRING_32)
-		do
-			fixme ("Check preconditions")
-			storage.update_node_title (a_id, a_title)
-		end
-
-	update_node_summary (a_id: INTEGER_64; a_summary: READABLE_STRING_32)
+	update_node_title (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
 		do
 			fixme ("Check preconditions")
-			storage.update_node_summary (a_id, a_summary)
+			storage.update_node_title (a_id,a_node_id,a_title)
 		end
 
-	update_node_content (a_id: INTEGER_64; a_content: READABLE_STRING_32)
+	update_node_summary (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
 		do
 			fixme ("Check preconditions")
-			storage.update_node_content (a_id, a_content)
+			storage.update_node_summary (a_id,a_node_id, a_summary)
+		end
+
+	update_node_content (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
+		do
+			fixme ("Check preconditions")
+			storage.update_node_content (a_id,a_node_id, a_content)
 		end
 
 
-feature -- User
+feature -- Access: User
+
+	user_by_name (a_username: READABLE_STRING_32): detachable CMS_USER
+		do
+			Result := storage.user_by_name (a_username)
+		end
+feature -- Change User
 
 	new_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.

@@ -93,7 +93,8 @@ feature -- HTTP Methods
 			u_node: CMS_NODE
 			l_page: ROC_RESPONSE
 		do
-			if attached current_user_name (req) then
+			to_implement ("Check user permissions!!!")
+			if attached current_user (req) as l_user then
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
 					if l_id.is_integer and then attached {CMS_NODE} api_service.node (l_id.integer_value) as l_node then
 						if attached {WSF_STRING} req.form_parameter ("method") as l_method then
@@ -113,7 +114,9 @@ feature -- HTTP Methods
 					end
 				else
 						-- New node
-					api_service.new_node (extract_data_form (req))
+					u_node := extract_data_form (req)
+					u_node.set_author (l_user)
+					api_service.new_node (u_node)
 					(create {ROC_RESPONSE}.make (req, "")).new_response_redirect (req, res, req.absolute_script_url (""))
 				end
 			else
@@ -126,12 +129,13 @@ feature -- HTTP Methods
 		local
 			u_node: CMS_NODE
 		do
-			if attached current_user_name (req) then
+
+			if attached current_user (req) as l_user then
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
 					if l_id.is_integer and then attached {CMS_NODE} api_service.node (l_id.integer_value) as l_node then
 						u_node := extract_data_form (req)
 						u_node.set_id (l_id.integer_value)
-						api_service.update_node (u_node)
+						api_service.update_node (l_user.id,u_node)
 						(create {ROC_RESPONSE}.make (req, "")).new_response_redirect (req, res, req.absolute_script_url (""))
 					else
 						do_error (req, res, l_id)

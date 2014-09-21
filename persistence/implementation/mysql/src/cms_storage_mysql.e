@@ -189,6 +189,7 @@ feature -- Node
 
 	delete_node (a_id: INTEGER_64)
 		do
+			node_provider.delete_from_user_nodes(a_id)
 			node_provider.delete_node (a_id)
 			post_node_provider_execution
 		end

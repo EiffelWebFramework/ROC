@@ -224,6 +224,18 @@ feature -- Basic operations
 			post_execution
 		end
 
+	delete_from_user_nodes (a_id: INTEGER_64)
+		local
+			l_parameters: STRING_TABLE [ANY]
+		do
+			log.write_information (generator + ".delete_from_user_nodes")
+			create l_parameters.make (1)
+			l_parameters.put (a_id, "id")
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (sql_delete_from_user_node, l_parameters))
+			db_handler.execute_change
+			post_execution
+		end
+
 feature -- Basic Operations: User_Nodes
 
 	add_author (a_user_id: INTEGER_64; a_node_id: INTEGER_64)
@@ -412,6 +424,8 @@ feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 	Select_user_collaborator: STRING = "SELECT * FROM Nodes INNER JOIN users_nodes ON users_nodes.nodes_id = nodes.id and users_nodes.users_id = :user_id;"
 
 	Select_exist_user_node: STRING= "Select Count(*) from Users_nodes where users_id=:user_id and nodes_id=:node_id;"
+
+	sql_delete_from_user_node: STRING = "delete from users_nodes where nodes_id=:id"
 
 
 feature -- 	
