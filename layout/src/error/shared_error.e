@@ -12,7 +12,7 @@ inherit
 
 feature -- Access
 
-	last_error: detachable ERROR_HANDLER
+	last_error: detachable BASIC_ERROR_HANDLER
 			-- Object represent last error.
 
 	last_error_message: READABLE_STRING_32
@@ -82,7 +82,7 @@ feature -- Element Settings
 			failed: not successful
 		end
 
-	set_last_error_from_handler (a_error: detachable ERROR_HANDLER)
+	set_last_error_from_handler (a_error: detachable BASIC_ERROR_HANDLER)
 			-- Set `last_error' with `a_error'.
 		do
 			last_error := a_error
