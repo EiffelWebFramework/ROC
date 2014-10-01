@@ -4,7 +4,7 @@ note
 	revision: "$Revision$"
 
 class
-	NODE_VIEW_CMS_RESPONSE
+	GENERIC_VIEW_CMS_RESPONSE
 
 inherit
 
@@ -30,7 +30,7 @@ feature -- Execution
 	process
 			-- Computed response message.
 		do
-			set_title ("List of Nodes")
+			set_title ("CMS")
 			set_page_title (Void)
 		end
 end

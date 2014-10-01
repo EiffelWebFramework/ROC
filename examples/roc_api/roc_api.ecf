@@ -17,7 +17,7 @@
 		<library name="wsf_extension" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf_extension-safe.ecf" readonly="false"/> 
 
 
-		<library name="cms" location="..\..\cms\cms.ecf"/>
+		<library name="cms" location="..\..\cms\cms.ecf" readonly="false"/>
 	</target>
 	<target name="roc_api_any" extends="common">
 		<root class="EWF_ROC_SERVER" feature="make_and_launch"/>

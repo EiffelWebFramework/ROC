@@ -46,7 +46,14 @@ feature -- HTTP Methods
 
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
+		local
+			l_page: CMS_RESPONSE
 		do
-			(create {NODES_VIEW_CMS_RESPONSE}.make (req, res, setup,"modules/nodes")).execute
+				-- At the moment the template is hardcoded, but we can
+				-- get them from the configuration file and load them into
+				-- the setup class.
+			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "modules/nodes")
+			l_page.add_variable (api_service.nodes, "nodes")
+			l_page.execute
 		end
 end

@@ -38,8 +38,6 @@ feature -- Implementation
 
 	setup_router
 			-- Setup `router'.
-		local
-			fhdl: WSF_FILE_SYSTEM_HANDLER
 		do
 			create router.make (5)
 			configure_api_node

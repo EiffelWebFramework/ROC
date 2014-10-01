@@ -69,7 +69,7 @@ feature -- HTTP Methods
 				-- Existing node
 			if attached {WSF_STRING} req.path_parameter ("id") as l_id then
 				if l_id.is_integer and then attached {CMS_NODE} api_service.node (l_id.integer_value) as l_node then
-					create {NODE_VIEW_CMS_RESPONSE} l_page.make (req, res, setup,"modules/node")
+					create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup,"modules/node")
 					l_page.add_variable (l_node, "node")
 					l_page.execute
 				else
@@ -97,11 +97,7 @@ feature -- HTTP Methods
 							elseif l_method.is_case_insensitive_equal ("PUT") then
 								do_put (req, res)
 							else
-								to_implement ("Implement specific responses for 500 pages")
-								create {NODE_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "master2/error")
-								l_page.add_variable ("500", "code")
-								l_page.add_variable (req.absolute_script_url (req.path_info), "request")
-								l_page.execute
+								(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
 							end
 						end
 					else
@@ -136,7 +132,7 @@ feature -- HTTP Methods
 						do_error (req, res, l_id)
 					end
 				else
-					-- Internal server error
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -156,7 +152,7 @@ feature -- HTTP Methods
 						do_error (req, res, l_id)
 					end
 				else
-					-- Internal server error
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -170,17 +166,18 @@ feature -- Error
 		local
 			l_page: CMS_RESPONSE
 		do
-			to_implement ("Not implemented")
---			create l_page.make (req, "master2/error.tpl")
---			if a_id.is_integer then
---					-- resource not found
---				l_page.set_value ("404", "code")
---			else
---					-- bad request
---				l_page.set_value ("400", "code")
---			end
---			l_page.set_value (req.absolute_script_url (req.path_info), "request")
---			l_page.send_to (res)
+			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "master2/error")
+			l_page.add_variable (req.absolute_script_url (req.path_info), "request")
+			if a_id.is_integer then
+					-- resource not found
+				l_page.add_variable ("404", "code")
+				l_page.set_status_code (404)
+			else
+					-- bad request
+				l_page.add_variable ("400", "code")
+				l_page.set_status_code (400)
+			end
+			l_page.execute
 		end
 
 feature {NONE} -- Node
@@ -190,7 +187,7 @@ feature {NONE} -- Node
 			l_page: CMS_RESPONSE
 		do
 			if attached current_user_name (req) then
-				create {NODE_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "modules/node")
+				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "modules/node")
 				l_page.add_variable (setup.is_html, "html")
 				l_page.add_variable (setup.is_web, "web")
 				l_page.execute

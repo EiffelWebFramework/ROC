@@ -70,7 +70,7 @@ feature -- HTTP Methods
 					-- Existing node
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
 					if l_id.is_integer and then attached {CMS_NODE} api_service.node (l_id.integer_value) as l_node then
-						create {NODE_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "modules/node_content")
+						create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "modules/node_content")
 						l_page.add_variable (l_node.content, "content")
 						l_page.add_variable (l_id.value, "id")
 						l_page.execute
@@ -78,12 +78,7 @@ feature -- HTTP Methods
 						do_error (req, res, l_id)
 					end
 				else
-						-- Todo extract method
-					to_implement ("Check how to implemet API error")
---					create l_page.make (req, "master2/error.tpl")
---					l_page.set_value ("500", "code")
---					l_page.set_value (req.absolute_script_url (req.path_info), "request")
---					l_page.send_to (res)
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -94,7 +89,7 @@ feature -- HTTP Methods
 	do_post (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
 		local
-			u_node: CMS_NODE
+			l_page: CMS_RESPONSE
 		do
 			if attached current_user_name (req) then
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
@@ -103,22 +98,14 @@ feature -- HTTP Methods
 							if l_method.is_case_insensitive_equal ("PUT") then
 								do_put (req, res)
 							else
-								to_implement ("Check how to implement API error")
---								create l_page.make (req, "master2/error.tpl")
---								l_page.set_value ("500", "code")
---								l_page.set_value (req.absolute_script_url (req.path_info), "request")
---								l_page.send_to (res)
+								(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
 							end
 						end
 					else
 						do_error (req, res, l_id)
 					end
 				else
-					to_implement ("Check how to implement API error")
---					create l_page.make (req, "master2/error.tpl")
---					l_page.set_value ("500", "code")
---					l_page.set_value (req.absolute_script_url (req.path_info), "request")
---					l_page.send_to (res)
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -129,7 +116,7 @@ feature -- HTTP Methods
 			-- <Precursor>
 		local
 			u_node: CMS_NODE
---			l_page: ROC_RESPONSE
+			l_page: CMS_RESPONSE
 		do
 			to_implement ("Check if user has permissions")
 			if attached current_user (req) as l_user then
@@ -143,11 +130,7 @@ feature -- HTTP Methods
 						do_error (req, res, l_id)
 					end
 				else
-					to_implement ("Check how to implement API error")
---					create l_page.make (req, "master2/error.tpl")
---					l_page.set_value ("500", "code")
---					l_page.set_value (req.absolute_script_url (req.path_info), "request")
---					l_page.send_to (res)
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -158,18 +141,20 @@ feature -- Error
 	do_error (req: WSF_REQUEST; res: WSF_RESPONSE; a_id: WSF_STRING)
 			-- Handling error.
 		local
+			l_page: CMS_RESPONSE
 		do
-			to_implement ("Check how to implement API error")
---			create l_page.make (req, "master2/error.tpl")
---			if a_id.is_integer then
---				-- resource not found
---				l_page.set_value ("404", "code")
---			else
---				-- bad request
---				l_page.set_value ("400", "code")
---			end
---			l_page.set_value (req.absolute_script_url (req.path_info), "request")
---			l_page.send_to(res)
+			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "master2/error")
+			l_page.add_variable (req.absolute_script_url (req.path_info), "request")
+			if a_id.is_integer then
+					-- resource not found
+				l_page.add_variable ("404", "code")
+				l_page.set_status_code (404)
+			else
+					-- bad request
+				l_page.add_variable ("400", "code")
+				l_page.set_status_code (400)
+			end
+			l_page.execute
 		end
 
 

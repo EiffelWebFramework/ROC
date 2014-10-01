@@ -92,6 +92,19 @@ feature -- Theme
 			end
 		end
 
+feature -- Element Change
+
+	set_status_code (a_status: INTEGER)
+			-- Set `status_code' with `a_status'.
+		note
+			EIS: "src=eiffel:?class=HTTP_STATUS_CODE"
+		do
+			to_implement ("Feature to test if a_status is a valid status code!!!.")
+			status_code := a_status
+		ensure
+			status_code_set: status_code = a_status
+		end
+
 feature -- Generation
 
 	prepare (page: CMS_HTML_PAGE)

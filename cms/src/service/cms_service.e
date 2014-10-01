@@ -17,6 +17,13 @@ inherit
 			execute_default
 		end
 
+	WSF_FILTERED_SERVICE
+
+	WSF_FILTER
+		rename
+			execute as execute_filter
+		end
+
 	WSF_NO_PROXY_POLICY
 
 	WSF_URI_HELPER_FOR_ROUTED_SERVICE
@@ -37,6 +44,7 @@ feature {NONE} -- Initialization
 			setup := a_setup
 			configuration := a_setup.configuration
 			modules := a_setup.modules
+			initialize_users
 			initialize_auth_engine
 			initialize_mailer
 			initialize_router
@@ -47,7 +55,6 @@ feature {NONE} -- Initialization
 
 	initialize_users
 		do
-			to_implement ("To Implement initialize users")
 		end
 
 	initialize_mailer

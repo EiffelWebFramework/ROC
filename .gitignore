@@ -1,2 +1,4 @@
 EIFGENs
 *.swp
+*.log*
+*.rc
