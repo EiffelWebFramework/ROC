@@ -21,7 +21,8 @@ feature {NONE} -- Initialization
 			node: NODE_DATA_PROVIDER
 			l_security: SECURITY_PROVIDER
 		do
-			create connection.make_basic ("cms_dev")
+				-- Change the path.
+			create connection.login_with_connection_string ("Driver=SQLite3 ODBC Driver;Database=./cms_lite.db;LongNames=0;Timeout=1000;NoTXN=0;SyncPragma=NORMAL;StepAPI=0;")
 			create user.make (connection)
 			user.new_user ("test", "test", "test")
 		end

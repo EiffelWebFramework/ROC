@@ -100,6 +100,46 @@ feature -- Change: user
 			end
 		end
 
+feature -- User Nodes
+
+	user_collaborator_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
+			-- Possible list of nodes where the user identified by `a_id', is a collaborator.
+		do
+			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
+			to_implement ("Not implemented")
+		end
+
+	user_author_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
+			-- Possible list of nodes where the user identified by `a_id', is the author.
+		do
+			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
+			to_implement ("Not implemented")
+		end
+
+feature -- Users roles and permissions
+
+	user_role_by_id (a_id: like {CMS_USER_ROLE}.id): detachable CMS_USER_ROLE
+			-- User role by id `a_id', if any.
+		do
+			to_implement ("Not implemented")
+		end
+
+	user_roles: LIST [CMS_USER_ROLE]
+			-- Possible list of user roles.
+		do
+			create {ARRAYED_LIST[CMS_USER_ROLE]} Result.make (0)
+			to_implement ("Not implemented")
+		end
+
+feature -- Change: roles and permissions		
+
+	save_user_role (a_user_role: CMS_USER_ROLE)
+			-- Save user role `a_user_role'
+		do
+			to_implement ("Not implemented")
+		end
+
+
 feature -- Access: node
 
 	nodes: LIST[CMS_NODE]
@@ -145,28 +185,42 @@ feature -- Node
 			post_node_provider_execution
 		end
 
-	update_node (a_node: CMS_NODE)
+	update_node (a_id: like {CMS_USER}.id; a_node: CMS_NODE)
 		do
 			node_provider.update_node (a_node)
 			post_node_provider_execution
 		end
 
-	update_node_title (a_id: INTEGER_64; a_title: READABLE_STRING_32)
+	update_node_title (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
 		do
 			node_provider.update_node_title (a_id, a_title)
 			post_node_provider_execution
 		end
 
-	update_node_summary (a_id: INTEGER_64; a_summary: READABLE_STRING_32)
+	update_node_summary (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
 		do
 			node_provider.update_node_summary (a_id, a_summary)
 			post_node_provider_execution
 		end
 
-	update_node_content (a_id: INTEGER_64; a_content: READABLE_STRING_32)
+	update_node_content (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
 		do
 			node_provider.update_node_content (a_id, a_content)
 			post_node_provider_execution
+		end
+
+
+	node_author (a_id: like {CMS_NODE}.id): detachable CMS_USER
+			-- Node's author. if any.
+		do
+			to_implement ("Not implemented")
+		end
+
+	node_collaborators (a_id: like {CMS_NODE}.id): LIST [CMS_USER]
+			-- Possible list of node's collaborator.
+		do
+			create {ARRAYED_LIST[CMS_USER]} Result.make (0)
+			to_implement ("Not implemented")
 		end
 
 

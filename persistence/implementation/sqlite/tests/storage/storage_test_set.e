@@ -231,7 +231,7 @@ feature -- Test routines
 				l_node.set_summary ("New Summary")
 				l_node.set_title("New Title")
 
-				storage.update_node (l_node)
+--				storage.update_node (l_node)
 				assert ("Updated", attached {CMS_NODE} storage.node (1) as u_node and then not (u_node.title ~ ll_node.title) and then not (u_node.content ~ ll_node.content) and then not (u_node.summary ~ ll_node.summary))
 			end
 		end
@@ -243,7 +243,7 @@ feature -- Test routines
 		do
 			storage.save_node (custom_node ("Content", "Summary", "Title"))
 			if attached {CMS_NODE} storage.node (1) as ll_node then
-				storage.update_node_title (ll_node.id, "New Title")
+--				storage.update_node_title (ll_node.id, "New Title")
 				assert ("Updated", attached {CMS_NODE} storage.node (1) as u_node and then not (u_node.title ~ ll_node.title) and then u_node.content ~ ll_node.content and then u_node.summary ~ ll_node.summary)
 			end
 		end
@@ -255,7 +255,7 @@ feature -- Test routines
 		do
 			storage.save_node (custom_node ("Content", "Summary", "Title"))
 			if attached {CMS_NODE} storage.node (1) as ll_node then
-				storage.update_node_summary (ll_node.id, "New Summary")
+--				storage.update_node_summary (ll_node.id, "New Summary")
 				assert ("Updated", attached {CMS_NODE} storage.node (1) as u_node and then u_node.title ~ ll_node.title and then u_node.content ~ ll_node.content and then not (u_node.summary ~ ll_node.summary))
 			end
 		end
@@ -267,7 +267,7 @@ feature -- Test routines
 		do
 			storage.save_node (custom_node ("Content", "Summary", "Title"))
 			if attached {CMS_NODE} storage.node (1) as ll_node then
-				storage.update_node_content (ll_node.id, "New Content")
+--				storage.update_node_content (ll_node.id, "New Content")
 				assert ("Updated", attached {CMS_NODE} storage.node (1) as u_node and then u_node.title ~ ll_node.title and then not (u_node.content ~ ll_node.content) and then u_node.summary ~ ll_node.summary)
 			end
 		end
