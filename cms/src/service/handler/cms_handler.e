@@ -9,6 +9,8 @@ deferred class
 
 inherit
 
+	WSF_HANDLER
+
 	CMS_REQUEST_UTIL
 
 	SHARED_LOGGER

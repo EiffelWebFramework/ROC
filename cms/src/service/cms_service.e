@@ -19,6 +19,7 @@ inherit
 			execute_default
 		end
 
+
 	WSF_FILTERED_SERVICE
 
 	WSF_FILTER
@@ -120,23 +121,6 @@ feature {NONE} -- Initialization
 			router.handle_with_request_methods ("/", fhdl, router.methods_GET)
 		end
 
-
-feature -- Access	
-
-	setup:  CMS_SETUP
-		-- CMS setup.
-
-	configuration: CMS_CONFIGURATION
-	   	-- CMS configuration.
-	   	-- | Maybe we can compute it (using `setup') instead of using memory.
-
-	modules: LIST [CMS_MODULE]
-		-- List of possible modules.
-		-- | Maybe we can compute it (using `setup') instead of using memory.
-
-	filters: LIST[WSF_FILTER]
-		 -- List of possible filters.
-
 feature -- Execute Filter
 
 	execute_filter (req: WSF_REQUEST; res: WSF_RESPONSE)
@@ -185,6 +169,23 @@ feature -- Filters
 			end
 			f.set_next (Current)
 		end
+
+
+feature -- Access	
+
+	setup:  CMS_SETUP
+		-- CMS setup.
+
+	configuration: CMS_CONFIGURATION
+	   	-- CMS configuration.
+	   	-- | Maybe we can compute it (using `setup') instead of using memory.
+
+	modules: LIST [CMS_MODULE]
+		-- List of possible modules.
+		-- | Maybe we can compute it (using `setup') instead of using memory.
+
+	filters: LIST[WSF_FILTER]
+		 -- List of possible filters.
 
 feature -- Execution
 

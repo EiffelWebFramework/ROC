@@ -62,7 +62,7 @@ feature -- Configure Node Resources Routes
 			create l_bal_handler.make (config)
 			create l_methods
 			l_methods.enable_get
-			router.handle_with_request_methods ("/basic_auth/login", l_bal_handler, l_methods)
+			router.handle_with_request_methods ("/basic_auth_login", l_bal_handler, l_methods)
 		end
 
 	configure_api_logoff
@@ -73,7 +73,7 @@ feature -- Configure Node Resources Routes
 			create l_bal_handler.make (config)
 			create l_methods
 			l_methods.enable_get
-			router.handle_with_request_methods ("/basic_auth/logoff", l_bal_handler, l_methods)
+			router.handle_with_request_methods ("/basic_auth_logoff", l_bal_handler, l_methods)
 		end
 
 end

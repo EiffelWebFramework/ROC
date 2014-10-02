@@ -33,7 +33,7 @@
 						<label> <span itemprop="text">Title:</span>   </label>
 					</div>
 					<div class="col-xs-7">
-				       	<input id="title" type="text" name="title" placeholder="Title" required value="{$title/}"/>
+				       	<input id="title" type="text" name="title" placeholder="Title" required value="{$node_title/}"/>
 				   	</div>
 				</div>
 

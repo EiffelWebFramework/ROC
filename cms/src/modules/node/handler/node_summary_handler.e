@@ -70,8 +70,8 @@ feature -- HTTP Methods
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
 					if l_id.is_integer and then attached {CMS_NODE} api_service.node (l_id.integer_value) as l_node then
 						create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "modules/node_summary")
-						l_page.add_variable (l_node.summary, "summary")
 						l_page.add_variable (l_id.value, "id")
+						l_page.add_variable (l_node.summary, "node_summary")
 						l_page.execute
 					else
 						do_error (req, res, l_id)

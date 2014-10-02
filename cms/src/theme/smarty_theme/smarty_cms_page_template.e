@@ -42,10 +42,10 @@ feature -- Access
 			end
 
 			if attached page.title as l_title then
-				variables.force (l_title, "title")
+				variables.force (l_title, "page_title")
 				variables.force (l_title, "head_title")
 			else
-				variables.force ("", "title")
+				variables.force ("", "page_title")
 				variables.force ("", "head_title")
 			end
 

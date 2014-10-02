@@ -33,7 +33,7 @@
 							<label> <span itemprop="text">Content:</span>   </label>
 						</div>
 						<div class="col-xs-7">
-					        	<textarea id="content" rows="25" cols="100" class="form-control" name="content" placeholder="Node content" required>{$content/}</textarea>			
+					        	<textarea id="content" rows="25" cols="100" class="form-control" name="content" placeholder="Node content" required>{$node_content/}</textarea>			
 					   	</div>
 					</div>
 
