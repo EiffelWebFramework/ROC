@@ -29,7 +29,7 @@ feature -- Responses
 			create h.make
 			h.put_content_type_text_html
 			h.put_current_date
-			h.put_header_key_value ({HTTP_HEADER_NAMES}.header_www_authenticate, "Basic realm=%"CMS-User%"")
+			h.put_header_key_value ({HTTP_HEADER_NAMES}.header_www_authenticate, "Basic realm=%"CMSRoc-User%"")
 			res.set_status_code ({HTTP_STATUS_CODE}.unauthorized)
 			res.put_header_text (h.string)
 		end
