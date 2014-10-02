@@ -17,13 +17,6 @@ inherit
 			execute_default
 		end
 
-	WSF_FILTERED_SERVICE
-
-	WSF_FILTER
-		rename
-			execute as execute_filter
-		end
-
 	WSF_NO_PROXY_POLICY
 
 	WSF_URI_HELPER_FOR_ROUTED_SERVICE
@@ -50,8 +43,6 @@ feature {NONE} -- Initialization
 			initialize_router
 			initialize_modules
 		end
-
-
 
 	initialize_users
 		do
