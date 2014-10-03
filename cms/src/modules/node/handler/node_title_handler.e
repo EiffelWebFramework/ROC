@@ -70,20 +70,14 @@ feature -- HTTP Methods
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
 					if l_id.is_integer and then attached {CMS_NODE} api_service.node (l_id.integer_value) as l_node then
 						create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "modules/node_title")
-						l_page.add_variable (setup.is_html, "html")
-						l_page.add_variable (setup.is_web, "web")
-						l_page.add_variable (l_node.title, "title")
+						l_page.add_variable (l_node.title, "node_title")
 						l_page.add_variable (l_id.value, "id")
 						l_page.execute
 					else
 						do_error (req, res, l_id)
 					end
 				else
-					to_implement ("Check how to implement API error")
---					create l_page.make (req, "master2/error")
---					l_page.set_value ("500", "code")
---					l_page.set_value (req.absolute_script_url (req.path_info), "request")
---					l_page.send_to (res)
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)

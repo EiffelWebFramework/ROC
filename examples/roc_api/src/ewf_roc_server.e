@@ -15,6 +15,7 @@ inherit
 		redefine
 			initialize
 		end
+
 	WSF_SERVICE
 		redefine
 			execute

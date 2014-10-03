@@ -85,6 +85,10 @@ feature {NONE} -- Initialization
 			create {NODE_MODULE} m.make (Current)
 			m.enable
 			modules.extend (m)
+
+			create {BASIC_AUTH_MODULE} m.make (Current)
+			m.enable
+			modules.extend (m)
 		end
 
 	build_api_service
