@@ -11,10 +11,19 @@ class
 
 inherit
 	WSF_ROUTED_SKELETON_SERVICE
+		rename
+			execute as execute_service
 		undefine
 			requires_proxy
 		redefine
 			execute_default
+		end
+
+	WSF_FILTERED_SERVICE
+
+	WSF_FILTER
+		rename
+			execute as execute_filter
 		end
 
 	WSF_NO_PROXY_POLICY
@@ -37,11 +46,13 @@ feature {NONE} -- Initialization
 			setup := a_setup
 			configuration := a_setup.configuration
 			modules := a_setup.modules
+			create {ARRAYED_LIST[WSF_FILTER]} filters.make (0)
 			initialize_users
 			initialize_auth_engine
 			initialize_mailer
 			initialize_router
 			initialize_modules
+			initialize_filter
 		end
 
 	initialize_users
@@ -69,6 +80,9 @@ feature {NONE} -- Initialization
 				if m.item.is_enabled then
 					router.import (m.item.router)
 				end
+				if attached m.item.filters as l_m_filters then
+					filters.append (l_m_filters)
+				end
 			end
 			configure_api_file_handler
 		end
@@ -89,6 +103,7 @@ feature {NONE} -- Initialization
 			create l_methods
 			l_methods.enable_get
 			router.handle_with_request_methods ("/", l_root_handler, l_methods)
+			router.handle_with_request_methods ("", l_root_handler, l_methods)
 		end
 
 	configure_api_file_handler
@@ -105,6 +120,55 @@ feature {NONE} -- Initialization
 			router.handle_with_request_methods ("/", fhdl, router.methods_GET)
 		end
 
+feature -- Execute Filter
+
+	execute_filter (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- Execute the filter.
+		do
+
+			res.put_header_line ("Date: " + (create {HTTP_DATE}.make_now_utc).string)
+			execute_service (req, res)
+		end
+
+feature -- Filters
+
+	create_filter
+			-- Create `filter'.
+		local
+			f, l_filter: detachable WSF_FILTER
+			fh: WSF_CUSTOM_HEADER_FILTER
+		do
+			l_filter := Void
+				-- Maintenance
+			create {WSF_MAINTENANCE_FILTER} f
+			f.set_next (l_filter)
+			l_filter := f
+
+			if attached filters as l_filters then
+				across l_filters as c loop
+					c.item.set_next (l_filter)
+					l_filter := c.item
+				end
+			end
+
+			filter := l_filter
+		end
+
+	setup_filter
+			-- Setup `filter'.
+		local
+			f: WSF_FILTER
+		do
+			from
+				f := filter
+			until
+				not attached f.next as l_next
+			loop
+				f := l_next
+			end
+			f.set_next (Current)
+		end
+
 
 feature -- Access	
 
@@ -119,10 +183,8 @@ feature -- Access
 		-- List of possible modules.
 		-- | Maybe we can compute it (using `setup') instead of using memory.
 
-feature -- Logging
-
-feature -- Notification
-
+	filters: LIST[WSF_FILTER]
+		 -- List of possible filters.
 
 feature -- Execution
 

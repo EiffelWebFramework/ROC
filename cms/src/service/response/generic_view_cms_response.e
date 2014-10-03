@@ -30,8 +30,8 @@ feature -- Execution
 	process
 			-- Computed response message.
 		do
-			set_title ("CMS")
-			set_page_title (Void)
+--			set_title ("CMS")
+--			set_page_title (Void)
 		end
 end
 

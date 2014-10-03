@@ -178,6 +178,8 @@ feature {NONE} -- Execution
 			prepare (cms_page)
 			create page.make (theme.page_html (cms_page))
 			page.set_status_code (status_code)
+			page.header.put_content_length (page.html.count)
+			page.header.put_current_date
 			response.send (page)
 			on_terminated
 		end

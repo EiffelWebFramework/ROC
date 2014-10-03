@@ -1,17 +1,13 @@
 note
-	description: "Handle Logoff for Basic Authentication"
-	date: "$Date: 2014-08-08 16:02:11 -0300 (vi., 08 ago. 2014) $"
-	revision: "$Revision: 95593 $"
+	description: "Summary description for {BASIC_AUTH_LOGOFF_HANDLER}."
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
-	ROC_LOGOFF_HANDLER
+	BASIC_AUTH_LOGOFF_HANDLER
 
 inherit
-
-	APP_ABSTRACT_HANDLER
-		rename
-			set_esa_config as make
-		end
+	CMS_HANDLER
 
 	WSF_URI_HANDLER
 		rename
@@ -47,13 +43,16 @@ feature -- HTTP Methods
 
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
+		local
+			l_page: CMS_RESPONSE
 		do
-				log.write_information(generator + ".do_get Processing logoff")
+			log.write_information(generator + ".do_get Processing basic auth logoff")
 			if attached req.query_parameter ("prompt") as l_prompt then
-				(create {ROC_RESPONSE}.make(req,"")).new_response_unauthorized (req, res)
+				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
 			else
-				req.unset_execution_variable ("user")
-				(create {ROC_RESPONSE}.make(req,"master2/logoff.tpl")).new_response_denied (req, res)
+				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "master2/basic_auth/logoff")
+				l_page.set_status_code ({HTTP_STATUS_CODE}.unauthorized)
+				l_page.execute
 			end
 		end
 

@@ -89,7 +89,7 @@
                     <div class="row">
                       <div class="col-xs-1">
                         {if isset="$node"}
-                          <label> <span itemprop="description"><a href="{$host/}/node/{$node.id/}/content" rel="node">Summary:</a></span></label>
+                          <label> <span itemprop="description"><a href="{$host/}/node/{$node.id/}/summary" rel="node">Summary:</a></span></label>
                         {/if}
                         {unless isset="$node"}
                           <label> <span itemprop="description">Summary:</span></label>

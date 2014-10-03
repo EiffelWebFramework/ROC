@@ -20,6 +20,7 @@ feature -- Generation
 
 	custom_prepare (page: CMS_HTML_PAGE)
 		do
+			Precursor (page)
 			page.register_variable (setup.api_service.recent_nodes (0, 5), "nodes")
 		end
 
