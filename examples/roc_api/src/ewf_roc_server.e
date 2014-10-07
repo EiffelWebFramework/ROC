@@ -111,7 +111,6 @@ feature -- CMS Initialization
 				create layout.make_default
 			end
 			create Result.make (layout)
-			setup_modules (Result)
 			setup_storage (Result)
 		end
 
@@ -121,20 +120,26 @@ feature -- CMS Initialization
 		do
 			log.write_debug (generator + ".initialize_cms")
 			create cms.make (a_setup)
+			setup_modules (cms)
 			cms_service := cms
 		end
 
 feature -- CMS setup
 
-	setup_modules (a_setup: CMS_SETUP)
+	setup_modules (a_service: CMS_SERVICE)
 			-- Setup modules to be added to the CMS ecosystem.
+		local
+			m: CMS_MODULE
 		do
-			to_implement ("To implement custom modules")
+
+			create {NODE_MODULE} m.make (a_service.setup)
+			m.enable
+			a_service.add_module (m)
 		end
 
 	setup_storage (a_setup: CMS_SETUP)
 		do
-
+			to_implement ("To implement custom storage")
 		end
 end
 

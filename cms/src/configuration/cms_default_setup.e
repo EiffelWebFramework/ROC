@@ -12,13 +12,18 @@ inherit
 	REFACTORING_HELPER
 create
 	make
+	
 feature {NONE} -- Initialization
 
 	make (a_layout: CMS_LAYOUT)
 		do
 			layout := a_layout
 			create configuration.make (layout)
+			configure
+		end
 
+	configure
+		do
 			site_id := configuration.site_id
 			site_url := configuration.site_url ("")
 			site_name := configuration.site_name ("EWF::CMS")
@@ -35,19 +40,13 @@ feature {NONE} -- Initialization
 			initialize
 		end
 
-
 	initialize
 		do
 			build_api_service
-			build_auth_engine
 			build_mailer
-			build_modules
 		end
 
 feature -- Access
-
-	modules: ARRAYED_LIST [CMS_MODULE]
-			-- List of possible modules
 
 	is_html: BOOLEAN
 			-- <Precursor>
@@ -61,34 +60,6 @@ feature -- Access
 		do
 			Result := (create {CMS_JSON_CONFIGURATION}).is_web_mode(layout.application_config_path)
 
-		end
-
-feature {NONE} -- Initialization		
-
-	build_modules
-			-- Core modules. (User, Admin, Node)
-			-- At the moment only node is supported.
-		local
-			m: CMS_MODULE
-		do
-			create modules.make (3)
-
---			-- Core
---			create {USER_MODULE} m.make
---			m.enable
---			modules.extend (m)
-
---			create {ADMIN_MODULE} m.make
---			m.enable
---			modules.extend (m)
-
-			create {NODE_MODULE} m.make (Current)
-			m.enable
-			modules.extend (m)
-
-			create {BASIC_AUTH_MODULE} m.make (Current)
-			m.enable
-			modules.extend (m)
 		end
 
 	build_api_service
@@ -113,14 +84,6 @@ feature {NONE} -- Initialization
 	build_mailer
 		do
 			to_implement ("Not implemented mailer")
-		end
-
-feature -- Change
-
-	add_module (m: CMS_MODULE)
-			-- Add a module `m' to the list of modules `modules'.
-		do
-			modules.force (m)
 		end
 
 end

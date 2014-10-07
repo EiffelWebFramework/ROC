@@ -37,16 +37,34 @@ inherit
 	SHARED_LOGGER
 
 create
-	make
+	make,
+	make_with_module_configurator
 
 feature {NONE} -- Initialization
 
 	make (a_setup: CMS_SETUP)
+			-- Build a a default service with a CMS_DEFAULT_MODULE_CONFIGURATOR
 		do
 			setup := a_setup
 			configuration := a_setup.configuration
-			modules := a_setup.modules
+			create {CMS_DEFAULT_MODULE_CONFIGURATOR} modules.make (a_setup)
 			create {ARRAYED_LIST[WSF_FILTER]} filters.make (0)
+			initialize
+		end
+
+	make_with_module_configurator (a_setup: CMS_SETUP; a_module_configurator: CMS_MODULE_CONFIGURATOR)
+			-- Build a a default service with a custom CMS_MODULE_CONFIGURATOR
+		do
+			setup := a_setup
+			configuration := a_setup.configuration
+			modules := a_module_configurator
+			create {ARRAYED_LIST[WSF_FILTER]} filters.make (0)
+			initialize
+		end
+
+
+	initialize
+		do
 			initialize_users
 			initialize_auth_engine
 			initialize_mailer
@@ -75,7 +93,7 @@ feature {NONE} -- Initialization
 		do
 			log.write_debug (generator + ".initialize_modules")
 			across
-				modules as m
+				modules.modules as m
 			loop
 				if m.item.is_enabled then
 					router.import (m.item.router)
@@ -178,12 +196,19 @@ feature -- Access
 	   	-- CMS configuration.
 	   	-- | Maybe we can compute it (using `setup') instead of using memory.
 
-	modules: LIST [CMS_MODULE]
-		-- List of possible modules.
-		-- | Maybe we can compute it (using `setup') instead of using memory.
+	modules: CMS_MODULE_CONFIGURATOR
+		-- Configurator of possible modules.
 
 	filters: LIST[WSF_FILTER]
 		 -- List of possible filters.
+
+feature -- Element Change: Modules	
+
+	add_module (a_module: CMS_MODULE)
+			-- Add a module `a_module' to the module configurator `a_module'.
+		do
+			modules.add_module (a_module)
+		end
 
 feature -- Execution
 

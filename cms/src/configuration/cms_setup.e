@@ -17,13 +17,6 @@ feature -- Access
 	api_service: CMS_API_SERVICE
 	    -- cms api service.
 
-	modules: LIST[CMS_MODULE]
-			-- Possible list of modules.
-			-- |If we remove Modules from setup.
-			-- |we can let the CMS_SERVICE define the basic modules.
-		deferred
-		end
-
 	is_html: BOOLEAN
 			--  api with progresive enhacements css and js, server side rendering.
 		deferred
