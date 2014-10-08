@@ -27,6 +27,11 @@ feature -- Access
 		deferred
 		end
 
+	modules: CMS_MODULE_COLLECTION
+			-- List of available modules.
+		deferred
+		end
+
 feature -- Access: Site
 
 	site_id: READABLE_STRING_8

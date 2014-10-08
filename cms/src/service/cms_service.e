@@ -41,12 +41,11 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_setup: CMS_SETUP; a_modules: CMS_MODULE_COLLECTION)
-			-- Build a a default service with a custom list of modules `a_modules'
+	make (a_setup: CMS_SETUP)
+			-- Build a CMS service with `a_setup' configuration.
 		do
 			setup := a_setup
 			configuration := a_setup.configuration
-			modules := a_modules
 			initialize
 		end
 
@@ -65,19 +64,19 @@ feature {NONE} -- Initialization
 			-- Intialize modules and keep only enabled modules.
 		local
 			l_module: CMS_MODULE
-			coll: CMS_MODULE_COLLECTION
+			l_available_modules: CMS_MODULE_COLLECTION
 		do
 			log.write_debug (generator + ".initialize_modules")
-			create coll.make (modules.count)
+			l_available_modules := setup.modules
+			create modules.make (l_available_modules.count)
 			across
-				modules as ic
+				l_available_modules as ic
 			loop
 				l_module := ic.item
 				if l_module.is_enabled then
-					coll.extend (l_module)
+					modules.extend (l_module)
 				end
 			end
-			modules := coll
 		ensure
 			only_enabled_modules: across modules as ic all ic.item.is_enabled end
 		end

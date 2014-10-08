@@ -25,8 +25,11 @@ feature {NONE} -- Initialization
 	initialize
 		do
 			configure
+			create modules.make (3)
 			build_api_service
 			build_mailer
+
+			initialize_modules
 		end
 
 	configure
@@ -45,7 +48,33 @@ feature {NONE} -- Initialization
 			compute_theme_resource_location
 		end
 
+	initialize_modules
+		local
+			m: CMS_MODULE
+		do
+--			-- Core
+--			create {USER_MODULE} m.make (Current)
+--			m.enable
+--			modules.extend (m)
+
+--			create {ADMIN_MODULE} m.make (Current)
+--			m.enable
+--			modules.extend (m)
+
+
+			create {BASIC_AUTH_MODULE} m.make (Current)
+			m.enable
+			modules.extend (m)
+
+			create {NODE_MODULE} m.make (Current)
+			m.enable
+			modules.extend (m)
+		end
+
 feature -- Access
+
+	modules: CMS_MODULE_COLLECTION
+			-- <Precursor>
 
 	is_html: BOOLEAN
 			-- <Precursor>

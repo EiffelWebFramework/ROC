@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {CMS_MODULE}."
+	description: "CMS module that bring support for NODE management."
 	date: "$Date$"
 	revision: "$Revision$"
 
