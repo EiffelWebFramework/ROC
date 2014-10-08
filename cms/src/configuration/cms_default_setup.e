@@ -62,10 +62,6 @@ feature {NONE} -- Initialization
 --			modules.extend (m)
 
 
-			create {BASIC_AUTH_MODULE} m.make (Current)
-			m.enable
-			modules.extend (m)
-
 			create {NODE_MODULE} m.make (Current)
 			m.enable
 			modules.extend (m)

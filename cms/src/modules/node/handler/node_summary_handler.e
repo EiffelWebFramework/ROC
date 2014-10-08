@@ -87,8 +87,6 @@ feature -- HTTP Methods
 
 	do_post (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
-		local
-			u_node: CMS_NODE
 		do
 			if attached current_user_name (req) then
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then

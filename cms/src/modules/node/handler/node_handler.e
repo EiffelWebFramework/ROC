@@ -85,7 +85,6 @@ feature -- HTTP Methods
 			-- <Precursor>
 		local
 			u_node: CMS_NODE
-			l_page: CMS_RESPONSE
 		do
 			to_implement ("Check user permissions!!!")
 			if attached current_user (req) as l_user then

@@ -47,8 +47,6 @@ feature -- HTTP Methods
 
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
-		local
-			l_page: CMS_RESPONSE
 		do
 			log.write_information(generator + ".do_get Processing basic auth login")
 			if attached {STRING_32} current_user_name (req) as l_user then

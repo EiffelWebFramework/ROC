@@ -88,8 +88,6 @@ feature -- HTTP Methods
 
 	do_post (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
-		local
-			l_page: CMS_RESPONSE
 		do
 			if attached current_user_name (req) then
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
@@ -116,7 +114,6 @@ feature -- HTTP Methods
 			-- <Precursor>
 		local
 			u_node: CMS_NODE
-			l_page: CMS_RESPONSE
 		do
 			to_implement ("Check if user has permissions")
 			if attached current_user (req) as l_user then
