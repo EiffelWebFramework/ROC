@@ -12,8 +12,8 @@ inherit
 	REFACTORING_HELPER
 
 
-create make
-
+create
+	make
 
 feature -- Initialize
 
@@ -28,7 +28,7 @@ feature -- Initialize
 
 feature -- Access
 
-	login_valid (l_auth_login, l_auth_password: READABLE_STRING_32): BOOLEAN
+	is_valid_credential (l_auth_login, l_auth_password: READABLE_STRING_32): BOOLEAN
 		local
 			l_security: SECURITY_PROVIDER
 		do
@@ -56,7 +56,6 @@ feature -- Access: Node
 			fixme ("Check preconditions")
 			Result := storage.node (a_id)
 		end
-
 
 feature -- Change: Node
 

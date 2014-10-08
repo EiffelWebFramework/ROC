@@ -43,7 +43,7 @@ feature {NONE} -- Initialization
 		do
 			Precursor
 			service_options := create {WSF_SERVICE_LAUNCHER_OPTIONS_FROM_INI}.make_from_file ("roc.ini")
-			launch_cms (cms_setup)
+			initialize_cms (cms_setup)
 		end
 
 feature -- Service
@@ -111,15 +111,18 @@ feature -- CMS Initialization
 				create layout.make_default
 			end
 			create Result.make (layout)
-			setup_modules (Result)
 			setup_storage (Result)
 		end
 
-	launch_cms (a_setup: CMS_SETUP)
+	initialize_cms (a_setup: CMS_SETUP)
 		local
 			cms: CMS_SERVICE
+			l_modules: CMS_MODULE_COLLECTION
 		do
-			log.write_debug (generator + ".launch_cms")
+			log.write_debug (generator + ".initialize_cms")
+
+			setup_modules (a_setup)
+
 			create cms.make (a_setup)
 			cms_service := cms
 		end
@@ -127,14 +130,18 @@ feature -- CMS Initialization
 feature -- CMS setup
 
 	setup_modules (a_setup: CMS_SETUP)
-			-- Setup modules to be added to the CMS ecosystem.
+			-- Setup additional modules.
+		local
+			m: CMS_MODULE
 		do
-			to_implement ("To implement custom modules")
+			create {NODE_MODULE} m.make (a_setup)
+			m.enable
+			a_setup.modules.extend (m)
 		end
 
 	setup_storage (a_setup: CMS_SETUP)
 		do
-
+			to_implement ("To implement custom storage")
 		end
 end
 

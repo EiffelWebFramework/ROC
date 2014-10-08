@@ -9,28 +9,26 @@ deferred class
 feature -- Access
 
 	configuration: CMS_CONFIGURATION
-		-- cms configuration.
+			-- cms configuration.
 
 	layout: CMS_LAYOUT
-		-- CMS layout.
+			-- CMS layout.
 
 	api_service: CMS_API_SERVICE
-	    -- cms api service.
-
-	modules: LIST[CMS_MODULE]
-			-- Possible list of modules.
-			-- |If we remove Modules from setup.
-			-- |we can let the CMS_SERVICE define the basic modules.
-		deferred
-		end
+	 	   -- cms api service.
 
 	is_html: BOOLEAN
-			--  api with progresive enhacements css and js, server side rendering.
+			--  api with progressive enhancements css and js, server side rendering.
 		deferred
 		end
 
 	is_web: BOOLEAN
-			-- web: Web Site with progresive enhacements css and js and Ajax calls.
+			-- web: Web Site with progressive enhancements css and js and Ajax calls.
+		deferred
+		end
+
+	modules: CMS_MODULE_COLLECTION
+			-- List of available modules.
 		deferred
 		end
 
@@ -50,14 +48,14 @@ feature -- Access: Site
 
 	files_location: PATH
 
-feature -- Access:Theme	
+feature -- Access: Theme	
 
 	themes_location: PATH
 
 	theme_location: PATH
 
 	theme_resource_location: PATH
-		--
+			--
 
 	theme_information_location: PATH
 			-- theme informations.
@@ -66,20 +64,6 @@ feature -- Access:Theme
 		end
 
 	theme_name: READABLE_STRING_32
-		-- theme name
-
-feature -- Compute location
-
-	compute_theme_location
-		do
-			theme_location := themes_location.extended (theme_name)
-		end
-
-	compute_theme_resource_location
-			-- assets (js, css, images, etc)
-			-- Not used at the moment.
-		do
-			theme_resource_location := theme_location
-		end
+			-- theme name
 
 end

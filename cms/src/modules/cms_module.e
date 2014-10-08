@@ -22,27 +22,18 @@ feature -- Router
 
 	router: WSF_ROUTER
 			-- Router configuration.
+		require
+			is_enabled: is_enabled
 		deferred
 		end
 
 feature -- Filter
 
-	filters: detachable LIST[WSF_FILTER]
-		-- Possibly list of Filter's module.
-
-feature -- Element Change: Filter
-
-	add_filter (a_filter: WSF_FILTER)
-			-- Add a filter `a_filter' to the list of module filters `filters'.
-		local
-			l_filters: like filters
+	filters: detachable LIST [WSF_FILTER]
+			-- Optional list of filter for Current module.
+		require
+			is_enabled: is_enabled
 		do
-			l_filters := filters
-			if l_filters = Void then
-				create {ARRAYED_LIST[WSF_FILTER]}l_filters.make (1)
-				filters := l_filters
-			end
-			l_filters.force (a_filter)
 		end
 
 feature -- Settings

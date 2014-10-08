@@ -16,8 +16,6 @@ feature {NONE} -- Initialization
 
 	make (a_layout: CMS_LAYOUT)
 			-- Initialize `Current'.
-		local
-			p: PATH
 		do
 			layout := a_layout
 			create options.make_equal (10)
@@ -169,8 +167,6 @@ feature -- Change
 		end
 
 	get_root_location
-		local
-			utf: UTF_CONVERTER
 		do
 			root_location := layout.www_path
 		end

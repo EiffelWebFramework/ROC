@@ -12,13 +12,28 @@ inherit
 	REFACTORING_HELPER
 create
 	make
+
 feature {NONE} -- Initialization
 
 	make (a_layout: CMS_LAYOUT)
 		do
 			layout := a_layout
 			create configuration.make (layout)
+			initialize
+		end
 
+	initialize
+		do
+			configure
+			create modules.make (3)
+			build_api_service
+			build_mailer
+
+			initialize_modules
+		end
+
+	configure
+		do
 			site_id := configuration.site_id
 			site_url := configuration.site_url ("")
 			site_name := configuration.site_name ("EWF::CMS")
@@ -31,23 +46,35 @@ feature {NONE} -- Initialization
 
 			compute_theme_location
 			compute_theme_resource_location
-
-			initialize
 		end
 
-
-	initialize
+	initialize_modules
+		local
+			m: CMS_MODULE
 		do
-			build_api_service
-			build_auth_engine
-			build_mailer
-			build_modules
+--			-- Core
+--			create {USER_MODULE} m.make (Current)
+--			m.enable
+--			modules.extend (m)
+
+--			create {ADMIN_MODULE} m.make (Current)
+--			m.enable
+--			modules.extend (m)
+
+
+			create {BASIC_AUTH_MODULE} m.make (Current)
+			m.enable
+			modules.extend (m)
+
+			create {NODE_MODULE} m.make (Current)
+			m.enable
+			modules.extend (m)
 		end
 
 feature -- Access
 
-	modules: ARRAYED_LIST [CMS_MODULE]
-			-- List of possible modules
+	modules: CMS_MODULE_COLLECTION
+			-- <Precursor>
 
 	is_html: BOOLEAN
 			-- <Precursor>
@@ -63,37 +90,8 @@ feature -- Access
 
 		end
 
-feature {NONE} -- Initialization		
-
-	build_modules
-			-- Core modules. (User, Admin, Node)
-			-- At the moment only node is supported.
-		local
-			m: CMS_MODULE
-		do
-			create modules.make (3)
-
---			-- Core
---			create {USER_MODULE} m.make
---			m.enable
---			modules.extend (m)
-
---			create {ADMIN_MODULE} m.make
---			m.enable
---			modules.extend (m)
-
-			create {NODE_MODULE} m.make (Current)
-			m.enable
-			modules.extend (m)
-
-			create {BASIC_AUTH_MODULE} m.make (Current)
-			m.enable
-			modules.extend (m)
-		end
-
 	build_api_service
 		local
-			dn: PATH
 			l_database: DATABASE_CONNECTION
 		do
 			to_implement ("Refactor database setup")
@@ -116,12 +114,18 @@ feature {NONE} -- Initialization
 			to_implement ("Not implemented mailer")
 		end
 
-feature -- Change
+feature -- Compute location
 
-	add_module (m: CMS_MODULE)
-			-- Add a module `m' to the list of modules `modules'.
+	compute_theme_location
 		do
-			modules.force (m)
+			theme_location := themes_location.extended (theme_name)
+		end
+
+	compute_theme_resource_location
+			-- assets (js, css, images, etc)
+			-- Not used at the moment.
+		do
+			theme_resource_location := theme_location
 		end
 
 end
