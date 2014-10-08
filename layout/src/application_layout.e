@@ -36,45 +36,118 @@ feature -- Access: internal
 
 	config_path: PATH
 			-- Configuration file path.
-		once
-			Result := path.extended ("config")
+		local
+			p: detachable PATH
+		do
+			p := internal_config_path
+			if p = Void then
+				p := path.extended ("config")
+				internal_config_path := p
+			end
+			Result := p
 		end
 
 	application_config_path: PATH
 			-- Database Configuration file path.
-		once
-			Result := config_path.extended ("application_configuration.json")
+		local
+			p: detachable PATH
+		do
+			p := internal_application_config_path
+			if p = Void then
+				p := config_path.extended ("application_configuration.json")
+				internal_application_config_path := p
+			end
+			Result := p
 		end
 
 	logs_path: PATH
 			-- Directory for logs.
-		once
-			Result := path.extended ("logs")
+		local
+			p: detachable PATH
+		do
+			p := internal_logs_path
+			if p = Void then
+				p := path.extended ("logs")
+				internal_logs_path := p
+			end
+			Result := p
 		end
 
 	documentation_path: PATH
 			-- Directory for API documentation.
-		once
-			Result := path.extended ("doc")
+		local
+			p: detachable PATH
+		do
+			p := internal_documentation_path
+			if p = Void then
+				p := path.extended ("doc")
+				internal_documentation_path := p
+			end
+			Result := p
 		end
 
 	www_path: PATH
 			-- Directory for www.
-		once
-			Result := path.extended ("www")
+		local
+			p: detachable PATH
+		do
+			p := internal_www_path
+			if p = Void then
+				p := path.extended ("www")
+				internal_www_path := p
+			end
+			Result := p
 		end
 
 	assets_path: PATH
 			-- Directory for public assets.
 			-- css, images, js.
-		once
-			Result := path.extended ("www").extended ("assets")
+		local
+			p: detachable PATH
+		do
+			p := internal_assets_path
+			if p = Void then
+				p := www_path.extended ("assets")
+				internal_assets_path := p
+			end
+			Result := p
 		end
 
 	template_path: PATH
 			-- Directory for templates (HTML, etc).
-		once
-			Result := www_path.extended ("template")
+		local
+			p: detachable PATH
+		do
+			p := internal_template_path
+			if p = Void then
+				p := www_path.extended ("template")
+				internal_template_path := p
+			end
+			Result := p
 		end
+
+feature {NONE} -- Implementation
+
+	internal_config_path: detachable like config_path
+			-- Configuration file path.
+
+	internal_application_config_path: detachable like application_config_path
+			-- Database Configuration file path.
+
+	internal_logs_path: detachable like logs_path
+			-- Directory for logs.
+
+	internal_documentation_path: detachable like documentation_path
+			-- Directory for API documentation.
+
+	internal_www_path: detachable like www_path
+			-- Directory for www.
+
+	internal_assets_path: detachable like assets_path
+			-- Directory for public assets.
+			-- css, images, js.
+
+	internal_template_path: detachable like template_path
+			-- Directory for templates (HTML, etc).
 
 end

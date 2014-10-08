@@ -45,19 +45,25 @@ feature -- Access
 		local
 			i: INTEGER
 			utf: UTF_CONVERTER
-		once
-			if attached information.regions as tb and then not tb.is_empty then
-				i := 1
-				create Result.make_filled ("", i, i + tb.count - 1)
-				across
-					tb as ic
-				loop
-					Result.force (utf.utf_32_string_to_utf_8_string_8 (ic.key), i) -- NOTE: UTF-8 encoded !
-					i := i + 1
+			l_regions: like internal_regions
+		do
+			l_regions := internal_regions
+			if l_regions = Void then
+				if attached information.regions as tb and then not tb.is_empty then
+					i := 1
+					create l_regions.make_filled ("", i, i + tb.count - 1)
+					across
+						tb as ic
+					loop
+						l_regions.force (utf.utf_32_string_to_utf_8_string_8 (ic.key), i) -- NOTE: UTF-8 encoded !
+						i := i + 1
+					end
+				else
+					l_regions := <<"header", "content", "footer", "first_sidebar", "second_sidebar">>
 				end
-			else
-				Result := <<"header", "content", "footer", "first_sidebar", "second_sidebar">>
+				internaL_regions := l_regions
 			end
+			Result := l_regions
 		end
 
 	page_template: SMARTY_CMS_PAGE_TEMPLATE
@@ -86,6 +92,8 @@ feature -- Conversion
 		end
 
 feature {NONE} -- Internal
+
+	internal_regions: detachable like regions
 
 	internal_page_template: detachable like page_template
 

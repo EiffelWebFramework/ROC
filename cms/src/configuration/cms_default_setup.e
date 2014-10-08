@@ -93,7 +93,6 @@ feature {NONE} -- Initialization
 
 	build_api_service
 		local
-			dn: PATH
 			l_database: DATABASE_CONNECTION
 		do
 			to_implement ("Refactor database setup")

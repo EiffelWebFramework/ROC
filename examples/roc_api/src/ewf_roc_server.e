@@ -43,7 +43,7 @@ feature {NONE} -- Initialization
 		do
 			Precursor
 			service_options := create {WSF_SERVICE_LAUNCHER_OPTIONS_FROM_INI}.make_from_file ("roc.ini")
-			launch_cms (cms_setup)
+			initialize_cms (cms_setup)
 		end
 
 feature -- Service
@@ -115,11 +115,11 @@ feature -- CMS Initialization
 			setup_storage (Result)
 		end
 
-	launch_cms (a_setup: CMS_SETUP)
+	initialize_cms (a_setup: CMS_SETUP)
 		local
 			cms: CMS_SERVICE
 		do
-			log.write_debug (generator + ".launch_cms")
+			log.write_debug (generator + ".initialize_cms")
 			create cms.make (a_setup)
 			cms_service := cms
 		end

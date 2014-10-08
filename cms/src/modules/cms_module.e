@@ -27,7 +27,7 @@ feature -- Router
 
 feature -- Filter
 
-	filters: detachable LIST[WSF_FILTER]
+	filters: detachable LIST [WSF_FILTER]
 		-- Possibly list of Filter's module.
 
 feature -- Element Change: Filter
@@ -39,7 +39,7 @@ feature -- Element Change: Filter
 		do
 			l_filters := filters
 			if l_filters = Void then
-				create {ARRAYED_LIST[WSF_FILTER]}l_filters.make (1)
+				create {ARRAYED_LIST [WSF_FILTER]} l_filters.make (1)
 				filters := l_filters
 			end
 			l_filters.force (a_filter)

@@ -136,7 +136,6 @@ feature -- Filters
 			-- Create `filter'.
 		local
 			f, l_filter: detachable WSF_FILTER
-			fh: WSF_CUSTOM_HEADER_FILTER
 		do
 			l_filter := Void
 				-- Maintenance
