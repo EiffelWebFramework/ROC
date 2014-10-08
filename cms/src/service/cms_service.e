@@ -37,72 +37,60 @@ inherit
 	SHARED_LOGGER
 
 create
-	make,
-	make_with_module_configurator
+	make
 
 feature {NONE} -- Initialization
 
-	make (a_setup: CMS_SETUP)
-			-- Build a a default service with a CMS_DEFAULT_MODULE_CONFIGURATOR
+	make (a_setup: CMS_SETUP; a_modules: CMS_MODULE_COLLECTION)
+			-- Build a a default service with a custom list of modules `a_modules'
 		do
 			setup := a_setup
 			configuration := a_setup.configuration
-			create {CMS_DEFAULT_MODULE_CONFIGURATOR} modules.make (a_setup)
-			create {ARRAYED_LIST[WSF_FILTER]} filters.make (0)
+			modules := a_modules
 			initialize
 		end
-
-	make_with_module_configurator (a_setup: CMS_SETUP; a_module_configurator: CMS_MODULE_CONFIGURATOR)
-			-- Build a a default service with a custom CMS_MODULE_CONFIGURATOR
-		do
-			setup := a_setup
-			configuration := a_setup.configuration
-			modules := a_module_configurator
-			create {ARRAYED_LIST[WSF_FILTER]} filters.make (0)
-			initialize
-		end
-
 
 	initialize
+			-- Initialize various parts of the CMS service.
 		do
+			initialize_modules
 			initialize_users
 			initialize_auth_engine
 			initialize_mailer
 			initialize_router
-			initialize_modules
 			initialize_filter
 		end
 
+	initialize_modules
+			-- Intialize modules and keep only enabled modules.
+		local
+			l_module: CMS_MODULE
+			coll: CMS_MODULE_COLLECTION
+		do
+			log.write_debug (generator + ".initialize_modules")
+			create coll.make (modules.count)
+			across
+				modules as ic
+			loop
+				l_module := ic.item
+				if l_module.is_enabled then
+					coll.extend (l_module)
+				end
+			end
+			modules := coll
+		ensure
+			only_enabled_modules: across modules as ic all ic.item.is_enabled end
+		end
+
 	initialize_users
+			-- Initialize users.
 		do
 		end
 
 	initialize_mailer
+			-- Initialize mailer engine.
 		do
 			to_implement ("To Implement mailer")
-		end
-
-	setup_router
-		do
-			configure_api_root
-		end
-
-	initialize_modules
-			-- Intialize modules, import router definitions
-			-- from enabled modules.
-		do
-			log.write_debug (generator + ".initialize_modules")
-			across
-				modules.modules as m
-			loop
-				if m.item.is_enabled then
-					router.import (m.item.router)
-				end
-				if attached m.item.filters as l_m_filters then
-					filters.append (l_m_filters)
-				end
-			end
-			configure_api_file_handler
 		end
 
 	initialize_auth_engine
@@ -110,6 +98,27 @@ feature {NONE} -- Initialization
 			to_implement ("To Implement authentication engine")
 		end
 
+feature -- Settings: router
+
+	setup_router
+			-- <Precursor>
+		local
+			l_module: CMS_MODULE
+		do
+			log.write_debug (generator + ".setup_router")
+				-- Configure root of api handler.
+			configure_api_root
+
+				-- Include routes from modules.
+			across
+				modules as ic
+			loop
+				l_module := ic.item
+				router.import (l_module.router)
+			end
+				-- Configure files handler.
+			configure_api_file_handler
+		end
 
 	configure_api_root
 		local
@@ -143,7 +152,6 @@ feature -- Execute Filter
 	execute_filter (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- Execute the filter.
 		do
-
 			res.put_header_line ("Date: " + (create {HTTP_DATE}.make_now_utc).string)
 			execute_service (req, res)
 		end
@@ -154,17 +162,29 @@ feature -- Filters
 			-- Create `filter'.
 		local
 			f, l_filter: detachable WSF_FILTER
+			l_module: CMS_MODULE
 		do
+			log.write_debug (generator + ".create_filter")
 			l_filter := Void
 				-- Maintenance
 			create {WSF_MAINTENANCE_FILTER} f
 			f.set_next (l_filter)
 			l_filter := f
 
-			if attached filters as l_filters then
-				across l_filters as c loop
-					c.item.set_next (l_filter)
-					l_filter := c.item
+				-- Include filters from modules
+			across
+				modules as ic
+			loop
+				l_module := ic.item
+				if
+					l_module.is_enabled and then
+					attached l_module.filters as l_m_filters
+				then
+					across l_m_filters as f_ic loop
+						f := f_ic.item
+						f.set_next (l_filter)
+						l_filter := f
+					end
 				end
 			end
 
@@ -176,6 +196,8 @@ feature -- Filters
 		local
 			f: WSF_FILTER
 		do
+			log.write_debug (generator + ".setup_filter")
+
 			from
 				f := filter
 			until
@@ -190,35 +212,22 @@ feature -- Filters
 feature -- Access	
 
 	setup:  CMS_SETUP
-		-- CMS setup.
+			-- CMS setup.
 
 	configuration: CMS_CONFIGURATION
-	   	-- CMS configuration.
-	   	-- | Maybe we can compute it (using `setup') instead of using memory.
+		   	-- CMS configuration.
+		   	--| Maybe we can compute it (using `setup') instead of using memory.
 
-	modules: CMS_MODULE_CONFIGURATOR
-		-- Configurator of possible modules.
-
-	filters: LIST[WSF_FILTER]
-		 -- List of possible filters.
-
-feature -- Element Change: Modules	
-
-	add_module (a_module: CMS_MODULE)
-			-- Add a module `a_module' to the module configurator `a_module'.
-		do
-			modules.add_module (a_module)
-		end
+	modules: CMS_MODULE_COLLECTION
+			-- Configurator of possible modules.
 
 feature -- Execution
 
 	execute_default (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- Default request handler if no other are relevant
-		local
 		do
 			fixme ("To Implement")
 		end
-
 
 note
 	copyright: "2011-2014, Jocelyn Fiat, Eiffel Software and others"

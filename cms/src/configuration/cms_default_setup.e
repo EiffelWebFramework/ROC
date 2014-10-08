@@ -12,14 +12,21 @@ inherit
 	REFACTORING_HELPER
 create
 	make
-	
+
 feature {NONE} -- Initialization
 
 	make (a_layout: CMS_LAYOUT)
 		do
 			layout := a_layout
 			create configuration.make (layout)
+			initialize
+		end
+
+	initialize
+		do
 			configure
+			build_api_service
+			build_mailer
 		end
 
 	configure
@@ -36,14 +43,6 @@ feature {NONE} -- Initialization
 
 			compute_theme_location
 			compute_theme_resource_location
-
-			initialize
-		end
-
-	initialize
-		do
-			build_api_service
-			build_mailer
 		end
 
 feature -- Access
@@ -84,6 +83,20 @@ feature -- Access
 	build_mailer
 		do
 			to_implement ("Not implemented mailer")
+		end
+
+feature -- Compute location
+
+	compute_theme_location
+		do
+			theme_location := themes_location.extended (theme_name)
+		end
+
+	compute_theme_resource_location
+			-- assets (js, css, images, etc)
+			-- Not used at the moment.
+		do
+			theme_resource_location := theme_location
 		end
 
 end

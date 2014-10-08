@@ -9,6 +9,9 @@ class
 inherit
 
 	CMS_MODULE
+		redefine
+			filters
+		end
 
 create
 	make
@@ -22,39 +25,34 @@ feature {NONE} -- Initialization
 			description := "Service to manage basic authentication"
 			package := "core"
 			config := a_config
-			setup_router
-			setup_filter
-			enable
 		end
-
-feature -- Access
-
-	router: WSF_ROUTER
-		-- Node router.
 
 	config: CMS_SETUP
 		-- Node configuration.
 
-feature -- Implementation
+feature -- Access: router
 
-	setup_router
-			-- Setup `router'.
+	router: WSF_ROUTER
+			-- Node router.
 		do
-			create router.make (2)
-			configure_api_login
-			configure_api_logoff
+			create Result.make (2)
+			configure_api_login (Result)
+			configure_api_logoff (Result)
 		end
 
-	setup_filter
-			-- Setup `filter'.
+feature -- Access: filter
+
+	filters: detachable LIST [WSF_FILTER]
+			-- Possibly list of Filter's module.
 		do
-			add_filter (create {CORS_FILTER})
-			add_filter (create {BASIC_AUTH_FILTER}.make (config))
+			create {ARRAYED_LIST [WSF_FILTER]} Result.make (2)
+			Result.extend (create {CORS_FILTER})
+			Result.extend (create {BASIC_AUTH_FILTER}.make (config))
 		end
 
-feature -- Configure Node Resources Routes
+feature {NONE} -- Implementation: routes
 
-	configure_api_login
+	configure_api_login (a_router: WSF_ROUTER)
 		local
 			l_bal_handler: BASIC_AUTH_LOGIN_HANDLER
 			l_methods: WSF_REQUEST_METHODS
@@ -62,10 +60,10 @@ feature -- Configure Node Resources Routes
 			create l_bal_handler.make (config)
 			create l_methods
 			l_methods.enable_get
-			router.handle_with_request_methods ("/basic_auth_login", l_bal_handler, l_methods)
+			a_router.handle_with_request_methods ("/basic_auth_login", l_bal_handler, l_methods)
 		end
 
-	configure_api_logoff
+	configure_api_logoff (a_router: WSF_ROUTER)
 		local
 			l_bal_handler: BASIC_AUTH_LOGOFF_HANDLER
 			l_methods: WSF_REQUEST_METHODS
@@ -73,7 +71,7 @@ feature -- Configure Node Resources Routes
 			create l_bal_handler.make (config)
 			create l_methods
 			l_methods.enable_get
-			router.handle_with_request_methods ("/basic_auth_logoff", l_bal_handler, l_methods)
+			a_router.handle_with_request_methods ("/basic_auth_logoff", l_bal_handler, l_methods)
 		end
 
 end

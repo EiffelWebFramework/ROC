@@ -117,24 +117,27 @@ feature -- CMS Initialization
 	initialize_cms (a_setup: CMS_SETUP)
 		local
 			cms: CMS_SERVICE
+			l_modules: CMS_MODULE_COLLECTION
 		do
 			log.write_debug (generator + ".initialize_cms")
-			create cms.make (a_setup)
-			setup_modules (cms)
+
+			create {CMS_DEFAULT_MODULE_COLLECTION} l_modules.make (a_setup)
+			setup_modules (l_modules, a_setup)
+
+			create cms.make (a_setup, l_modules)
 			cms_service := cms
 		end
 
 feature -- CMS setup
 
-	setup_modules (a_service: CMS_SERVICE)
-			-- Setup modules to be added to the CMS ecosystem.
+	setup_modules (a_modules: CMS_MODULE_COLLECTION; a_setup: CMS_SETUP)
+			-- Setup modules to be added to the available modules.
 		local
 			m: CMS_MODULE
 		do
-
-			create {NODE_MODULE} m.make (a_service.setup)
+			create {NODE_MODULE} m.make (a_setup)
 			m.enable
-			a_service.add_module (m)
+			a_modules.extend (m)
 		end
 
 	setup_storage (a_setup: CMS_SETUP)
