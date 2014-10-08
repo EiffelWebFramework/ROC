@@ -117,7 +117,6 @@ feature -- CMS Initialization
 	initialize_cms (a_setup: CMS_SETUP)
 		local
 			cms: CMS_SERVICE
-			l_modules: CMS_MODULE_COLLECTION
 		do
 			log.write_debug (generator + ".initialize_cms")
 
@@ -134,7 +133,7 @@ feature -- CMS setup
 		local
 			m: CMS_MODULE
 		do
-			create {NODE_MODULE} m.make (a_setup)
+			create {BASIC_AUTH_MODULE} m.make (a_setup)
 			m.enable
 			a_setup.modules.extend (m)
 

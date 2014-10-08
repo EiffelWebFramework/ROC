@@ -50,7 +50,6 @@ feature -- Responses
 			-- Handle not authorized.
 		local
 			h: HTTP_HEADER
-			output: STRING
 		do
 			create h.make
 			h.put_content_type_text_html

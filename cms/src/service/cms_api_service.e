@@ -29,8 +29,6 @@ feature -- Initialize
 feature -- Access
 
 	is_valid_credential (l_auth_login, l_auth_password: READABLE_STRING_32): BOOLEAN
-		local
-			l_security: SECURITY_PROVIDER
 		do
 			Result := storage.is_valid_credential (l_auth_login, l_auth_password)
 		end
