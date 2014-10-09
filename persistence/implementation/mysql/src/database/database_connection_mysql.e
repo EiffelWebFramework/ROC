@@ -34,17 +34,11 @@ feature -- Initialization
 				if keep_connection then
 					connect
 				end
-				set_successful
 			else
 				create db_control.make
 			end
 		rescue
-			create db_control.make
-			set_last_error_from_exception ("Connection execution")
-			log.write_critical (generator + ".make_common:" + last_error_message)
-			if is_connected then
-				disconnect
-			end
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
 			l_retried := True
 			retry
 		end
@@ -66,17 +60,11 @@ feature -- Initialization
 				if keep_connection then
 					connect
 				end
-				set_successful
 			else
 				create db_control.make
 			end
 		rescue
-			create db_control.make
-			set_last_error_from_exception ("Connection execution")
-			log.write_critical (generator + ".make_common:" + last_error_message)
-			if is_connected then
-				disconnect
-			end
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
 			l_retried := True
 			retry
 		end
