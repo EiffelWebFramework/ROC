@@ -10,7 +10,7 @@ inherit
 
 	DATABASE_CONFIG
 
-	SHARED_ERROR
+	SHARED_ERROR_HANDLER
 
 feature {NONE} -- Initialization
 
@@ -71,6 +71,65 @@ feature -- Database Setup
 
 	keep_connection: BOOLEAN
 			-- Keep connection alive?
+
+feature -- Transactions
+
+	begin_transaction
+			-- Start a transaction which will be terminated by a call to `rollback' or `commit'.
+		local
+			rescued: BOOLEAN
+		do
+			if not rescued then
+				if db_control.is_ok then
+					db_control.begin
+				else
+					database_error_handler.add_database_error (db_control.error_message_32, db_control.error_code)
+				end
+			end
+		rescue
+			rescued := True
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
+			db_control.reset
+			retry
+		end
+
+	commit
+			-- Commit updates in the database.
+		local
+			rescued: BOOLEAN
+		do
+			if not rescued then
+				if db_control.is_ok then
+					db_control.commit
+				else
+					database_error_handler.add_database_error (db_control.error_message_32, db_control.error_code)
+				end
+			end
+		rescue
+			rescued := True
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
+			db_control.reset
+			retry
+		end
+
+	rollback
+			-- Rollback updates in the database.
+		local
+			rescued: BOOLEAN
+		do
+			if not rescued then
+				if db_control.is_ok then
+					db_control.rollback
+				else
+					database_error_handler.add_database_error (db_control.error_message_32, db_control.error_code)
+				end
+			end
+		rescue
+			rescued := True
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
+			db_control.reset
+			retry
+		end
 
 feature -- Change Element
 

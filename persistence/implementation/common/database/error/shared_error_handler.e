@@ -6,12 +6,24 @@ note
 class
 	SHARED_ERROR_HANDLER
 
+inherit
+
+	SHARED_LOGGER
+
 feature -- Access
 
 	database_error_handler: DATABASE_ERROR_HANDLER
-			-- Error handler
+			-- Error handler.
 		once
 			create Result.make
+		end
+
+feature -- Status Report
+
+	has_error: BOOLEAN
+			-- Has error?
+		do
+			Result := database_error_handler.has_error
 		end
 
 feature -- Helper

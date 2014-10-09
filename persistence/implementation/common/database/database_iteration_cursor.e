@@ -1,5 +1,5 @@
 note
-	description: "External iteration cursor for {ESA_DATABASE_HANDLER}"
+	description: "External iteration cursor for {DATABASE_HANDLER}"
 	date: "$Date: 2014-08-20 15:21:15 -0300 (mi., 20 ago. 2014) $"
 	revision: "$Revision: 95678 $"
 

@@ -21,6 +21,7 @@ feature {NONE} -- Initialization
 		require
 			is_connected: a_connection.is_connected
 		do
+			connection := a_connection
 			log.write_information (generator+".make_with_database is database connected?  "+ a_connection.is_connected.out )
 			create node_provider.make (a_connection)
 			create user_provider.make (a_connection)
@@ -125,11 +126,14 @@ feature -- Change: user
 	save_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.
 		do
+
 			if
 				attached a_user.password as l_password and then
 				attached a_user.email as l_email
 			then
+				connection.begin_transaction
 				user_provider.new_user (a_user.name, l_password, l_email)
+				connection.commit
 			else
 				set_last_error ("User or Password not attached", generator + ".save_user")
 			end
@@ -282,4 +286,6 @@ feature {NONE} -- Post process
 	user_provider: USER_DATA_PROVIDER
 			-- User Data provider.
 
+	connection: DATABASE_CONNECTION
+			-- Current database connection.
 end

@@ -24,6 +24,7 @@ feature
 		do
 			create l_parameters.make (0)
 
+			a_connection.begin_transaction
 
 				-- Clean Profiles
 			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Sql_delete_user_profiles, l_parameters))
@@ -72,6 +73,7 @@ feature
 			db_handler(a_connection).set_query (create {DATABASE_QUERY}.data_reader (Rest_profiles_autoincrement, l_parameters))
 			db_handler(a_connection).execute_change
 
+			a_connection.commit
 		end
 
 

@@ -32,6 +32,12 @@ feature -- Access
 		deferred
 		end
 
+
+feature -- Status Report
+
+	error_handler: ERROR_HANDLER
+		-- Error handler.			
+
 feature -- Access: Site
 
 	site_id: READABLE_STRING_8

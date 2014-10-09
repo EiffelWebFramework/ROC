@@ -165,8 +165,14 @@ feature -- Filters
 		do
 			log.write_debug (generator + ".create_filter")
 			l_filter := Void
+
 				-- Maintenance
 			create {WSF_MAINTENANCE_FILTER} f
+			f.set_next (l_filter)
+			l_filter := f
+
+			 	-- Error Filter
+			create {CMS_ERROR_FILTER} f.make (setup)
 			f.set_next (l_filter)
 			l_filter := f
 
