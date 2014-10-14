@@ -137,6 +137,11 @@ feature -- CMS setup
 			create {NODE_MODULE} m.make (a_setup)
 			m.enable
 			a_setup.modules.extend (m)
+
+			create {CMS_DEMO_MODULE} m.make (a_setup)
+			m.enable
+			a_setup.modules.extend (m)
+
 		end
 
 	setup_storage (a_setup: CMS_SETUP)

@@ -10,8 +10,9 @@
 			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
 		</option>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
-		<library name="cms" location="..\..\cms\cms.ecf" readonly="false"/>
-		<library name="layout" location="..\..\layout\layout.ecf" readonly="false"/>
+		<library name="cms" location="..\..\cms\cms-safe.ecf" readonly="false"/>
+		<library name="cms_demo_module" location="modules\demo\cms_demo_module-safe.ecf" readonly="false"/>
+		<library name="layout" location="..\..\layout\layout-safe.ecf" readonly="false"/>
 		<library name="wsf" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf-safe.ecf"/>
 		<library name="wsf_extension" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf_extension-safe.ecf" readonly="false"/>
 	</target>
