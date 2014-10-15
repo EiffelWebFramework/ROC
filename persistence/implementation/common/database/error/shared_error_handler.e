@@ -31,7 +31,7 @@ feature -- Helper
 	exception_as_error (a_e: like {EXCEPTION_MANAGER}.last_exception)
 			-- Record exception as an error.
 		do
-			if attached a_e as l_e and then attached l_e.exception_trace as l_trace then
+			if attached a_e as l_e and then attached l_e.trace as l_trace then
 				database_error_handler.add_error_details (l_e.code, once "Exception", l_trace.as_string_32)
 			end
 		end
