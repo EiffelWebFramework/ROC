@@ -8,7 +8,7 @@ deferred class
 
 inherit
 
-	SHARED_ERROR_HANDLER
+	SHARED_LOGGER
 
 feature -- Access
 
@@ -178,6 +178,7 @@ feature -- Error handling
 			if attached db_change as l_change and then not l_change.is_ok then
 				database_error_handler.add_database_error (l_change.error_message_32, l_change.error_code)
 				log.write_error (generator + ".check_database_change_error: " + l_change.error_message_32)
+				l_change.reset
 			end
 		end
 
@@ -187,10 +188,34 @@ feature -- Error handling
 			if attached db_selection as l_selection and then not l_selection.is_ok then
 				database_error_handler.add_database_error (l_selection.error_message_32, l_selection.error_code)
 				log.write_error (generator + ".check_database_selection_error: " + l_selection.error_message_32)
+				l_selection.reset
 			end
 		end
 
-feature {NODE_DATA_PROVIDER}-- Implementation
+feature -- Error Handling
+
+	database_error_handler: DATABASE_ERROR_HANDLER
+			-- Error handler.
+
+feature -- Status Report
+
+	has_error: BOOLEAN
+			-- Has error?
+		do
+			Result := database_error_handler.has_error
+		end
+
+feature -- Helper
+
+	exception_as_error (a_e: like {EXCEPTION_MANAGER}.last_exception)
+			-- Record exception as an error.
+		do
+			if attached a_e as l_e and then attached l_e.trace as l_trace then
+				database_error_handler.add_error_details (l_e.code, once "Exception", l_trace.as_string_32)
+			end
+		end
+
+feature -- Connection Handling
 
 	connect
 			-- Connect to the database.

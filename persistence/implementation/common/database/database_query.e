@@ -8,9 +8,9 @@ class
 
 inherit
 
-	SHARED_ERROR_HANDLER
-
 	REFACTORING_HELPER
+
+	SHARED_LOGGER
 
 create
 	data_reader

@@ -10,8 +10,6 @@ inherit
 
 	DATABASE_CONFIG
 
-	SHARED_ERROR_HANDLER
-
 feature {NONE} -- Initialization
 
 	make_common
@@ -131,142 +129,6 @@ feature -- Transactions
 			retry
 		end
 
-
-feature --
-
-	is_connected_to_storage: BOOLEAN
-			-- Is connected to the database
-		do
-			Result := db_control.is_connected
-		end
-
-feature -- Transaction Status
-
-	in_transaction_session: BOOLEAN
-			-- Is session started?
-
-	transaction_session_depth: INTEGER
-			-- Depth in the transaction session
-
-feature -- Transaction Operation
-
-	begin_transaction2
-			-- Start session
-			-- if already started, increase the `transaction_session_depth'
-		require
-			in_transaction_session implies transaction_session_depth > 0
-			not in_transaction_session implies transaction_session_depth = 0
-		local
-			l_session_control: like db_control
-			l_retried: INTEGER
-		do
-			if l_retried = 0 then
-				if not in_transaction_session then
-					database_error_handler.reset
-
-					check transaction_session_depth = 0 end
-
-					debug ("database_session")
-						print ("..Start session%N")
-					end
-					connect -- connect the DB
-					if is_connected_to_storage then
-						in_transaction_session := True
-						db_control.begin -- start transaction
-					else
-						l_session_control := db_control
-						if not l_session_control.is_ok then
-							database_error_handler.add_database_error (l_session_control.error_message_32, l_session_control.error_code)
-						else
-							database_error_handler.add_database_error ("Session_not_started_error_message", 0)
-						end
-						l_session_control.reset
-					end
-				end
-				transaction_session_depth := transaction_session_depth + 1
-			else
-				if l_retried = 1 then
-					transaction_session_depth := transaction_session_depth + 1
-					if attached (create {EXCEPTION_MANAGER}).last_exception as e then
-						if attached {ASSERTION_VIOLATION} e then
-							--| Ignore for now with MYSQL ...
-						else
-							exception_as_error (e)
-						end
-					end
-
-					in_transaction_session := False
-					db_control.reset
-				else
-					in_transaction_session := False
-				end
-			end
-		ensure
-			transaction_session_depth = (old transaction_session_depth) + 1
-		rescue
-			l_retried := l_retried + 1
-			retry
-		end
-
-	commit2
-			-- End session
-		local
-			l_retried: BOOLEAN
-		do
-			if not l_retried then
-				transaction_session_depth := transaction_session_depth - 1
-				if transaction_session_depth = 0 then
-					debug ("database_session")
-						print ("..End session%N")
-					end
-					if is_connected_to_storage then
-						if not database_error_handler.has_error then
-							db_control.commit -- Commit transaction
-						else
-							db_control.rollback  -- Rollback transaction
-						end
-					end
-					in_transaction_session := False
-				end
-			else
-				exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
-				in_transaction_session := False
-				transaction_session_depth := transaction_session_depth - 1
-				db_control.reset
-			end
-		rescue
-			l_retried := True
-			retry
-		end
-
-
-
-	rollback2
-			-- End session
-		local
-			l_retried: BOOLEAN
-		do
-			if not l_retried then
-				transaction_session_depth := transaction_session_depth - 1
-				if transaction_session_depth = 0 then
-					debug ("database_session")
-						print ("..End session%N")
-					end
-					if is_connected_to_storage then
-						db_control.rollback  -- Rollback transaction
-					end
-					in_transaction_session := False
-				end
-			else
-				exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
-				in_transaction_session := False
-				transaction_session_depth := transaction_session_depth - 1
-				db_control.reset
-			end
-		rescue
-			l_retried := True
-			retry
-		end
 feature -- Change Element
 
 	not_keep_connection
@@ -301,5 +163,29 @@ feature -- Conection
 		do
 			Result := db_control.is_connected
 		end
+
+feature -- Error Handling
+
+	database_error_handler: DATABASE_ERROR_HANDLER
+			-- Error handler.
+	
+feature -- Status Report
+
+	has_error: BOOLEAN
+			-- Has error?
+		do
+			Result := database_error_handler.has_error
+		end
+
+feature -- Helper
+
+	exception_as_error (a_e: like {EXCEPTION_MANAGER}.last_exception)
+			-- Record exception as an error.
+		do
+			if attached a_e as l_e and then attached l_e.trace as l_trace then
+				database_error_handler.add_error_details (l_e.code, once "Exception", l_trace.as_string_32)
+			end
+		end
+
 
 end

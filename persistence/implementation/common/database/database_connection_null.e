@@ -22,6 +22,7 @@ feature -- Initialization
 	make_common
 			-- Create a database handler for ODBC with common settings.
 		do
+			create database_error_handler.make
 			create db_application.login (username, password)
 			db_application.set_hostname (hostname)
 			db_application.set_data_source (database_name)

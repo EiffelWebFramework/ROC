@@ -21,9 +21,11 @@ feature {NONE} -- Initialization
 		do
 			connection := a_connection
 			create last_query.make_now
+			create database_error_handler.make
 		ensure
 			connection_not_void: connection /= Void
 			last_query_not_void: last_query /= Void
+			database_error_handler_set: attached database_error_handler
 		end
 
 feature -- Functionality
@@ -35,6 +37,7 @@ feature -- Functionality
 			l_retried: BOOLEAN
 		do
 			if not l_retried then
+				database_error_handler.reset
 				if attached store as l_store then
 					create l_db_selection.make
 					db_selection := l_db_selection
@@ -59,7 +62,7 @@ feature -- Functionality
 			l_retried : BOOLEAN
 		do
 		    if not  l_retried then
-
+				database_error_handler.reset
 				if attached store as l_store then
 					create l_db_change.make
 					db_change := l_db_change
@@ -86,6 +89,7 @@ feature -- SQL Queries
 			l_retried: BOOLEAN
 		do
 			if not l_retried then
+				database_error_handler.reset
 				if attached query as l_query then
 					create l_db_selection.make
 					db_selection := l_db_selection
@@ -110,6 +114,7 @@ feature -- SQL Queries
 			l_retried : BOOLEAN
 		do
 		    if not  l_retried then
+				database_error_handler.reset
 				if attached query as l_query then
 					create l_db_change.make
 					db_change := l_db_change

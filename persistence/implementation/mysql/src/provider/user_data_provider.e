@@ -10,9 +10,9 @@ inherit
 
 	PARAMETER_NAME_HELPER
 
-	SHARED_ERROR
-
 	REFACTORING_HELPER
+
+	SHARED_LOGGER
 
 create
 	make
@@ -23,17 +23,24 @@ feature -- Initialization
 			-- Create a data provider.
 		do
 			create {DATABASE_HANDLER_IMPL} db_handler.make (a_connection)
+			create error_handler.make
 			post_execution
 		end
 
 	db_handler: DATABASE_HANDLER
 			-- Db handler.
 
+feature -- Error Handler
+
+	error_handler: ERROR_HANDLER
+
+
 feature -- Status Report
 
 	is_successful: BOOLEAN
 			-- Is the last execution sucessful?
 		do
+			Result := not error_handler.has_error
 		end
 
 	has_user: BOOLEAN
@@ -51,6 +58,7 @@ feature -- Basic Operations
 			l_password_salt, l_password_hash: STRING
 			l_security: SECURITY_PROVIDER
 		do
+			error_handler.reset
 			create l_security
 			l_password_salt := l_security.salt
 			l_password_hash := l_security.password_hash (a_password, l_password_salt)
@@ -71,6 +79,7 @@ feature -- Basic Operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".user")
 			create l_parameters.make (1)
 			l_parameters.put (a_id,"id")
@@ -87,6 +96,7 @@ feature -- Basic Operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".user_by_name")
 			create l_parameters.make (1)
 			l_parameters.put (a_name,"name")
@@ -104,6 +114,7 @@ feature -- Basic Operations
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".user_by_email")
 			create l_parameters.make (1)
 			l_parameters.put (a_email,"email")
@@ -120,6 +131,7 @@ feature -- Basic Operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".user_salt")
 			create l_parameters.make (1)
 			l_parameters.put (a_username,"name")
@@ -138,6 +150,7 @@ feature -- Basic Operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".count")
 			create l_parameters.make (0)
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_count, l_parameters))
@@ -155,6 +168,7 @@ feature -- Basic operations: User Roles
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".add_role")
 			create l_parameters.make (2)
 			l_parameters.put (a_user_id,"users_id")
@@ -169,6 +183,7 @@ feature -- Basic operations: User Roles
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".user_roles")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "user_id")
@@ -186,6 +201,7 @@ feature -- Basic operations: User Profiles
 		local
 				l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".save_profile_item")
 			create l_parameters.make (3)
 			l_parameters.put (a_key, "key")
@@ -201,6 +217,7 @@ feature -- Basic operations: User Profiles
 		local
 			l_cursor: TABLE_ITERATION_CURSOR [READABLE_STRING_8, READABLE_STRING_8]
 		do
+			error_handler.reset
 			log.write_information (generator + ".save_profile")
 			from
 				l_cursor := a_user_profile.new_cursor
@@ -219,6 +236,7 @@ feature -- Basic operations: User Profiles
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".user_profile")
 			create l_parameters.make (1)
 			l_parameters.put (a_user_id, "users_id")
@@ -310,6 +328,10 @@ feature {NONE} -- Implementation
 	post_execution
 			-- Post database execution.
 		do
+			error_handler.add_synchronization (db_handler.database_error_handler)
+			if error_handler.has_error then
+				log.write_critical (generator + ".post_execution " +  error_handler.as_string_representation)
+			end
 		end
 
 end
