@@ -69,7 +69,7 @@ feature -- HTTP Methods
 				-- Existing node
 			if attached {WSF_STRING} req.path_parameter ("id") as l_id then
 				if l_id.is_integer and then attached {CMS_NODE} api_service.node (l_id.integer_value) as l_node then
-					create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup,"modules/node")
+					create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup)
 					l_page.add_variable (l_node, "node")
 					l_page.execute
 				else
@@ -96,7 +96,7 @@ feature -- HTTP Methods
 							elseif l_method.is_case_insensitive_equal ("PUT") then
 								do_put (req, res)
 							else
-								(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
+								(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup)).execute
 							end
 						end
 					else
@@ -131,7 +131,7 @@ feature -- HTTP Methods
 						do_error (req, res, l_id)
 					end
 				else
-					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup)).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -151,7 +151,7 @@ feature -- HTTP Methods
 						do_error (req, res, l_id)
 					end
 				else
-					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup)).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -165,7 +165,7 @@ feature -- Error
 		local
 			l_page: CMS_RESPONSE
 		do
-			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "master2/error")
+			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup)
 			l_page.add_variable (req.absolute_script_url (req.path_info), "request")
 			if a_id.is_integer then
 					-- resource not found
@@ -186,7 +186,7 @@ feature {NONE} -- Node
 			l_page: CMS_RESPONSE
 		do
 			if attached current_user_name (req) then
-				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "modules/node")
+				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup)
 				l_page.add_variable (setup.is_html, "html")
 				l_page.add_variable (setup.is_web, "web")
 				l_page.execute

@@ -90,4 +90,11 @@ feature -- Mapping helper: uri template agent
 			map_uri_template_with_request_methods (a_router, a_tpl, create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (proc), rqst_methods)
 		end
 
+
+feature -- Hooks
+
+	register_hooks (a_response: CMS_RESPONSE)
+		do
+		end
+
 end

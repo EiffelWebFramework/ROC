@@ -74,4 +74,11 @@ feature {NONE} -- Implementation: routes
 			a_router.handle_with_request_methods ("/basic_auth_logoff", l_bal_handler, l_methods)
 		end
 
+
+feature -- Hooks
+
+	register_hooks (a_response: CMS_RESPONSE)
+		do
+		end
+
 end

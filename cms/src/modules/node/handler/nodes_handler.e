@@ -52,7 +52,7 @@ feature -- HTTP Methods
 				-- At the moment the template is hardcoded, but we can
 				-- get them from the configuration file and load them into
 				-- the setup class.
-			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup, "modules/nodes")
+			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup)
 			l_page.add_variable (api_service.nodes, "nodes")
 			l_page.execute
 		end

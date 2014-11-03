@@ -29,13 +29,22 @@ feature -- status report
 		end
 
 	is_expanded: BOOLEAN
+			-- Is expanded and visually expanded?
 		deferred
+		end
+
+	is_collapsed: BOOLEAN
+			-- Is expanded, but visually collapsed?
+		deferred
+		ensure
+			Result implies is_expandable
 		end
 
 	is_expandable: BOOLEAN
+			-- Is expandable?	
 		deferred
 		end
-
+		
 	has_children: BOOLEAN
 		deferred
 		end

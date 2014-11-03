@@ -10,6 +10,11 @@ inherit
 
 	CMS_MODULE
 
+	CMS_HOOK_MENU_ALTER
+
+	CMS_HOOK_BLOCK
+
+
 create
 	make
 
@@ -113,6 +118,42 @@ feature {NONE} -- Implementation: routes
 			l_methods.enable_post
 			l_methods.enable_put
 			a_router.handle_with_request_methods ("/node/{id}/content", l_report_handler, l_methods)
+		end
+
+
+feature -- Hooks
+
+	register_hooks (a_response: CMS_RESPONSE)
+		do
+			a_response.add_menu_alter_hook (Current)
+			a_response.add_block_hook (Current)
+		end
+
+	block_list: ITERABLE [like {CMS_BLOCK}.name]
+		do
+			Result := <<"node-info">>
+		end
+
+	get_block_view (a_block_id: detachable READABLE_STRING_8; a_response: CMS_RESPONSE)
+--		local
+--			b: CMS_CONTENT_BLOCK
+		do
+--			if
+--				a_execution.is_front and then
+--				attached a_execution.user as u
+--			then
+--				create b.make ("node-info", "Node", "Node ...", a_execution.formats.plain_text)
+--				a_execution.add_block (b, Void)
+--			end
+		end
+
+	menu_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
+		local
+			lnk: CMS_LOCAL_LINK
+			perms: detachable ARRAYED_LIST [READABLE_STRING_8]
+		do
+			create lnk.make ("node", "/node")
+			a_menu_system.navigation_menu.extend (lnk)
 		end
 
 end

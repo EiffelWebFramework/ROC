@@ -24,8 +24,17 @@ feature -- Access
 	page_template: CMS_TEMPLATE
 		deferred
 		end
-
 feature -- Conversion
+
+	menu_html (a_menu: CMS_MENU; is_horizontal: BOOLEAN): STRING_8
+			-- Render Menu as HTML.
+			-- A theme will define a menu.tpl
+		deferred
+		end
+
+	block_html (a_block: CMS_BLOCK): STRING_8
+		deferred
+		end
 
 	page_html (page: CMS_HTML_PAGE): STRING_8
 			-- Render `page' as html.
@@ -34,6 +43,67 @@ feature -- Conversion
 
 feature {NONE} -- Implementation
 
+	append_cms_link_to (lnk: CMS_LINK; s: STRING_8)
+		local
+			cl: STRING
+		do
+			create cl.make_empty
+			if lnk.is_active then
+				cl.append ("active ")
+			end
+			if lnk.is_expandable then
+				cl.append ("expandable ")
+			end
+			if lnk.is_expanded then
+				cl.append ("expanded ")
+			end
+			if cl.is_empty then
+				s.append ("<li>")
+			else
+				s.append ("<li class=%""+ cl + "%">")
+			end
+--			s.append ("<a href=%"" + url (lnk.location, lnk.options) + "%">" + html_encoded (lnk.title) + "</a>")
+			if
+--				(lnk.is_expanded or lnk.is_collapsed) and then
+				attached lnk.children as l_children
+			then
+				s.append ("<ul>%N")
+				across
+					l_children as c
+				loop
+					append_cms_link_to (c.item, s)
+				end
+				s.append ("</ul>")
+			end
+			s.append ("</li>")
+		end
+
+
+feature -- Encoders
+
+	url_encoded (s: detachable READABLE_STRING_GENERAL): STRING_8
+		local
+			enc: URL_ENCODER
+		do
+			create enc
+			if s /= Void then
+				Result := enc.general_encoded_string (s)
+			else
+				create Result.make_empty
+			end
+		end
+
+	html_encoded (s: detachable READABLE_STRING_GENERAL): STRING_8
+		local
+			enc: HTML_ENCODER
+		do
+			create enc
+			if s /= Void then
+				Result := enc.general_encoded_string (s)
+			else
+				create Result.make_empty
+			end
+		end
 
 note
 	copyright: "2011-2014, Jocelyn Fiat, Eiffel Software and others"

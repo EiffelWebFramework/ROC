@@ -27,6 +27,17 @@ feature -- Router
 		deferred
 		end
 
+
+
+feature -- Hooks configuration
+
+	register_hooks (a_response: CMS_RESPONSE)
+			-- Module hooks configuration.
+		require
+			is_enabled: is_enabled
+		deferred
+		end
+
 feature -- Filter
 
 	filters: detachable LIST [WSF_FILTER]

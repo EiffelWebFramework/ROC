@@ -25,7 +25,7 @@ feature -- Basic operations
 				execute_next (req, res)
 			else
 				log.write_critical (generator + ".execute" + setup.error_handler.as_string_representation )
-				(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup, "master2/error")).execute
+				(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup)).execute
 				setup.error_handler.reset
 			end
 		end

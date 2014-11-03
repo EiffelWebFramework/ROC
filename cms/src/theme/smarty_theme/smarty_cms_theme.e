@@ -10,16 +10,17 @@ class
 inherit
 	CMS_THEME
 
+	REFACTORING_HELPER
+
 create
 	make
 
 feature {NONE} -- Initialization
 
-	make (a_setup: like setup; a_info: like information; a_template: like template)
+	make (a_setup: like setup; a_info: like information;)
 		do
 			setup := a_setup
 			information := a_info
-			template := a_template
 			if attached a_info.item ("template_dir") as s then
 				templates_directory := a_setup.theme_location.extended (s)
 			else
@@ -28,14 +29,11 @@ feature {NONE} -- Initialization
 		ensure
 			setup_set: setup = a_setup
 			information_set: information = a_info
-			template_set: template = a_template
 		end
 
 feature -- Access
 
 	name: STRING = "smarty-CMS"
-
-	template: STRING;
 
 	templates_directory: PATH
 
@@ -59,7 +57,7 @@ feature -- Access
 						i := i + 1
 					end
 				else
-					l_regions := <<"header", "content", "footer", "first_sidebar", "second_sidebar">>
+					l_regions := <<"top","header", "content", "footer", "first_sidebar", "second_sidebar","bottom">>
 				end
 				internaL_regions := l_regions
 			end
@@ -72,13 +70,28 @@ feature -- Access
 		do
 			tpl := internal_page_template
 			if tpl = Void then
-				create tpl.make (template, Current)
+				create tpl.make ("page", Current)
 				internal_page_template := tpl
 			end
 			Result := tpl
 		end
 
 feature -- Conversion
+
+	menu_html (a_menu: CMS_MENU; is_horizontal: BOOLEAN): STRING_8
+			-- Render Menu as HTML.
+			-- A theme will define a menu.tpl
+		do
+		    to_implement ("Add implementation")
+			Result := "to be implemented"
+		end
+
+
+	block_html (a_block: CMS_BLOCK): STRING_8
+		do
+			to_implement ("Add implementation")
+			Result := "to be implemented"
+		end
 
 	prepare (page: CMS_HTML_PAGE)
 		do
