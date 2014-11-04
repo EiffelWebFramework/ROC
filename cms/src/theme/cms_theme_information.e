@@ -18,7 +18,7 @@ feature {NONE} -- Initialization
 			create items.make_caseless (1)
 			create regions.make (5)
 			across
-				(<<"header", "content", "footer", "first_sidebar", "second_sidebar">>) as ic
+				(<<"top","header", "highlighted","help", "content", "footer", "first_sidebar", "second_sidebar", "bottom">>) as ic
 			loop
 				regions.force (ic.item, ic.item)
 			end

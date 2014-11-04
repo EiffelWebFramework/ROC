@@ -13,7 +13,7 @@
 </head>
 <body>
 <head>
-<title>{$title/}</title>
+<title>{$page_title/}</title>
 </head>
 <body>
   <!-- Page Top -->

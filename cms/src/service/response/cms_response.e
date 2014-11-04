@@ -143,7 +143,7 @@ feature -- Blocks initialization
 
 				-- FIXME: let the user choose ...
 			create l_table.make_caseless (10)
-			l_table["page_top"] := "top"
+			l_table["top"] := "top"
 			l_table["header"] := "header"
 			l_table["highlighted"] := "highlighted"
 			l_table["help"] := "help"
@@ -152,7 +152,7 @@ feature -- Blocks initialization
 			l_table["management"] := "first_sidebar"
 			l_table["navigation"] := "first_sidebar"
 			l_table["user"] := "first_sidebar"
-			l_table["page_bottom"] := "page_bottom"
+			l_table["bottom"] := "page_bottom"
 			block_region_settings := l_table
 		end
 
@@ -275,13 +275,13 @@ feature -- Blocks
 		local
 			s: STRING
 		do
-			fixme ("Avoid Hardcoded HTML")
+			fixme ("Avoid Hardcoded HTML!!!")
 			--	create s.make_from_string ("<a href=%""+ url ("/", Void) +"%"><img id=%"logo%" src=%"" + logo_location + "%"/></a><div id=%"title%">" + html_encoded (site_name) + "</div>")
 			create s.make_empty
 			s.append ("<div id=%"menu-bar%">")
 			s.append (theme.menu_html (main_menu, True))
 			s.append ("</div>")
-			create Result.make ("top_header", Void, s, formats.full_html)
+			create Result.make ("header", Void, s, formats.full_html)
 			Result.set_is_raw (True)
 		end
 

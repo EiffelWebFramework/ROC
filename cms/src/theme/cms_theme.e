@@ -1,11 +1,15 @@
 note
 	description: "Summary description for {WSF_CMS_THEME}."
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 deferred class
 	CMS_THEME
+
+inherit
+
+	REFACTORING_HELPER
+
 
 feature {NONE} -- Access
 
@@ -14,16 +18,20 @@ feature {NONE} -- Access
 feature -- Access
 
 	name: STRING
+			-- theme name.
 		deferred
 		end
 
 	regions: ARRAY [STRING]
+			-- theme's regions.
 		deferred
 		end
 
 	page_template: CMS_TEMPLATE
+			-- theme template page.
 		deferred
 		end
+
 feature -- Conversion
 
 	menu_html (a_menu: CMS_MENU; is_horizontal: BOOLEAN): STRING_8
@@ -33,6 +41,7 @@ feature -- Conversion
 		end
 
 	block_html (a_block: CMS_BLOCK): STRING_8
+			-- Render a block as HTML.
 		deferred
 		end
 
@@ -47,6 +56,7 @@ feature {NONE} -- Implementation
 		local
 			cl: STRING
 		do
+			fixme ("Remove HTML from Eiffel")
 			create cl.make_empty
 			if lnk.is_active then
 				cl.append ("active ")

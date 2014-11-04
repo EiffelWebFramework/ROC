@@ -1,7 +1,8 @@
 note
 	description: "Summary description for {CMS_HTML_PAGE}."
-	date: "$Date$"
-	revision: "$Revision$"
+	author: ""
+	date: "$Date: 2014-11-04 09:57:24 -0300 (ma. 04 de nov. de 2014) $"
+	revision: "$Revision: 96034 $"
 
 class
 	CMS_HTML_PAGE
@@ -23,6 +24,7 @@ feature {NONE} -- Initialization
 		do
 			create regions.make (5)
 			language := "en"
+
 			status_code := {HTTP_STATUS_CODE}.ok
 			create header.make
 			create {ARRAYED_LIST [STRING]} head_lines.make (5)
@@ -65,7 +67,7 @@ feature -- Header
 
 feature -- Region
 
-	regions: HASH_TABLE [STRING_8, STRING_8]
+	regions: STRING_TABLE [STRING_8]
 			-- header
 			-- content
 			-- footer
@@ -81,21 +83,6 @@ feature -- Region
 					Result := "{{" + n + "}}"
 				end
 			end
-		end
-
-	header_region: STRING_8
-		do
-			Result := region ("header")
-		end
-
-	content_region: STRING_8
-		do
-			Result := region ("content")
-		end
-
-	footer_region: STRING_8
-		do
-			Result := region ("content")
 		end
 
 feature -- Element change
@@ -118,39 +105,9 @@ feature -- Element change
 			end
 		end
 
-	add_to_header_region (s: STRING)
-		do
-			add_to_region (s, "header")
-		end
-
-	add_to_content_region (s: STRING)
-		do
-			add_to_region (s, "content")
-		end
-
-	add_to_footer_region (s: STRING)
-		do
-			add_to_region (s, "footer")
-		end
-
 	set_region (s: STRING; k: STRING)
 		do
 			regions.force (s, k)
-		end
-
-	set_header_region (s: STRING)
-		do
-			set_region (s, "header")
-		end
-
-	set_content_region (s: STRING)
-		do
-			set_region (s, "content")
-		end
-
-	set_footer_region (s: STRING)
-		do
-			set_region (s, "footer")
 		end
 
 feature -- Element change
@@ -168,6 +125,50 @@ feature -- Element change
 	set_title (s: like title)
 		do
 			title := s
+		end
+
+	add_meta_name_content (a_name: STRING; a_content: STRING)
+		local
+			s: STRING_8
+		do
+			s := "<meta name=%"" + a_name + "%" content=%"" + a_content + "%" />"
+			head_lines.extend (s)
+		end
+
+	add_meta_http_equiv (a_http_equiv: STRING; a_content: STRING)
+		local
+			s: STRING_8
+		do
+			s := "<meta http-equiv=%"" + a_http_equiv + "%" content=%"" + a_content + "%" />"
+			head_lines.extend (s)
+		end
+
+	add_style (a_href: STRING; a_media: detachable STRING)
+		local
+			s: STRING_8
+		do
+			s := "<link rel=%"stylesheet%" href=%""+ a_href + "%" type=%"text/css%""
+			if a_media /= Void then
+				s.append (" media=%""+ a_media + "%"")
+			end
+			s.append ("/>")
+			head_lines.extend (s)
+		end
+
+	add_javascript_url (a_src: STRING)
+		local
+			s: STRING_8
+		do
+			s := "<script type=%"text/javascript%" src=%"" + a_src + "%"></script>"
+			head_lines.extend (s)
+		end
+
+	add_javascript_content (a_script: STRING)
+		local
+			s: STRING_8
+		do
+			s := "<script type=%"text/javascript%">%N" + a_script + "%N</script>"
+			head_lines.extend (s)
 		end
 
 note

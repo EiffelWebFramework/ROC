@@ -55,7 +55,7 @@ feature -- Access
 			across
 				theme.regions as r
 			loop
-				variables.force (page.region (r.item), r.item)
+				variables.force (page.region (r.item), "region_" + r.item)
 			end
 		end
 

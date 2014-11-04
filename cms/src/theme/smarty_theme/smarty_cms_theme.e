@@ -10,8 +10,6 @@ class
 inherit
 	CMS_THEME
 
-	REFACTORING_HELPER
-
 create
 	make
 
@@ -82,15 +80,43 @@ feature -- Conversion
 			-- Render Menu as HTML.
 			-- A theme will define a menu.tpl
 		do
-		    to_implement ("Add implementation")
-			Result := "to be implemented"
+			create Result.make_from_string ("<div id=%""+ a_menu.name +"%" class=%"menu%">")
+			if is_horizontal then
+				Result.append ("<ul class=%"horizontal%" >%N")
+			else
+				Result.append ("<ul class=%"vertical%" >%N")
+			end
+			across
+				a_menu as c
+			loop
+				append_cms_link_to (c.item, Result)
+			end
+			Result.append ("</ul>%N")
+			Result.append ("</div>")
 		end
 
 
 	block_html (a_block: CMS_BLOCK): STRING_8
+		local
+			s: STRING
 		do
-			to_implement ("Add implementation")
-			Result := "to be implemented"
+			if attached {CMS_CONTENT_BLOCK} a_block as l_content_block and then l_content_block.is_raw then
+				create s.make_empty
+				if attached l_content_block.title as l_title then
+					s.append ("<div class=%"title%">" + html_encoded (l_title) + "</div>")
+				end
+				s.append (l_content_block.to_html (Current))
+			else
+				create s.make_from_string ("<div class=%"block%" id=%"" + a_block.name + "%">")
+				if attached a_block.title as l_title then
+					s.append ("<div class=%"title%">" + html_encoded (l_title) + "</div>")
+				end
+				s.append ("<div class=%"inside%">")
+				s.append (a_block.to_html (Current))
+				s.append ("</div>")
+				s.append ("</div>")
+			end
+			Result := s
 		end
 
 	prepare (page: CMS_HTML_PAGE)

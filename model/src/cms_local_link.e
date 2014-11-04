@@ -98,7 +98,6 @@ feature -- Element change
 			children := lst
 		end
 
-
 	set_expanded (b: like is_expanded)
 		do
 			if b then
@@ -120,7 +119,6 @@ feature -- Element change
 		do
 			internal_is_expandable := b
 		end
-
 
 	set_permission_arguments (args: like permission_arguments)
 		do
