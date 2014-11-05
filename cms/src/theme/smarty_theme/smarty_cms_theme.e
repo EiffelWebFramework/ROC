@@ -79,20 +79,21 @@ feature -- Conversion
 	menu_html (a_menu: CMS_MENU; is_horizontal: BOOLEAN): STRING_8
 			-- Render Menu as HTML.
 			-- A theme will define a menu.tpl
+		local
+			tpl: SMARTY_CMS_PAGE_TEMPLATE
+			l_page: CMS_HTML_PAGE
 		do
-			create Result.make_from_string ("<div id=%""+ a_menu.name +"%" class=%"menu%">")
-			if is_horizontal then
-				Result.append ("<ul class=%"horizontal%" >%N")
-			else
-				Result.append ("<ul class=%"vertical%" >%N")
-			end
-			across
-				a_menu as c
-			loop
-				append_cms_link_to (c.item, Result)
-			end
-			Result.append ("</ul>%N")
-			Result.append ("</div>")
+			to_implement ("Proof of concept to load a Menu from a tpl/menu.tpl.")
+			to_implement ("In this case the template only take care of links.")
+			to_implement ("Maybe we need a SMARTY_CMS_REGION_TEMPLATE")
+			to_implement ("Provide a default Menu using HTML hardcoded, maybe using the Default or providing a default implementation in CMS_THEME.menu_html")
+				-- Use the similar pattern to SMARTY_CMS_PAGE_TEMPLATE, with a different prepare
+				-- feature.
+			create tpl.make ("tpl/menu", Current)
+			create l_page.make
+			l_page.register_variable (a_menu, "menu")
+			tpl.prepare (l_page)
+			Result := tpl.to_html (l_page)
 		end
 
 

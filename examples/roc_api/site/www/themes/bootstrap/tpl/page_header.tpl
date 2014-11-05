@@ -1,4 +1,4 @@
-	<h1>ROC Layout with Default Regions</h1>
+  	<h1>{$page_title/}</h1>
     <div class='navbar navbar-inverse'>
       <div class='navbar-inner nav-collapse' style="height: auto;">
         <ul class="nav">

@@ -23,8 +23,8 @@
   <div class='container-fluid'>
     
     <!-- Page Header -->
-    {$region_header/}
-
+      {$region_header/}
+    
     <!-- General Page Content -->
     <div id='content' class='row-fluid'>
     

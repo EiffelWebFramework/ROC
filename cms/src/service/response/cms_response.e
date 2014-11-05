@@ -7,6 +7,7 @@ deferred class
 	CMS_RESPONSE
 
 inherit
+	CMS_ENCODERS
 
 	CMS_REQUEST_UTIL
 
@@ -139,9 +140,10 @@ feature -- Blocks initialization
 		local
 			l_table: like block_region_settings
 		do
+			fixme ("CHECK:Can we use the same structure as in theme.info?")
 			create regions.make_caseless (5)
 
-				-- FIXME: let the user choose ...
+			fixme ("let the user choose ...")
 			create l_table.make_caseless (10)
 			l_table["top"] := "top"
 			l_table["header"] := "header"
@@ -202,7 +204,7 @@ feature -- Blocks
 	get_blocks
 		do
 			fixme ("find a way to have this in configuration or database, and allow different order")
-			add_block (top_header_block, "header")
+			add_block (top_header_block, "top")
 			add_block (header_block, "header")
 			if attached message_block as m then
 				add_block (m, "content")
@@ -275,22 +277,46 @@ feature -- Blocks
 		local
 			s: STRING
 		do
-			fixme ("Avoid Hardcoded HTML!!!")
-			--	create s.make_from_string ("<a href=%""+ url ("/", Void) +"%"><img id=%"logo%" src=%"" + logo_location + "%"/></a><div id=%"title%">" + html_encoded (site_name) + "</div>")
 			create s.make_empty
-			s.append ("<div id=%"menu-bar%">")
-			s.append (theme.menu_html (main_menu, True))
-			s.append ("</div>")
-			create Result.make ("header", Void, s, formats.full_html)
+			create Result.make ("page_top", Void, s, formats.full_html)
 			Result.set_is_raw (True)
 		end
 
 	header_block: CMS_CONTENT_BLOCK
 		local
 			s: STRING
+			tpl: SMARTY_CMS_PAGE_TEMPLATE
+			l_page: CMS_HTML_PAGE
+			l_hb: STRING
 		do
-			create s.make_empty
-			create Result.make ("header", Void, s, formats.full_html)
+			create s.make_from_string (theme.menu_html (main_menu, True))
+			create l_hb.make_empty
+			to_implement ("Check if the tpl does not exist, provide a default implementation")
+			if attached {SMARTY_CMS_THEME} theme as l_theme then
+				create tpl.make ("block/header_test", l_theme)
+					-- Change to "block/header_block" to use the template code.
+				create l_page.make
+				l_page.register_variable (s, "header_block")
+				tpl.prepare (l_page)
+				l_hb := tpl.to_html (l_page)
+			end
+			if l_hb.starts_with ("ERROR") then
+				l_hb.wipe_out
+				to_implement ("Hardcoded HTML with CSS, find a better way to define defaults!!!.")
+				l_hb := "[
+						  <div class='navbar navbar-inverse'>
+					      <div class='navbar-inner nav-collapse' style='height: auto;'>
+        			  	  <ul class='nav'>
+        				]"
+        		l_hb.append (s)
+        		l_hb.append ("[
+						        </ul>
+						      </div>
+						    </div>  
+						    ]")
+
+			end
+			create Result.make ("header", Void, l_hb, formats.full_html)
 			Result.set_is_raw (True)
 		end
 
@@ -447,6 +473,25 @@ feature -- Hook: block
 			end
 		end
 
+
+feature -- Menu: change
+
+	add_to_main_menu (lnk: CMS_LINK)
+		do
+--			if attached {CMS_LOCAL_LINK} lnk as l_local then
+--				l_local.get_is_active (request)
+--			end
+			main_menu.extend (lnk)
+		end
+
+	add_to_menu (lnk: CMS_LINK; m: CMS_MENU)
+		do
+--			if attached {CMS_LOCAL_LINK} lnk as l_local then
+--				l_local.get_is_active (request)
+--			end
+			m.extend (lnk)
+		end
+
 feature -- Message
 
 	add_message (a_msg: READABLE_STRING_8; a_category: detachable READABLE_STRING_8)
@@ -567,6 +612,7 @@ feature -- Generation
 
 				-- Additional lines in <head ../>
 
+			add_to_main_menu (create {CMS_LOCAL_LINK}.make ("Home", "/"))
 			call_menu_alter_hooks (menu_system)
 			prepare_menu_system (menu_system)
 
@@ -619,11 +665,11 @@ feature -- Generation
 
     prepare_menu_system (a_menu_system: CMS_MENU_SYSTEM)
 		do
-			across
-				a_menu_system as c
-			loop
-				prepare_links (c.item)
-			end
+--			across
+--				a_menu_system as c
+--			loop
+--				prepare_links (c.item)
+--			end
 		end
 
 	prepare_links (a_menu: CMS_LINK_COMPOSITE)
