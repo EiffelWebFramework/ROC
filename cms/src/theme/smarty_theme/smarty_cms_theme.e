@@ -74,61 +74,46 @@ feature -- Access
 			Result := tpl
 		end
 
-	navigation_template: detachable READABLE_STRING_GENERAL
-			-- navigation template name, if any.
-		do
-			Result := information.item ("navigation")
-		end
-
 feature -- Conversion
-
-	menu_html (a_menu: CMS_MENU; is_horizontal: BOOLEAN): STRING_8
-			-- Render Menu as HTML.
-			-- A theme will define a menu.tpl
-		local
-			tpl: SMARTY_CMS_PAGE_TEMPLATE
-			l_page: CMS_HTML_PAGE
-		do
-			create tpl.make ("tpl/" + a_menu.name, Current)
-			create l_page.make
-			l_page.register_variable (a_menu, "menu")
-			tpl.prepare (l_page)
-			Result := tpl.to_html (l_page)
-		end
-
-
-	block_html (a_block: CMS_BLOCK): STRING_8
-		local
-			s: STRING
-		do
-			if attached {CMS_CONTENT_BLOCK} a_block as l_content_block and then l_content_block.is_raw then
-				create s.make_empty
-				if attached l_content_block.title as l_title then
-					s.append ("<div class=%"title%">" + html_encoded (l_title) + "</div>")
-				end
-				s.append (l_content_block.to_html (Current))
-			else
-				create s.make_from_string ("<div class=%"block%" id=%"" + a_block.name + "%">")
-				if attached a_block.title as l_title then
-					s.append ("<div class=%"title%">" + html_encoded (l_title) + "</div>")
-				end
-				s.append ("<div class=%"inside%">")
-				s.append (a_block.to_html (Current))
-				s.append ("</div>")
-				s.append ("</div>")
-			end
-			Result := s
-		end
 
 	prepare (page: CMS_HTML_PAGE)
 		do
+			page.register_variable (page, "page")
+			page.register_variable (page.regions, "regions")
+			across
+				page.regions as ic
+			loop
+				page.register_variable (ic.item, "region_" + ic.key)
+			end
 		end
 
 	page_html (page: CMS_HTML_PAGE): STRING_8
+		local
+			l_page_inspector: detachable SMARTY_CMS_HTML_PAGE_INSPECTOR
+			l_regions_inspector: detachable SMARTY_CMS_REGIONS_INSPECTOR
+			l_table_inspector: detachable STRING_TABLE_OF_STRING_INSPECTOR
 		do
 			prepare (page)
+			create l_page_inspector.register (page.generating_type)
+
+			if attached {CMS_RESPONSE} page.variables.item ("cms") as l_cms then
+				if attached l_cms.regions as l_regions then
+					create l_regions_inspector.register (l_regions.generating_type)
+				end
+			end
+
+			create l_table_inspector.register (({detachable STRING_TABLE [STRING]}).name)
 			page_template.prepare (page)
 			Result := page_template.to_html (page)
+
+				-- Clean template inspector.
+			if l_regions_inspector /= Void then
+				l_regions_inspector.unregister
+			end
+			if l_page_inspector /= Void then
+				l_page_inspector.unregister
+			end
+			l_table_inspector.unregister
 		end
 
 feature {NONE} -- Internal

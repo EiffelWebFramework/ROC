@@ -1,5 +1,5 @@
 note
-	description: "Generic CMS Response, place to add HOOKS features as collaborators."
+	description: "Generic CMS Response.It builds the content to get process to render the output"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -34,13 +34,11 @@ feature {NONE} -- Initialization
 			register_hooks
 		end
 
-
 	register_hooks
 		local
 			l_module: CMS_MODULE
 			l_available_modules: CMS_MODULE_COLLECTION
 		do
---			log.write_debug (generator + ".register_hooks")
 			l_available_modules := setup.modules
 			across
 				l_available_modules as ic
@@ -51,7 +49,6 @@ feature {NONE} -- Initialization
 				end
 			end
 		end
-
 
 feature -- Access
 
@@ -73,9 +70,75 @@ feature -- Access
 
 	main_content: detachable STRING_8
 
+	additional_page_head_lines: detachable LIST [READABLE_STRING_8]
+			-- HTML>head>...extra lines
+
+feature -- Access: CMS
+
+	site_name: STRING_32
+		do
+			Result := setup.site_name
+		end
+
+	front_page_url: READABLE_STRING_8
+		do
+			Result := request.absolute_script_url ("/")
+		end
+
 	values: CMS_VALUE_TABLE
 			-- Associated values indexed by string name.
 
+feature -- Permission
+		-- FIXME: to be implemented has_permissions and has_permission.
+
+feature -- Status		
+		-- FIXME: to be implemented	
+		-- is_from, is_module, has_js.
+
+
+feature -- Head customization
+
+	add_additional_head_line (s: READABLE_STRING_8; a_allow_duplication: BOOLEAN)
+		local
+			lst: like additional_page_head_lines
+		do
+			lst := additional_page_head_lines
+			if lst = Void then
+				create {ARRAYED_LIST [like additional_page_head_lines.item]} lst.make (1)
+				additional_page_head_lines := lst
+			end
+			if a_allow_duplication or else across lst as c all not c.item.same_string (s) end then
+				lst.extend (s)
+			end
+		end
+
+	add_style (a_href: STRING; a_media: detachable STRING)
+		local
+			s: STRING_8
+		do
+			s := "<link rel=%"stylesheet%" href=%""+ a_href + "%" type=%"text/css%""
+			if a_media /= Void then
+				s.append (" media=%""+ a_media + "%"")
+			end
+			s.append ("/>")
+			add_additional_head_line (s, False)
+		end
+
+	add_javascript_url (a_src: STRING)
+		local
+			s: STRING_8
+		do
+			s := "<script type=%"text/javascript%" src=%"" + a_src + "%"></script>"
+			add_additional_head_line (s, False)
+		end
+
+	add_javascript_content (a_script: STRING)
+		local
+			s: STRING_8
+		do
+			s := "<script type=%"text/javascript%">%N" + a_script + "%N</script>"
+			add_additional_head_line (s, True)
+		end
 
 feature -- Element change				
 
@@ -95,6 +158,35 @@ feature -- Element change
 			main_content := s
 		end
 
+	set_value (v: detachable ANY; k: READABLE_STRING_GENERAL)
+			-- Set value `v' associated with name `k'.
+		do
+			values.force (v, k)
+		end
+
+	unset_value (k: READABLE_STRING_GENERAL)
+			-- Unset value associated with name `k'.
+		do
+			values.remove (k)
+		end
+
+
+feature -- Logging
+
+	log	(a_category: READABLE_STRING_8; a_message: READABLE_STRING_8; a_level: INTEGER; a_link: detachable CMS_LINK)
+		local
+--			l_log: CMS_LOG
+		do
+			debug
+				to_implement ("Add implemenatation")
+			end
+--			create l_log.make (a_category, a_message, a_level, Void)
+--			if a_link /= Void then
+--				l_log.set_link (a_link)
+--			end
+--			l_log.set_info (request.http_user_agent)
+--			service.storage.save_log (l_log)
+		end
 
 feature -- Formats
 
@@ -202,28 +294,6 @@ feature -- Blocks
 		end
 
 
-	set_blocks (a_page: CMS_HTML_PAGE)
-			-- Set blocks to the current `a_page'
-		do
-			debug
-				fixme ("Experimental code")
-			end
-				-- top_header_block
-			set_header_block (a_page)
-
-		end
-
-
-	set_header_block (a_page: CMS_HTML_PAGE)
-		do
-			if not main_menu.is_empty then
-				a_page.register_variable (theme.menu_html (main_menu, False), "primary_nav")
-			end
-			if not navigation_menu.is_empty then
-				a_page.register_variable (theme.menu_html (navigation_menu, False), "secondary_nav")
-			end
-		end
-
 	get_blocks
 		do
 			fixme ("find a way to have this in configuration or database, and allow different order")
@@ -318,6 +388,21 @@ feature -- Blocks
 			Result.set_is_raw (True)
 		end
 
+	horizontal_main_menu_html: STRING
+		do
+			create Result.make_empty
+			Result.append ("<div id=%"menu-bar%">")
+			Result.append (theme.menu_html (main_menu, True))
+			Result.append ("</div>")
+		end
+
+	message_html: detachable STRING
+		do
+			if attached message as m and then not m.is_empty then
+				Result := "<div id=%"message%">" + m + "</div>"
+			end
+		end
+
 	message_block: detachable CMS_CONTENT_BLOCK
 		do
 			if attached message as m and then not m.is_empty then
@@ -342,13 +427,15 @@ feature -- Blocks
 			Result.set_is_raw (True)
 		end
 
-	footer_block: CMS_CONTENT_BLOCK
-		local
-			s: STRING
+	made_with_html: STRING
 		do
-			create s.make_empty
-			s.append ("Made with <a href=%"http://www.eiffel.com/%">EWF</a>")
-			create Result.make ("made_with", Void, s, formats.full_html)
+			create Result.make_empty
+			Result.append ("Made with <a href=%"http://www.eiffel.com/%">EWF</a>")
+		end
+
+	footer_block: CMS_CONTENT_BLOCK
+		do
+			create Result.make ("made_with", Void, made_with_html, Void)
 		end
 
 feature -- Hook: value alter
@@ -595,58 +682,78 @@ feature -- Generation
 			common_prepare (page)
 			custom_prepare (page)
 
-				-- Cms values
-			call_value_alter_hooks (values)
+				-- Menu
+				add_to_main_menu (create {CMS_LOCAL_LINK}.make ("Home", "/"))
+				call_menu_alter_hooks (menu_system)
+				prepare_menu_system (menu_system)
+
+					-- Blocks
+				get_blocks
+				across
+					regions as reg_ic
+				loop
+					across
+						reg_ic.item.blocks as ic
+					loop
+						if attached {CMS_MENU_BLOCK} ic.item as l_menu_block then
+							recursive_get_active (l_menu_block.menu, request)
+						end
+					end
+				end
+
+					-- Values
+				if attached current_user_name (request) as l_user then
+					page.register_variable (l_user, "user")
+				end
+
+					-- Cms values
+				call_value_alter_hooks (values)
+
+
+					-- Predefined values
+				if attached title as l_title then
+					page.set_title (l_title)
+				else
+					page.set_title ("CMS::" + request.path_info)
+				end
+				page.register_variable (page, "page")
+
+			--	page.register_variable (is_front, "is_front")
+				page.register_variable (request.absolute_script_url (""), "site_url")
+				page.register_variable (title, "site_title")
+			--			page.register_variable (site_name_and_slogan, "site_name_and_slogan")
+			--	if attached logo_location as l_logo then
+			--		page.register_variable (l_logo, "logo")
+			--	end
+				page.register_variable (horizontal_main_menu_html, "primary_nav")
 
 					-- Values Associated with current Execution object.
-			across
-				values as ic
-			loop
-				page.register_variable (ic.item, ic.key)
-			end
-
-				-- Specific values
-			page.register_variable (request.absolute_script_url (""), "site_url")
-
-				-- Additional lines in <head ../>
-
-			add_to_main_menu (create {CMS_LOCAL_LINK}.make ("Home", "/"))
-			call_menu_alter_hooks (menu_system)
-			prepare_menu_system (menu_system)
-
-			if attached theme.navigation_template as l_navigation_template then
-				page.register_variable (l_navigation_template, l_navigation_template)
-			end
-			set_blocks (page)
---			get_blocks
---			across
---				regions as reg_ic
---			loop
---				across
---					reg_ic.item.blocks as ic
---				loop
---					if attached {CMS_MENU_BLOCK} ic.item as l_menu_block then
---						recursive_get_active (l_menu_block.menu, request)
---					end
---				end
---			end
-
-			if attached title as l_title then
-				page.set_title (l_title)
-			else
-				page.set_title ("CMS::" + request.path_info)
-			end
-
-				-- blocks
-			across
-				regions as reg_ic
-			loop
 				across
-					reg_ic.item.blocks as ic
+					values as ic
 				loop
-					page.add_to_region (theme.block_html (ic.item), reg_ic.item.name)
+					page.register_variable (ic.item, ic.key)
 				end
-			end
+
+					-- Block rendering
+				across
+					regions as reg_ic
+				loop
+					across
+						reg_ic.item.blocks as ic
+					loop
+						page.add_to_region (theme.block_html (ic.item), reg_ic.item.name)
+					end
+				end
+
+					-- Additional lines in <head ../>
+				if attached additional_page_head_lines as l_head_lines then
+					across
+						l_head_lines as hl
+					loop
+						page.head_lines.force (hl.item)
+					end
+				end
+
 		end
 
 	common_prepare (page: CMS_HTML_PAGE)

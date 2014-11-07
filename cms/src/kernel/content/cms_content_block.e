@@ -39,7 +39,7 @@ feature -- Access
 
 	content: READABLE_STRING_8
 
-	format: CONTENT_FORMAT
+	format: detachable CONTENT_FORMAT
 
 feature -- Status report
 
@@ -58,9 +58,14 @@ feature -- Conversion
 
 	to_html (a_theme: CMS_THEME): STRING_8
 		do
-			Result := content
-		end
+				-- Why in this particular case theme is not used to generate the content?
 
+			if attached format as f then
+				Result := f.formatted_output (content)
+			else
+				Result := content
+			end
+		end
 note
 	copyright: "2011-2014, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
