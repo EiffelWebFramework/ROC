@@ -201,6 +201,29 @@ feature -- Blocks
 			l_region.extend (b)
 		end
 
+
+	set_blocks (a_page: CMS_HTML_PAGE)
+			-- Set blocks to the current `a_page'
+		do
+			debug
+				fixme ("Experimental code")
+			end
+				-- top_header_block
+			set_header_block (a_page)
+
+		end
+
+
+	set_header_block (a_page: CMS_HTML_PAGE)
+		do
+			if not main_menu.is_empty then
+				a_page.register_variable (main_menu, "primary_nav")
+			end
+			if not navigation_menu.is_empty then
+				a_page.register_variable (navigation_menu, "secondary_nav")
+			end
+		end
+
 	get_blocks
 		do
 			fixme ("find a way to have this in configuration or database, and allow different order")
@@ -312,7 +335,7 @@ feature -- Blocks
         		l_hb.append ("[
 						        </ul>
 						      </div>
-						    </div>  
+						    </div>
 						    ]")
 
 			end
@@ -616,18 +639,19 @@ feature -- Generation
 			call_menu_alter_hooks (menu_system)
 			prepare_menu_system (menu_system)
 
-			get_blocks
-			across
-				regions as reg_ic
-			loop
-				across
-					reg_ic.item.blocks as ic
-				loop
-					if attached {CMS_MENU_BLOCK} ic.item as l_menu_block then
-						recursive_get_active (l_menu_block.menu, request)
-					end
-				end
-			end
+			set_blocks (page)
+--			get_blocks
+--			across
+--				regions as reg_ic
+--			loop
+--				across
+--					reg_ic.item.blocks as ic
+--				loop
+--					if attached {CMS_MENU_BLOCK} ic.item as l_menu_block then
+--						recursive_get_active (l_menu_block.menu, request)
+--					end
+--				end
+--			end
 
 			if attached title as l_title then
 				page.set_title (l_title)
@@ -635,16 +659,16 @@ feature -- Generation
 				page.set_title ("CMS::" + request.path_info)
 			end
 
-				-- blocks
-			across
-				regions as reg_ic
-			loop
-				across
-					reg_ic.item.blocks as ic
-				loop
-					page.add_to_region (theme.block_html (ic.item), reg_ic.item.name)
-				end
-			end
+--				-- blocks
+--			across
+--				regions as reg_ic
+--			loop
+--				across
+--					reg_ic.item.blocks as ic
+--				loop
+--					page.add_to_region (theme.block_html (ic.item), reg_ic.item.name)
+--				end
+--			end
 		end
 
 	common_prepare (page: CMS_HTML_PAGE)

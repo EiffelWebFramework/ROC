@@ -1,10 +1,35 @@
-  	<h1>{$page_title/}</h1>
-    <div class='navbar navbar-inverse'>
-      <div class='navbar-inner nav-collapse' style="height: auto;">
-        <ul class="nav">
-          <li class="active"><a href="#">Home</a></li>
-          <li><a href="#">Page One</a></li>
-          <li><a href="#">Page Two</a></li>
-        </ul>
-      </div>
+  <div class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+      </button>
+      <a class="navbar-brand" href="${site_url/}" itemprop="home" rel="home">{$site_name/}</a>
+      <a class="navbar-brand" href="https://www2.eiffel.com/beta" itemprop="home" rel="home">Eiffel CMS</a>
+
     </div>
+    
+    <div class="navbar-collapse collapse">
+     
+      {if isset="$primary_nav"}
+        <ul class="nav navbar-nav navbar-left">
+             {foreach item="item" from="$primary_nav.items"}
+                <!-- TODO check if a menu item is active or not -->
+                <li class="active"><a href="{$item.location/}">{$item.title/}</a></li>
+             {/foreach}
+        </ul>
+      {/if}
+
+      {if isset="$secondary_nav"}
+        <ul class="nav navbar-nav navbar-right">
+              {foreach item="item" from="$secondary_nav.items"}
+                <!-- TODO check if a menu item is active or not -->
+                <li class="active"><a href="{$item.location/}">{$item.title/}</a></li>
+             {/foreach}
+        </ul>
+      {/if}  
+    </div>
+
+  </div>
+</div>
+

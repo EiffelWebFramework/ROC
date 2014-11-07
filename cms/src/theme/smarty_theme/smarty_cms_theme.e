@@ -88,7 +88,7 @@ feature -- Conversion
 			to_implement ("Maybe we need a SMARTY_CMS_REGION_TEMPLATE")
 			to_implement ("Provide a default Menu using HTML hardcoded, maybe using the Default or providing a default implementation in CMS_THEME.menu_html")
 				-- Use the similar pattern to SMARTY_CMS_PAGE_TEMPLATE, with a different prepare
-				-- feature.
+				-- feature
 			create tpl.make ("tpl/menu", Current)
 			create l_page.make
 			l_page.register_variable (a_menu, "menu")

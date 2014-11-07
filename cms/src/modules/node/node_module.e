@@ -153,7 +153,7 @@ feature -- Hooks
 			perms: detachable ARRAYED_LIST [READABLE_STRING_8]
 		do
 			create lnk.make ("List of nodes", "/nodes")
-			a_menu_system.main_menu.extend (lnk)
+			a_menu_system.navigation_menu.extend (lnk)
 		end
 
 end
