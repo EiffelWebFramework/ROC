@@ -114,6 +114,11 @@ feature -- Conversion
 			Result := html_template.to_html (page)
 		end
 
+	navigation_template: detachable READABLE_STRING_GENERAL
+			-- navigation template name, if any.
+		do
+		end
+
 feature {NONE} -- Internal
 
 	internal_page_template: detachable like page_template

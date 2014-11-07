@@ -33,6 +33,12 @@ feature -- Access
 		deferred
 		end
 
+	navigation_template: detachable READABLE_STRING_GENERAL
+			-- navigation template name, if any.
+		deferred
+		end
+
+
 feature -- Conversion
 
 	menu_html (a_menu: CMS_MENU; is_horizontal: BOOLEAN): STRING_8

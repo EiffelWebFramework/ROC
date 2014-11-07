@@ -11,3 +11,4 @@ regions[footer] = Footer
 regions[first_sidebar] = first sidebar
 regions[second_sidebar] = second sidebar
 regions[page_bottom] = Bottom
+navigation=default_nav

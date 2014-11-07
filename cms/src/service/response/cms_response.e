@@ -217,10 +217,10 @@ feature -- Blocks
 	set_header_block (a_page: CMS_HTML_PAGE)
 		do
 			if not main_menu.is_empty then
-				a_page.register_variable (main_menu, "primary_nav")
+				a_page.register_variable (theme.menu_html (main_menu, False), "primary_nav")
 			end
 			if not navigation_menu.is_empty then
-				a_page.register_variable (navigation_menu, "secondary_nav")
+				a_page.register_variable (theme.menu_html (navigation_menu, False), "secondary_nav")
 			end
 		end
 
@@ -314,31 +314,6 @@ feature -- Blocks
 		do
 			create s.make_from_string (theme.menu_html (main_menu, True))
 			create l_hb.make_empty
-			to_implement ("Check if the tpl does not exist, provide a default implementation")
-			if attached {SMARTY_CMS_THEME} theme as l_theme then
-				create tpl.make ("block/header_test", l_theme)
-					-- Change to "block/header_block" to use the template code.
-				create l_page.make
-				l_page.register_variable (s, "header_block")
-				tpl.prepare (l_page)
-				l_hb := tpl.to_html (l_page)
-			end
-			if l_hb.starts_with ("ERROR") then
-				l_hb.wipe_out
-				to_implement ("Hardcoded HTML with CSS, find a better way to define defaults!!!.")
-				l_hb := "[
-						  <div class='navbar navbar-inverse'>
-					      <div class='navbar-inner nav-collapse' style='height: auto;'>
-        			  	  <ul class='nav'>
-        				]"
-        		l_hb.append (s)
-        		l_hb.append ("[
-						        </ul>
-						      </div>
-						    </div>
-						    ]")
-
-			end
 			create Result.make ("header", Void, l_hb, formats.full_html)
 			Result.set_is_raw (True)
 		end
@@ -639,6 +614,9 @@ feature -- Generation
 			call_menu_alter_hooks (menu_system)
 			prepare_menu_system (menu_system)
 
+			if attached theme.navigation_template as l_navigation_template then
+				page.register_variable (l_navigation_template, l_navigation_template)
+			end
 			set_blocks (page)
 --			get_blocks
 --			across
@@ -659,16 +637,16 @@ feature -- Generation
 				page.set_title ("CMS::" + request.path_info)
 			end
 
---				-- blocks
---			across
---				regions as reg_ic
---			loop
---				across
---					reg_ic.item.blocks as ic
---				loop
---					page.add_to_region (theme.block_html (ic.item), reg_ic.item.name)
---				end
---			end
+				-- blocks
+			across
+				regions as reg_ic
+			loop
+				across
+					reg_ic.item.blocks as ic
+				loop
+					page.add_to_region (theme.block_html (ic.item), reg_ic.item.name)
+				end
+			end
 		end
 
 	common_prepare (page: CMS_HTML_PAGE)

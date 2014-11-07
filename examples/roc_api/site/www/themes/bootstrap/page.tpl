@@ -33,7 +33,7 @@
     
     <!-- Page Header -->
     <div id="header">
-       {include file="tpl/page_header.tpl"/}
+       {include file="tpl/page_header2.tpl"/}
     </div> 
     
     <!-- General Page Content -->

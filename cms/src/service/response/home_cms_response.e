@@ -29,7 +29,7 @@ feature -- Execution
 	process
 			-- Computed response message.
 		do
-			set_title ("Home")
+			set_title (Void)
 			set_page_title (Void)
 		end
 end

@@ -74,6 +74,12 @@ feature -- Access
 			Result := tpl
 		end
 
+	navigation_template: detachable READABLE_STRING_GENERAL
+			-- navigation template name, if any.
+		do
+			Result := information.item ("navigation")
+		end
+
 feature -- Conversion
 
 	menu_html (a_menu: CMS_MENU; is_horizontal: BOOLEAN): STRING_8
@@ -83,13 +89,7 @@ feature -- Conversion
 			tpl: SMARTY_CMS_PAGE_TEMPLATE
 			l_page: CMS_HTML_PAGE
 		do
-			to_implement ("Proof of concept to load a Menu from a tpl/menu.tpl.")
-			to_implement ("In this case the template only take care of links.")
-			to_implement ("Maybe we need a SMARTY_CMS_REGION_TEMPLATE")
-			to_implement ("Provide a default Menu using HTML hardcoded, maybe using the Default or providing a default implementation in CMS_THEME.menu_html")
-				-- Use the similar pattern to SMARTY_CMS_PAGE_TEMPLATE, with a different prepare
-				-- feature
-			create tpl.make ("tpl/menu", Current)
+			create tpl.make ("tpl/" + a_menu.name, Current)
 			create l_page.make
 			l_page.register_variable (a_menu, "menu")
 			tpl.prepare (l_page)
