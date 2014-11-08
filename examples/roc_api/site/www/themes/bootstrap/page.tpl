@@ -33,7 +33,9 @@
     
     <!-- Page Header -->
     <div id="header">
-       {include file="tpl/page_header2.tpl"/}
+      {if isset="$page.primary_nav"}
+          {$page.primary_nav/}
+      {/if}    
     </div> 
     
     <!-- General Page Content -->
