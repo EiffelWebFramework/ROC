@@ -21,11 +21,11 @@
 </head>
 <body>
 <head>
-<title>{$page_title/}</title>
+<title>{$head_title/}</title>
 </head>
 <body>
   <!-- Page Top -->
-  {if isset="$top"}
+  {if isset="$region_top"}
     {$region_top/}
   {/if}
   <!-- Body -->
@@ -35,40 +35,47 @@
     <div id="header">
       {if isset="$page.primary_nav"}
           {$page.primary_nav/}
-      {/if}    
+      {/if}
     </div> 
     
     <!-- General Page Content -->
     <div id='content' class='row-fluid'>
-    
+		<!-- Left Sidebar sidebar_first -->
+		{unless empty="$page.region_sidebar_first"}
+		<div style="float: left;">
+		{$page.region_sidebar_first/}
+		</div>
+		{/unless}
 
-      <!-- Left Side Bard sidebar_first -->
-      {$region_sidebar_first/}
 
         <!-- Highlighted, Help, Content -->      
         <div class='span8 main'>
           <!-- Highlighted Section -->
-          {$region_highlighted/}
+          {$page.region_highlighted/}
  
-
           <!-- Help Section -->
-          {$region_help/}
-          
+          {$page.region_help/}
 
           <!-- Main Content Section -->
-           {$region_main/}   
+		  {unless empty="$page_title"}<h1 class="page-title">{$page_title/}</h1>{/unless}
+          {$page.region_content/}   
         </div>
 
-      <!-- Right Side Bard sidebar_second-->
-      {$region_sidebar_second/}
+		<!-- Right Sidebar sidebar_second-->
+		{unless empty="$page.region_sidebar_second"}
+		<div style="float: right;">
+		{$page.region_sidebar_second/}
+		</div>
+		{/unless}
+
       </div>
     </div>
 
   <!--Page footer -->
-  {$region_footer/}
+  {$page.region_footer/}
 
   <!-- Page Bottom -->
-  {$region_bottom/}
+  {$page.region_bottom/}
 </body>
 <script type="text/javascript">
 

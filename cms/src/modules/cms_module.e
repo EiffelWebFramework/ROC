@@ -33,7 +33,7 @@ feature -- Hooks configuration
 			-- Module hooks configuration.
 		require
 			is_enabled: is_enabled
-		deferred
+		do
 		end
 
 feature -- Filter

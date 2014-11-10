@@ -38,7 +38,9 @@ feature -- Access
 			-- Optional page type.
 			-- such as "front", "about", ... that could be customized by themes.
 
-	title: detachable STRING
+	is_front: BOOLEAN
+
+	title: detachable READABLE_STRING_32
 
 	language: STRING
 
@@ -58,6 +60,7 @@ feature -- Access
 	variables: STRING_TABLE [detachable ANY]
 
 feature -- Status
+
 
 	status_code: INTEGER
 
@@ -86,6 +89,12 @@ feature -- Region
 		end
 
 feature -- Element change
+
+	set_is_front (b: BOOLEAN)
+			-- Set `is_front' to `b'.
+		do
+			is_front := b
+		end
 
 	register_variable (a_value: detachable ANY; k: READABLE_STRING_GENERAL)
 		do

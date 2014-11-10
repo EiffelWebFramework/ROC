@@ -98,6 +98,14 @@ feature -- Element change
 			children := lst
 		end
 
+feature -- Status change
+
+	set_is_active (b: BOOLEAN)
+			-- Set `is_active' to `b'.
+		do
+			is_active := b
+		end
+
 	set_expanded (b: like is_expanded)
 		do
 			if b then

@@ -4,8 +4,7 @@
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
         <span class="sr-only">Toggle navigation</span>
       </button>
-      <a class="navbar-brand" href="${site_url/}" itemprop="home" rel="home">{$site_name/}</a>
-      <a class="navbar-brand" href="https://www2.eiffel.com/beta" itemprop="home" rel="home">Eiffel CMS</a>
+      <a class="navbar-brand" href="{$site_url/}" itemprop="home" rel="home">{unless isset="$site_name"}Eiffel CMS{/unless}{if isset="$site_name"}{$site_name/}{/if}</a>
 
     </div>
     

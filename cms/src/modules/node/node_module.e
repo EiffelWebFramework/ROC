@@ -9,6 +9,9 @@ class
 inherit
 
 	CMS_MODULE
+		redefine
+			register_hooks
+		end
 
 	CMS_HOOK_MENU_ALTER
 
@@ -68,6 +71,7 @@ feature {NONE} -- Implementation: routes
 			l_methods.enable_put
 			l_methods.enable_delete
 			a_router.handle_with_request_methods ("/node/{id}", l_node_handler, l_methods)
+			a_router.handle_with_request_methods ("/nodes/", create {WSF_URI_AGENT_HANDLER}.make (agent do_get_nodes (?,?, api)), a_router.methods_get)
 		end
 
 	configure_api_nodes (api: CMS_API; a_router: WSF_ROUTER)
@@ -93,7 +97,6 @@ feature {NONE} -- Implementation: routes
 			l_methods.enable_put
 			a_router.handle_with_request_methods ("/node/{id}/summary", l_report_handler, l_methods)
 		end
-
 
 	configure_api_node_title (api: CMS_API; a_router: WSF_ROUTER)
 		local
@@ -134,17 +137,12 @@ feature -- Hooks
 			Result := <<"node-info">>
 		end
 
-	get_block_view (a_block_id: detachable READABLE_STRING_8; a_response: CMS_RESPONSE)
---		local
+	get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+		local
 --			b: CMS_CONTENT_BLOCK
 		do
---			if
---				a_execution.is_front and then
---				attached a_execution.user as u
---			then
---				create b.make ("node-info", "Node", "Node ...", a_execution.formats.plain_text)
---				a_execution.add_block (b, Void)
---			end
+--			create b.make (a_block_id, "Block::node", "This is a block test", Void)
+--			a_response.add_block (b, "sidebar_second")
 		end
 
 	menu_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
@@ -152,8 +150,20 @@ feature -- Hooks
 			lnk: CMS_LOCAL_LINK
 --			perms: detachable ARRAYED_LIST [READABLE_STRING_8]
 		do
-			create lnk.make ("List of nodes", "/nodes")
-			a_menu_system.main_menu.extend (lnk)
+			create lnk.make ("List of nodes", a_response.url ("/nodes", Void))
+			a_menu_system.primary_menu.extend (lnk)
+		end
+
+feature -- Handler
+
+	do_get_nodes (req: WSF_REQUEST; res: WSF_RESPONSE; a_api: CMS_API)
+		local
+			r: CMS_RESPONSE
+		do
+			create {NOT_IMPLEMENTED_ERROR_CMS_RESPONSE} r.make (req, res, a_api)
+			r.set_main_content ("Sorry: listing the CMS nodes is not yet implemented.")
+			r.add_block (create {CMS_CONTENT_BLOCK}.make ("nodes_warning", Void, "/nodes/ is not yet implemented", Void), "highlighted")
+			r.execute
 		end
 
 end

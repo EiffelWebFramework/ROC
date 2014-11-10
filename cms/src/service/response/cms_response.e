@@ -7,15 +7,13 @@ deferred class
 	CMS_RESPONSE
 
 inherit
-	CMS_ENCODERS
-
-	CMS_REQUEST_UTIL
+	CMS_URL_UTILITIES
 
 	REFACTORING_HELPER
 
 feature {NONE} -- Initialization
 
-	make(req: WSF_REQUEST; res: WSF_RESPONSE; a_api: like api)
+	make (req: WSF_REQUEST; res: WSF_RESPONSE; a_api: like api)
 		do
 			status_code := {HTTP_STATUS_CODE}.ok
 			api := a_api
@@ -79,6 +77,36 @@ feature -- Access
 	additional_page_head_lines: detachable LIST [READABLE_STRING_8]
 			-- HTML>head>...extra lines
 
+feature -- URL utilities
+
+	is_front: BOOLEAN
+			-- Is current response related to "front" page?
+		local
+			l_path_info: READABLE_STRING_8
+		do
+			l_path_info := request.path_info
+			if attached setup.front_page_path as l_front_page_path then
+				Result := l_front_page_path.same_string (l_path_info)
+			else
+				if attached base_url as l_base_url then
+					Result := l_path_info.same_string (l_base_url)
+				else
+					Result := l_path_info.is_empty or else l_path_info.same_string ("/")
+				end
+			end
+		end
+
+	site_url: READABLE_STRING_8
+		do
+			Result := absolute_host (request, "")
+		end
+
+	base_url: detachable READABLE_STRING_8
+			-- Base url if any.
+			--| Usually it is Void, but it could be
+			--|  /project/demo/
+			--| FIXME: for now, no way to change that. Always at the root "/"
+
 feature -- Access: CMS
 
 	site_name: STRING_32
@@ -93,6 +121,8 @@ feature -- Access: CMS
 
 	values: CMS_VALUE_TABLE
 			-- Associated values indexed by string name.
+
+
 
 feature -- Permission
 		-- FIXME: to be implemented has_permissions and has_permission.
@@ -206,8 +236,15 @@ feature -- Menu
 	menu_system: CMS_MENU_SYSTEM
 
 	main_menu: CMS_MENU
+		obsolete
+			"Use `primary_menu' [Nov/2014]"
 		do
-			Result := menu_system.main_menu
+			Result := primary_menu
+		end
+
+	primary_menu: CMS_MENU
+		do
+			Result := menu_system.primary_menu
 		end
 
 	management_menu: CMS_MENU
@@ -323,7 +360,6 @@ feature -- Blocks
 			if attached navigation_menu_block as l_block then
 				add_block (l_block, "first_sidebar")
 			end
-
 			if attached user_menu_block as l_block then
 				add_block (l_block, "first_sidebar")
 			end
@@ -335,9 +371,9 @@ feature -- Blocks
 			hook_block_view
 		end
 
-	main_menu_block: detachable CMS_MENU_BLOCK
+	primary_menu_block: detachable CMS_MENU_BLOCK
 		do
-			if attached main_menu as m and then not m.is_empty then
+			if attached primary_menu as m and then not m.is_empty then
 				create Result.make (m)
 			end
 		end
@@ -384,17 +420,17 @@ feature -- Blocks
 			s: STRING
 			l_hb: STRING
 		do
-			create s.make_from_string (theme.menu_html (main_menu, True))
+			create s.make_from_string (theme.menu_html (primary_menu, True))
 			create l_hb.make_empty
 			create Result.make ("header", Void, l_hb, formats.full_html)
 			Result.set_is_raw (True)
 		end
 
-	horizontal_main_menu_html: STRING
+	horizontal_primary_menu_html: STRING
 		do
 			create Result.make_empty
 			Result.append ("<div id=%"menu-bar%">")
-			Result.append (theme.menu_html (main_menu, True))
+			Result.append (theme.menu_html (primary_menu, True))
 			Result.append ("</div>")
 		end
 
@@ -564,11 +600,15 @@ feature -- Hook: block
 feature -- Menu: change
 
 	add_to_main_menu (lnk: CMS_LINK)
+		obsolete
+			"use add_to_primary_menu [Nov/2014]"
 		do
---			if attached {CMS_LOCAL_LINK} lnk as l_local then
---				l_local.get_is_active (request)
---			end
-			main_menu.extend (lnk)
+			add_to_primary_menu (lnk)
+		end
+
+	add_to_primary_menu (lnk: CMS_LINK)
+		do
+			add_to_menu (lnk, primary_menu)
 		end
 
 	add_to_menu (lnk: CMS_LINK; m: CMS_MENU)
@@ -646,7 +686,7 @@ feature -- Message
 feature -- Theme
 
 	theme: CMS_THEME
-		-- Current theme
+			-- Current theme
 
 	get_theme
 		local
@@ -681,106 +721,112 @@ feature -- Generation
 
 	prepare (page: CMS_HTML_PAGE)
 		do
+				-- Menu
+			add_to_primary_menu (create {CMS_LOCAL_LINK}.make ("Home", "/"))
+			call_menu_alter_hooks (menu_system)
+			prepare_menu_system (menu_system)
+
+				-- Blocks
+			get_blocks
+			across
+				regions as reg_ic
+			loop
+				across
+					reg_ic.item.blocks as ic
+				loop
+					if attached {CMS_MENU_BLOCK} ic.item as l_menu_block then
+						recursive_get_active (l_menu_block.menu, request)
+					end
+				end
+			end
+
+				-- Values
 			common_prepare (page)
 			custom_prepare (page)
 
-				-- Menu
-				add_to_main_menu (create {CMS_LOCAL_LINK}.make ("Home", "/"))
-				call_menu_alter_hooks (menu_system)
-				prepare_menu_system (menu_system)
+				-- Cms values
+			call_value_alter_hooks (values)
 
-					-- Blocks
-				get_blocks
+				-- Predefined values
+			page.register_variable (page, "page") -- DO NOT REMOVE
+
+				-- Values Associated with current Execution object.
+			across
+				values as ic
+			loop
+				page.register_variable (ic.item, ic.key)
+			end
+
+				-- Block rendering
+			across
+				regions as reg_ic
+			loop
 				across
-					regions as reg_ic
+					reg_ic.item.blocks as ic
 				loop
-					across
-						reg_ic.item.blocks as ic
-					loop
-						if attached {CMS_MENU_BLOCK} ic.item as l_menu_block then
-							recursive_get_active (l_menu_block.menu, request)
-						end
-					end
+					page.add_to_region (theme.block_html (ic.item), reg_ic.item.name)
 				end
+			end
 
-					-- Values
-				if attached current_user_name (request) as l_user then
-					page.register_variable (l_user, "user")
-				end
-
-					-- Cms values
-				call_value_alter_hooks (values)
-
-
-					-- Predefined values
-				if attached title as l_title then
-					page.set_title (l_title)
-				else
-					page.set_title ("CMS::" + request.path_info)
-				end
-				page.register_variable (page, "page")
-
-			--	page.register_variable (is_front, "is_front")
-				page.register_variable (request.absolute_script_url (""), "site_url")
-				page.register_variable (title, "site_title")
-			--			page.register_variable (site_name_and_slogan, "site_name_and_slogan")
-			--	if attached logo_location as l_logo then
-			--		page.register_variable (l_logo, "logo")
-			--	end
-				page.register_variable (horizontal_main_menu_html, "primary_nav")
-
-					-- Values Associated with current Execution object.
+				-- Additional lines in <head ../>
+			if attached additional_page_head_lines as l_head_lines then
 				across
-					values as ic
+					l_head_lines as hl
 				loop
-					page.register_variable (ic.item, ic.key)
+					page.head_lines.force (hl.item)
 				end
-
-					-- Block rendering
-				across
-					regions as reg_ic
-				loop
-					across
-						reg_ic.item.blocks as ic
-					loop
-						page.add_to_region (theme.block_html (ic.item), reg_ic.item.name)
-					end
-				end
-
-					-- Additional lines in <head ../>
-				if attached additional_page_head_lines as l_head_lines then
-					across
-						l_head_lines as hl
-					loop
-						page.head_lines.force (hl.item)
-					end
-				end
-
-		end
-
-	common_prepare (page: CMS_HTML_PAGE)
-		do
-			fixme ("Fix generacion common")
-			page.register_variable (request.absolute_script_url (""), "host")
-			page.register_variable (setup.is_web, "web")
-			page.register_variable (setup.is_html, "html")
-			if attached current_user_name (request) as l_user then
-				page.register_variable (l_user, "user")
 			end
 		end
 
+	common_prepare (page: CMS_HTML_PAGE)
+			-- Common preparation for page `page'.
+		do
+			fixme ("Fix generation common")
+
+				-- Information
+			page.set_title (title)
+			debug ("cms")
+				if title = Void then
+					page.set_title ("CMS::" + request.path_info) --| FIXME: probably, should be removed and handled by theme.
+				end
+			end
+
+				-- Variables
+			page.register_variable (request.absolute_script_url (""), "site_url")
+			page.register_variable (request.absolute_script_url (""), "host") -- Same as `site_url'.
+			if attached current_user_name (request) as l_user then
+				page.register_variable (l_user, "user")
+			end
+			page.register_variable (title, "site_title")
+			page.set_is_front (is_front)
+
+				-- Variables/Setup
+			page.register_variable (setup.is_web, "web")
+			page.register_variable (setup.is_html, "html")
+
+				-- Variables/Misc
+
+-- FIXME: logo .. could be a settings of theme, managed by admin front-end/database.
+--			if attached logo_location as l_logo then
+--				page.register_variable (l_logo, "logo")
+--			end
+
+				-- Menu...
+			page.register_variable (horizontal_primary_menu_html, "primary_nav")
+		end
+
 	custom_prepare (page: CMS_HTML_PAGE)
+			-- Common preparation for page `page' that can be redefined by descendants.
 		do
 		end
 
-
     prepare_menu_system (a_menu_system: CMS_MENU_SYSTEM)
 		do
---			across
---				a_menu_system as c
---			loop
---				prepare_links (c.item)
---			end
+			across
+				a_menu_system as c
+			loop
+				prepare_links (c.item)
+			end
 		end
 
 	prepare_links (a_menu: CMS_LINK_COMPOSITE)
@@ -796,7 +842,7 @@ feature -- Generation
 --						to_remove.force (lm)
 --					else
 						-- if lm.permission_arguments is Void , this is permitted
---						lm.get_is_active (request)
+						get_local_link_active_status (lm)
 						if attached {CMS_LINK_COMPOSITE} lm as comp then
 							prepare_links (comp)
 						end
@@ -823,7 +869,7 @@ feature -- Generation
 				loop
 					ln := ic.item
 					if attached {CMS_LOCAL_LINK} ln as l_local then
---						l_local.get_is_active (request)
+						get_local_link_active_status (l_local)
 					end
 					if (ln.is_expanded or ln.is_collapsed) and then attached {CMS_LINK_COMPOSITE} ln as l_comp then
 						recursive_get_active (l_comp, req)
@@ -832,6 +878,23 @@ feature -- Generation
 			end
 		end
 
+	get_local_link_active_status (a_lnk: CMS_LOCAL_LINK)
+			-- Get `a_lnk.is_active' value according to `request' data.
+		local
+			qs: STRING
+			l_is_active: BOOLEAN
+		do
+			create qs.make_from_string (request.percent_encoded_path_info)
+			l_is_active := qs.same_string (a_lnk.location)
+			if not l_is_active then
+				if attached request.query_string as l_query_string and then not l_query_string.is_empty then
+					qs.append_character ('?')
+					qs.append (l_query_string)
+				end
+				l_is_active := qs.same_string (a_lnk.location)
+			end
+			a_lnk.set_is_active (l_is_active)
+		end
 
 feature -- Custom Variables
 

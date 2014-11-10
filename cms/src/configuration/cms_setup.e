@@ -45,6 +45,10 @@ feature -- Access: Site
 
 	files_location: PATH
 
+	front_page_path: detachable READABLE_STRING_8
+			-- Optional path defining the front page.
+			-- By default "" or "/".
+
 feature -- Access: Theme	
 
 	themes_location: PATH
