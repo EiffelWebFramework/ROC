@@ -167,6 +167,7 @@ feature -- LOGIN and DATABASE_APPL only for password_ok
 	password_ok (upasswd: STRING): BOOLEAN
 			-- Can the user password be Void?
 		do
+			Result := True
 		end
 
 	password_ensure (name, passwd, uname, upasswd: STRING): BOOLEAN
