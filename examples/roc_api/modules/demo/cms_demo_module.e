@@ -15,21 +15,17 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_config: CMS_SETUP)
+	make
 		do
 			name := "Demo module"
 			version := "1.0"
 			description := "Service to demonstrate and test cms system"
 			package := "demo"
-			config := a_config
 		end
-
-	config: CMS_SETUP
-			-- Node configuration.
 
 feature -- Access: router
 
-	router: WSF_ROUTER
+	router (a_api: CMS_API): WSF_ROUTER
 			-- Node router.
 		do
 			create Result.make (2)

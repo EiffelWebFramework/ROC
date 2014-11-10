@@ -41,11 +41,11 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_setup: CMS_SETUP)
+	make (a_api: CMS_API)
 			-- Build a CMS service with `a_setup' configuration.
 		do
-			setup := a_setup
-			configuration := a_setup.configuration
+			api := a_api
+			configuration := a_api.setup.configuration
 			initialize
 		end
 
@@ -103,36 +103,41 @@ feature -- Settings: router
 			-- <Precursor>
 		local
 			l_module: CMS_MODULE
+			l_api: like api
+			l_router: like router
 		do
 			log.write_debug (generator + ".setup_router")
 				-- Configure root of api handler.
-			configure_api_root
+
+			l_router := router
+			configure_api_root (l_router)
 
 				-- Include routes from modules.
+			l_api := api
 			across
 				modules as ic
 			loop
 				l_module := ic.item
-				router.import (l_module.router)
+				l_router.import (l_module.router (l_api))
 			end
 				-- Configure files handler.
-			configure_api_file_handler
+			configure_api_file_handler (l_router)
 		end
 
-	configure_api_root
+	configure_api_root (a_router: WSF_ROUTER)
 		local
 			l_root_handler: CMS_ROOT_HANDLER
 			l_methods: WSF_REQUEST_METHODS
 		do
 			log.write_debug (generator + ".configure_api_root")
-			create l_root_handler.make (setup)
+			create l_root_handler.make (api)
 			create l_methods
 			l_methods.enable_get
-			router.handle_with_request_methods ("/", l_root_handler, l_methods)
-			router.handle_with_request_methods ("", l_root_handler, l_methods)
+			a_router.handle_with_request_methods ("/", l_root_handler, l_methods)
+			a_router.handle_with_request_methods ("", l_root_handler, l_methods)
 		end
 
-	configure_api_file_handler
+	configure_api_file_handler (a_router: WSF_ROUTER)
 		local
 			fhdl: WSF_FILE_SYSTEM_HANDLER
 		do
@@ -143,7 +148,7 @@ feature -- Settings: router
 				do
 					execute_default (ia_req, ia_res)
 				end)
-			router.handle_with_request_methods ("/", fhdl, router.methods_GET)
+			a_router.handle_with_request_methods ("/", fhdl, router.methods_GET)
 		end
 
 feature -- Execute Filter
@@ -162,6 +167,7 @@ feature -- Filters
 		local
 			f, l_filter: detachable WSF_FILTER
 			l_module: CMS_MODULE
+			l_api: like api
 		do
 			log.write_debug (generator + ".create_filter")
 			l_filter := Void
@@ -172,18 +178,19 @@ feature -- Filters
 			l_filter := f
 
 			 	-- Error Filter
-			create {CMS_ERROR_FILTER} f.make (setup)
+			create {CMS_ERROR_FILTER} f.make (api)
 			f.set_next (l_filter)
 			l_filter := f
 
 				-- Include filters from modules
+			l_api := api
 			across
 				modules as ic
 			loop
 				l_module := ic.item
 				if
 					l_module.is_enabled and then
-					attached l_module.filters as l_m_filters
+					attached l_module.filters (l_api) as l_m_filters
 				then
 					across l_m_filters as f_ic loop
 						f := f_ic.item
@@ -213,11 +220,16 @@ feature -- Filters
 			f.set_next (Current)
 		end
 
-
 feature -- Access	
+
+	api: CMS_API
+			-- API service.
 
 	setup:  CMS_SETUP
 			-- CMS setup.
+		do
+			Result := api.setup
+		end
 
 	configuration: CMS_CONFIGURATION
 		   	-- CMS configuration.

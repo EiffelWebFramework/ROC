@@ -50,7 +50,7 @@ feature -- HTTP Methods
 			if attached req.query_parameter ("prompt") as l_prompt then
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
 			else
-				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup)
+				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
 				l_page.set_status_code ({HTTP_STATUS_CODE}.unauthorized)
 				l_page.execute
 			end

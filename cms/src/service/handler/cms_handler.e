@@ -19,20 +19,20 @@ inherit
 
 feature {NONE} -- Initialization
 
-	make (a_setup: CMS_SETUP)
+	make (a_api: CMS_API)
 		do
-			setup := a_setup
+			api := a_api
 		end
 
 feature -- Setup
 
 	setup:  CMS_SETUP
+		do
+			Result := api.setup
+		end
 
 feature -- API Service
 
-	api_service: CMS_API_SERVICE
-		do
-			Result := setup.api_service
-		end
+	api: CMS_API
 
 end

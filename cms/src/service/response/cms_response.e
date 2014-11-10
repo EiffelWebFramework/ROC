@@ -15,10 +15,10 @@ inherit
 
 feature {NONE} -- Initialization
 
-	make(req: WSF_REQUEST; res: WSF_RESPONSE; a_setup: like setup)
+	make(req: WSF_REQUEST; res: WSF_RESPONSE; a_api: like api)
 		do
 			status_code := {HTTP_STATUS_CODE}.ok
-			setup := a_setup
+			api := a_api
 			request := req
 			response := res
 			create header.make
@@ -56,8 +56,14 @@ feature -- Access
 
 	response: WSF_RESPONSE
 
+	api: CMS_API
+			-- Current CMS API.
+
 	setup: CMS_SETUP
-		-- Current setup
+			-- Current setup
+		do
+			Result := api.setup
+		end
 
 	status_code: INTEGER
 
@@ -222,8 +228,6 @@ feature -- Menu
 	primary_tabs: CMS_MENU
 		do
 			Result := menu_system.primary_tabs
-		debug
-			end
 		end
 
 feature -- Blocks initialization
@@ -378,8 +382,6 @@ feature -- Blocks
 	header_block: CMS_CONTENT_BLOCK
 		local
 			s: STRING
-			tpl: SMARTY_CMS_PAGE_TEMPLATE
-			l_page: CMS_HTML_PAGE
 			l_hb: STRING
 		do
 			create s.make_from_string (theme.menu_html (main_menu, True))

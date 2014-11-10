@@ -68,8 +68,8 @@ feature -- HTTP Methods
 			if attached current_user_name (req) as l_user then
 					-- Existing node
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
-					if l_id.is_integer and then attached {CMS_NODE} api_service.node (l_id.integer_value) as l_node then
-						create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup)
+					if l_id.is_integer and then attached {CMS_NODE} api.node (l_id.integer_value) as l_node then
+						create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
 						l_page.add_variable (l_node.title, "node_title")
 						l_page.add_variable (l_id.value, "id")
 						l_page.execute
@@ -77,7 +77,7 @@ feature -- HTTP Methods
 						do_error (req, res, l_id)
 					end
 				else
-					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup)).execute
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -89,19 +89,19 @@ feature -- HTTP Methods
 		do
 			if attached current_user_name (req) as l_user then
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
-					if l_id.is_integer and then attached {CMS_NODE} api_service.node (l_id.integer_value) as l_node then
+					if l_id.is_integer and then attached {CMS_NODE} api.node (l_id.integer_value) as l_node then
 						if attached {WSF_STRING} req.form_parameter ("method") as l_method then
 							if l_method.is_case_insensitive_equal ("PUT") then
 								do_put (req, res)
 							else
-								(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup)).execute
+								(create {ERROR_500_CMS_RESPONSE}.make (req, res, api)).execute
 							end
 						end
 					else
 						do_error (req, res, l_id)
 					end
 				else
-					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup)).execute
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -116,16 +116,16 @@ feature -- HTTP Methods
 			to_implement ("Check if user has permissions")
 			if attached current_user (req) as l_user then
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
-					if l_id.is_integer and then attached {CMS_NODE} api_service.node (l_id.integer_value) as l_node then
+					if l_id.is_integer and then attached {CMS_NODE} api.node (l_id.integer_value) as l_node then
 						u_node := extract_data_form (req)
 						u_node.set_id (l_id.integer_value)
-						api_service.update_node_title (l_user.id,u_node.id, u_node.title)
+						api.update_node_title (l_user.id,u_node.id, u_node.title)
 						(create {CMS_GENERIC_RESPONSE}).new_response_redirect (req, res, req.absolute_script_url (""))
 					else
 						do_error (req, res, l_id)
 					end
 				else
-					(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup)).execute
+					(create {ERROR_500_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -139,7 +139,7 @@ feature -- Error
 		local
 			l_page: CMS_RESPONSE
 		do
-			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, setup)
+			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
 			l_page.add_variable (req.absolute_script_url (req.path_info), "request")
 			if a_id.is_integer then
 					-- resource not found
