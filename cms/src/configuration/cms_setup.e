@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {CMS_SETUP}."
+	description: "Class that enable to set basic configuration, application layout, core modules and  themes."
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -34,16 +34,13 @@ feature -- Access: Site
 	site_id: READABLE_STRING_8
 
 	site_name: READABLE_STRING_32
+			-- Name of the site.
 
 	site_email: READABLE_STRING_8
+			-- Email for the site.
 
 	site_url: READABLE_STRING_8
-
-	site_dir: PATH
-
-	site_var_dir: PATH
-
-	files_location: PATH
+			-- Base url of the site.
 
 	front_page_path: detachable READABLE_STRING_8
 			-- Optional path defining the front page.
@@ -52,11 +49,13 @@ feature -- Access: Site
 feature -- Access: Theme	
 
 	themes_location: PATH
+			-- Path to themes.
 
 	theme_location: PATH
+			-- Path to a particular theme.
 
 	theme_resource_location: PATH
-			--
+			-- Path to a particular theme resource.
 
 	theme_information_location: PATH
 			-- theme informations.
@@ -65,6 +64,6 @@ feature -- Access: Theme
 		end
 
 	theme_name: READABLE_STRING_32
-			-- theme name
+			-- theme name.
 
 end

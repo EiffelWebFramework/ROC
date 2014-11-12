@@ -42,11 +42,13 @@ create
 feature {NONE} -- Initialization
 
 	make (a_api: CMS_API)
-			-- Build a CMS service with `a_setup' configuration.
+			-- Build a CMS service with `a_api'
 		do
 			api := a_api
 			configuration := a_api.setup.configuration
 			initialize
+		ensure
+			api_set: api = a_api
 		end
 
 	initialize

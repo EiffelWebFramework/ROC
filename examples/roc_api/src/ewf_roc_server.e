@@ -42,7 +42,7 @@ feature {NONE} -- Initialization
 			-- Initialize current service.
 		do
 			Precursor
-			service_options := create {WSF_SERVICE_LAUNCHER_OPTIONS_FROM_INI}.make_from_file ("roc.ini")
+			create {WSF_SERVICE_LAUNCHER_OPTIONS_FROM_INI} service_options.make_from_file ("roc.ini")
 			initialize_cms (cms_setup)
 		end
 
@@ -59,7 +59,7 @@ feature -- Service
 feature -- Layout
 
 	layout: CMS_LAYOUT
-		-- cms layout		
+		-- cms layout.		
 
 feature {NONE} -- Launch operation
 

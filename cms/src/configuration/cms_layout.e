@@ -1,5 +1,12 @@
 note
-	description: "Summary description for {CMS_LAYOUT}."
+	description: "[
+				CMS API Layout, to provide paths 
+							*config 
+							*application 
+							*logs 
+							*documentation 
+							*themes
+						]"
 	date: "$Date$"
 	revision: "$Revision$"
 
