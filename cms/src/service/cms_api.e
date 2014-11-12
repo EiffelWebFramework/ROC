@@ -1,32 +1,85 @@
 note
-	description: "Summary description for {CMS_API_SERVICE}."
+	description: "Summary description for {CMS_API}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_API_SERVICE
+	CMS_API
 
 inherit
 
 	SHARED_ERROR
-	REFACTORING_HELPER
 
+	REFACTORING_HELPER
 
 create
 	make
 
 feature -- Initialize
 
-	make (a_storage: CMS_STORAGE)
+	make (a_setup: CMS_SETUP)
 			-- Create the API service with an storege `a_storage'.
 		do
-			storage := a_storage
+			setup := a_setup
+			create error_handler.make
+			initialize
 			set_successful
 		ensure
-			storage_set: storage = a_storage
+--			storage_set: storage = a_storage
+		end
+
+	setup: CMS_SETUP
+			-- CMS setup.
+
+	initialize
+		local
+			l_database: DATABASE_CONNECTION
+			retried: BOOLEAN
+			l_message: STRING
+		do
+			if not retried then
+				to_implement ("Refactor database setup")
+				if attached (create {JSON_CONFIGURATION}).new_database_configuration (setup.layout.application_config_path) as l_database_config then
+					create {DATABASE_CONNECTION_MYSQL} l_database.login_with_connection_string (l_database_config.connection_string)
+					create {CMS_STORAGE_MYSQL} storage.make (l_database)
+				else
+					create {DATABASE_CONNECTION_NULL} l_database.make_common
+					create {CMS_STORAGE_NULL} storage
+				end
+			else
+				to_implement ("Workaround code, persistence layer does not implement yet this kind of error handling.")
+					-- error hanling.
+				create {DATABASE_CONNECTION_NULL} l_database.make_common
+				create {CMS_STORAGE_NULL} storage
+				create l_message.make (1024)
+				if attached ((create {EXCEPTION_MANAGER}).last_exception) as l_exception then
+					if attached l_exception.description as l_description then
+						l_message.append (l_description.as_string_32)
+						l_message.append ("%N%N")
+					elseif attached l_exception.trace as l_trace then
+						l_message.append (l_trace)
+						l_message.append ("%N%N")
+					else
+						l_message.append (l_exception.out)
+						l_message.append ("%N%N")
+					end
+				else
+					l_message.append ("The application crash without available information")
+					l_message.append ("%N%N")
+				end
+				error_handler.add_custom_error (0, " Database Connection ", l_message)
+			end
+		rescue
+			retried := True
+			retry
 		end
 
 feature -- Access
+
+	error_handler: ERROR_HANDLER
+			-- Error handler.
+
+feature -- Status Report
 
 	is_valid_credential (l_auth_login, l_auth_password: READABLE_STRING_32): BOOLEAN
 		do

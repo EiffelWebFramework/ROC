@@ -13,6 +13,8 @@ inherit
 			internal_data
 		end
 
+	CMS_ENCODERS
+
 create
 	register
 
@@ -29,7 +31,13 @@ feature {TEMPLATE_ROUTINES}
 				if attached l_page.variables.item (l_fn) as v then
 					Result := cell_of (v)
 				elseif l_fn.is_case_insensitive_equal ("title") then
-					Result := cell_of (l_page.title)
+					if attached l_page.title as l_title then
+						Result := cell_of (html_encoded (l_title))
+					else
+						Result := cell_of (Void)
+					end
+				elseif l_fn.is_case_insensitive_equal ("is_front") then
+					Result := cell_of (l_page.is_front)
 				elseif l_fn.starts_with_general ("region_") then
 					l_fn.remove_head (7) -- remove "region_"
 					Result := cell_of (l_page.region (l_fn))

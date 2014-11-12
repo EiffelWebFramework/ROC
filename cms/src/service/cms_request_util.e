@@ -9,6 +9,8 @@ deferred class
 
 inherit
 
+	CMS_ENCODERS
+
 	REFACTORING_HELPER
 
 feature -- User
@@ -21,8 +23,6 @@ feature -- User
 			if attached {CMS_USER} current_user (req) as l_user then
 				Result := l_user.name
 			end
-
-
 		end
 
 	current_user (req: WSF_REQUEST): detachable CMS_USER

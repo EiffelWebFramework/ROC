@@ -14,9 +14,6 @@ feature -- Access
 	layout: CMS_LAYOUT
 			-- CMS layout.
 
-	api_service: CMS_API_SERVICE
-	 	   -- cms api service.
-
 	is_html: BOOLEAN
 			--  api with progressive enhancements css and js, server side rendering.
 		deferred
@@ -31,12 +28,6 @@ feature -- Access
 			-- List of available modules.
 		deferred
 		end
-
-
-feature -- Status Report
-
-	error_handler: ERROR_HANDLER
-		-- Error handler.			
 
 feature -- Access: Site
 
@@ -53,6 +44,10 @@ feature -- Access: Site
 	site_var_dir: PATH
 
 	files_location: PATH
+
+	front_page_path: detachable READABLE_STRING_8
+			-- Optional path defining the front page.
+			-- By default "" or "/".
 
 feature -- Access: Theme	
 

@@ -48,7 +48,7 @@ feature -- HTTP Methods
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
 		do
-			(create {HOME_CMS_RESPONSE}.make (req, res, setup)).execute
+			(create {HOME_CMS_RESPONSE}.make (req, res, api)).execute
 		end
 
 end

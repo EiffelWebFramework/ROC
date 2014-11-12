@@ -20,9 +20,9 @@ feature {NONE} -- Initialization
 		do
 			to_implement ("Refactor, take the info from a Database or Configuration file.")
 			create items.make (5)
-			force (create {CMS_MENU}.make ("primary_nav", 3)) -- primary menu
-			force (create {CMS_MENU}.make_with_title ("management_nav", "Management", 3)) -- secondary in admin view.
-			force (create {CMS_MENU}.make_with_title ("secondary_nav", "Navigation", 3)) -- secondary
+			force (create {CMS_MENU}.make ("primary", 3)) -- primary menu
+			force (create {CMS_MENU}.make_with_title ("management", "Management", 3)) -- secondary in admin view.
+			force (create {CMS_MENU}.make_with_title ("secondary", "Navigation", 3)) -- secondary
 			force (create {CMS_MENU}.make_with_title ("user", "User", 3)) -- first_side_bar
 		end
 
@@ -41,18 +41,30 @@ feature -- Access
 		end
 
 	main_menu: CMS_MENU
+		obsolete
+			"Use `primary_menu' [Nov/2014]"
 		do
-			Result := item ("primary_nav")
+			Result := primary_menu
+		end
+
+	primary_menu: CMS_MENU
+		do
+			Result := item ("primary")
+		end
+
+	secondary_menu: CMS_MENU
+		do
+			Result := item ("secondary")
 		end
 
 	management_menu: CMS_MENU
 		do
-			Result := item ("management_nav")
+			Result := item ("management")
 		end
 
 	navigation_menu: CMS_MENU
 		do
-			Result := item ("secondary_nav")
+			Result := item ("navigation")
 		end
 
 	user_menu: CMS_MENU

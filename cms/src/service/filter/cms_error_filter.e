@@ -20,13 +20,13 @@ feature -- Basic operations
 	execute (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- Execute the filter
 		do
-			if not setup.error_handler.has_error then
+			if not api.error_handler.has_error then
 				log.write_information (generator + ".execute")
 				execute_next (req, res)
 			else
-				log.write_critical (generator + ".execute" + setup.error_handler.as_string_representation )
-				(create {ERROR_500_CMS_RESPONSE}.make (req, res, setup)).execute
-				setup.error_handler.reset
+				log.write_critical (generator + ".execute" + api.error_handler.as_string_representation )
+				(create {ERROR_500_CMS_RESPONSE}.make (req, res, api)).execute
+				api.error_handler.reset
 			end
 		end
 
