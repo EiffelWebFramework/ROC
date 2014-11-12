@@ -1,20 +1,22 @@
 note
-	description: "Describe how to alter generic values before they are rendered."
-	date: "$Date: 2014-10-23 08:30:11 -0300 (ju. 23 de oct. de 2014) $"
-	revision: "$Revision: 95980 $"
+	description: "[
+			Hook providing a way to alter the value table for a response.
+		]"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
-	CMS_HOOK_VALUE_ALTER
+	CMS_HOOK_VALUE_TABLE_ALTER
 
 inherit
-
 	CMS_HOOK
 
 feature -- Hook
 
-	value_alter (a_value: CMS_VALUE_TABLE; a_response: CMS_RESPONSE)
+	value_table_alter (a_value: CMS_VALUE_TABLE; a_response: CMS_RESPONSE)
 		deferred
 		end
+
 note
 	copyright: "2011-2014, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"

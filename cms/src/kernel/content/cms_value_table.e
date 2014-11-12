@@ -1,7 +1,10 @@
 note
-	description: "Summary description for {CMS_VALUE_TABLE}."
-	date: "$Date: 2014-10-23 08:30:11 -0300 (ju. 23 de oct. de 2014) $"
-	revision: "$Revision: 95980 $"
+	description: "[
+			Object containing a collection of values.
+			It is typically used by `{CMS_RESPONSE}.values' .
+		]"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_VALUE_TABLE

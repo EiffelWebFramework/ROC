@@ -13,7 +13,7 @@ inherit
 			register_hooks
 		end
 
-	CMS_HOOK_MENU_ALTER
+	CMS_HOOK_MENU_SYSTEM_ALTER
 
 	CMS_HOOK_BLOCK
 
@@ -128,8 +128,8 @@ feature -- Hooks
 
 	register_hooks (a_response: CMS_RESPONSE)
 		do
-			a_response.add_menu_alter_hook (Current)
-			a_response.add_block_hook (Current)
+			a_response.subscribe_to_menu_system_alter_hook (Current)
+			a_response.subscribe_to_block_hook (Current)
 		end
 
 	block_list: ITERABLE [like {CMS_BLOCK}.name]
@@ -145,7 +145,7 @@ feature -- Hooks
 --			a_response.add_block (b, "sidebar_second")
 		end
 
-	menu_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
+	menu_system_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
 		local
 			lnk: CMS_LOCAL_LINK
 --			perms: detachable ARRAYED_LIST [READABLE_STRING_8]

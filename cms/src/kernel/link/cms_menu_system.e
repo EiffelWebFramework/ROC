@@ -1,7 +1,9 @@
 note
-	description: "Describe the navigation menus."
-	date: "$Date: 2014-08-28 08:21:49 -0300 (ju. 28 de ago. de 2014) $"
-	revision: "$Revision: 95708 $"
+	description: "[
+			Menu associated with CMS system.
+		]"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_MENU_SYSTEM
@@ -20,15 +22,17 @@ feature {NONE} -- Initialization
 		do
 			to_implement ("Refactor, take the info from a Database or Configuration file.")
 			create items.make (5)
-			force (create {CMS_MENU}.make ("primary", 3)) -- primary menu
-			force (create {CMS_MENU}.make_with_title ("management", "Management", 3)) -- secondary in admin view.
-			force (create {CMS_MENU}.make_with_title ("secondary", "Navigation", 3)) -- secondary
-			force (create {CMS_MENU}.make_with_title ("user", "User", 3)) -- first_side_bar
+			force (create {CMS_MENU}.make ("primary", 3))
+			force (create {CMS_MENU}.make_with_title ("management", "Management", 3))
+			force (create {CMS_MENU}.make_with_title ("secondary", "Navigation", 3))
+			force (create {CMS_MENU}.make_with_title ("user", "User", 3))
 		end
 
 feature -- Access
 
 	item (n: like {CMS_MENU}.name): CMS_MENU
+			-- Menu associated with name `n',
+			-- if none, it is created.
 		local
 			m: detachable CMS_MENU
 		do
@@ -80,6 +84,7 @@ feature -- Access
 feature -- Change
 
 	force (m: CMS_MENU)
+			-- Add menu `m'.
 		do
 			items.force (m, m.name)
 		end
@@ -94,7 +99,6 @@ feature -- Access
 
 feature {NONE} -- Implementation
 
-	items: HASH_TABLE [CMS_MENU, like {CMS_MENU}.name]
---	items: ARRAYED_LIST [CMS_MENU]
+	items: STRING_TABLE [CMS_MENU]
 
 end
