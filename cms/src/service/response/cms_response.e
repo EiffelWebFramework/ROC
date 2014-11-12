@@ -368,7 +368,7 @@ feature -- Blocks
 				add_block (l_block, "footer")
 			end
 
-			hook_block_view
+			invoke_block
 		end
 
 	primary_menu_block: detachable CMS_MENU_BLOCK
@@ -478,36 +478,65 @@ feature -- Blocks
 
 feature -- Hook: value alter
 
-	add_value_alter_hook (h: like value_alter_hooks.item)
+	subscribe_to_value_table_alter_hook (h: like value_table_alter_hooks.item)
 		local
-			lst: like value_alter_hooks
+			lst: like value_table_alter_hooks
 		do
-			lst := value_alter_hooks
+			lst := value_table_alter_hooks
 			if lst = Void then
 				create lst.make (1)
-				value_alter_hooks := lst
+				value_table_alter_hooks := lst
 			end
 			if not lst.has (h) then
 				lst.force (h)
 			end
 		end
 
-	value_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_VALUE_ALTER]
+	value_table_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_VALUE_TABLE_ALTER]
 
-	call_value_alter_hooks (m: CMS_VALUE_TABLE)
+	invoke_value_table_alter (m: CMS_VALUE_TABLE)
 		do
-			if attached value_alter_hooks as lst then
+			if attached value_table_alter_hooks as lst then
 				across
 					lst as c
 				loop
-					c.item.value_alter (m, Current)
+					c.item.value_table_alter (m, Current)
+				end
+			end
+		end
+
+feature -- Hook: menu_system_alter
+
+	subscribe_to_menu_system_alter_hook (h: like menu_system_alter_hooks.item)
+		local
+			lst: like menu_system_alter_hooks
+		do
+			lst := menu_system_alter_hooks
+			if lst = Void then
+				create lst.make (1)
+				menu_system_alter_hooks := lst
+			end
+			if not lst.has (h) then
+				lst.force (h)
+			end
+		end
+
+	menu_system_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_MENU_SYSTEM_ALTER]
+
+	invoke_menu_system_alter (m: CMS_MENU_SYSTEM )
+		do
+			if attached menu_system_alter_hooks as lst then
+				across
+					lst as c
+				loop
+					c.item.menu_system_alter (m, Current)
 				end
 			end
 		end
 
 feature -- Hook: menu_alter
 
-	add_menu_alter_hook (h: like menu_alter_hooks.item)
+	subscribe_to_menu_alter_hook (h: like menu_alter_hooks.item)
 		local
 			lst: like menu_alter_hooks
 		do
@@ -523,7 +552,7 @@ feature -- Hook: menu_alter
 
 	menu_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_MENU_ALTER]
 
-	call_menu_alter_hooks (m: CMS_MENU_SYSTEM )
+	invoke_menu_alter (m: CMS_MENU)
 		do
 			if attached menu_alter_hooks as lst then
 				across
@@ -536,7 +565,7 @@ feature -- Hook: menu_alter
 
 feature -- Hook: form_alter
 
-	add_form_alter_hook (h: like form_alter_hooks.item)
+	subscribe_to_form_alter_hook (h: like form_alter_hooks.item)
 		local
 			lst: like form_alter_hooks
 		do
@@ -552,7 +581,7 @@ feature -- Hook: form_alter
 
 	form_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_FORM_ALTER]
 
-	call_form_alter_hooks (f: CMS_FORM; a_form_data: detachable WSF_FORM_DATA; )
+	invoke_form_alter (f: CMS_FORM; a_form_data: detachable WSF_FORM_DATA)
 		do
 			if attached form_alter_hooks as lst then
 				across
@@ -565,7 +594,7 @@ feature -- Hook: form_alter
 
 feature -- Hook: block		
 
-	add_block_hook (h: like block_hooks.item)
+	subscribe_to_block_hook (h: CMS_HOOK_BLOCK)
 		local
 			lst: like block_hooks
 		do
@@ -581,7 +610,7 @@ feature -- Hook: block
 
 	block_hooks: detachable ARRAYED_LIST [CMS_HOOK_BLOCK]
 
-	hook_block_view
+	invoke_block
 		do
 			if attached block_hooks as lst then
 				across
@@ -595,7 +624,6 @@ feature -- Hook: block
 				end
 			end
 		end
-
 
 feature -- Menu: change
 
@@ -723,7 +751,7 @@ feature -- Generation
 		do
 				-- Menu
 			add_to_primary_menu (create {CMS_LOCAL_LINK}.make ("Home", "/"))
-			call_menu_alter_hooks (menu_system)
+			invoke_menu_system_alter (menu_system)
 			prepare_menu_system (menu_system)
 
 				-- Blocks
@@ -745,7 +773,7 @@ feature -- Generation
 			custom_prepare (page)
 
 				-- Cms values
-			call_value_alter_hooks (values)
+			invoke_value_table_alter (values)
 
 				-- Predefined values
 			page.register_variable (page, "page") -- DO NOT REMOVE

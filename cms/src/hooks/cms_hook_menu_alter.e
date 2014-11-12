@@ -1,6 +1,8 @@
 note
-	description: "Describe how to alter a menu before it's rendered."
-	date: "$Date: 2014-08-28 08:21:49 -0300 (ju. 28 de ago. de 2014) $"
+	description: "[
+			Hook providing a way to alter a menu
+		]"
+	date: "$Date$"
 
 deferred class
 	CMS_HOOK_MENU_ALTER
@@ -10,7 +12,9 @@ inherit
 
 feature -- Hook
 
-	menu_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
+	menu_alter (a_menu: CMS_MENU; a_response: CMS_RESPONSE)
+			-- Hook execution on menu `a_menu'
+			-- for related response `a_response'.
 		deferred
 		end
 

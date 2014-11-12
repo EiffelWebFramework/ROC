@@ -1,5 +1,7 @@
 note
-	description: "Marker interface"
+	description: "[
+			Marker interface for CMS Hook
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
