@@ -16,6 +16,7 @@ create
 feature {NONE} -- Initialization
 
 	make (a_layout: CMS_LAYOUT)
+				-- Create a default setup with `a_layout'.
 		do
 			layout := a_layout
 			create configuration.make (layout)
@@ -23,6 +24,7 @@ feature {NONE} -- Initialization
 		end
 
 	initialize
+			-- Initialize varius cms components.
 		do
 			configure
 			create modules.make (3)
@@ -36,9 +38,6 @@ feature {NONE} -- Initialization
 			site_url := configuration.site_url ("")
 			site_name := configuration.site_name ("EWF::CMS")
 			site_email := configuration.site_email ("webmaster")
-			site_dir := configuration.root_location
-			site_var_dir := configuration.var_location
-			files_location := configuration.files_location
 			themes_location := configuration.themes_location
 			theme_name := configuration.theme_name ("default")
 
@@ -47,6 +46,7 @@ feature {NONE} -- Initialization
 		end
 
 	initialize_modules
+				-- Intialize core modules.
 		local
 			m: CMS_MODULE
 		do
@@ -104,6 +104,9 @@ feature -- Compute location
 			-- assets (js, css, images, etc)
 			-- Not used at the moment.
 		do
+			debug
+				fixme ("Check if we really need it")
+			end
 			theme_resource_location := theme_location
 		end
 

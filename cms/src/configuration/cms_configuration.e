@@ -1,3 +1,8 @@
+note
+	description: "[
+					Configure the basic settings for a CMS application, for example where to look for themes, the name of the application, etc.
+					The settings can be configured by default using the current working directory, using the commands provided by the class or by an external configuration file
+					]"
 class
 	CMS_CONFIGURATION
 
@@ -15,7 +20,7 @@ create
 feature {NONE} -- Initialization
 
 	make (a_layout: CMS_LAYOUT)
-			-- Initialize `Current'.
+			-- Initialize `Current' with layout `a_layout'.
 		do
 			layout := a_layout
 			create options.make_equal (10)
@@ -36,6 +41,7 @@ feature -- Access
 
 
 	configuration_location: detachable PATH
+			-- Path to configuration location.
 
 	option (a_name: READABLE_STRING_GENERAL): detachable ANY
 		do
