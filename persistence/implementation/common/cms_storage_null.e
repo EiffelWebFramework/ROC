@@ -9,8 +9,22 @@ class
 inherit
 
 	CMS_STORAGE
+		redefine
+			default_create
+		select
+			default_create
+		end
 	REFACTORING_HELPER
+		rename
+			default_create as default_create_rh
+		end
 
+feature -- Initialization
+
+	default_create
+		do
+			create error_handler.make
+		end
 
 feature -- Access: user
 

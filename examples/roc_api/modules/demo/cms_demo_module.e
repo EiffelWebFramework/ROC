@@ -9,45 +9,91 @@ class
 
 inherit
 	CMS_MODULE
+		redefine
+			register_hooks
+		end
+
+	CMS_HOOK_MENU_ALTER
+
+	CMS_HOOK_BLOCK
 
 create
 	make
 
 feature {NONE} -- Initialization
 
-	make (a_config: CMS_SETUP)
+	make
 		do
 			name := "Demo module"
 			version := "1.0"
 			description := "Service to demonstrate and test cms system"
 			package := "demo"
-			config := a_config
 		end
-
-	config: CMS_SETUP
-			-- Node configuration.
 
 feature -- Access: router
 
-	router: WSF_ROUTER
+	router (a_api: CMS_API): WSF_ROUTER
 			-- Node router.
 		do
 			create Result.make (2)
 
-			map_uri_template_agent (Result, "/demo/", agent handle_demo)
-			map_uri_template_agent (Result, "/book/{id}", agent handle_demo_entry)
+			map_uri_template_agent (Result, "/demo/", agent handle_demo (?,?,a_api))
+			map_uri_template_agent (Result, "/demo/{id}", agent handle_demo_entry (?,?,a_api))
+		end
+
+feature -- Hooks
+
+	register_hooks (a_response: CMS_RESPONSE)
+		do
+			a_response.add_menu_alter_hook (Current)
+			a_response.add_block_hook (Current)
+		end
+
+	block_list: ITERABLE [like {CMS_BLOCK}.name]
+		do
+			Result := <<"demo-info">>
+		end
+
+	get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+		local
+			b: CMS_CONTENT_BLOCK
+			mb: CMS_MENU_BLOCK
+			m: CMS_MENU
+			lnk: CMS_LOCAL_LINK
+		do
+			if a_block_id.is_case_insensitive_equal_general ("demo-info") then
+				if a_response.request.request_uri.starts_with ("/demo/") then
+					create m.make_with_title (a_block_id, "Demo", 2)
+					create lnk.make ("/demo/abc", a_response.url ("/demo/abc", Void))
+					m.extend (lnk)
+					create lnk.make ("/demo/123", a_response.url ("/demo/123", Void))
+					m.extend (lnk)
+					create mb.make (m)
+					a_response.add_block (mb, "sidebar_second")
+				end
+			end
+		end
+
+	menu_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
+		local
+			lnk: CMS_LOCAL_LINK
+--			perms: detachable ARRAYED_LIST [READABLE_STRING_8]
+		do
+			create lnk.make ("Demo", "/demo/")
+			a_menu_system.primary_menu.extend (lnk)
 		end
 
 feature -- Handler
 
 	handle_demo,
-	handle_demo_entry (req: WSF_REQUEST; res: WSF_RESPONSE)
+	handle_demo_entry (req: WSF_REQUEST; res: WSF_RESPONSE; a_api: CMS_API)
 		local
-			m: WSF_NOT_FOUND_RESPONSE
+			r: NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
 		do
-			create m.make (req)
-			m.set_body ("Not yet implemented!")
-			res.send (m)
+			create r.make (req, res, a_api)
+			r.set_main_content ("NODE module does not yet implement %"" + req.path_info + "%" ...")
+			r.add_error_message ("NODE Module: not yet implemented")
+			r.execute
 		end
 
 feature -- Mapping helper: uri template

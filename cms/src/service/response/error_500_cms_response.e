@@ -21,8 +21,8 @@ feature -- Generation
 	custom_prepare (page: CMS_HTML_PAGE)
 		do
 			page.register_variable (request.absolute_script_url (request.path_info), "request")
-			page.register_variable ("500", "code")
-			page.set_status_code (500)
+			page.set_status_code ({HTTP_STATUS_CODE}.internal_server_error)
+			page.register_variable (page.status_code.out, "code")
 		end
 
 feature -- Execution

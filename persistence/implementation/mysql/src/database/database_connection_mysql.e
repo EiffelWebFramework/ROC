@@ -23,6 +23,7 @@ feature -- Initialization
 		local
 			l_retried: BOOLEAN
 		do
+			create database_error_handler.make
 			create db_application.login (username, password)
 
 			if not l_retried then
@@ -34,17 +35,12 @@ feature -- Initialization
 				if keep_connection then
 					connect
 				end
-				set_successful
 			else
 				create db_control.make
 			end
 		rescue
-			create db_control.make
-			set_last_error_from_exception ("Connection execution")
-			log.write_critical (generator + ".make_common:" + last_error_message)
-			if is_connected then
-				disconnect
-			end
+			create database_error_handler.make
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
 			l_retried := True
 			retry
 		end
@@ -55,6 +51,7 @@ feature -- Initialization
 		local
 			l_retried: BOOLEAN
 		do
+			create database_error_handler.make
 			create db_application.login (username, password)
 
 			if not l_retried then
@@ -66,17 +63,12 @@ feature -- Initialization
 				if keep_connection then
 					connect
 				end
-				set_successful
 			else
 				create db_control.make
 			end
 		rescue
-			create db_control.make
-			set_last_error_from_exception ("Connection execution")
-			log.write_critical (generator + ".make_common:" + last_error_message)
-			if is_connected then
-				disconnect
-			end
+			create database_error_handler.make
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
 			l_retried := True
 			retry
 		end
@@ -88,6 +80,7 @@ feature -- Initialization
 			-- `database_name' to `a_database_name'
 			-- `connection' to `a_connection'
 		do
+			create database_error_handler.make
 			create db_application.login (a_username, a_password)
 			db_application.set_hostname (a_hostname)
 			db_application.set_data_source (a_database_name)
@@ -109,6 +102,8 @@ feature -- Initialization
 			l_user: STRING
 			l_password: STRING
 		do
+			create database_error_handler.make
+
 			l_string := a_string.split (';')
 			l_server := l_string.at (2).split ('=').at (2)
 			l_port := l_string.at (3).split ('=').at (2)
@@ -123,12 +118,12 @@ feature -- Initialization
 			db_application.set_base
 			create db_control.make
 			keep_connection := is_keep_connection
-
 		end
 
 	login_with_schema (a_schema: STRING; a_username: STRING; a_password: STRING)
 			-- Login with `a_connection_string'and immediately connect to database.
 		do
+			create database_error_handler.make
 			create db_application
 			db_application.set_application (a_schema)
 			db_application.login_and_connect (a_username, a_password)

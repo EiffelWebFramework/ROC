@@ -10,9 +10,9 @@ inherit
 
 	PARAMETER_NAME_HELPER
 
-	SHARED_ERROR
-
 	REFACTORING_HELPER
+
+	SHARED_LOGGER
 
 create
 	make
@@ -23,6 +23,7 @@ feature -- Initialization
 			-- Create a data provider.
 		do
 			create {DATABASE_HANDLER_IMPL} db_handler.make (a_connection)
+			create error_handler.make
 			post_execution
 		end
 
@@ -34,8 +35,12 @@ feature -- Status Report
 	is_successful: BOOLEAN
 			-- Is the last execution sucessful?
 		do
-			Result := db_handler.successful
+			Result := not error_handler.has_error
 		end
+
+feature -- Error Handler
+
+	error_handler: ERROR_HANDLER
 
 feature -- Access
 
@@ -44,6 +49,7 @@ feature -- Access
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".nodes")
 			create l_parameters.make (0)
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Select_nodes, l_parameters))
@@ -58,6 +64,7 @@ feature -- Access
 			l_parameters: STRING_TABLE [ANY]
 			l_query: STRING
 		do
+			error_handler.reset
 			log.write_information (generator + ".recent_nodes")
 			create l_parameters.make (2)
 			l_parameters.put (a_rows, "rows")
@@ -74,6 +81,7 @@ feature -- Access
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".node")
 			create l_parameters.make (1)
 			l_parameters.put (a_id,"id")
@@ -90,6 +98,7 @@ feature -- Access
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".count")
 			create l_parameters.make (0)
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (select_count, l_parameters))
@@ -106,6 +115,7 @@ feature -- Access
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".last_inserted_node_id")
 			create l_parameters.make (0)
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (Sql_last_insert_node_id, l_parameters))
@@ -123,6 +133,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".new_node")
 			create l_parameters.make (7)
 			l_parameters.put (a_node.title, "title")
@@ -141,10 +152,7 @@ feature -- Basic operations
 			db_handler.execute_change
 
 			a_node.set_id (last_inserted_node_id)
-
 			post_execution
-
-
 		end
 
 	update_node_title (a_id: INTEGER_64; a_title: READABLE_STRING_32)
@@ -152,6 +160,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".update_node_title")
 			create l_parameters.make (3)
 			l_parameters.put (a_title, "title")
@@ -167,6 +176,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".update_node_summary")
 			create l_parameters.make (3)
 			l_parameters.put (a_summary, "summary")
@@ -182,6 +192,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".update_node_content")
 			create l_parameters.make (3)
 			l_parameters.put (a_content, "content")
@@ -197,6 +208,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".update_node")
 			create l_parameters.make (7)
 			l_parameters.put (a_node.title, "title")
@@ -216,6 +228,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".delete_node")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "id")
@@ -228,6 +241,7 @@ feature -- Basic operations
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".delete_from_user_nodes")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "id")
@@ -243,6 +257,7 @@ feature -- Basic Operations: User_Nodes
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".add_author")
 			create l_parameters.make (2)
 			l_parameters.put (a_user_id,"user_id")
@@ -257,6 +272,7 @@ feature -- Basic Operations: User_Nodes
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".add_collaborator")
 			create l_parameters.make (2)
 			l_parameters.put (a_user_id,"users_id")
@@ -271,6 +287,7 @@ feature -- Basic Operations: User_Nodes
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".add_collaborator")
 			create l_parameters.make (2)
 			l_parameters.put (a_user_id,"users_id")
@@ -286,6 +303,7 @@ feature -- Basic Operations: User_Nodes
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".author_nodes")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "user_id")
@@ -300,6 +318,7 @@ feature -- Basic Operations: User_Nodes
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".collaborator_nodes")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "user_id")
@@ -315,6 +334,7 @@ feature -- Basic Operations: User_Nodes
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".node_author")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "node_id")
@@ -331,6 +351,7 @@ feature -- Basic Operations: User_Nodes
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".node_collaborators")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "node_id")
@@ -345,6 +366,7 @@ feature -- Basic Operations: User_Nodes
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
+			error_handler.reset
 			log.write_information (generator + ".node_collaborators")
 			create l_parameters.make (2)
 			l_parameters.put (a_user_id, "user_id")
@@ -354,7 +376,6 @@ feature -- Basic Operations: User_Nodes
 			if db_handler.count = 1 then
 				Result := db_handler.read_integer_32 (1) = 1
 			end
-
 			post_execution
 		end
 
@@ -481,12 +502,9 @@ feature {NONE} -- Implementation
 	post_execution
 			-- Post database execution.
 		do
-			if db_handler.successful then
-				set_successful
-			else
-				if attached db_handler.last_error then
-					set_last_error_from_handler (db_handler.last_error)
-				end
+			error_handler.add_synchronization (db_handler.database_error_handler)
+			if error_handler.has_error then
+				log.write_critical (generator + ".post_execution " +  error_handler.as_string_representation)
 			end
 		end
 

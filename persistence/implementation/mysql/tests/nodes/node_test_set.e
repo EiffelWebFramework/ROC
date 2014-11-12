@@ -41,7 +41,9 @@ feature {NONE} -- Events
 feature -- Test routines
 
 	test_new_node
-		do
+		note
+				testing:  "execution/isolated"
+	do
 			assert ("Empty Nodes", node_provider.nodes.after)
 			node_provider.new_node (default_node)
 			assert ("Not empty Nodes after new_node", not node_provider.nodes.after)
@@ -53,6 +55,8 @@ feature -- Test routines
 
 
 	test_update_node
+		note
+				testing:  "execution/isolated"
 		local
 			l_node: CMS_NODE
 		do
@@ -85,6 +89,8 @@ feature -- Test routines
 		end
 
 	test_update_title
+		note
+				testing:  "execution/isolated"
 		local
 			l_node: CMS_NODE
 		do
@@ -104,6 +110,8 @@ feature -- Test routines
 		end
 
 	test_update_summary
+		note
+				testing:  "execution/isolated"
 		local
 			l_node: CMS_NODE
 		do
@@ -123,11 +131,14 @@ feature -- Test routines
 		end
 
 	test_update_content
+		note
+			testing:  "execution/isolated"
 		local
 			l_node: CMS_NODE
 		do
 			assert ("Empty Nodes", node_provider.nodes.after)
 			l_node := custom_node ("<h1> test node udpate </h1>", "Update node", "Test case update")
+			connection.begin_transaction
 			node_provider.new_node (l_node)
 			assert ("Not empty Nodes after new_node", not node_provider.nodes.after)
 				-- Exist node with id 1
@@ -139,6 +150,7 @@ feature -- Test routines
 				node_provider.update_node_content (l_un.id,"New Content")
 				assert ("Exist node with id 1", attached {CMS_NODE} node_provider.node (1) as ll_node and then not (ll_node.content ~ l_un.content) and then ll_node.content ~ "New Content" and then ll_node.summary ~ l_un.summary  and then  ll_node.title ~ l_un.title)
 			end
+			connection.commit
 		end
 
 

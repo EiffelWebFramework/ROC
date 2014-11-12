@@ -8,7 +8,7 @@ deferred class
 
 inherit
 
-	SHARED_ERROR
+	SHARED_LOGGER
 
 feature -- Access
 
@@ -42,15 +42,15 @@ feature -- Modifiers
 
 feature -- Functionality Store Procedures
 
-	execute_reader
-			-- Execute store.
+	execute_store_reader
+			-- Execute a `store' to read data.
 		require
 			store_not_void: store /= void
 		deferred
 		end
 
-	execute_writer
-			-- Execute store.
+	execute_store_writer
+			-- Execute a `store' to write data.
 		require
 			store_not_void: store /= void
 		deferred
@@ -59,14 +59,14 @@ feature -- Functionality Store Procedures
 feature -- SQL Queries
 
 	execute_query
-			-- Execute query.
+			-- Execute sql query, the read data from the database.
 		require
 			query_not_void: query /= void
 		deferred
 		end
 
 	execute_change
-			-- Execute sqlquery that update/add data.
+			-- Execute sql query that update/add data.
 		require
 			query_not_void: query /= void
 		deferred
@@ -147,15 +147,75 @@ feature -- Access
 
 feature -- Status Report
 
-	has_error: BOOLEAN
-			-- Is there an error?
-
 	count: INTEGER
 			-- Number of rows, last execution.
 		deferred
 		end
 
-feature {NODE_DATA_PROVIDER}-- Implementation
+	connection: DATABASE_CONNECTION
+		-- Database connection.
+
+	db_control: DB_CONTROL
+		-- Database control.
+		do
+			Result := connection.db_control
+		end
+
+	db_result: detachable DB_RESULT
+		-- Database query result.
+
+	db_selection: detachable DB_SELECTION
+		-- Database selection.
+
+	db_change: detachable DB_CHANGE
+		-- Database modification.	
+
+feature -- Error handling
+
+	check_database_change_error
+			-- Check database error from `db_change'.
+		do
+			if attached db_change as l_change and then not l_change.is_ok then
+				database_error_handler.add_database_error (l_change.error_message_32, l_change.error_code)
+				log.write_error (generator + ".check_database_change_error: " + l_change.error_message_32)
+				l_change.reset
+			end
+		end
+
+	check_database_selection_error
+			-- Check database error from `db_selection'.
+		do
+			if attached db_selection as l_selection and then not l_selection.is_ok then
+				database_error_handler.add_database_error (l_selection.error_message_32, l_selection.error_code)
+				log.write_error (generator + ".check_database_selection_error: " + l_selection.error_message_32)
+				l_selection.reset
+			end
+		end
+
+feature -- Error Handling
+
+	database_error_handler: DATABASE_ERROR_HANDLER
+			-- Error handler.
+
+feature -- Status Report
+
+	has_error: BOOLEAN
+			-- Has error?
+		do
+			Result := database_error_handler.has_error
+		end
+
+feature -- Helper
+
+	exception_as_error (a_e: like {EXCEPTION_MANAGER}.last_exception)
+			-- Record exception as an error.
+		do
+			if attached a_e as l_e and then attached l_e.trace as l_trace then
+				database_error_handler.add_error_details (l_e.code, once "Exception", l_trace.as_string_32)
+			end
+		end
+
+feature -- Connection Handling
 
 	connect
 			-- Connect to the database.

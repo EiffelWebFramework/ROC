@@ -26,9 +26,7 @@ feature {NONE} -- Initialization
 		do
 			configure
 			create modules.make (3)
-			build_api_service
 			build_mailer
-
 			initialize_modules
 		end
 
@@ -61,11 +59,6 @@ feature {NONE} -- Initialization
 --			m.enable
 --			modules.extend (m)
 
-
-			create {BASIC_AUTH_MODULE} m.make (Current)
-			m.enable
-			modules.extend (m)
-
 			create {NODE_MODULE} m.make (Current)
 			m.enable
 			modules.extend (m)
@@ -88,20 +81,6 @@ feature -- Access
 		do
 			Result := (create {CMS_JSON_CONFIGURATION}).is_web_mode(layout.application_config_path)
 
-		end
-
-	build_api_service
-		local
-			l_database: DATABASE_CONNECTION
-		do
-			to_implement ("Refactor database setup")
-			if attached (create {JSON_CONFIGURATION}).new_database_configuration (layout.application_config_path) as l_database_config then
-				create {DATABASE_CONNECTION_MYSQL} l_database.login_with_connection_string (l_database_config.connection_string)
-				create api_service.make (create {CMS_STORAGE_MYSQL}.make (l_database))
-			else
-				create {DATABASE_CONNECTION_NULL} l_database.make_common
-				create api_service.make (create {CMS_STORAGE_NULL})
-			end
 		end
 
 	build_auth_engine

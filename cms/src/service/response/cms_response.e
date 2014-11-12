@@ -1,5 +1,5 @@
 note
-	description: "Generic CMS Response, place to add HOOKS features as collaborators."
+	description: "Generic CMS Response.It builds the content to get process to render the output"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -7,27 +7,45 @@ deferred class
 	CMS_RESPONSE
 
 inherit
-
-	CMS_REQUEST_UTIL
+	CMS_URL_UTILITIES
 
 	REFACTORING_HELPER
 
 feature {NONE} -- Initialization
 
-	make (req: WSF_REQUEST; res: WSF_RESPONSE; a_setup: like setup; a_template: like template)
+	make (req: WSF_REQUEST; res: WSF_RESPONSE; a_api: like api)
 		do
 			status_code := {HTTP_STATUS_CODE}.ok
-			setup := a_setup
+			api := a_api
 			request := req
 			response := res
-			template := a_template
 			create header.make
+			create values.make (3)
 			initialize
 		end
 
 	initialize
 		do
 			get_theme
+			create menu_system.make
+			initialize_block_region_settings
+			register_hooks
+		end
+
+	register_hooks
+		local
+			l_module: CMS_MODULE
+			l_available_modules: CMS_MODULE_COLLECTION
+		do
+			l_available_modules := setup.modules
+			across
+				l_available_modules as ic
+			loop
+				l_module := ic.item
+				if l_module.is_enabled then
+					l_module.register_hooks (Current)
+				end
+			end
 		end
 
 feature -- Access
@@ -36,8 +54,14 @@ feature -- Access
 
 	response: WSF_RESPONSE
 
+	api: CMS_API
+			-- Current CMS API.
+
 	setup: CMS_SETUP
-		-- Current setup
+			-- Current setup
+		do
+			Result := api.setup
+		end
 
 	status_code: INTEGER
 
@@ -50,8 +74,107 @@ feature -- Access
 
 	main_content: detachable STRING_8
 
-	template: READABLE_STRING_32
-	 		-- Current template.
+	additional_page_head_lines: detachable LIST [READABLE_STRING_8]
+			-- HTML>head>...extra lines
+
+feature -- URL utilities
+
+	is_front: BOOLEAN
+			-- Is current response related to "front" page?
+		local
+			l_path_info: READABLE_STRING_8
+		do
+			l_path_info := request.path_info
+			if attached setup.front_page_path as l_front_page_path then
+				Result := l_front_page_path.same_string (l_path_info)
+			else
+				if attached base_url as l_base_url then
+					Result := l_path_info.same_string (l_base_url)
+				else
+					Result := l_path_info.is_empty or else l_path_info.same_string ("/")
+				end
+			end
+		end
+
+	site_url: READABLE_STRING_8
+		do
+			Result := absolute_host (request, "")
+		end
+
+	base_url: detachable READABLE_STRING_8
+			-- Base url if any.
+			--| Usually it is Void, but it could be
+			--|  /project/demo/
+			--| FIXME: for now, no way to change that. Always at the root "/"
+
+feature -- Access: CMS
+
+	site_name: STRING_32
+		do
+			Result := setup.site_name
+		end
+
+	front_page_url: READABLE_STRING_8
+		do
+			Result := request.absolute_script_url ("/")
+		end
+
+	values: CMS_VALUE_TABLE
+			-- Associated values indexed by string name.
+
+
+
+feature -- Permission
+		-- FIXME: to be implemented has_permissions and has_permission.
+
+feature -- Status		
+		-- FIXME: to be implemented	
+		-- is_from, is_module, has_js.
+
+
+feature -- Head customization
+
+	add_additional_head_line (s: READABLE_STRING_8; a_allow_duplication: BOOLEAN)
+		local
+			lst: like additional_page_head_lines
+		do
+			lst := additional_page_head_lines
+			if lst = Void then
+				create {ARRAYED_LIST [like additional_page_head_lines.item]} lst.make (1)
+				additional_page_head_lines := lst
+			end
+			if a_allow_duplication or else across lst as c all not c.item.same_string (s) end then
+				lst.extend (s)
+			end
+		end
+
+	add_style (a_href: STRING; a_media: detachable STRING)
+		local
+			s: STRING_8
+		do
+			s := "<link rel=%"stylesheet%" href=%""+ a_href + "%" type=%"text/css%""
+			if a_media /= Void then
+				s.append (" media=%""+ a_media + "%"")
+			end
+			s.append ("/>")
+			add_additional_head_line (s, False)
+		end
+
+	add_javascript_url (a_src: STRING)
+		local
+			s: STRING_8
+		do
+			s := "<script type=%"text/javascript%" src=%"" + a_src + "%"></script>"
+			add_additional_head_line (s, False)
+		end
+
+	add_javascript_content (a_script: STRING)
+		local
+			s: STRING_8
+		do
+			s := "<script type=%"text/javascript%">%N" + a_script + "%N</script>"
+			add_additional_head_line (s, True)
+		end
 
 feature -- Element change				
 
@@ -71,10 +194,499 @@ feature -- Element change
 			main_content := s
 		end
 
+	set_value (v: detachable ANY; k: READABLE_STRING_GENERAL)
+			-- Set value `v' associated with name `k'.
+		do
+			values.force (v, k)
+		end
+
+	unset_value (k: READABLE_STRING_GENERAL)
+			-- Unset value associated with name `k'.
+		do
+			values.remove (k)
+		end
+
+
+feature -- Logging
+
+	log	(a_category: READABLE_STRING_8; a_message: READABLE_STRING_8; a_level: INTEGER; a_link: detachable CMS_LINK)
+		local
+--			l_log: CMS_LOG
+		do
+			debug
+				to_implement ("Add implemenatation")
+			end
+--			create l_log.make (a_category, a_message, a_level, Void)
+--			if a_link /= Void then
+--				l_log.set_link (a_link)
+--			end
+--			l_log.set_info (request.http_user_agent)
+--			service.storage.save_log (l_log)
+		end
+
+feature -- Formats
+
+	formats: CMS_FORMATS
+		once
+			create Result
+		end
+
+feature -- Menu
+
+	menu_system: CMS_MENU_SYSTEM
+
+	main_menu: CMS_MENU
+		obsolete
+			"Use `primary_menu' [Nov/2014]"
+		do
+			Result := primary_menu
+		end
+
+	primary_menu: CMS_MENU
+		do
+			Result := menu_system.primary_menu
+		end
+
+	management_menu: CMS_MENU
+		do
+			Result := menu_system.management_menu
+		end
+
+	navigation_menu: CMS_MENU
+		do
+			Result := menu_system.navigation_menu
+		end
+
+	user_menu: CMS_MENU
+		do
+			Result := menu_system.user_menu
+		end
+
+	primary_tabs: CMS_MENU
+		do
+			Result := menu_system.primary_tabs
+		end
+
+feature -- Blocks initialization
+
+	initialize_block_region_settings
+		local
+			l_table: like block_region_settings
+		do
+			fixme ("CHECK:Can we use the same structure as in theme.info?")
+			create regions.make_caseless (5)
+
+			fixme ("let the user choose ...")
+			create l_table.make_caseless (10)
+			l_table["top"] := "top"
+			l_table["header"] := "header"
+			l_table["highlighted"] := "highlighted"
+			l_table["help"] := "help"
+			l_table["content"] := "content"
+			l_table["footer"] := "footer"
+			l_table["management"] := "first_sidebar"
+			l_table["navigation"] := "first_sidebar"
+			l_table["user"] := "first_sidebar"
+			l_table["bottom"] := "page_bottom"
+			block_region_settings := l_table
+		end
+
+feature -- Blocks regions
+
+	regions: STRING_TABLE [CMS_BLOCK_REGION]
+			-- Layout regions, that contains blocks.
+
+	block_region_settings: STRING_TABLE [STRING]
+
+	block_region (b: CMS_BLOCK; a_default_region: detachable READABLE_STRING_8): CMS_BLOCK_REGION
+			-- Region associated with block `b', or else `a_default_region' if provided.
+		local
+			l_region_name: detachable READABLE_STRING_8
+		do
+			l_region_name := block_region_settings.item (b.name)
+			if l_region_name = Void then
+				if a_default_region /= Void then
+					l_region_name := a_default_region
+				else
+						-- Default .. put it in same named region
+						-- Maybe a bad idea
+
+					l_region_name := b.name.as_lower
+				end
+			end
+			if attached regions.item (l_region_name) as res then
+				Result := res
+			else
+				create Result.make (l_region_name)
+				regions.force (Result, l_region_name)
+			end
+		end
+
+
+feature -- Blocks 		
+
+	add_block (b: CMS_BLOCK; a_default_region: detachable READABLE_STRING_8)
+			-- Add block `b' to associated region or `a_default_region' if provided.
+		local
+			l_region: detachable like block_region
+		do
+			l_region := block_region (b, a_default_region)
+			l_region.extend (b)
+		end
+
+
+	get_blocks
+		do
+			fixme ("find a way to have this in configuration or database, and allow different order")
+			add_block (top_header_block, "top")
+			add_block (header_block, "header")
+			if attached message_block as m then
+				add_block (m, "content")
+			end
+				-- FIXME: avoid hardcoded html! should be only in theme.
+			add_block (create {CMS_CONTENT_BLOCK}.make_raw ("top_content_anchor", Void, "<a id=%"main-content%"></a>%N", formats.full_html), "content")
+			if attached page_title as l_page_title then
+					-- FIXME: avoid hardcoded html! should be only in theme.
+				add_block (create {CMS_CONTENT_BLOCK}.make_raw ("page_title", Void, "<h1 id=%"page-title%" class=%"title%">"+ l_page_title +"</h1>%N", formats.full_html), "content")
+			end
+			if attached primary_tabs_block as m then
+				add_block (m, "content")
+			end
+			add_block (content_block, "content")
+
+			if attached management_menu_block as l_block then
+				add_block (l_block, "first_sidebar")
+			end
+			if attached navigation_menu_block as l_block then
+				add_block (l_block, "first_sidebar")
+			end
+			if attached user_menu_block as l_block then
+				add_block (l_block, "first_sidebar")
+			end
+
+			if attached footer_block as l_block then
+				add_block (l_block, "footer")
+			end
+
+			hook_block_view
+		end
+
+	primary_menu_block: detachable CMS_MENU_BLOCK
+		do
+			if attached primary_menu as m and then not m.is_empty then
+				create Result.make (m)
+			end
+		end
+
+	management_menu_block: detachable CMS_MENU_BLOCK
+		do
+			if attached management_menu as m and then not m.is_empty then
+				create Result.make (m)
+			end
+		end
+
+	navigation_menu_block: detachable CMS_MENU_BLOCK
+		do
+			if attached navigation_menu as m and then not m.is_empty then
+				create Result.make (m)
+			end
+		end
+
+	user_menu_block: detachable CMS_MENU_BLOCK
+		do
+			if attached user_menu as m and then not m.is_empty then
+				create Result.make (m)
+			end
+		end
+
+	primary_tabs_block: detachable CMS_MENU_BLOCK
+		do
+			if attached primary_tabs as m and then not m.is_empty then
+				create Result.make (m)
+			end
+		end
+
+	top_header_block: CMS_CONTENT_BLOCK
+		local
+			s: STRING
+		do
+			create s.make_empty
+			create Result.make ("page_top", Void, s, formats.full_html)
+			Result.set_is_raw (True)
+		end
+
+	header_block: CMS_CONTENT_BLOCK
+		local
+			s: STRING
+			l_hb: STRING
+		do
+			create s.make_from_string (theme.menu_html (primary_menu, True))
+			create l_hb.make_empty
+			create Result.make ("header", Void, l_hb, formats.full_html)
+			Result.set_is_raw (True)
+		end
+
+	horizontal_primary_menu_html: STRING
+		do
+			create Result.make_empty
+			Result.append ("<div id=%"menu-bar%">")
+			Result.append (theme.menu_html (primary_menu, True))
+			Result.append ("</div>")
+		end
+
+	message_html: detachable STRING
+		do
+			if attached message as m and then not m.is_empty then
+				Result := "<div id=%"message%">" + m + "</div>"
+			end
+		end
+
+	message_block: detachable CMS_CONTENT_BLOCK
+		do
+			if attached message as m and then not m.is_empty then
+				create Result.make ("message", Void, "<div id=%"message%">" + m + "</div>", formats.full_html)
+				Result.set_is_raw (True)
+			end
+		end
+
+	content_block: CMS_CONTENT_BLOCK
+		local
+			s: STRING
+		do
+			if attached main_content as l_content then
+				s := l_content
+			else
+				s := ""
+				debug
+					s := "No Content"
+				end
+			end
+			create Result.make ("content", Void, s, formats.full_html)
+			Result.set_is_raw (True)
+		end
+
+	made_with_html: STRING
+		do
+			create Result.make_empty
+			Result.append ("Made with <a href=%"http://www.eiffel.com/%">EWF</a>")
+		end
+
+	footer_block: CMS_CONTENT_BLOCK
+		do
+			create Result.make ("made_with", Void, made_with_html, Void)
+		end
+
+feature -- Hook: value alter
+
+	add_value_alter_hook (h: like value_alter_hooks.item)
+		local
+			lst: like value_alter_hooks
+		do
+			lst := value_alter_hooks
+			if lst = Void then
+				create lst.make (1)
+				value_alter_hooks := lst
+			end
+			if not lst.has (h) then
+				lst.force (h)
+			end
+		end
+
+	value_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_VALUE_ALTER]
+
+	call_value_alter_hooks (m: CMS_VALUE_TABLE)
+		do
+			if attached value_alter_hooks as lst then
+				across
+					lst as c
+				loop
+					c.item.value_alter (m, Current)
+				end
+			end
+		end
+
+feature -- Hook: menu_alter
+
+	add_menu_alter_hook (h: like menu_alter_hooks.item)
+		local
+			lst: like menu_alter_hooks
+		do
+			lst := menu_alter_hooks
+			if lst = Void then
+				create lst.make (1)
+				menu_alter_hooks := lst
+			end
+			if not lst.has (h) then
+				lst.force (h)
+			end
+		end
+
+	menu_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_MENU_ALTER]
+
+	call_menu_alter_hooks (m: CMS_MENU_SYSTEM )
+		do
+			if attached menu_alter_hooks as lst then
+				across
+					lst as c
+				loop
+					c.item.menu_alter (m, Current)
+				end
+			end
+		end
+
+feature -- Hook: form_alter
+
+	add_form_alter_hook (h: like form_alter_hooks.item)
+		local
+			lst: like form_alter_hooks
+		do
+			lst := form_alter_hooks
+			if lst = Void then
+				create lst.make (1)
+				form_alter_hooks := lst
+			end
+			if not lst.has (h) then
+				lst.force (h)
+			end
+		end
+
+	form_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_FORM_ALTER]
+
+	call_form_alter_hooks (f: CMS_FORM; a_form_data: detachable WSF_FORM_DATA; )
+		do
+			if attached form_alter_hooks as lst then
+				across
+					lst as c
+				loop
+					c.item.form_alter (f, a_form_data, Current)
+				end
+			end
+		end
+
+feature -- Hook: block		
+
+	add_block_hook (h: like block_hooks.item)
+		local
+			lst: like block_hooks
+		do
+			lst := block_hooks
+			if lst = Void then
+				create lst.make (1)
+				block_hooks := lst
+			end
+			if not lst.has (h) then
+				lst.force (h)
+			end
+		end
+
+	block_hooks: detachable ARRAYED_LIST [CMS_HOOK_BLOCK]
+
+	hook_block_view
+		do
+			if attached block_hooks as lst then
+				across
+					lst as c
+				loop
+					across
+						c.item.block_list as blst
+					loop
+						c.item.get_block_view (blst.item, Current)
+					end
+				end
+			end
+		end
+
+
+feature -- Menu: change
+
+	add_to_main_menu (lnk: CMS_LINK)
+		obsolete
+			"use add_to_primary_menu [Nov/2014]"
+		do
+			add_to_primary_menu (lnk)
+		end
+
+	add_to_primary_menu (lnk: CMS_LINK)
+		do
+			add_to_menu (lnk, primary_menu)
+		end
+
+	add_to_menu (lnk: CMS_LINK; m: CMS_MENU)
+		do
+--			if attached {CMS_LOCAL_LINK} lnk as l_local then
+--				l_local.get_is_active (request)
+--			end
+			m.extend (lnk)
+		end
+
+feature -- Message
+
+	add_message (a_msg: READABLE_STRING_8; a_category: detachable READABLE_STRING_8)
+		local
+			m: like message
+		do
+			m := message
+			if m = Void then
+				create m.make (a_msg.count + 9)
+				message := m
+			end
+			if a_category /= Void then
+				m.append ("<li class=%""+ a_category +"%">")
+			else
+				m.append ("<li>")
+			end
+			m.append (a_msg + "</li>")
+		end
+
+	add_notice_message (a_msg: READABLE_STRING_8)
+		do
+			add_message (a_msg, "notice")
+		end
+
+	add_warning_message (a_msg: READABLE_STRING_8)
+		do
+			add_message (a_msg, "warning")
+		end
+
+	add_error_message (a_msg: READABLE_STRING_8)
+		do
+			add_message (a_msg, "error")
+		end
+
+	add_success_message (a_msg: READABLE_STRING_8)
+		do
+			add_message (a_msg, "success")
+		end
+
+	report_form_errors (fd: WSF_FORM_DATA)
+		require
+			has_error: not fd.is_valid
+		do
+			if attached fd.errors as errs then
+				across
+					errs as err
+				loop
+					if attached err.item as e then
+						if attached e.field as l_field then
+							if attached e.message as e_msg then
+								add_error_message (e_msg) --"Field [" + l_field.name + "] is invalid. " + e_msg)
+							else
+								add_error_message ("Field [" + l_field.name + "] is invalid.")
+							end
+						elseif attached e.message as e_msg then
+							add_error_message (e_msg)
+						end
+					end
+				end
+			end
+		end
+
+	message: detachable STRING_8
+
 feature -- Theme
 
 	theme: CMS_THEME
-		-- Current theme
+			-- Current theme
 
 	get_theme
 		local
@@ -86,7 +698,7 @@ feature -- Theme
 				create l_info.make_default
 			end
 			if l_info.engine.is_case_insensitive_equal_general ("smarty") then
-				create {SMARTY_CMS_THEME} theme.make (setup, l_info, template)
+				create {SMARTY_CMS_THEME} theme.make (setup, l_info)
 			else
 				create {DEFAULT_CMS_THEME} theme.make (setup, l_info)
 			end
@@ -109,25 +721,180 @@ feature -- Generation
 
 	prepare (page: CMS_HTML_PAGE)
 		do
+				-- Menu
+			add_to_primary_menu (create {CMS_LOCAL_LINK}.make ("Home", "/"))
+			call_menu_alter_hooks (menu_system)
+			prepare_menu_system (menu_system)
+
+				-- Blocks
+			get_blocks
+			across
+				regions as reg_ic
+			loop
+				across
+					reg_ic.item.blocks as ic
+				loop
+					if attached {CMS_MENU_BLOCK} ic.item as l_menu_block then
+						recursive_get_active (l_menu_block.menu, request)
+					end
+				end
+			end
+
+				-- Values
 			common_prepare (page)
 			custom_prepare (page)
-		end
 
-	common_prepare (page: CMS_HTML_PAGE)
-		do
-			fixme ("Fix generacion common")
-			page.register_variable (request.absolute_script_url (""), "host")
-			page.register_variable (setup.is_web, "web")
-			page.register_variable (setup.is_html, "html")
-			if attached current_user_name (request) as l_user then
-				page.register_variable (l_user, "user")
+				-- Cms values
+			call_value_alter_hooks (values)
+
+				-- Predefined values
+			page.register_variable (page, "page") -- DO NOT REMOVE
+
+				-- Values Associated with current Execution object.
+			across
+				values as ic
+			loop
+				page.register_variable (ic.item, ic.key)
+			end
+
+				-- Block rendering
+			across
+				regions as reg_ic
+			loop
+				across
+					reg_ic.item.blocks as ic
+				loop
+					page.add_to_region (theme.block_html (ic.item), reg_ic.item.name)
+				end
+			end
+
+				-- Additional lines in <head ../>
+			if attached additional_page_head_lines as l_head_lines then
+				across
+					l_head_lines as hl
+				loop
+					page.head_lines.force (hl.item)
+				end
 			end
 		end
 
+	common_prepare (page: CMS_HTML_PAGE)
+			-- Common preparation for page `page'.
+		do
+			fixme ("Fix generation common")
+
+				-- Information
+			page.set_title (title)
+			debug ("cms")
+				if title = Void then
+					page.set_title ("CMS::" + request.path_info) --| FIXME: probably, should be removed and handled by theme.
+				end
+			end
+
+				-- Variables
+			page.register_variable (request.absolute_script_url (""), "site_url")
+			page.register_variable (request.absolute_script_url (""), "host") -- Same as `site_url'.
+			if attached current_user_name (request) as l_user then
+				page.register_variable (l_user, "user")
+			end
+			page.register_variable (title, "site_title")
+			page.set_is_front (is_front)
+
+				-- Variables/Setup
+			page.register_variable (setup.is_web, "web")
+			page.register_variable (setup.is_html, "html")
+
+				-- Variables/Misc
+
+-- FIXME: logo .. could be a settings of theme, managed by admin front-end/database.
+--			if attached logo_location as l_logo then
+--				page.register_variable (l_logo, "logo")
+--			end
+
+				-- Menu...
+			page.register_variable (horizontal_primary_menu_html, "primary_nav")
+		end
+
 	custom_prepare (page: CMS_HTML_PAGE)
+			-- Common preparation for page `page' that can be redefined by descendants.
 		do
 		end
 
+    prepare_menu_system (a_menu_system: CMS_MENU_SYSTEM)
+		do
+			across
+				a_menu_system as c
+			loop
+				prepare_links (c.item)
+			end
+		end
+
+	prepare_links (a_menu: CMS_LINK_COMPOSITE)
+		local
+			to_remove: ARRAYED_LIST [CMS_LINK]
+		do
+			create to_remove.make (0)
+			across
+				a_menu as c
+			loop
+				if attached {CMS_LOCAL_LINK} c.item as lm then
+--					if attached lm.permission_arguments as perms and then not has_permissions (perms) then
+--						to_remove.force (lm)
+--					else
+						-- if lm.permission_arguments is Void , this is permitted
+						get_local_link_active_status (lm)
+						if attached {CMS_LINK_COMPOSITE} lm as comp then
+							prepare_links (comp)
+						end
+--					end
+				elseif attached {CMS_LINK_COMPOSITE} c.item as comp then
+					prepare_links (comp)
+				end
+			end
+			across
+				to_remove as c
+			loop
+				a_menu.remove (c.item)
+			end
+		end
+
+	recursive_get_active (a_comp: CMS_LINK_COMPOSITE; req: WSF_REQUEST)
+			-- Update the active status recursively on `a_comp'.
+		local
+			ln: CMS_LINK
+		do
+			if attached a_comp.items as l_items then
+				across
+					l_items as ic
+				loop
+					ln := ic.item
+					if attached {CMS_LOCAL_LINK} ln as l_local then
+						get_local_link_active_status (l_local)
+					end
+					if (ln.is_expanded or ln.is_collapsed) and then attached {CMS_LINK_COMPOSITE} ln as l_comp then
+						recursive_get_active (l_comp, req)
+					end
+				end
+			end
+		end
+
+	get_local_link_active_status (a_lnk: CMS_LOCAL_LINK)
+			-- Get `a_lnk.is_active' value according to `request' data.
+		local
+			qs: STRING
+			l_is_active: BOOLEAN
+		do
+			create qs.make_from_string (request.percent_encoded_path_info)
+			l_is_active := qs.same_string (a_lnk.location)
+			if not l_is_active then
+				if attached request.query_string as l_query_string and then not l_query_string.is_empty then
+					qs.append_character ('?')
+					qs.append (l_query_string)
+				end
+				l_is_active := qs.same_string (a_lnk.location)
+			end
+			a_lnk.set_is_active (l_is_active)
+		end
 
 feature -- Custom Variables
 

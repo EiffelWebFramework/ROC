@@ -10,8 +10,6 @@ inherit
 
 	DATABASE_CONFIG
 
-	SHARED_ERROR
-
 feature {NONE} -- Initialization
 
 	make_common
@@ -72,6 +70,65 @@ feature -- Database Setup
 	keep_connection: BOOLEAN
 			-- Keep connection alive?
 
+feature -- Transactions
+
+	begin_transaction
+			-- Start a transaction which will be terminated by a call to `rollback' or `commit'.
+		local
+			rescued: BOOLEAN
+		do
+			if not rescued then
+				if db_control.is_ok then
+					db_control.begin
+				else
+					database_error_handler.add_database_error (db_control.error_message_32, db_control.error_code)
+				end
+			end
+		rescue
+			rescued := True
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
+			db_control.reset
+			retry
+		end
+
+	commit
+			-- Commit updates in the database.
+		local
+			rescued: BOOLEAN
+		do
+			if not rescued then
+				if db_control.is_ok then
+					db_control.commit
+				else
+					database_error_handler.add_database_error (db_control.error_message_32, db_control.error_code)
+				end
+			end
+		rescue
+			rescued := True
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
+			db_control.reset
+			retry
+		end
+
+	rollback
+			-- Rollback updates in the database.
+		local
+			rescued: BOOLEAN
+		do
+			if not rescued then
+				if db_control.is_ok then
+					db_control.rollback
+				else
+					database_error_handler.add_database_error (db_control.error_message_32, db_control.error_code)
+				end
+			end
+		rescue
+			rescued := True
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
+			db_control.reset
+			retry
+		end
+
 feature -- Change Element
 
 	not_keep_connection
@@ -106,5 +163,29 @@ feature -- Conection
 		do
 			Result := db_control.is_connected
 		end
+
+feature -- Error Handling
+
+	database_error_handler: DATABASE_ERROR_HANDLER
+			-- Error handler.
+	
+feature -- Status Report
+
+	has_error: BOOLEAN
+			-- Has error?
+		do
+			Result := database_error_handler.has_error
+		end
+
+feature -- Helper
+
+	exception_as_error (a_e: like {EXCEPTION_MANAGER}.last_exception)
+			-- Record exception as an error.
+		do
+			if attached a_e as l_e and then attached l_e.trace as l_trace then
+				database_error_handler.add_error_details (l_e.code, once "Exception", l_trace.as_string_32)
+			end
+		end
+
 
 end

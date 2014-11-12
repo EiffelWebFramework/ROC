@@ -20,16 +20,25 @@ feature -- Access
 
 feature -- Router
 
-	router: WSF_ROUTER
+	router (a_api: CMS_API): WSF_ROUTER
 			-- Router configuration.
 		require
 			is_enabled: is_enabled
 		deferred
 		end
 
+feature -- Hooks configuration
+
+	register_hooks (a_response: CMS_RESPONSE)
+			-- Module hooks configuration.
+		require
+			is_enabled: is_enabled
+		do
+		end
+
 feature -- Filter
 
-	filters: detachable LIST [WSF_FILTER]
+	filters (a_api: CMS_API): detachable LIST [WSF_FILTER]
 			-- Optional list of filter for Current module.
 		require
 			is_enabled: is_enabled

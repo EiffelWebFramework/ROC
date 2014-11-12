@@ -9,6 +9,8 @@ class
 inherit
 	CMS_PAGE_TEMPLATE
 
+	CMS_ENCODERS
+
 	SHARED_TEMPLATE_CONTEXT
 
 create
@@ -41,12 +43,13 @@ feature -- Access
 				variables.force (ic.item, ic.key)
 			end
 
+				-- FIXME: review variables !
 			if attached page.title as l_title then
-				variables.force (l_title, "page_title")
-				variables.force (l_title, "head_title")
+				variables.force (html_encoded (l_title), "head_title")
+				variables.force (html_encoded (l_title), "page_title")
 			else
+				variables.force ("CMS", "head_title")
 				variables.force ("", "page_title")
-				variables.force ("", "head_title")
 			end
 
 			variables.force (page.language, "language")
@@ -55,7 +58,7 @@ feature -- Access
 			across
 				theme.regions as r
 			loop
-				variables.force (page.region (r.item), r.item)
+				variables.force (page.region (r.item), "region_" + r.item)
 			end
 		end
 

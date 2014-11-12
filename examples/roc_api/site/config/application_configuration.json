@@ -24,7 +24,7 @@
 			"backup_count":"4"
 		},
 	"server": { 
-			"mode":"api"
+			"mode":"html"
 		}
 			
 }

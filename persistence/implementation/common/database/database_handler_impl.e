@@ -21,79 +21,62 @@ feature {NONE} -- Initialization
 		do
 			connection := a_connection
 			create last_query.make_now
-			set_successful
+			create database_error_handler.make
 		ensure
 			connection_not_void: connection /= Void
 			last_query_not_void: last_query /= Void
+			database_error_handler_set: attached database_error_handler
 		end
 
 feature -- Functionality
 
-	execute_reader
+	execute_store_reader
 			-- Execute stored procedure that returns data.
 		local
 			l_db_selection: DB_SELECTION
 			l_retried: BOOLEAN
 		do
 			if not l_retried then
-				if not keep_connection then
-					connect
-				end
-
+				database_error_handler.reset
 				if attached store as l_store then
 					create l_db_selection.make
 					db_selection := l_db_selection
 					items := l_store.execute_reader (l_db_selection)
+					check_database_selection_error
 				end
-
-				if not keep_connection then
-					disconnect
-				end
-				set_successful
 				log.write_debug ( generator+".execute_reader Successful")
 			end
 		rescue
-			set_last_error_from_exception ("Store procedure execution")
-			log.write_critical (generator+ ".execute_reader " + last_error_message)
-			if is_connected then
-				disconnect
-			end
 			l_retried := True
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
+			if attached db_selection as l_selection then
+				l_selection.reset
+			end
 			retry
 		end
 
-	execute_writer
+	execute_store_writer
 			-- Execute stored procedure that update/add data.
 		local
 			l_db_change: DB_CHANGE
 			l_retried : BOOLEAN
 		do
 		    if not  l_retried then
-				if not keep_connection and not is_connected then
-					connect
-				end
-
+				database_error_handler.reset
 				if attached store as l_store then
 					create l_db_change.make
-					db_update := l_db_change
+					db_change := l_db_change
 					l_store.execute_writer (l_db_change)
-					if not l_store.has_error then
-						db_control.commit
-					end
+					check_database_change_error
 				end
-				if not keep_connection then
-					disconnect
-				end
-				set_successful
 				log.write_debug ( generator+".execute_writer Successful")
 			end
 		rescue
-			set_last_error_from_exception ("Store procedure execution")
-			log.write_critical (generator+ ".execute_writer " + last_error_message)
-			if is_connected then
-				disconnect
-			end
 			l_retried := True
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
+			if attached db_change as l_change then
+				l_change.reset
+			end
 			retry
 		end
 
@@ -106,60 +89,45 @@ feature -- SQL Queries
 			l_retried: BOOLEAN
 		do
 			if not l_retried then
-				if not keep_connection then
-					connect
-				end
-
+				database_error_handler.reset
 				if attached query as l_query then
 					create l_db_selection.make
 					db_selection := l_db_selection
 					items := l_query.execute_reader (l_db_selection)
+					check_database_selection_error
 				end
-				if not keep_connection then
-					disconnect
-				end
-				set_successful
 			end
 		rescue
-			set_last_error_from_exception ("execute_query")
-			log.write_critical (generator+ ".execute_query " + last_error_message)
-			if is_connected then
-				disconnect
-			end
 			l_retried := True
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
+			if attached db_selection as l_selection then
+				l_selection.reset
+			end
 			retry
 		end
 
 
 	execute_change
-			-- Execute sqlquery that update/add data.
+			-- Execute sql_query that update/add data.
 		local
 			l_db_change: DB_CHANGE
 			l_retried : BOOLEAN
 		do
 		    if not  l_retried then
-				if not keep_connection and not is_connected then
-					connect
-				end
-
+				database_error_handler.reset
 				if attached query as l_query then
 					create l_db_change.make
-					db_update := l_db_change
+					db_change := l_db_change
 					l_query.execute_change (l_db_change)
-					db_control.commit
+					check_database_change_error
 				end
-				if not keep_connection then
-					disconnect
-				end
-				set_successful
 			end
 		rescue
-			set_last_error_from_exception ("Store procedure execution")
-			log.write_critical (generator+ ".execute_writer " + last_error_message)
-			if is_connected then
-				disconnect
-			end
 			l_retried := True
+			exception_as_error ((create {EXCEPTION_MANAGER}).last_exception)
+			if attached db_change as l_change then
+				l_change.reset
+			end
 			retry
 		end
 
@@ -207,24 +175,6 @@ feature -- Iteration
 
 feature {NONE} -- Implementation
 
-	connection: DATABASE_CONNECTION
-		-- Database connection.
-
-	db_control: DB_CONTROL
-		-- Database control.
-		do
-			Result := connection.db_control
-		end
-
-	db_result: detachable DB_RESULT
-		-- Database query result.
-
-	db_selection: detachable DB_SELECTION
-		-- Database selection.
-
-	db_update: detachable DB_CHANGE
-		-- Database modification.	
-
 	last_query: DATE_TIME
 		-- Last time when a query was executed.
 
@@ -263,7 +213,7 @@ feature {NONE} -- Implementation
 	affected_row_count: INTEGER
 			--  The number of rows changed, deleted, or inserted by the last statement.
 		do
-			if attached db_update as l_update then
+			if attached db_change as l_update then
 				Result := l_update.affected_row_count
 			end
 		end

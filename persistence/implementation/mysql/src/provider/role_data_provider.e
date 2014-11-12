@@ -35,7 +35,7 @@ feature -- Status Report
 	is_successful: BOOLEAN
 			-- Is the last execution sucessful?
 		do
-			Result := db_handler.successful
+--			Result := db_handler.successful
 		end
 
 	has_roles: BOOLEAN
@@ -210,13 +210,7 @@ feature {NONE} -- Implementation
 	post_execution
 			-- Post database execution.
 		do
-			if db_handler.successful then
-				set_successful
-			else
-				if attached db_handler.last_error then
-					set_last_error_from_handler (db_handler.last_error)
-				end
-			end
+
 		end
 
 end

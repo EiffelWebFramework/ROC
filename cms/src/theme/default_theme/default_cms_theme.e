@@ -60,7 +60,6 @@ feature -- Conversion
 
 	prepare (page: CMS_HTML_PAGE)
 		do
---			page.add_style (url ("/theme/style.css", Void), Void)
 		end
 
 	page_html (page: CMS_HTML_PAGE): STRING_8
@@ -73,6 +72,11 @@ feature -- Conversion
 			html_template.prepare (page)
 			html_template.register (l_content, "page")
 			Result := html_template.to_html (page)
+		end
+
+	navigation_template: detachable READABLE_STRING_GENERAL
+			-- navigation template name, if any.
+		do
 		end
 
 feature {NONE} -- Internal

@@ -15,11 +15,10 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_setup: like setup; a_info: like information; a_template: like template)
+	make (a_setup: like setup; a_info: like information;)
 		do
 			setup := a_setup
 			information := a_info
-			template := a_template
 			if attached a_info.item ("template_dir") as s then
 				templates_directory := a_setup.theme_location.extended (s)
 			else
@@ -28,14 +27,11 @@ feature {NONE} -- Initialization
 		ensure
 			setup_set: setup = a_setup
 			information_set: information = a_info
-			template_set: template = a_template
 		end
 
 feature -- Access
 
 	name: STRING = "smarty-CMS"
-
-	template: STRING;
 
 	templates_directory: PATH
 
@@ -59,7 +55,7 @@ feature -- Access
 						i := i + 1
 					end
 				else
-					l_regions := <<"header", "content", "footer", "first_sidebar", "second_sidebar">>
+					l_regions := <<"top","header", "content", "footer", "first_sidebar", "second_sidebar","bottom">>
 				end
 				internaL_regions := l_regions
 			end
@@ -72,7 +68,7 @@ feature -- Access
 		do
 			tpl := internal_page_template
 			if tpl = Void then
-				create tpl.make (template, Current)
+				create tpl.make ("page", Current)
 				internal_page_template := tpl
 			end
 			Result := tpl
@@ -82,13 +78,42 @@ feature -- Conversion
 
 	prepare (page: CMS_HTML_PAGE)
 		do
+			page.register_variable (page, "page")
+			page.register_variable (page.regions, "regions")
+			across
+				page.regions as ic
+			loop
+				page.register_variable (ic.item, "region_" + ic.key)
+			end
 		end
 
 	page_html (page: CMS_HTML_PAGE): STRING_8
+		local
+			l_page_inspector: detachable SMARTY_CMS_HTML_PAGE_INSPECTOR
+			l_regions_inspector: detachable SMARTY_CMS_REGIONS_INSPECTOR
+			l_table_inspector: detachable STRING_TABLE_OF_STRING_INSPECTOR
 		do
 			prepare (page)
+			create l_page_inspector.register (page.generating_type)
+
+			if attached {CMS_RESPONSE} page.variables.item ("cms") as l_cms then
+				if attached l_cms.regions as l_regions then
+					create l_regions_inspector.register (l_regions.generating_type)
+				end
+			end
+
+			create l_table_inspector.register (({detachable STRING_TABLE [STRING]}).name)
 			page_template.prepare (page)
 			Result := page_template.to_html (page)
+
+				-- Clean template inspector.
+			if l_regions_inspector /= Void then
+				l_regions_inspector.unregister
+			end
+			if l_page_inspector /= Void then
+				l_page_inspector.unregister
+			end
+			l_table_inspector.unregister
 		end
 
 feature {NONE} -- Internal

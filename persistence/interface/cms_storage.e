@@ -11,13 +11,18 @@ deferred class
 
 inherit
 
-	SHARED_ERROR
+	SHARED_LOGGER
 
 feature {NONE} -- Initialization
 
 	initialize
 		do
 		end
+
+feature -- Error Handling
+
+	error_handler: ERROR_HANDLER
+			-- Error handler.
 
 feature -- Access: user
 
