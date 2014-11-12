@@ -35,7 +35,7 @@ feature {NONE} -- Initialization
 	configure
 		do
 			site_id := configuration.site_id
-			site_url := configuration.site_url ("")
+			site_url := configuration.site_url (Void)
 			site_name := configuration.site_name ("EWF::CMS")
 			site_email := configuration.site_email ("webmaster")
 			themes_location := configuration.themes_location
@@ -104,7 +104,7 @@ feature -- Compute location
 			-- assets (js, css, images, etc)
 			-- Not used at the moment.
 		do
-			debug
+			debug ("refactor_fixme")
 				fixme ("Check if we really need it")
 			end
 			theme_resource_location := theme_location

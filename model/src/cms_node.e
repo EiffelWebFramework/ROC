@@ -25,9 +25,13 @@ feature{NONE} -- Initialization
 			set_creation_date (l_time)
 			set_modification_date (l_time)
 			set_publication_date (l_time)
-			fixme ("Remove harcode format")
+			debug ("refactor_fixme")
+				fixme ("Remove harcode format")
+			end
 			set_format ("HTML")
-			fixme ("Remove harcode content type")
+			debug ("refactor_fixme")
+				fixme ("Remove harcode content type")
+			end
 			set_content_type ("Page")
 		ensure
 			content_set: content = a_content

@@ -274,10 +274,12 @@ feature -- Blocks initialization
 		local
 			l_table: like block_region_settings
 		do
-			fixme ("CHECK:Can we use the same structure as in theme.info?")
+			debug ("refactor_fixme")
+				fixme ("CHECK:Can we use the same structure as in theme.info?")
+				fixme ("let the user choose ...")
+			end
 			create regions.make_caseless (5)
 
-			fixme ("let the user choose ...")
 			create l_table.make_caseless (10)
 			l_table["top"] := "top"
 			l_table["header"] := "header"
@@ -338,7 +340,9 @@ feature -- Blocks
 
 	get_blocks
 		do
-			fixme ("find a way to have this in configuration or database, and allow different order")
+			debug ("refactor_fixme")
+				fixme ("find a way to have this in configuration or database, and allow different order")
+			end
 			add_block (top_header_block, "top")
 			add_block (header_block, "header")
 			if attached message_block as m then
@@ -796,7 +800,9 @@ feature -- Generation
 	common_prepare (page: CMS_HTML_PAGE)
 			-- Common preparation for page `page'.
 		do
-			fixme ("Fix generation common")
+			debug ("refactor_fixme")
+				fixme ("Fix generation common")
+			end
 
 				-- Information
 			page.set_title (title)

@@ -39,7 +39,7 @@ feature -- Access: user
 
 	all_users: LIST [CMS_USER]
 		do
-			to_implement("Not implemented!!!")
+			to_implement (generator + ".all_users")
 			create {ARRAYED_LIST[CMS_USER]} Result.make (0)
 		end
 
@@ -88,14 +88,14 @@ feature -- User Nodes
 	user_collaborator_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
 			-- Possible list of nodes where the user identified by `a_id', is a collaborator.
 		do
-			fixme ("Not implemented!!!")
+			to_implement (generator + ".user_collaborator_nodes")
 			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
 		end
 
 	user_author_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
 			-- Possible list of nodes where the user identified by `a_id', is the author.
 		do
-			fixme ("Not implemented!!!")
+			to_implement (generator + ".user_author_nodes")
 			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
 		end
 
@@ -103,12 +103,12 @@ feature -- Access: roles and permissions
 
 	user_role_by_id (a_id: like {CMS_USER_ROLE}.id): detachable CMS_USER_ROLE
 		do
-			fixme ("Not Implemented!!!")
+			to_implement (generator + ".user_role_by_id")
 		end
 
 	user_roles: LIST [CMS_USER_ROLE]
 		do
-			fixme ("Not Implemented!!!")
+			to_implement (generator + ".user_roles")
 			create {ARRAYED_LIST[CMS_USER_ROLE]} Result.make (0)
 		end
 
@@ -116,7 +116,7 @@ feature -- Change: roles and permissions
 
 	save_user_role (a_user_role: CMS_USER_ROLE)
 		do
-			fixme ("Not Implemented!!!")
+			to_implement (generator + ".save_user_role")
 		end
 
 feature -- Change: user
@@ -133,6 +133,9 @@ feature -- Change: user
 				user_provider.new_user (a_user.name, l_password, l_email)
 				connection.commit
 			else
+				debug ("refactor_fixme")
+					fixme ("maybe we should not always carry password, in this case, to implement the else part..")
+				end
 			end
 		end
 

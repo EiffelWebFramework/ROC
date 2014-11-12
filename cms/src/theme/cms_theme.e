@@ -37,7 +37,9 @@ feature -- Conversion
 
 	menu_html (a_menu: CMS_MENU; is_horizontal: BOOLEAN): STRING_8
 		do
-			fixme ("Refactor HTML code to use the new Bootstrap theme template")
+			debug ("refactor_fixme")
+				fixme ("Refactor HTML code to use the new Bootstrap theme template")
+			end
 			create Result.make_from_string ("<div id=%""+ a_menu.name +"%" class=%"menu%">")
 			if is_horizontal then
 				Result.append ("<ul class=%"horizontal%" >%N")
@@ -57,7 +59,9 @@ feature -- Conversion
 		local
 			s: STRING
 		do
-			fixme ("Refactor HTML code to use the new Bootstrap theme template")
+			debug ("refactor_fixme")
+				fixme ("Refactor HTML code to use the new Bootstrap theme template")
+			end
 			if attached {CMS_CONTENT_BLOCK} a_block as l_content_block and then l_content_block.is_raw then
 				create s.make_empty
 				if attached l_content_block.title as l_title then
@@ -87,7 +91,9 @@ feature {NONE} -- Implementation
 		local
 			cl: STRING
 		do
-			fixme ("Remove HTML from Eiffel")
+			debug ("refactor_fixme")
+				fixme ("Remove HTML from Eiffel")
+			end
 			create cl.make_empty
 			if lnk.is_active then
 				cl.append ("active ")

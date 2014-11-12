@@ -245,7 +245,7 @@ feature -- Execution
 	execute_default (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- Default request handler if no other are relevant
 		do
-			fixme ("To Implement")
+			to_implement ("Default response for CMS_SERVICE")
 		end
 
 note
