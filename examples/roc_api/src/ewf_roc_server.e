@@ -144,7 +144,9 @@ feature -- CMS setup
 
 	setup_storage (a_setup: CMS_SETUP)
 		do
-			to_implement ("To implement custom storage")
+			debug ("refactor_fixme")
+				to_implement ("To implement custom storage")
+			end
 		end
 end
 
