@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {BASIC_AUTH_MODULE}."
+	description: "This module allows the use of HTTP Basic Authentication to restrict access by looking up users in the given providers."
 	date: "$Date$"
 	revision: "$Revision$"
 

@@ -19,13 +19,19 @@ feature -- Hook
 	hook_auto_register (a_response: CMS_RESPONSE)
 		do
 			if attached {CMS_HOOK_MENU_ALTER} Current as h_menu_alter then
-				a_response.add_menu_alter_hook (h_menu_alter)
+				debug ("refactor_fixme")
+					-- Fixme: CMS_RESPONSE.add_menu_alter_hook : a_response.add_menu_alter_hook (h_menu_alter)
+				end
 			end
 			if attached {CMS_HOOK_BLOCK} Current as h_block then
-				a_response.add_block_hook (h_block)
+				debug ("refactor_fixme")
+					-- Fixme: CMS_RESPONSE.add_block_hook a_response.add_block_hook (h_block)
+				end
 			end
 			if attached {CMS_HOOK_FORM_ALTER} Current as h_block then
-				a_response.add_form_alter_hook (h_block)
+				debug ("refactor_fixme")
+					-- CMS_RESPONSE.add_form_alter_hook a_response.add_form_alter_hook (h_block)
+				end
 			end
 
 		end
