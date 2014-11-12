@@ -39,8 +39,8 @@ feature -- Access: Site
 	site_email: READABLE_STRING_8
 			-- Email for the site.
 
-	site_url: READABLE_STRING_8
-			-- Base url of the site.
+	site_url: detachable READABLE_STRING_8
+			-- Optional base url of the site.
 
 	front_page_path: detachable READABLE_STRING_8
 			-- Optional path defining the front page.

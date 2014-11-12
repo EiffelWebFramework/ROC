@@ -1,12 +1,12 @@
 note
 	description: "[
-				CMS API Layout, to provide paths 
-							*config 
-							*application 
-							*logs 
-							*documentation 
-							*themes
-						]"
+				CMS Layout providing file system locations for
+						- config 
+						- application 
+						- logs 
+						- documentation 
+						- themes
+			]"
 	date: "$Date$"
 	revision: "$Revision$"
 

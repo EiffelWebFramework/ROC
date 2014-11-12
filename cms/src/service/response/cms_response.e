@@ -29,6 +29,7 @@ feature {NONE} -- Initialization
 			get_theme
 			create menu_system.make
 			initialize_block_region_settings
+			create hook_subscribers.make (0)
 			register_hooks
 		end
 
@@ -273,10 +274,12 @@ feature -- Blocks initialization
 		local
 			l_table: like block_region_settings
 		do
-			fixme ("CHECK:Can we use the same structure as in theme.info?")
+			debug ("refactor_fixme")
+				fixme ("CHECK:Can we use the same structure as in theme.info?")
+				fixme ("let the user choose ...")
+			end
 			create regions.make_caseless (5)
 
-			fixme ("let the user choose ...")
 			create l_table.make_caseless (10)
 			l_table["top"] := "top"
 			l_table["header"] := "header"
@@ -337,7 +340,9 @@ feature -- Blocks
 
 	get_blocks
 		do
-			fixme ("find a way to have this in configuration or database, and allow different order")
+			debug ("refactor_fixme")
+				fixme ("find a way to have this in configuration or database, and allow different order")
+			end
 			add_block (top_header_block, "top")
 			add_block (header_block, "header")
 			if attached message_block as m then
@@ -476,118 +481,111 @@ feature -- Blocks
 			create Result.make ("made_with", Void, made_with_html, Void)
 		end
 
-feature -- Hook: value alter
 
-	subscribe_to_value_table_alter_hook (h: like value_table_alter_hooks.item)
+feature -- Hooks
+
+	hook_subscribers: HASH_TABLE [LIST [CMS_HOOK], TYPE [CMS_HOOK]]
+			-- Hook indexed by hook identifier.
+
+	subscribe_to_hook (h: CMS_HOOK; a_hook_type: TYPE [CMS_HOOK])
+			-- Subscribe `h' to hooks identified by `a_hook_type'.
 		local
-			lst: like value_table_alter_hooks
+			lst: detachable LIST [CMS_HOOK]
 		do
-			lst := value_table_alter_hooks
+			lst := hook_subscribers.item (a_hook_type)
 			if lst = Void then
-				create lst.make (1)
-				value_table_alter_hooks := lst
+				create {ARRAYED_LIST [CMS_HOOK]} lst.make (1)
+				hook_subscribers.force (lst, a_hook_type)
 			end
 			if not lst.has (h) then
 				lst.force (h)
 			end
 		end
 
-	value_table_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_VALUE_TABLE_ALTER]
+feature -- Hook: value alter
 
-	invoke_value_table_alter (m: CMS_VALUE_TABLE)
+	subscribe_to_value_table_alter_hook (h: CMS_HOOK_VALUE_TABLE_ALTER)
+			-- Add `h' as subscriber of value table alter hooks CMS_HOOK_VALUE_TABLE_ALTER.		
 		do
-			if attached value_table_alter_hooks as lst then
+			subscribe_to_hook (h, {CMS_HOOK_VALUE_TABLE_ALTER})
+		end
+
+	invoke_value_table_alter (a_table: CMS_VALUE_TABLE)
+			-- Invoke value table alter hook for table `a_table'.		
+		do
+			if attached hook_subscribers.item ({CMS_HOOK_VALUE_TABLE_ALTER}) as lst then
 				across
 					lst as c
 				loop
-					c.item.value_table_alter (m, Current)
+					if attached {CMS_HOOK_VALUE_TABLE_ALTER} c.item as h then
+						h.value_table_alter (a_table, Current)
+					end
 				end
 			end
 		end
 
 feature -- Hook: menu_system_alter
 
-	subscribe_to_menu_system_alter_hook (h: like menu_system_alter_hooks.item)
-		local
-			lst: like menu_system_alter_hooks
+	subscribe_to_menu_system_alter_hook (h: CMS_HOOK_MENU_SYSTEM_ALTER)
+			-- Add `h' as subscriber of menu system alter hooks CMS_HOOK_MENU_SYSTEM_ALTER.	
 		do
-			lst := menu_system_alter_hooks
-			if lst = Void then
-				create lst.make (1)
-				menu_system_alter_hooks := lst
-			end
-			if not lst.has (h) then
-				lst.force (h)
-			end
+			subscribe_to_hook (h, {CMS_HOOK_MENU_SYSTEM_ALTER})
 		end
 
-	menu_system_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_MENU_SYSTEM_ALTER]
-
-	invoke_menu_system_alter (m: CMS_MENU_SYSTEM )
+	invoke_menu_system_alter (a_menu_system: CMS_MENU_SYSTEM)
+			-- Invoke menu system alter hook for menu `a_menu_system'.	
 		do
-			if attached menu_system_alter_hooks as lst then
+			if attached hook_subscribers.item ({CMS_HOOK_MENU_SYSTEM_ALTER}) as lst then
 				across
 					lst as c
 				loop
-					c.item.menu_system_alter (m, Current)
+					if attached {CMS_HOOK_MENU_SYSTEM_ALTER} c.item as h then
+						h.menu_system_alter (a_menu_system, Current)
+					end
 				end
 			end
 		end
 
 feature -- Hook: menu_alter
 
-	subscribe_to_menu_alter_hook (h: like menu_alter_hooks.item)
-		local
-			lst: like menu_alter_hooks
+	subscribe_to_menu_alter_hook (h: CMS_HOOK_MENU_ALTER)
+			-- Add `h' as subscriber of menu alter hooks CMS_HOOK_MENU_ALTER.
 		do
-			lst := menu_alter_hooks
-			if lst = Void then
-				create lst.make (1)
-				menu_alter_hooks := lst
-			end
-			if not lst.has (h) then
-				lst.force (h)
-			end
+			subscribe_to_hook (h, {CMS_HOOK_MENU_ALTER})
 		end
 
-	menu_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_MENU_ALTER]
-
-	invoke_menu_alter (m: CMS_MENU)
+	invoke_menu_alter (a_menu: CMS_MENU)
+			-- Invoke menu alter hook for menu `a_menu'.
 		do
-			if attached menu_alter_hooks as lst then
+			if attached hook_subscribers.item ({CMS_HOOK_MENU_ALTER}) as lst then
 				across
 					lst as c
 				loop
-					c.item.menu_alter (m, Current)
+					if attached {CMS_HOOK_MENU_ALTER} c.item as h then
+						h.menu_alter (a_menu, Current)
+					end
 				end
 			end
 		end
 
 feature -- Hook: form_alter
 
-	subscribe_to_form_alter_hook (h: like form_alter_hooks.item)
-		local
-			lst: like form_alter_hooks
+	subscribe_to_form_alter_hook (h: CMS_HOOK_FORM_ALTER)
+			-- Add `h' as subscriber of form alter hooks CMS_HOOK_FORM_ALTER.
 		do
-			lst := form_alter_hooks
-			if lst = Void then
-				create lst.make (1)
-				form_alter_hooks := lst
-			end
-			if not lst.has (h) then
-				lst.force (h)
-			end
+			subscribe_to_hook (h, {CMS_HOOK_MENU_ALTER})
 		end
 
-	form_alter_hooks: detachable ARRAYED_LIST [CMS_HOOK_FORM_ALTER]
-
-	invoke_form_alter (f: CMS_FORM; a_form_data: detachable WSF_FORM_DATA)
+	invoke_form_alter (a_form: CMS_FORM; a_form_data: detachable WSF_FORM_DATA)
+			-- Invoke form alter hook for form `a_form' and associated data `a_form_data'
 		do
-			if attached form_alter_hooks as lst then
+			if attached hook_subscribers.item ({CMS_HOOK_FORM_ALTER}) as lst then
 				across
 					lst as c
 				loop
-					c.item.form_alter (f, a_form_data, Current)
+					if attached {CMS_HOOK_FORM_ALTER} c.item as h then
+						h.form_alter (a_form, a_form_data, Current)
+					end
 				end
 			end
 		end
@@ -595,31 +593,24 @@ feature -- Hook: form_alter
 feature -- Hook: block		
 
 	subscribe_to_block_hook (h: CMS_HOOK_BLOCK)
-		local
-			lst: like block_hooks
+			-- Add `h' as subscriber of hooks CMS_HOOK_BLOCK.
 		do
-			lst := block_hooks
-			if lst = Void then
-				create lst.make (1)
-				block_hooks := lst
-			end
-			if not lst.has (h) then
-				lst.force (h)
-			end
+			subscribe_to_hook (h, {CMS_HOOK_BLOCK})
 		end
 
-	block_hooks: detachable ARRAYED_LIST [CMS_HOOK_BLOCK]
-
 	invoke_block
+			-- Invoke block hook in order to get block from modules.
 		do
-			if attached block_hooks as lst then
+			if attached hook_subscribers.item ({CMS_HOOK_BLOCK}) as lst then
 				across
 					lst as c
 				loop
-					across
-						c.item.block_list as blst
-					loop
-						c.item.get_block_view (blst.item, Current)
+					if attached {CMS_HOOK_BLOCK} c.item as h then
+						across
+							h.block_list as blst
+						loop
+							h.get_block_view (blst.item, Current)
+						end
 					end
 				end
 			end
@@ -809,7 +800,9 @@ feature -- Generation
 	common_prepare (page: CMS_HTML_PAGE)
 			-- Common preparation for page `page'.
 		do
-			fixme ("Fix generation common")
+			debug ("refactor_fixme")
+				fixme ("Fix generation common")
+			end
 
 				-- Information
 			page.set_title (title)

@@ -1,8 +1,14 @@
 note
 	description: "[
-					Configure the basic settings for a CMS application, for example where to look for themes, the name of the application, etc.
-					The settings can be configured by default using the current working directory, using the commands provided by the class or by an external configuration file
-					]"
+			Configure the basic settings for a CMS application, 
+			i.e: where to look for themes, name of the application, etc...
+	
+			The settings can be configured by default:
+				- using the current working directory,
+				- using the commands provided by the class 
+				- or by an external configuration file.
+		]"
+
 class
 	CMS_CONFIGURATION
 
@@ -119,7 +125,7 @@ feature -- Access
 			end
 		end
 
-	site_url (dft: like site_url): READABLE_STRING_8
+	site_url (dft: like site_url): detachable READABLE_STRING_8
 		do
 			if attached options.item ("site.url") as s then
 				Result := s

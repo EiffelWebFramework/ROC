@@ -94,7 +94,9 @@ feature -- Access: Node
 	nodes: LIST[CMS_NODE]
 			-- List of nodes.
 		do
-			fixme ("Implementation")
+			debug ("refactor_fixme")
+				fixme ("Implementation")
+			end
 			Result := storage.recent_nodes (0, 10)
 		end
 
@@ -107,7 +109,9 @@ feature -- Access: Node
 	node (a_id: INTEGER_64): detachable CMS_NODE
 			-- Node by ID.
 		do
-			fixme ("Check preconditions")
+			debug ("refactor_fixme")
+				fixme ("Check preconditions")
+			end
 			Result := storage.node (a_id)
 		end
 
@@ -134,21 +138,27 @@ feature -- Change: Node
 	update_node_title (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
 			-- Update node title, with user identified by `a_id', with node id `a_node_id' and a new title `a_title'.
 		do
-			fixme ("Check preconditions")
+			debug ("refactor_fixme")
+				fixme ("Check preconditions")
+			end
 			storage.update_node_title (a_id,a_node_id,a_title)
 		end
 
 	update_node_summary (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
 			-- Update node summary, with user identified by `a_id', with node id `a_node_id' and a new summary `a_summary'.
 		do
-			fixme ("Check preconditions")
+			debug ("refactor_fixme")
+				fixme ("Check preconditions")
+			end
 			storage.update_node_summary (a_id,a_node_id, a_summary)
 		end
 
 	update_node_content (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
 			-- Update node content, with user identified by `a_id', with node id `a_node_id' and a new content `a_content'.
 		do
-			fixme ("Check preconditions")
+			debug ("refactor_fixme")
+				fixme ("Check preconditions")
+			end
 			storage.update_node_content (a_id,a_node_id, a_content)
 		end
 
@@ -172,7 +182,9 @@ feature -- Change User
 			then
 				storage.save_user (a_user)
 			else
-				fixme ("Add error")
+				debug ("refactor_fixme")
+					fixme ("Add error")
+				end
 			end
 		end
 
