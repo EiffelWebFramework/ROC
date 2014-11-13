@@ -1,5 +1,8 @@
 note
-	description: "Summary description for {NODE}."
+	description: "[
+			CMS abstraction for CMS content entity, named "node".
+		]"
+	status: "draft"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -14,7 +17,9 @@ create
 	make
 
 feature{NONE} -- Initialization
-	make (a_content: READABLE_STRING_32; a_summary:READABLE_STRING_32; a_title: READABLE_STRING_32)
+
+	make (a_content: READABLE_STRING_32; a_summary: READABLE_STRING_32; a_title: READABLE_STRING_32)
+			-- Create current node with `a_content', `a_summary' and `a_title'.
 		local
 			l_time: DATE_TIME
 		do
@@ -25,12 +30,14 @@ feature{NONE} -- Initialization
 			set_creation_date (l_time)
 			set_modification_date (l_time)
 			set_publication_date (l_time)
+
 			debug ("refactor_fixme")
-				fixme ("Remove harcode format")
+				fixme ("Remove default harcoded format")
 			end
 			set_format ("HTML")
+
 			debug ("refactor_fixme")
-				fixme ("Remove harcode content type")
+				fixme ("Remove default harcoded content type")
 			end
 			set_content_type ("Page")
 		ensure
@@ -40,6 +47,9 @@ feature{NONE} -- Initialization
 		end
 
 feature -- Access
+
+	id: INTEGER_64 assign set_id
+			-- Unique id.
 
 	content: READABLE_STRING_32
 			-- Content of the node.
@@ -62,10 +72,7 @@ feature -- Access
 	publication_date_output: READABLE_STRING_32
 			-- Formatted output.
 
-	id: INTEGER_64 assign set_id
-			-- Unique id.
-
-	format:  READABLE_STRING_32
+	format: READABLE_STRING_32
 			-- Format associated with `body'.
 			-- For example: text, mediawiki, html, etc
 
@@ -73,18 +80,19 @@ feature -- Access
 			-- Associated content type name.
 			-- Page, Article, Blog, News, etc.
 
+	author: detachable CMS_USER
+			-- Author of current node.
+
+	collaborators: detachable LIST[CMS_USER]
+			-- Users contributed to current Node.
+
 feature -- status report
 
 	has_id: BOOLEAN
+			-- Has unique identifier?
 		do
 			Result := id > 0
 		end
-
-	author: detachable CMS_USER
-		-- Node's author.	
-
-	collaborators: detachable LIST[CMS_USER]
-		-- Node's collaborators.
 
 feature -- Element change
 
@@ -182,4 +190,7 @@ feature -- Element change
 			lst.force (a_user)
 		end
 
+note
+	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

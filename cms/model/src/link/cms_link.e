@@ -1,6 +1,7 @@
 note
-	description: "Summary description for {CMS_MENU}."
-	author: ""
+	description: "[
+			Abstraction to represent a URI link in the CMS system.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -17,14 +18,16 @@ inherit
 feature -- Access	
 
 	title: READABLE_STRING_32
-		-- link's title.
+			-- Associated title.
 
 	location: READABLE_STRING_8
-		-- link's location.
+			-- Associated url location.
 
 feature -- status report	
 
 	is_active: BOOLEAN
+			-- Is current link active?
+			-- i.e: related to requested url.
 		deferred
 		end
 
@@ -44,16 +47,20 @@ feature -- status report
 			-- Is expandable?	
 		deferred
 		end
-		
+
 	has_children: BOOLEAN
+			-- Has sub link?
 		deferred
 		end
 
 feature -- Query
 
 	parent: detachable CMS_LINK
+			-- Optional parent link.
 
 	children: detachable LIST [CMS_LINK]
+			-- Optional children links.
+			-- Useful to have a non flat menu.
 		deferred
 		end
 
@@ -71,10 +78,15 @@ feature -- Access
 
 feature -- Status report
 
-	debug_output: STRING
+	debug_output: STRING_32
 			-- String that should be displayed in debugger to represent `Current'.
 		do
-			Result := title.as_string_8 + " -> " + location
+			create Result.make_from_string (title)
+			Result.append_string_general (" -> ")
+			Result.append_string_general (location)
 		end
 
+note
+	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

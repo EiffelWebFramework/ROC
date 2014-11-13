@@ -1,5 +1,5 @@
 note
-	description: "Object that represent Logger configuration settings"
+	description: "Object that represents Logger configuration settings"
 	date: "$Date: 2014-08-20 15:21:15 -0300 (mi., 20 ago. 2014) $"
 	revision: "$Revision: 95678 $"
 
@@ -42,7 +42,7 @@ feature -- Access
 			-- When non-zero, the value specifies the maximum number of backup files.
 
 	level: INTEGER
-		-- Logger level.
+			-- Logger level.
 
 feature -- Element Change
 
@@ -77,4 +77,7 @@ feature -- Element Change
 				level := 0
 			end
 		end
+note
+	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

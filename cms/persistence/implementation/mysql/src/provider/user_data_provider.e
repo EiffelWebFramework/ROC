@@ -215,7 +215,7 @@ feature -- Basic operations: User Profiles
 	save_profile (a_user_id: INTEGER_64; a_user_profile: CMS_USER_PROFILE)
 			-- Save a profile item with (a_key and a_value) to the given user `user_id'.
 		local
-			l_cursor: TABLE_ITERATION_CURSOR [READABLE_STRING_8, READABLE_STRING_8]
+			l_cursor: TABLE_ITERATION_CURSOR [READABLE_STRING_8, READABLE_STRING_GENERAL]
 		do
 			error_handler.reset
 			log.write_information (generator + ".save_profile")
@@ -224,7 +224,7 @@ feature -- Basic operations: User Profiles
 			until
 				l_cursor.after
 			loop
-				save_profile_item (a_user_id, l_cursor.key, l_cursor.item)
+				save_profile_item (a_user_id, l_cursor.key.as_string_32, l_cursor.item)
 				l_cursor.forth
 			end
 

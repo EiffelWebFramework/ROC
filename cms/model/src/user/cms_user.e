@@ -1,5 +1,7 @@
 note
-	description: "Summary description for {USER}."
+	description: "[
+				Interface representing a USER in the CMS system.
+			]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -27,31 +29,33 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	id: INTEGER_64
-		-- Unique id.
+			-- Unique id.
 
 	name: READABLE_STRING_32
-		-- User name.
+			-- User name.
 
 	password: detachable READABLE_STRING_32
-		-- User password.
+			-- User password.
 
 	email: detachable READABLE_STRING_32
-		-- User email.
+			-- User email.
 
 	profile: detachable CMS_USER_PROFILE
-		-- User profile.
+			-- User profile.
 
 	creation_date: DATE_TIME
-		-- Creation date.
+			-- Creation date.
 
 	last_login_date: detachable DATE_TIME
-		-- User last login.
+			-- User last login.
+
+feature -- Access: data			
 
 	data: detachable STRING_TABLE [detachable ANY]
-		-- Additional user's data.
+			-- Additional data.
 
 	data_item (k: READABLE_STRING_GENERAL): detachable ANY
-			-- Additional item data.
+			-- Additional item data associated with key `k'.
 		do
 			if attached data as l_data then
 				Result := l_data.item (k)
@@ -70,14 +74,21 @@ feature -- Status report
 			Result := attached email as e and then not e.is_empty
 		end
 
-	debug_output: STRING
+	debug_output: STRING_32
 		do
-			Result := name
+			create Result.make_from_string (name)
+			if has_id then
+				Result.append_character (' ')
+				Result.append_character ('<')
+				Result.append_integer_64 (id)
+				Result.append_character ('>')
+			end
 		end
 
-	same_as (u: detachable CMS_USER): BOOLEAN
+	same_as (other: detachable CMS_USER): BOOLEAN
+			-- Is Current same as `other'?
 		do
-			Result := u /= Void and then id = u.id
+			Result := other /= Void and then id = other.id
 		end
 
 feature -- Change element
@@ -98,20 +109,20 @@ feature -- Change element
 			name_set: name = n
 		end
 
-	set_password (p: like password)
-			-- Set `password' with `p'.
+	set_password (a_password: like password)
+			-- Set `password' with `a_password'.
 		do
-			password := p
+			password := a_password
 		ensure
-			password_set: password = p
+			password_set: password = a_password
 		end
 
-	set_email (m: like email)
-			-- Set `email' with `m'.
+	set_email (a_email: like email)
+			-- Set `email' with `a_email'.
 		do
-			email := m
+			email := a_email
 		ensure
-			email_set: email = m
+			email_set: email = a_email
 		end
 
 	set_profile (prof: like profile)
@@ -120,25 +131,6 @@ feature -- Change element
 			profile := prof
 		ensure
 			profile_set: profile = prof
-		end
-
-	set_data_item (k: READABLE_STRING_GENERAL; d: like data_item)
-		local
-			l_data: like data
-		do
-			l_data := data
-			if l_data = Void then
-				create l_data.make (1)
-				data := l_data
-			end
-			l_data.force (d, k)
-		end
-
-	remove_data_item (k: READABLE_STRING_GENERAL)
-		do
-			if attached data as l_data then
-				l_data.remove (k)
-			end
 		end
 
 	set_profile_item (k: READABLE_STRING_8; v: READABLE_STRING_8)
@@ -163,4 +155,30 @@ feature -- Change element
 			set_last_login_date (create {DATE_TIME}.make_now_utc)
 		end
 
+feature -- Change element: data		
+
+	set_data_item (k: READABLE_STRING_GENERAL; d: like data_item)
+			-- Associate data item `d' with key `k'.
+		local
+			l_data: like data
+		do
+			l_data := data
+			if l_data = Void then
+				create l_data.make (1)
+				data := l_data
+			end
+			l_data.force (d, k)
+		end
+
+	remove_data_item (k: READABLE_STRING_GENERAL)
+			-- Remove data item associated with key `k'.	
+		do
+			if attached data as l_data then
+				l_data.remove (k)
+			end
+		end
+
+note
+	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
