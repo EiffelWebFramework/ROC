@@ -15,16 +15,17 @@ The goal of the library is to provide the following features.
 
 **Directory Structure**
 
- - cms --Library
+ - library --Library
 	 - layout -- application layout library.
 	 - model -- domain model library.
-	 - persistence -- persistance layer library.
+	 - persistence -- persistence layer library.
 	 - src -- cms source code.
  - example
 	 - demo -- example using the cms library.
+ - doc  -- Documentation. 	 
 
 **Documentation**
- >[CMS design](https://github.com/EiffelWebFramework/ROC)
- >[CMS concepts](https://github.com/EiffelWebFramework/ROC)
+ >[CMS design](https://github.com/EiffelWebFramework/ROC).
+ >[CMS concepts](https://github.com/EiffelWebFramework/ROC).
  
 	 
