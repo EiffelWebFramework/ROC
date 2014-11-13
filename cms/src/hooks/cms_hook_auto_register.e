@@ -16,24 +16,20 @@ inherit
 
 feature -- Hook
 
-	hook_auto_register (a_response: CMS_RESPONSE)
+	auto_subscribe_to_hooks (a_response: CMS_RESPONSE)
 		do
+			if attached {CMS_HOOK_MENU_SYSTEM_ALTER} Current as h_menu_system_alter then
+				a_response.subscribe_to_menu_system_alter_hook (h_menu_system_alter)
+			end
 			if attached {CMS_HOOK_MENU_ALTER} Current as h_menu_alter then
-				debug ("refactor_fixme")
-					-- Fixme: CMS_RESPONSE.add_menu_alter_hook : a_response.add_menu_alter_hook (h_menu_alter)
-				end
+				a_response.subscribe_to_menu_alter_hook (h_menu_alter)
 			end
 			if attached {CMS_HOOK_BLOCK} Current as h_block then
-				debug ("refactor_fixme")
-					-- Fixme: CMS_RESPONSE.add_block_hook a_response.add_block_hook (h_block)
-				end
+				a_response.subscribe_to_block_hook (h_block)
 			end
-			if attached {CMS_HOOK_FORM_ALTER} Current as h_block then
-				debug ("refactor_fixme")
-					-- CMS_RESPONSE.add_form_alter_hook a_response.add_form_alter_hook (h_block)
-				end
+			if attached {CMS_HOOK_FORM_ALTER} Current as h_form then
+				a_response.subscribe_to_form_alter_hook (h_form)
 			end
-
 		end
 
 end

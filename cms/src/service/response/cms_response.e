@@ -44,6 +44,9 @@ feature {NONE} -- Initialization
 			loop
 				l_module := ic.item
 				if l_module.is_enabled then
+					if attached {CMS_HOOK_AUTO_REGISTER} l_module as l_auto then
+						l_auto.auto_subscribe_to_hooks (Current)
+					end
 					l_module.register_hooks (Current)
 				end
 			end
