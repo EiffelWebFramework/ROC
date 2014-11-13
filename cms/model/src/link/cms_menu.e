@@ -26,6 +26,9 @@ feature {NONE} -- Initialization
 		do
 			name := a_name
 			create items.make (a_capacity)
+		ensure
+			name_set:  name = a_name
+			items_set: items.capacity = a_capacity
 		end
 
 	make_with_title (a_name: like name; a_title: READABLE_STRING_32; a_capacity: INTEGER)
@@ -33,6 +36,10 @@ feature {NONE} -- Initialization
 		do
 			make (a_name, a_capacity)
 			set_title (a_title)
+		ensure
+			name_set: name = a_name
+			title_set: title = a_title
+			items_set: items.capacity = a_capacity
 		end
 
 feature -- Access
