@@ -1,7 +1,18 @@
 note
-	description: "[API Layout, to provide paths(config, application, log, documentation, www, html cj)]"
-	date: "$Date: 2014-08-20 15:21:15 -0300 (mi., 20 ago. 2014) $"
-	revision: "$Revision: 95678 $"
+	description: "[
+			Application layout
+			Related to file system locations such as 
+				- configuration locations
+				- application
+				- log
+				- documentation
+				- www
+				- assets 
+				- templates (html, Collection+JSON, ...)
+				- ...
+		]"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	APPLICATION_LAYOUT
@@ -31,6 +42,7 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	path: PATH
+			-- Root location.
 
 feature -- Access: internal
 
@@ -150,4 +162,7 @@ feature {NONE} -- Implementation
 	internal_template_path: detachable like template_path
 			-- Directory for templates (HTML, etc).
 
+;note
+	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
