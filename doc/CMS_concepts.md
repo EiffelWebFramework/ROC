@@ -2,6 +2,12 @@ CMS Concepts
 ============
 [Work in progress]
 
+##### Table of Contents  
+[Theme](#theme)  
+[Regions](#regions)  
+[Blocks](#blocks)  
+
+<a name="theme"/>
 Theme
 -----
 In a CMS , a theme is a collection of templates files (HTML, CSS, Images, etc ) that determine how a CMS web site looks.  The goal of a theme is to let you change the look and feel of the site.
@@ -9,6 +15,7 @@ Our CMS uses the same default regions as Drupal for themes.
 
 > Current Theme design [Work in Progress]
 
+<a name="regions"/>
 Regions
 ------
 In a CMS site, you can image it divided into different areas called regions. Our CMS uses the same default regions as Drupal, so let's see them in an image
@@ -34,6 +41,7 @@ What goes inside regions?  Generally, regions hold smaller piece of content call
 Regions are defined in a configuration file theme.info.
 
 
+<a name="blocks"/>
 CMS_BLOCK
 ---------
 **What is a cms block?** 
