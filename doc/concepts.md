@@ -23,6 +23,7 @@ The layout of a CMS web page has predefined area called **regions**. The Eiffel 
 
 ![default page layout](http://themery.com/sites/default/files/figure-15-10.png)
 
+```
 regions[page_top] = Top
 regions[header] = Header
 regions[content] = Content
@@ -32,7 +33,7 @@ regions[footer] = Footer
 regions[first_sidebar] = first sidebar
 regions[second_sidebar] = second sidebar
 regions[page_bottom] = Bottom
-
+```
 
 **Regions Hold Blocks**
 
