@@ -11,17 +11,17 @@ CMS Concepts
 Theme
 -----
 In a CMS , a theme is a collection of templates files (HTML, CSS, Images, etc ) that determine how a CMS web site looks.  The goal of a theme is to let you change the look and feel of the site.
-Our CMS uses the same default regions as Drupal for themes.
+Eiffel CMS uses the same default regions as Drupal for themes.
 
 > Current Theme design [Work in Progress]
 
 <a name="regions"/>
 Regions
-------
-In a CMS site, you can image it divided into different areas called regions. Our CMS uses the same default regions as Drupal, so let's see them in an image
+-------
+The layout of a CMS web page has predefined area called **regions**. The Eiffel CMS uses the same default regions as Drupal, so let's see them in the following image.
 
 
-![enter image description here](http://themery.com/sites/default/files/figure-15-10.png)
+![default page layout](http://themery.com/sites/default/files/figure-15-10.png)
 
 regions[page_top] = Top
 regions[header] = Header
