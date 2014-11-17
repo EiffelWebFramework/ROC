@@ -25,8 +25,10 @@ The goal of the library is to provide the following features.
  - doc  -- Documentation. 	 
 
 **Documentation**
- >[CMS design](/doc/CMS_design.md).
+
+ >[CMS concepts](/doc/concepts.md).
  
- >[CMS concepts](/doc/CMS_concepts.md).
- 
+ >[CMS design](/doc/design.md).
+
+ >[CMS tutorial](/doc/tutorial.md).
 	 
