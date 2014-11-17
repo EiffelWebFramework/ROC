@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {CMS_BLOCK}."
+	description: "Describe content to be placed inside Regions."
 	date: "$Date: 2014-08-28 08:21:49 -0300 (ju. 28 de ago. de 2014) $"
 
 deferred class
