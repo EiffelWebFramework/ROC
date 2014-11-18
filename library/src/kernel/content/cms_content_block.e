@@ -1,8 +1,7 @@
 note
-	description: "Summary description for {CMS_CONTENT_BLOCK}."
-	author: ""
-	date: "$Date: 2014-10-30 12:55:33 -0300 (ju. 30 de oct. de 2014) $"
-	revision: "$Revision: 96018 $"
+	description: "CMS_BLOCK implemented with a `content' associated with a specific `format'."
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_CONTENT_BLOCK

@@ -2,8 +2,8 @@ note
 	description: "[
 			CMS block with smarty template file content.
 		]"
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2014-11-14 20:11:17 +0100 (ven., 14 nov. 2014) $"
+	revision: "$Revision: 96092 $"
 
 class
 	CMS_SMARTY_TEMPLATE_BLOCK
