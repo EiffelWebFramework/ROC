@@ -65,7 +65,7 @@ feature {NONE} -- Initialization
 	initialize_modules
 			-- Intialize modules and keep only enabled modules.
 		do
-			modules := setup.modules_enabled
+			modules := setup.enabled_modules
 		ensure
 			only_enabled_modules: across modules as ic all ic.item.is_enabled end
 		end

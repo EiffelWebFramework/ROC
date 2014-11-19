@@ -24,19 +24,19 @@ feature -- Access
 		deferred
 		end
 
-	modules: CMS_MODULE_COLLECTION
+	available_modules: CMS_MODULE_COLLECTION
 			-- List of available modules.
 		deferred
 		end
 
-	modules_enabled: CMS_MODULE_COLLECTION
+	enabled_modules: CMS_MODULE_COLLECTION
 			-- List of enabled modules.
 		local
 			l_module: CMS_MODULE
 		do
-			create Result.make (modules.count)
+			create Result.make (available_modules.count)
 			across
-				modules as ic
+				available_modules as ic
 			loop
 				l_module := ic.item
 				if l_module.is_enabled then
