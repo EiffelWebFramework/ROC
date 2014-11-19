@@ -29,6 +29,24 @@ feature -- Access
 		deferred
 		end
 
+	modules_enabled: CMS_MODULE_COLLECTION
+			-- List of enabled modules.
+		local
+			l_module: CMS_MODULE
+		do
+			create Result.make (modules.count)
+			across
+				modules as ic
+			loop
+				l_module := ic.item
+				if l_module.is_enabled then
+					Result.extend (l_module)
+				end
+			end
+		ensure
+			only_enabled_modules: across Result as ic all ic.item.is_enabled end
+		end
+
 feature -- Access: Site
 
 	site_id: READABLE_STRING_8
