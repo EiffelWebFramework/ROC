@@ -3,11 +3,14 @@ CMS Concepts
 [Work in progress]
 
 ##### Table of Contents  
-[Theme](#theme)  
-[Regions](#regions)
-[Blocks](#blocks)
-[Modules](#modules)
-[Hooks](#hooks)
+
+1. [**Theme**](#theme)
+2. [**Regions**](#regions)
+      - [**Default Page Layout**](#page_layout)
+      - [**Regions Holds blocks**](#regions_blocks)
+3. [**Blocks**](#blocks)
+4. [**Modules**](#modules)
+5. [**Hooks**](#hooks)
 
 
 <a name="theme"/>
@@ -27,7 +30,7 @@ Regions
 -------
 The layout of a CMS web page has predefined area called **regions**. The Eiffel CMS uses the same default regions as Drupal, so let's see them in the following image.
 
-
+<a name="page_layout"/>
 ![default page layout](http://themery.com/sites/default/files/figure-15-10.png)
 
 ```
@@ -41,7 +44,7 @@ regions[first_sidebar] = first sidebar
 regions[second_sidebar] = second sidebar
 regions[page_bottom] = Bottom
 ```
-
+<a name="regions_blocks"/>
 **Regions Hold Blocks**
 
 What goes inside regions?  Generally, regions hold smaller piece of content called blocks.  Blocks hold chunks of content, like the user login form, navigation menu or the information for the footer.
