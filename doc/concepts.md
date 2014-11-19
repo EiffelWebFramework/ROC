@@ -1,6 +1,6 @@
 CMS Concepts
 ============
-[Work in progress]
+>Current implemented concepts
 
 ##### Table of Contents  
 
@@ -17,13 +17,13 @@ CMS Concepts
 Theme
 -----
 In a CMS , a theme is a collection of templates files (HTML, CSS, Images, etc ) that determine how a CMS web site looks.  The goal of a theme is to let you change the look and feel of the site.
-Eiffel CMS uses the same default regions as Drupal for themes.
+Eiffel CMS is inspired by Drupal, and use the same default region names as default drupal theme.
 
 #### Important Classes
 
-* [CMS_THEME] (/library/src/theme/cms_theme.e): The deferred class CMS_THEME provides an abstraction to the actual theme.
-* [SMARTY_CMS_THEME] (/library/src/theme/smarty_theme/smarty_cms_theme.e): The class SMARTY_CMS_THEME, is a theme implementation using the [Eiffel Smarty library] (https://github.com/eiffelhub/template-smarty).
-* [CMS_TEMPLATE] (/library/src/theme/cms_template.e): The deferred CMS_TEMPLATE clas provides an abstraction to describe the theme, the variables to feed it and how to render it as html.  At the moment there is only one implementation [SMARTY_CMS_PAGE_TEMPLATE] (/library/src/theme/smarty_theme/smarty_cms_page_template.e).
+* [CMS_THEME] (/library/src/theme/cms_theme.e):  Abstraction defining the interface of a CMS theme.
+* [SMARTY_CMS_THEME] (/library/src/theme/smarty_theme/smarty_cms_theme.e): Theme implemented using the [Eiffel Smarty library] (https://github.com/eiffelhub/template-smarty).
+* [CMS_TEMPLATE] (/library/src/theme/cms_template.e): Template Abstraction that contains theme, variables needed by template when rendering page as html. At the moment there is only one implementation SMARTY_CMS_PAGE_TEMPLATE.  At the moment there is only one implementation [SMARTY_CMS_PAGE_TEMPLATE] (/library/src/theme/smarty_theme/smarty_cms_page_template.e).
 
 <a name="regions"/>
 Regions
@@ -45,9 +45,10 @@ regions[second_sidebar] = second sidebar
 regions[page_bottom] = Bottom
 ```
 <a name="regions_blocks"/>
-**Regions Hold Blocks**
+**A Region holds blocks**
 
-What goes inside regions?  Generally, regions hold smaller piece of content called blocks.  Blocks hold chunks of content, like the user login form, navigation menu or the information for the footer.
+**What goes inside regions?**
+Generally, regions hold smaller piece of content called blocks.  Blocks hold chunks of content, like the user login form, navigation menu or the information for the footer.
 
 Regions are defined in a configuration file theme.info.
 
@@ -69,7 +70,7 @@ Blocks are chunk of content that can be created to display whatever you want, an
 <a name="modules"/>
 CMS_MODULES
 -----------
-What is a cms module?
+**What is a cms module?**
 Modules are piece of code that adds one or more features to your web site. 
 Modules can be plugged and combined to provide a web site customized to your needs. There are modules for many purposes, for example Administratiton, Basic Authentication, etc.
 
