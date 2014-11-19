@@ -4,8 +4,11 @@ CMS Concepts
 
 ##### Table of Contents  
 [Theme](#theme)  
-[Regions](#regions)  
-[Blocks](#blocks)  
+[Regions](#regions)
+[Blocks](#blocks)
+[Modules](#modules)
+[Hooks](#hooks)
+
 
 <a name="theme"/>
 Theme
@@ -59,3 +62,28 @@ Blocks are chunk of content that can be created to display whatever you want, an
 * [CMS_MENU_BLOCK](/library/src/kernel/content/cms_menu_block.e): The class CMS_MENU_BLOCK describe how to provides a menu of navigational links.
 * [CMS_SMARTY_TEMPLATE_BLOCK] (/library/src/kernel/content/cms_smarty_templateblock.e) The class CMS_SMARTY_TEMPLATE_BLOCK describe how to use a CMS block with smarty template file content.
 
+
+<a name="modules"/>
+CMS_MODULES
+-----------
+What is a cms module?
+Modules are piece of code that adds one or more features to your web site. 
+Modules can be plugged and combined to provide a web site customized to your needs. There are modules for many purposes, for example Administratiton, Basic Authentication, etc.
+
+#### Important Classes
+* [CMS_MODULE] (/library/src/modules/cms_module.e): The deferred class CMS_MODULE provides an abstraction to describe a generic module that add features to your web site.
+* [CMS_RESPONSE](/library/src/service/response/cms_response.e). The deferred class CMS_RESPONSE provide an abstraction to builds the content to get process to render the output. 
+
+
+<a name="hooks">
+CMS_HOOK
+--------
+Hooks is a mechanism which provide a way for modules to interact with each other and extending blocks of the current CMS.
+
+* [CMS_HOOK] (/library/src/hooks/cms_hook.e): The deferred class CMS_HOOK is a marker interface for CMS Hook
+* [CMS_HOOK_AUTO_REGISTER] (/library/src/hooks/cms_hook_auto_register.e): The deferred class provides an abstraction that when inheriting from this class, the declared hooks are automatically registered, otherwise, each descendant has to add it to the cms service	itself.
+* [CMS_HOOK_BLOCK](/library/src/hooks/cms_hook_block.e): The class CMS_HOOK_BLOCK describe a hook providing a way to alter a generic block.
+* [CMS_HOOK_FORM_ALTER](/library/src/hooks/cms_hook_form_alter.e): The class CMS_HOOK_FORM_ATLER describe a hook providing a way to alter a form.
+* [CMS_HOOK_MENU_ALTER](/library/src/hooks/cms_hook_menu_alter.e): The class CMS_HOOK_MENU_ATLER describe a hook providing a way to alter a menu.
+* [CMS_HOOK_MENU_SYSTEM_ALTER](/library/src/hooks/cms_hook_menu_system_alter.e): The class CMS_HOOK_MENU_SYSTEM_ALTER describe a hook providing a way to alter the CMS menu system.
+* [CMS_HOOK_VALUE_TABLE_ALTER](/library/src/hooks/cms_hook_value_table_alter.e):: The class CMS_HOOK_VALUE_TABLE_ALTER describe a hook providing a way to alter the value table for a response.
