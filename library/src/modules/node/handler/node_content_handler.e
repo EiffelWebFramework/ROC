@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {NEW_CONTENT_HANDLER}."
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2014-12-19 10:17:32 -0300 (vi., 19 dic. 2014) $"
+	revision: "$Revision: 96402 $"
 
 class
 	NODE_CONTENT_HANDLER
@@ -78,7 +78,7 @@ feature -- HTTP Methods
 						do_error (req, res, l_id)
 					end
 				else
-					(create {ERROR_500_CMS_RESPONSE}.make (req, res, api)).execute
+					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -96,14 +96,14 @@ feature -- HTTP Methods
 							if l_method.is_case_insensitive_equal ("PUT") then
 								do_put (req, res)
 							else
-								(create {ERROR_500_CMS_RESPONSE}.make (req, res, api)).execute
+								(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
 							end
 						end
 					else
 						do_error (req, res, l_id)
 					end
 				else
-					(create {ERROR_500_CMS_RESPONSE}.make (req, res, api)).execute
+					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
@@ -127,7 +127,7 @@ feature -- HTTP Methods
 						do_error (req, res, l_id)
 					end
 				else
-					(create {ERROR_500_CMS_RESPONSE}.make (req, res, api)).execute
+					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
 				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)

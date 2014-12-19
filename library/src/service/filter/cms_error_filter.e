@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {CMS_ERROR_FILTER}."
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2014-12-19 10:17:32 -0300 (vi., 19 dic. 2014) $"
+	revision: "$Revision: 96402 $"
 
 class
 	CMS_ERROR_FILTER
@@ -32,7 +32,7 @@ feature -- Basic operations
 				execute_next (req, res)
 			else
 				log.write_critical (generator + ".execute" + api.as_string_representation )
-				(create {ERROR_500_CMS_RESPONSE}.make (req, res, api)).execute
+				(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
 				api.reset
 			end
 		end

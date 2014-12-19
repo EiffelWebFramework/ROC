@@ -1,10 +1,10 @@
 note
-	description: "Summary description for {ERROR_500_CMS_RESPONSE}."
-	date: "$Date$"
-	revision: "$Revision$"
+	description: "Summary description for {INTERNAL_SERVER_ERROR_CMS_RESPONSE}."
+	date: "$Date: 2014-12-19 10:17:32 -0300 (vi., 19 dic. 2014) $"
+	revision: "$Revision: 96402 $"
 
 class
-	ERROR_500_CMS_RESPONSE
+	INTERNAL_SERVER_ERROR_CMS_RESPONSE
 
 inherit
 
@@ -32,6 +32,7 @@ feature -- Execution
 		do
 			set_title ("Internal Server Error")
 			set_page_title (Void)
+			set_main_content ("<em>Internal Server Error</em>")
 		end
 end
 

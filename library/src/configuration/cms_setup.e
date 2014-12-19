@@ -1,15 +1,12 @@
 note
 	description: "Class that enable to set basic configuration, application layout, core modules and  themes."
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2014-12-18 12:47:20 -0300 (ju. 18 de dic. de 2014) $"
+	revision: "$Revision: 96384 $"
 
 deferred class
 	CMS_SETUP
 
 feature -- Access
-
-	configuration: CMS_CONFIGURATION
-			-- cms configuration.
 
 	layout: CMS_LAYOUT
 			-- CMS layout.
@@ -59,7 +56,8 @@ feature -- Access: Site
 			-- Name of the site.
 
 	site_email: READABLE_STRING_8
-			-- Email for the site.
+			-- Admin email address for the site.
+			-- Mainly used for internal notification.
 
 	site_url: detachable READABLE_STRING_8
 			-- Optional base url of the site.
@@ -69,8 +67,31 @@ feature -- Access: Site
 			-- By default "" or "/".
 
 	smtp: detachable READABLE_STRING_8
-			-- 	Smtp server
-			
+			-- Smtp server
+
+feature -- Query
+
+	text_item (a_name: READABLE_STRING_GENERAL): detachable READABLE_STRING_32
+			-- Configuration value associated with `a_name', if any.
+		deferred
+		end
+
+	text_item_or_default (a_name: READABLE_STRING_GENERAL; a_default_value: READABLE_STRING_GENERAL): READABLE_STRING_32
+			-- `text_item' associated with `a_name' or if none, `a_default_value'.
+		do
+			if attached text_item (a_name) as v then
+				Result := v
+			else
+				Result := a_default_value.as_string_32
+			end
+		end
+
+	string_8_item (a_name: READABLE_STRING_GENERAL): detachable READABLE_STRING_8
+			-- Configuration value associated with `a_name', if any.
+		deferred
+		end
+
+
 feature -- Access: Theme	
 
 	themes_location: PATH

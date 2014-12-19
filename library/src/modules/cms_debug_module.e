@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {CMS_DEBUG_MODULE}."
-	date: "$Date: 2014-08-28 13:21:49 +0200 (jeu., 28 août 2014) $"
-	revision: "$Revision: 95708 $"
+	date: "$Date: 2014-12-18 12:47:20 -0300 (ju. 18 de dic. de 2014) $"
+	revision: "$Revision: 96384 $"
 
 class
 	CMS_DEBUG_MODULE
@@ -82,7 +82,7 @@ feature -- Handler
 				append_info_to ("Name", api.setup.site_name, r, s)
 				append_info_to ("Url", api.setup.site_url, r, s)
 
-				if attached api.setup.configuration.configuration_location as l_loc then
+				if attached api.setup.layout.cms_config_ini_path as l_loc then
 					s.append ("<hr/>")
 					append_info_to ("Configuration file", l_loc.name, r, s)
 				end
