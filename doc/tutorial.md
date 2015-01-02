@@ -20,12 +20,15 @@ A [Module](/doc/concepts.md#modules) as we already describe it, enable us to add
 
 Here we will describe the basics steps to write your own modules.
 
- * The first thing to do is inherit form the class [CMS_MODULE] () and redefine the register_hooks feature.
+ * The first thing to do is inherit from the class [CMS_MODULE] () and redefine the register_hooks (2) feature.
  * Implement (via inheritance) the needed [Hooks] (/doc/concepts.md#hooks).
+ * Define the module API through route definition. (1)
+ * Define the list of block to be handle by the current module (3).
+ * Render the block (4) (could be defined in Eiffel itself or using a template file (smarty)). 
+ * API implementation (5).
  
 ```
-  class
-    MY_NEW_MODULE
+  class  MY_NEW_MODULE
 
   inherit
 
@@ -56,8 +59,8 @@ feature {NONE} -- Initialization
 feature -- Access: router
 
 	router (a_api: CMS_API): WSF_ROUTER
-			-- Node router.
-		do
+			-- (1) Node router.
+		do  
 			create Result.make (1)
 			Result.handle_with_request_methods ("/demo", create {WSF_URI_AGENT_HANDLER}.make (agent handle_demo (a_api, ?, ?)), Result.methods_head_get)
 		end
@@ -66,18 +69,19 @@ feature -- Hooks
 
 	register_hooks (a_response: CMS_RESPONSE)
 		do
+		        -- (2)
 			a_response.subscribe_to_menu_system_alter_hook (Current)
 			a_response.subscribe_to_block_hook (Current)
 		end
 
 	block_list: ITERABLE [like {CMS_BLOCK}.name]
 		do
-		    -- List of block names, managed by current object.
+		    --  (3) List of block names, managed by current object.
 		end
 
 	get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
 		do
-        -- Get block object identified by `a_block_id' and associate with `a_response'.
+		    --  (4) Get block object identified by `a_block_id' and associate with `a_response'.
 		end
 
 	menu_system_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
@@ -94,6 +98,7 @@ feature -- Handler
 		local
 			r: NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
 		do
+		       -- (5)
 			create r.make (req, res, a_api)
 			r.set_main_content ("NODE module does not yet implement %"" + req.path_info + "%" ...")
 			r.add_error_message ("NODE Module: not yet implemented")
