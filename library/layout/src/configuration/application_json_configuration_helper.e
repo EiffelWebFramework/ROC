@@ -1,10 +1,10 @@
 note
 	description: "Provide access to json configuration"
-	date: "$Date: 2014-11-20 15:03:29 +0100 (jeu., 20 nov. 2014) $"
-	revision: "$Revision: 96138 $"
+	date: "$Date: 2015-01-14 16:13:47 +0100 (mer., 14 janv. 2015) $"
+	revision: "$Revision: 96454 $"
 
 class
-	JSON_CONFIGURATION
+	APPLICATION_JSON_CONFIGURATION_HELPER
 
 feature -- Application Configuration
 
@@ -113,7 +113,7 @@ feature {NONE} -- JSON
 		end
 
 note
-	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	copyright: "2011-2015, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 
 end

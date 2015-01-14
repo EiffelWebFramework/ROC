@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {STRING_TABLE_OF_STRING_INSPECTOR}."
 	author: ""
-	date: "$Date: 2014-11-06 17:59:12 -0300 (ju. 06 de nov. de 2014) $"
-	revision: "$Revision: 96040 $"
+	date: "$Date: 2014-12-05 22:39:27 +0100 (ven., 05 déc. 2014) $"
+	revision: "$Revision: 96260 $"
 
 class
 	STRING_TABLE_OF_STRING_INSPECTOR
@@ -23,13 +23,22 @@ feature {TEMPLATE_ROUTINES}
 			-- If not handled by this inspector, return Void
 		local
 			l_fn: STRING
+			utf: UTF_CONVERTER
 		do
-			if attached {STRING_TABLE [STRING]} obj as l_regions then
+			if attached {STRING_TABLE [detachable READABLE_STRING_GENERAL]} obj as l_regions then
 				l_fn := field_name.as_lower
 				if l_fn.is_case_insensitive_equal ("count") then
 					Result := cell_of (l_regions.count)
 				elseif attached l_regions.item (l_fn) as v then
-					Result := cell_of (v)
+					if attached {READABLE_STRING_32} v as v32 then
+						if attached v32.is_valid_as_string_8 then
+							Result := cell_of (v.to_string_8)
+						else
+							Result := cell_of (utf.escaped_utf_32_string_to_utf_8_string_8 (v32))
+						end
+					else
+						Result := cell_of (v.to_string_8)
+					end
 				end
 			end
 		end

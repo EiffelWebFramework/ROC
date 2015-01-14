@@ -9,6 +9,7 @@ class
 	MISSING_CMS_TEMPLATE
 
 inherit
+
 	CMS_TEMPLATE
 
 create

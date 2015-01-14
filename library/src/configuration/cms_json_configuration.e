@@ -1,15 +1,15 @@
 note
 	description: "Summary description for {CMS_JSON_CONFIGURATION}."
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2015-01-14 16:13:47 +0100 (mer., 14 janv. 2015) $"
+	revision: "$Revision: 96454 $"
 
 class
 	CMS_JSON_CONFIGURATION
 
 inherit
 
-	JSON_CONFIGURATION
-
+	APPLICATION_JSON_CONFIGURATION_HELPER
+	
 feature -- Access
 
 	is_html_mode (a_path: PATH): BOOLEAN

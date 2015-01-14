@@ -1,7 +1,7 @@
 note
 	description: "Smarty template CMS theme."
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2014-12-05 22:39:27 +0100 (ven., 05 déc. 2014) $"
+	revision: "$Revision: 96260 $"
 
 class
 	SMARTY_CMS_THEME
@@ -101,7 +101,11 @@ feature -- Conversion
 				end
 			end
 
-			create l_table_inspector.register (({detachable STRING_TABLE [STRING]}).name)
+			create l_table_inspector.register (({detachable STRING_TABLE [STRING_8]}).name)
+			create l_table_inspector.register (({detachable STRING_TABLE [STRING_32]}).name)
+			create l_table_inspector.register (({detachable STRING_TABLE [READABLE_STRING_8]}).name)
+			create l_table_inspector.register (({detachable STRING_TABLE [READABLE_STRING_32]}).name)
+
 			page_template.prepare (page)
 			Result := page_template.to_html (page)
 

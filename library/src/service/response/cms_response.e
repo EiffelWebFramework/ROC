@@ -1,7 +1,7 @@
 note
 	description: "Generic CMS Response.It builds the content to get process to render the output"
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2014-12-15 21:43:38 +0100 (lun., 15 déc. 2014) $"
+	revision: "$Revision: 96346 $"
 
 deferred class
 	CMS_RESPONSE
@@ -380,12 +380,6 @@ feature -- Blocks
 			if attached message_block as m then
 				add_block (m, "content")
 			end
-				-- FIXME: avoid hardcoded html! should be only in theme.
-			add_block (create {CMS_CONTENT_BLOCK}.make_raw ("top_content_anchor", Void, "<a id=%"main-content%"></a>%N", formats.full_html), "content")
-			if attached page_title as l_page_title then
-					-- FIXME: avoid hardcoded html! should be only in theme.
-				add_block (create {CMS_CONTENT_BLOCK}.make_raw ("page_title", Void, "<h1 id=%"page-title%" class=%"title%">"+ l_page_title +"</h1>%N", formats.full_html), "content")
-			end
 			if attached primary_tabs_block as m then
 				add_block (m, "content")
 			end
@@ -447,7 +441,7 @@ feature -- Blocks
 			s: STRING
 		do
 			create s.make_empty
-			create Result.make ("page_top", Void, s, formats.full_html)
+			create Result.make ("page_top", Void, s, Void)
 			Result.set_is_raw (True)
 		end
 
@@ -458,7 +452,7 @@ feature -- Blocks
 		do
 			create s.make_from_string (theme.menu_html (primary_menu, True))
 			create l_hb.make_empty
-			create Result.make ("header", Void, l_hb, formats.full_html)
+			create Result.make ("header", Void, l_hb, Void)
 			Result.set_is_raw (True)
 		end
 
@@ -480,7 +474,7 @@ feature -- Blocks
 	message_block: detachable CMS_CONTENT_BLOCK
 		do
 			if attached message as m and then not m.is_empty then
-				create Result.make ("message", Void, "<div id=%"message%">" + m + "</div>", formats.full_html)
+				create Result.make ("message", Void, "<div id=%"message%">" + m + "</div>", Void)
 				Result.set_is_raw (True)
 			end
 		end
@@ -497,7 +491,7 @@ feature -- Blocks
 					s := "No Content"
 				end
 			end
-			create Result.make ("content", Void, s, formats.full_html)
+			create Result.make ("content", Void, s, Void)
 			Result.set_is_raw (True)
 		end
 
@@ -862,6 +856,11 @@ feature -- Generation
 
 				-- Menu...
 			page.register_variable (horizontal_primary_menu_html, "primary_nav")
+
+				-- Page related
+			if attached page_title as l_page_title then
+				page.register_variable (l_page_title, "page_title")
+			end
 		end
 
 	custom_prepare (page: CMS_HTML_PAGE)
@@ -911,7 +910,11 @@ feature -- Generation
 			-- Update the active status recursively on `a_comp'.
 		local
 			ln: CMS_LINK
+			l_comp_link: detachable CMS_LOCAL_LINK
 		do
+			if attached {CMS_LOCAL_LINK} a_comp as lnk then
+				l_comp_link := lnk
+			end
 			if attached a_comp.items as l_items then
 				across
 					l_items as ic
@@ -923,7 +926,15 @@ feature -- Generation
 					if (ln.is_expanded or ln.is_collapsed) and then attached {CMS_LINK_COMPOSITE} ln as l_comp then
 						recursive_get_active (l_comp, req)
 					end
+					if l_comp_link /= Void then
+						if ln.is_expanded or (not ln.is_expandable and ln.is_active) then
+							l_comp_link.set_expanded (True)
+						end
+					end
 				end
+			end
+			if l_comp_link /= Void and then l_comp_link.is_active then
+				l_comp_link.set_expanded (True)
 			end
 		end
 

@@ -7,8 +7,8 @@ note
 						- documentation 
 						- themes
 			]"
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2014-12-18 16:37:11 +0100 (jeu., 18 déc. 2014) $"
+	revision: "$Revision: 96383 $"
 
 class
 	CMS_LAYOUT
@@ -38,7 +38,7 @@ feature -- Access
 		end
 
 	cms_config_ini_path: PATH
-			-- Database Configuration file path.
+			-- CMS Configuration file path.
 		local
 			p: detachable PATH
 		do

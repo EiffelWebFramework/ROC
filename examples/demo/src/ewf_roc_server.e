@@ -2,8 +2,8 @@ note
 	description: "[
 				application service
 			]"
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2014-11-20 15:03:29 +0100 (jeu., 20 nov. 2014) $"
+	revision: "$Revision: 96138 $"
 
 class
 	EWF_ROC_SERVER

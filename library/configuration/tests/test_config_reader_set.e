@@ -3,7 +3,7 @@ note
 			Testing suite for CONFIG_READER .
 		]"
 	author: "$Author: jfiat $"
-	date: "$Date: 2014-12-18 12:37:11 -0300 (ju. 18 de dic. de 2014) $"
+	date: "$Date: 2014-12-18 16:37:11 +0100 (jeu., 18 déc. 2014) $"
 	revision: "$Revision: 96383 $"
 
 class

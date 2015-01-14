@@ -1,6 +1,6 @@
 note
 	description: "Summary description for {NODE_HANDLER}."
-	date: "$Date: 2014-12-19 10:17:32 -0300 (vi., 19 dic. 2014) $"
+	date: "$Date: 2014-12-19 14:17:32 +0100 (ven., 19 déc. 2014) $"
 	revision: "$Revision: 96402 $"
 
 class

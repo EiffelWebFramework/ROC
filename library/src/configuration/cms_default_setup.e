@@ -2,8 +2,8 @@ note
 	description: "[
 			Default CMS_SETUP that can be reused easily, and/or redefined to match specific setup.
 			]"
-	date: "$Date: 2014-11-19 20:00:19 +0100 (mer., 19 nov. 2014) $"
-	revision: "$Revision: 96123 $"
+	date: "$Date: 2015-01-14 16:13:47 +0100 (mer., 14 janv. 2015) $"
+	revision: "$Revision: 96454 $"
 
 class
 	CMS_DEFAULT_SETUP
@@ -22,7 +22,7 @@ feature {NONE} -- Initialization
 				-- Create a default setup with `a_layout'.
 		do
 			layout := a_layout
-			create configuration.make (layout)
+			create {INI_CONFIG} configuration.make_from_file (layout.cms_config_ini_path)
 			initialize
 		end
 
@@ -37,13 +37,32 @@ feature {NONE} -- Initialization
 
 	configure
 		do
-			site_id := configuration.site_id
-			site_url := configuration.site_url (Void)
-			site_name := configuration.site_name ("EWF::CMS")
-			site_email := configuration.site_email ("webmaster")
-			themes_location := configuration.themes_location
-			theme_name := configuration.theme_name ("default")
-			smtp := configuration.smtp
+				--| Site id, used to identified a site, this could be set to a uuid, or else
+			site_id := text_item_or_default ("site.id", "_EWF_CMS_NO_ID_")
+
+				-- Site url: optional, but ending with a slash
+			site_url := string_8_item ("site_url")
+			if attached site_url as l_url and then not l_url.is_empty then
+				if l_url[l_url.count] /= '/' then
+					site_url := l_url + "/"
+				end
+			end
+				-- Site name
+			site_name := text_item_or_default ("site.name", "EWF::CMS")
+
+				-- Site email for any internal notification
+				-- Can be also used to precise the "From:" value for email.
+			site_email := text_item_or_default ("site.email", "webmaster")
+
+				-- Location for theme folders.
+			if attached text_item ("themes-dir") as s then
+				create themes_location.make_from_string (s)
+			else
+				themes_location := layout.www_path.extended ("themes")
+			end
+
+				-- Selected theme's name
+			theme_name := text_item_or_default ("theme", "default")
 
 			debug ("refactor_fixme")
 				fixme ("Review export clause for configuration and layout")
@@ -72,10 +91,35 @@ feature {NONE} -- Initialization
 			register_module (m)
 		end
 
+feature {NONE} -- Configuration
+
+	configuration: CONFIG_READER
+			-- Association configuration file.		
+
 feature -- Access
 
 	modules: CMS_MODULE_COLLECTION
 			-- <Precursor>
+
+	text_item (a_name: READABLE_STRING_GENERAL): detachable READABLE_STRING_32
+			-- Configuration value associated with `a_name', if any.
+		do
+			Result := configuration.resolved_text_item (a_name)
+		end
+
+	string_8_item (a_name: READABLE_STRING_GENERAL): detachable READABLE_STRING_8
+			-- String 8 configuration value associated with `a_name', if any.
+		local
+			utf: UTF_CONVERTER
+		do
+			if attached text_item (a_name) as s then
+				if s.is_valid_as_string_8 then
+					Result := s.as_string_8
+				else
+					Result := utf.escaped_utf_32_string_to_utf_8_string_8 (s)
+				end
+			end
+		end
 
 	is_html: BOOLEAN
 			-- <Precursor>

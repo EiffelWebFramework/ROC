@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {HOME_CMS_RESPONSE}."
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2014-12-17 13:14:43 +0100 (mer., 17 déc. 2014) $"
+	revision: "$Revision: 96367 $"
 
 class
 	HOME_CMS_RESPONSE

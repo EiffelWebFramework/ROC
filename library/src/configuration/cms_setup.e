@@ -1,7 +1,7 @@
 note
 	description: "Class that enable to set basic configuration, application layout, core modules and  themes."
-	date: "$Date: 2014-12-18 12:47:20 -0300 (ju. 18 de dic. de 2014) $"
-	revision: "$Revision: 96384 $"
+	date: "$Date: 2015-01-14 18:12:03 +0100 (mer., 14 janv. 2015) $"
+	revision: "$Revision: 96456 $"
 
 deferred class
 	CMS_SETUP
@@ -65,9 +65,6 @@ feature -- Access: Site
 	front_page_path: detachable READABLE_STRING_8
 			-- Optional path defining the front page.
 			-- By default "" or "/".
-
-	smtp: detachable READABLE_STRING_8
-			-- Smtp server
 
 feature -- Query
 

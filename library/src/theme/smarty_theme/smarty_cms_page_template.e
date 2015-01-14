@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {CMS_PAGE_TEMPLATE}."
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2015-01-14 16:13:47 +0100 (mer., 14 janv. 2015) $"
+	revision: "$Revision: 96454 $"
 
 class
 	SMARTY_CMS_PAGE_TEMPLATE
@@ -75,26 +75,29 @@ feature -- Access
 			debug ("smarty")
 				template_context.enable_verbose
 			end
-			p := template_context.template_folder
-			if p = Void then
-				create p.make_current
-			end
+
 			if attached page.type as l_page_type then
 				create n.make_from_string_general (l_page_type)
 				n.append_character ('-')
 				n.append_string_general (template_name)
 				n.append_string_general (".tpl")
-				if ut.file_path_exists (p.extended (n)) then
+
+				p := template_context.template_file (n)
+
+				if ut.file_path_exists (p) then
 					create tpl.make_from_file (n)
 				end
 			end
 			if tpl = Void then
 				create n.make_from_string_general (template_name)
 				n.append_string_general (".tpl")
-				if ut.file_path_exists (p.extended (n)) then
+
+				p := template_context.template_file (n)
+				if ut.file_path_exists (p) then
 					create tpl.make_from_file (n)
 				end
 			end
+
 			if tpl /= Void then
 				across
 					variables as ic

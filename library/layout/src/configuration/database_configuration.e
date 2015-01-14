@@ -1,7 +1,7 @@
 note
 	description: "Object that represent Database configuration settings"
-	date: "$Date: 2014-08-20 15:21:15 -0300 (mi., 20 ago. 2014) $"
-	revision: "$Revision: 95678 $"
+	date: "$Date: 2015-01-14 16:13:47 +0100 (mer., 14 janv. 2015) $"
+	revision: "$Revision: 96454 $"
 
 class
 	DATABASE_CONFIGURATION
@@ -25,10 +25,10 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	driver: READABLE_STRING_32
-		--Database driver.
+			--Database driver.
 
 	database_string: READABLE_STRING_32
-		-- Database connection.	
+			-- Database connection.	
 
 	connection_string: READABLE_STRING_32
 			-- Connection string
