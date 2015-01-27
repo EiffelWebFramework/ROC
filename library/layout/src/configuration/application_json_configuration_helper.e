@@ -1,7 +1,7 @@
 note
 	description: "Provide access to json configuration"
-	date: "$Date: 2015-01-14 16:13:47 +0100 (mer., 14 janv. 2015) $"
-	revision: "$Revision: 96454 $"
+	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
+	revision: "$Revision: 96542 $"
 
 class
 	APPLICATION_JSON_CONFIGURATION_HELPER
@@ -47,7 +47,7 @@ feature -- Application Configuration
 					attached {JSON_OBJECT} l_environments.item (l_envrionment.item) as l_environment_selected and then
 					attached {JSON_STRING} l_environment_selected.item ("connection_string") as l_connection_string
 				then
-					create Result.make (l_driver.item, l_connection_string.unescaped_string_8)
+					create Result.make (l_driver.item, l_connection_string.unescaped_string_32)
 				end
 			end
 		end

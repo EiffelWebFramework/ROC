@@ -1,7 +1,7 @@
 note
 	description: "Database error handler"
-	date: "$Date: 2013-08-08 16:39:49 -0300 (ju. 08 de ago. de 2013) $"
-	revision: "$Revision: 195 $"
+	date: "$Date: 2014-11-13 16:23:47 +0100 (jeu., 13 nov. 2014) $"
+	revision: "$Revision: 96085 $"
 
 class
 	DATABASE_ERROR_HANDLER

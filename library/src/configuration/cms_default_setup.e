@@ -2,8 +2,8 @@ note
 	description: "[
 			Default CMS_SETUP that can be reused easily, and/or redefined to match specific setup.
 			]"
-	date: "$Date: 2015-01-14 16:13:47 +0100 (mer., 14 janv. 2015) $"
-	revision: "$Revision: 96454 $"
+	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
+	revision: "$Revision: 96542 $"
 
 class
 	CMS_DEFAULT_SETUP
@@ -31,7 +31,10 @@ feature {NONE} -- Initialization
 		do
 			configure
 			create modules.make (3)
+			create storage_drivers.make (2)
+
 			build_mailer
+			initialize_storages
 			initialize_modules
 		end
 
@@ -70,6 +73,12 @@ feature {NONE} -- Initialization
 
 			compute_theme_location
 			compute_theme_assets_location
+		end
+
+	initialize_storages
+			-- Initialize storages
+		do
+			storage_drivers.force (create {CMS_STORAGE_NULL_BUILDER}, "null")
 		end
 
 	initialize_modules
@@ -143,6 +152,11 @@ feature -- Access
 		do
 			to_implement ("Not implemented mailer")
 		end
+
+feature -- Access: storage
+
+	storage_drivers: STRING_TABLE [CMS_STORAGE_BUILDER]
+			-- Precursor	
 
 feature -- Element change
 

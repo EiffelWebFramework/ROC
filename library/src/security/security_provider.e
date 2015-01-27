@@ -1,7 +1,7 @@
 note
 	description: "Provides security routine helpers"
-	date: "$Date: 2014-08-20 15:21:15 -0300 (mi., 20 ago. 2014) $"
-	revision: "$Revision: 95678 $"
+	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
+	revision: "$Revision: 96542 $"
 
 class
 	SECURITY_PROVIDER
@@ -34,10 +34,16 @@ feature -- Access
 			Result.keep_head (Result.count - 2)
 		end
 
-	password_hash (a_password, a_salt: STRING): STRING
+	password_hash (a_password: READABLE_STRING_GENERAL; a_salt: STRING): STRING
 			-- Password hash based on password `a_password' and salt value `a_salt'.
+		local
+			utf: UTF_CONVERTER
+			s: STRING
 		do
-			Result := sha1_string (a_password + a_salt )
+			create s.make (a_password.count + a_salt.count)
+			utf.utf_32_string_into_utf_8_string_8 (a_password, s)
+			s.append (a_salt)
+			Result := sha1_string (s)
 		end
 
 feature {NONE} -- Implementation

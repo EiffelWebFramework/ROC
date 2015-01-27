@@ -2,8 +2,8 @@ note
 	description: "[
 				application service
 			]"
-	date: "$Date: 2014-11-20 15:03:29 +0100 (jeu., 20 nov. 2014) $"
-	revision: "$Revision: 96138 $"
+	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
+	revision: "$Revision: 96542 $"
 
 class
 	EWF_ROC_SERVER
@@ -147,6 +147,9 @@ feature -- CMS setup
 			debug ("refactor_fixme")
 				to_implement ("To implement custom storage")
 			end
+			a_setup.storage_drivers.force (create {CMS_STORAGE_MYSQL_BUILDER}.make, "mysql")
+			a_setup.storage_drivers.force (create {CMS_STORAGE_SQLITE_BUILDER}.make, "sqlite")
 		end
+
 end
 

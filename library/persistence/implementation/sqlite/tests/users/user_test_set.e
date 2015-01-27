@@ -3,8 +3,8 @@ note
 		Eiffel tests that can be executed by testing tool.
 	]"
 	author: "EiffelStudio test wizard"
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
+	revision: "$Revision: 96542 $"
 	testing: "type/manual"
 
 class
@@ -30,7 +30,7 @@ feature {NONE} -- Events
 			-- <Precursor>
 		do
 			(create {CLEAN_DB}).clean_db(connection)
-			user_provider.new_user ("admin", "admin","admin@admin.com")
+			storage.new_user (custom_user ("admin", "admin","admin@admin.com"))
 		end
 
 	on_clean
@@ -43,36 +43,30 @@ feature -- Test routines
 	test_user_exist
 			-- User admin exist			
 		do
-			assert ("Not void",  attached user_provider.user_by_email ("admin@admin.com"))
-			assert ("Not void",  attached user_provider.user (1))
-			assert ("Not void",  attached user_provider.user_by_name ("admin"))
+			assert ("Not void",  attached storage.user_by_email ("admin@admin.com"))
+			assert ("Not void",  attached storage.user_by_id (1))
+			assert ("Not void",  attached storage.user_by_name ("admin"))
 		end
 
 	test_user_not_exist
 			-- Uset test does not exist.
 		do
-			assert ("Void", user_provider.user_by_email ("test@admin.com") = Void)
-			assert ("Void", user_provider.user(2) = Void )
-			assert ("Void", user_provider.user_by_name ("test") = Void)
+			assert ("Void", storage.user_by_email ("test@admin.com") = Void)
+			assert ("Void", storage.user_by_id (2) = Void )
+			assert ("Void", storage.user_by_name ("test") = Void)
 		end
 
 	test_new_user
 		do
-			user_provider.new_user ("test", "test","test@admin.com")
-			assert ("Not void",  attached user_provider.user_by_email ("test@admin.com"))
-			assert ("Not void",  attached user_provider.user (2))
-			assert ("Not void",  attached user_provider.user (2) as l_user and then l_user.id = 2 and then l_user.name ~ "test")
-			assert ("Not void",  attached user_provider.user_by_name ("test"))
+			storage.new_user (custom_user ("test", "test","test@admin.com"))
+			assert ("Not void",  attached storage.user_by_email ("test@admin.com"))
+			assert ("Not void",  attached storage.user_by_id (2))
+			assert ("Not void",  attached storage.user_by_id (2) as l_user and then l_user.id = 2 and then l_user.name ~ "test")
+			assert ("Not void",  attached storage.user_by_name ("test"))
 		end
 
 
-feature {NONE} -- Implementation
 
-	user_provider: USER_DATA_PROVIDER
-			-- user provider.
-		once
-			create Result.make (connection)
-		end
 end
 
 

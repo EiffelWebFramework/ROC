@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {NOT_IMPLEMENTED_ERROR_CMS_RESPONSE}."
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
+	revision: "$Revision: 96542 $"
 
 class
 	NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
@@ -32,7 +32,9 @@ feature -- Execution
 		do
 			set_title ("Not Implemented")
 			set_page_title (Void)
-			set_main_content (request.percent_encoded_path_info + " is not implemented!")
+			if main_content = Void then
+				set_main_content (request.percent_encoded_path_info + " is not implemented!")
+			end
 		end
 end
 

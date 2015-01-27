@@ -1,7 +1,7 @@
 note
 	description: "Provides logger information"
-	date: "$Date: 2014-08-20 15:21:15 -0300 (mi., 20 ago. 2014) $"
-	revision: "$Revision: 95678 $"
+	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
+	revision: "$Revision: 96542 $"
 
 class
 	SHARED_LOGGER
@@ -29,7 +29,7 @@ feature -- Logger
 			create l_environment
 			if attached separate_character_option_value ('d') as l_dir then
 				l_path := create {PATH}.make_from_string (l_dir)
-				create l_log_writer.make_at_location (l_path.extended ("..").appended ("\api.log"))
+				create l_log_writer.make_at_location (l_path.extended ("logs").appended ("\api.log"))
 			else
 				l_path := create {PATH}.make_current
 				create l_log_writer.make_at_location (l_path.extended("api.log"))
@@ -82,23 +82,26 @@ feature {NONE} -- JSON
 		do
 			create Result
 			if attached json_file_from (a_path) as json_file then
-			 l_parser := new_json_parser (json_file)
-			 if  attached {JSON_OBJECT} l_parser.parse as jv and then l_parser.is_parsed and then
-			     attached {JSON_OBJECT} jv.item ("logger") as l_logger and then
-			     attached {JSON_STRING} l_logger.item ("backup_count") as l_count and then
-			     attached {JSON_STRING} l_logger.item ("level") as l_level then
-			     Result.set_level (l_level.item)
-			     if l_count.item.is_natural then
-			     	Result.set_backup_count (l_count.item.to_natural)
-			     end
-			 end
+				l_parser := new_json_parser (json_file)
+				if  attached {JSON_OBJECT} l_parser.parse as jv and then l_parser.is_parsed and then
+					attached {JSON_OBJECT} jv.item ("logger") as l_logger and then
+					attached {JSON_STRING} l_logger.item ("backup_count") as l_count and then
+					attached {JSON_STRING} l_logger.item ("level") as l_level then
+					Result.set_level (l_level.item)
+					if l_count.item.is_natural then
+						Result.set_backup_count (l_count.item.to_natural)
+					end
+				end
 			end
 		end
 
-
 	json_file_from (a_fn: PATH): detachable STRING
+		local
+			ut: FILE_UTILITIES
 		do
-			Result := (create {JSON_FILE_READER}).read_json_from (a_fn.name.out)
+			if ut.file_path_exists (a_fn) then
+				Result := (create {JSON_FILE_READER}).read_json_from (a_fn.name)
+			end
 		end
 
 	new_json_parser (a_string: STRING): JSON_PARSER
@@ -107,6 +110,6 @@ feature {NONE} -- JSON
 		end
 
 note
-	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	copyright: "2011-2015, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

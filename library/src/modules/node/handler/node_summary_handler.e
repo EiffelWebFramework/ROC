@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {NODE_SUMMARY_HANDLER}."
-	date: "$Date: 2014-12-19 14:17:32 +0100 (ven., 19 déc. 2014) $"
-	revision: "$Revision: 96402 $"
+	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
+	revision: "$Revision: 96542 $"
 
 class
 	NODE_SUMMARY_HANDLER
@@ -118,7 +118,7 @@ feature -- HTTP Methods
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
 					if l_id.is_integer and then attached {CMS_NODE} api.node (l_id.integer_value) as l_node then
 						u_node := extract_data_form (req)
-						u_node.set_id (l_id.integer_value)
+						u_node.set_id (l_id.value.to_integer_64)
 						api.update_node_summary (l_user.id,u_node.id, u_node.summary)
 						(create {CMS_GENERIC_RESPONSE}).new_response_redirect (req, res, req.absolute_script_url (""))
 					else
