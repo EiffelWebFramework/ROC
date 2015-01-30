@@ -1,7 +1,7 @@
 note
 	description: "Provides logger information"
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date: 2015-01-30 19:39:52 +0100 (ven., 30 janv. 2015) $"
+	revision: "$Revision: 96564 $"
 
 class
 	SHARED_LOGGER
@@ -109,7 +109,7 @@ feature {NONE} -- JSON
 
 	new_json_parser (a_string: STRING): JSON_PARSER
 		do
-			create Result.make_parser (a_string)
+			create Result.make_with_string (a_string)
 		end
 
 note
