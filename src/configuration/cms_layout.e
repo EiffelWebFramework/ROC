@@ -7,8 +7,8 @@ note
 						- documentation 
 						- themes
 			]"
-	date: "$Date: 2014-12-18 16:37:11 +0100 (jeu., 18 déc. 2014) $"
-	revision: "$Revision: 96383 $"
+	date: "$Date: 2015-02-05 10:25:53 +0100 (jeu., 05 févr. 2015) $"
+	revision: "$Revision: 96584 $"
 
 class
 	CMS_LAYOUT
@@ -19,8 +19,8 @@ inherit
 
 create
 	make_default,
-	make_with_path
-
+	make_with_path,
+	make_with_directory_name
 
 feature -- Access
 
