@@ -1,7 +1,7 @@
 note
 	description: "Generic CMS Response.It builds the content to get process to render the output"
-	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
-	revision: "$Revision: 96616 $"
+	date: "$Date: 2015-02-16 20:14:19 +0100 (lun., 16 févr. 2015) $"
+	revision: "$Revision: 96643 $"
 
 deferred class
 	CMS_RESPONSE
@@ -844,11 +844,13 @@ feature -- Generation
 				-- Variables
 			page.register_variable (request.absolute_script_url (""), "site_url")
 			page.register_variable (request.absolute_script_url (""), "host") -- Same as `site_url'.
+			page.register_variable (request.is_https, "is_https")
 			if attached current_user_name (request) as l_user then
 				page.register_variable (l_user, "user")
 			end
 			page.register_variable (title, "site_title")
 			page.set_is_front (is_front)
+			page.set_is_https (request.is_https)
 
 				-- Variables/Misc
 

@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {SMARTY_CMS_HTML_PAGE_INSPECTOR}."
 	author: ""
-	date: "$Date: 2014-11-13 16:23:47 +0100 (jeu., 13 nov. 2014) $"
-	revision: "$Revision: 96085 $"
+	date: "$Date: 2015-02-16 20:14:19 +0100 (lun., 16 févr. 2015) $"
+	revision: "$Revision: 96643 $"
 
 class
 	SMARTY_CMS_HTML_PAGE_INSPECTOR
@@ -38,6 +38,8 @@ feature {TEMPLATE_ROUTINES}
 					end
 				elseif l_fn.is_case_insensitive_equal ("is_front") then
 					Result := cell_of (l_page.is_front)
+				elseif l_fn.is_case_insensitive_equal ("is_https") then
+					Result := cell_of (l_page.is_https)
 				elseif l_fn.starts_with_general ("region_") then
 					l_fn.remove_head (7) -- remove "region_"
 					Result := cell_of (l_page.region (l_fn))

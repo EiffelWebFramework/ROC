@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {CMS_HTML_PAGE}."
 	author: ""
-	date: "$Date: 2014-11-13 19:34:00 +0100 (jeu., 13 nov. 2014) $"
-	revision: "$Revision: 96086 $"
+	date: "$Date: 2015-02-16 20:14:19 +0100 (lun., 16 févr. 2015) $"
+	revision: "$Revision: 96643 $"
 
 class
 	CMS_HTML_PAGE
@@ -39,6 +39,8 @@ feature -- Access
 			-- such as "front", "about", ... that could be customized by themes.
 
 	is_front: BOOLEAN
+
+	is_https: BOOLEAN
 
 	title: detachable READABLE_STRING_32
 
@@ -94,6 +96,12 @@ feature -- Element change
 			-- Set `is_front' to `b'.
 		do
 			is_front := b
+		end
+
+	set_is_https (b: BOOLEAN)
+			-- Set `is_https' to `b'.
+		do
+			is_https := b
 		end
 
 	register_variable (a_value: detachable ANY; k: READABLE_STRING_GENERAL)
