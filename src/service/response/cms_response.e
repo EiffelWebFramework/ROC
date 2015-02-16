@@ -1,7 +1,7 @@
 note
 	description: "Generic CMS Response.It builds the content to get process to render the output"
-	date: "$Date: 2014-12-15 21:43:38 +0100 (lun., 15 déc. 2014) $"
-	revision: "$Revision: 96346 $"
+	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
+	revision: "$Revision: 96616 $"
 
 deferred class
 	CMS_RESPONSE
@@ -357,7 +357,6 @@ feature -- Blocks regions
 			end
 		end
 
-
 feature -- Blocks 		
 
 	add_block (b: CMS_BLOCK; a_default_region: detachable READABLE_STRING_8)
@@ -368,7 +367,6 @@ feature -- Blocks
 			l_region := block_region (b, a_default_region)
 			l_region.extend (b)
 		end
-
 
 	get_blocks
 		do
@@ -754,9 +752,13 @@ feature -- Element Change
 feature -- Generation
 
 	prepare (page: CMS_HTML_PAGE)
+		local
+			lnk: CMS_LINK
 		do
 				-- Menu
-			add_to_primary_menu (create {CMS_LOCAL_LINK}.make ("Home", "/"))
+			create {CMS_LOCAL_LINK} lnk.make ("Home", "/")
+			lnk.set_weight (-10)
+			add_to_primary_menu (lnk)
 			invoke_menu_system_alter (menu_system)
 			prepare_menu_system (menu_system)
 
@@ -772,6 +774,11 @@ feature -- Generation
 						recursive_get_active (l_menu_block.menu, request)
 					end
 				end
+			end
+
+				-- Sort items
+			across menu_system as ic loop
+				ic.item.sort
 			end
 
 				-- Values
@@ -842,10 +849,6 @@ feature -- Generation
 			end
 			page.register_variable (title, "site_title")
 			page.set_is_front (is_front)
-
-				-- Variables/Setup
-			page.register_variable (setup.is_web, "web")
-			page.register_variable (setup.is_html, "html")
 
 				-- Variables/Misc
 

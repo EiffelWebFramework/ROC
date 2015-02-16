@@ -1,0 +1,71 @@
+note
+	description: "Summary description for {CMS_REQUEST_UTIL}."
+	author: ""
+	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
+	revision: "$Revision: 96616 $"
+
+deferred class
+	CMS_REQUEST_UTIL
+
+inherit
+	CMS_ENCODERS
+
+	REFACTORING_HELPER
+
+feature -- User
+
+	current_user_name (req: WSF_REQUEST): detachable READABLE_STRING_32
+			-- Current user name or Void in case of Guest users.
+		note
+			EIS: "src=eiffel:?class=AUTHENTICATION_FILTER&feature=execute"
+		do
+			if attached {CMS_USER} current_user (req) as l_user then
+				Result := l_user.name
+			end
+		end
+
+	current_user (req: WSF_REQUEST): detachable CMS_USER
+			-- Current user or Void in case of Guest user.
+		note
+			EIS: "eiffel:?class=AUTHENTICATION_FILTER&feature=execute"
+		do
+			if attached {CMS_USER} req.execution_variable ("_cms_active_user_") as l_user then
+				Result := l_user
+			end
+		end
+
+feature -- Change
+
+	set_current_user (req: WSF_REQUEST; a_user: detachable CMS_USER)
+			-- Set `a_user' as `current_user'.
+		do
+			if a_user = Void then
+				req.unset_execution_variable ("_cms_active_user_")
+			else
+				req.set_execution_variable ("_cms_active_user_", a_user)
+			end
+		ensure
+			user_set: current_user (req) ~ a_user
+		end
+
+feature -- Media Type
+
+	current_media_type (req: WSF_REQUEST): detachable READABLE_STRING_32
+			-- Current media type or Void if it's not acceptable.
+		do
+			if attached {STRING} req.execution_variable ("media_type") as l_type then
+				Result := l_type
+			end
+		end
+
+feature -- Absolute Host
+
+	absolute_host (req: WSF_REQUEST; a_path:STRING): STRING
+		do
+			Result := req.absolute_script_url (a_path)
+			if Result.last_index_of ('/', Result.count) = Result.count then
+				Result.remove_tail (1)
+			end
+		end
+
+end

@@ -1,7 +1,7 @@
 note
 	description: "Object that represent Database configuration settings"
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
+	revision: "$Revision: 96596 $"
 
 class
 	DATABASE_CONFIGURATION
@@ -33,7 +33,7 @@ feature -- Access
 	connection_string: READABLE_STRING_32
 			-- Connection string
 		do
-			Result := "Driver={" + driver + "};" + database_string
+			Result := {STRING_32} "Driver={" + driver + {STRING_32} "};" + database_string
 		end
 
 	item (a_param: READABLE_STRING_GENERAL): detachable READABLE_STRING_32

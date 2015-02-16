@@ -1,7 +1,7 @@
 note
 	description: "Smarty template CMS theme."
-	date: "$Date: 2014-12-05 22:39:27 +0100 (ven., 05 déc. 2014) $"
-	revision: "$Revision: 96260 $"
+	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
+	revision: "$Revision: 96596 $"
 
 class
 	SMARTY_CMS_THEME
@@ -56,7 +56,7 @@ feature -- Access
 				else
 					l_regions := <<"top","header", "highlighted","help", "content", "footer", "first_sidebar", "second_sidebar", "bottom">>
 				end
-				internaL_regions := l_regions
+				internal_regions := l_regions
 			end
 			Result := l_regions
 		end

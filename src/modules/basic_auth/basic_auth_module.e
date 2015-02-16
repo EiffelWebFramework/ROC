@@ -1,17 +1,23 @@
 note
 	description: "This module allows the use of HTTP Basic Authentication to restrict access by looking up users in the given providers."
-	date: "$Date: 2014-11-13 16:23:47 +0100 (jeu., 13 nov. 2014) $"
-	revision: "$Revision: 96085 $"
+	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
+	revision: "$Revision: 96596 $"
 
 class
 	BASIC_AUTH_MODULE
 
 inherit
-
 	CMS_MODULE
 		redefine
-			filters
+			filters,
+			register_hooks
 		end
+
+	CMS_HOOK_AUTO_REGISTER
+
+	CMS_HOOK_BLOCK
+
+	CMS_HOOK_MENU_SYSTEM_ALTER
 
 create
 	make
@@ -69,5 +75,47 @@ feature {NONE} -- Implementation: routes
 			l_methods.enable_get
 			a_router.handle_with_request_methods ("/basic_auth_logoff", l_bal_handler, l_methods)
 		end
+
+feature -- Hooks configuration
+
+	register_hooks (a_response: CMS_RESPONSE)
+			-- Module hooks configuration.
+		do
+--			a_response.subscribe_to_block_hook (Current)
+		end 
+
+feature -- Hooks
+
+	block_list: ITERABLE [like {CMS_BLOCK}.name]
+			-- List of block names, managed by current object.
+		do
+			Result := <<"basic_auth_login_form">>
+		end
+
+	get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+			-- Get block object identified by `a_block_id' and associate with `a_response'.
+		do
+			if a_block_id.same_string ("basic_auth_login_form") then
+
+			end
+		end
+
+	menu_system_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
+			-- Hook execution on collection of menu contained by `a_menu_system'
+			-- for related response `a_response'.
+		local
+			lnk: CMS_LOCAL_LINK
+		do
+			if attached a_response.current_user (a_response.request) as u then
+				create lnk.make ("Logout", "/basic_auth_logoff")
+			else
+				create lnk.make ("Login", "/basic_auth_login")
+			end
+--			if not a_menu_system.primary_menu.has (lnk) then
+				lnk.set_weight (99)
+				a_menu_system.primary_menu.extend (lnk)
+--			end
+		end
+
 
 end

@@ -2,8 +2,8 @@ note
 	description: "[
 			Default CMS_SETUP that can be reused easily, and/or redefined to match specific setup.
 			]"
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
+	revision: "$Revision: 96616 $"
 
 class
 	CMS_DEFAULT_SETUP
@@ -86,7 +86,11 @@ feature {NONE} -- Initialization
 		local
 			m: CMS_MODULE
 		do
---			-- Core
+			-- Core
+--			create {BASIC_AUTH_MODULE} m.make
+--			m.enable
+--			register_module (m)
+
 --			create {USER_MODULE} m.make (Current)
 --			m.enable
 --			register_module (m)
@@ -128,19 +132,6 @@ feature -- Access
 					Result := utf.escaped_utf_32_string_to_utf_8_string_8 (s)
 				end
 			end
-		end
-
-	is_html: BOOLEAN
-			-- <Precursor>
-		do
-				-- Enable change the mode
-			Result := (create {CMS_JSON_CONFIGURATION}).is_html_mode (layout.application_config_path)
-		end
-
-	is_web: BOOLEAN
-			-- <Precursor>
-		do
-			Result := (create {CMS_JSON_CONFIGURATION}).is_web_mode (layout.application_config_path)
 		end
 
 	build_auth_engine

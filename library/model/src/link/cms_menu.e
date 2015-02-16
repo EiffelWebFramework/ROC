@@ -3,8 +3,8 @@ note
 				Abstraction to represent a MENU in the CMS system.
 				It has items as sub menu/link.
 			]"
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
+	revision: "$Revision: 96596 $"
 
 class
 	CMS_MENU
@@ -61,6 +61,17 @@ feature -- Status report
 			Result := items.is_empty
 		end
 
+	has (lnk: CMS_LINK): BOOLEAN
+		do
+			across
+				items as ic
+			until
+				Result
+			loop
+				Result := ic.item.location.same_string (lnk.location)
+			end
+		end
+
 feature -- Element change			
 
 	extend (lnk: CMS_LINK)
@@ -91,6 +102,6 @@ feature -- Access
 invariant
 
 note
-	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	copyright: "2011-2015, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

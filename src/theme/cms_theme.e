@@ -1,7 +1,7 @@
 note
 	description: "Abstract class describing a generic theme"
-	date: "$Date: 2014-11-18 02:49:56 +0100 (mar., 18 nov. 2014) $"
-	revision: "$Revision: 96108 $"
+	date: "$Date: 2015-02-16 12:52:35 +0100 (lun., 16 févr. 2015) $"
+	revision: "$Revision: 96630 $"
 
 deferred class
 	CMS_THEME
@@ -69,7 +69,7 @@ feature -- Conversion
 				end
 				s.append (a_block.to_html (Current))
 			else
-				create s.make_from_string ("<div class=%"block%" id=%"" + a_block.name + "%">")
+				create s.make_from_string ("<div class=%"block%" id=%"block-" + a_block.name + "%">")
 				if attached a_block.title as l_title then
 					s.append ("<div class=%"title%">" + html_encoded (l_title) + "</div>")
 				end

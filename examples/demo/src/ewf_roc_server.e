@@ -2,8 +2,8 @@ note
 	description: "[
 				application service
 			]"
-	date: "$Date: 2015-02-05 10:25:53 +0100 (jeu., 05 févr. 2015) $"
-	revision: "$Revision: 96584 $"
+	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
+	revision: "$Revision: 96596 $"
 
 class
 	EWF_ROC_SERVER
@@ -136,8 +136,10 @@ feature -- CMS setup
 			m: CMS_MODULE
 		do
 			create {BASIC_AUTH_MODULE} m.make
-			m.enable
-			a_setup.register_module (m)
+			if not a_setup.module_with_same_type_registered (m) then
+				m.enable
+				a_setup.register_module (m)
+			end
 
 			create {CMS_DEMO_MODULE} m.make
 			m.enable

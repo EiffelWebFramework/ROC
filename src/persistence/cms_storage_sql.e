@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {CMS_STORAGE_SQL}."
 	author: ""
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
+	revision: "$Revision: 96616 $"
 
 deferred class
 	CMS_STORAGE_SQL
@@ -10,7 +10,20 @@ deferred class
 feature -- Error handler
 
 	error_handler: ERROR_HANDLER
+			-- Error handler.
 		deferred
+		end
+
+	has_error: BOOLEAN
+			-- Last operation reported error.
+		do
+			Result := error_handler.has_error
+		end
+
+	reset_error
+			-- Reset errors.
+		do
+			error_handler.reset
 		end
 
 feature -- Execution
@@ -29,6 +42,7 @@ feature -- Execution
 
 	sql_post_execution
 			-- Post database execution.
+			-- note: execute after each `sql_query' and `sql_change'.
 		deferred
 		end
 

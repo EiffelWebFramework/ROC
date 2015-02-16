@@ -3,8 +3,8 @@ note
 	description : "[ 
 				CMS interface to storage
 			]"
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
+	revision: "$Revision: 96596 $"
 
 deferred class
 	CMS_STORAGE
@@ -20,6 +20,18 @@ feature {NONE} -- Initialization
 
 	initialize
 		do
+		end
+
+feature -- Status report
+
+	is_available: BOOLEAN
+			-- Is storage available?
+		deferred
+		end
+
+	is_initialized: BOOLEAN
+			-- Is storage initialized?
+		deferred
 		end
 
 feature -- Error Handling

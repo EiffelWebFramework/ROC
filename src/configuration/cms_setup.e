@@ -1,7 +1,7 @@
 note
 	description: "Class that enable to set basic configuration, application layout, core modules and  themes."
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
+	revision: "$Revision: 96616 $"
 
 deferred class
 	CMS_SETUP
@@ -13,16 +13,6 @@ feature -- Access
 
 	layout: CMS_LAYOUT
 			-- CMS layout.
-
-	is_html: BOOLEAN
-			--  api with progressive enhancements css and js, server side rendering.
-		deferred
-		end
-
-	is_web: BOOLEAN
-			-- web: Web Site with progressive enhancements css and js and Ajax calls.
-		deferred
-		end
 
 	enabled_modules: CMS_MODULE_COLLECTION
 			-- List of enabled modules.
@@ -42,7 +32,7 @@ feature -- Access
 			only_enabled_modules: across Result as ic all ic.item.is_enabled end
 		end
 
-feature {CMS_MODULE} -- Restricted access
+feature {CMS_MODULE, CMS_API} -- Restricted access
 
 	modules: CMS_MODULE_COLLECTION
 			-- List of available modules.
@@ -129,13 +119,10 @@ feature -- Access: storage
 					attached storage_drivers.item (l_database_config.driver) as l_builder
 				then
 					Result := l_builder.storage (Current)
-				else
-					create {CMS_STORAGE_NULL} Result
 				end
 			else
 				to_implement ("Workaround code, persistence layer does not implement yet this kind of error handling.")
 					-- error hanling.
-				create {CMS_STORAGE_NULL} Result
 				create l_message.make (1024)
 				if attached ((create {EXCEPTION_MANAGER}).last_exception) as l_exception then
 					if attached l_exception.description as l_description then
@@ -161,11 +148,24 @@ feature -- Access: storage
 
 feature -- Element change
 
+	module_registered (m: CMS_MODULE): BOOLEAN
+		do
+			Result := modules.has (m)
+		end
+
+	module_with_same_type_registered (m: CMS_MODULE): BOOLEAN
+		do
+			Result := modules.has_module_with_same_type (m)
+		end
+
 	register_module (m: CMS_MODULE)
 			-- Add module `m' to `modules'
+		require
+			module_not_registered: not module_registered (m)
+			no_module_with_same_type_registered: not module_with_same_type_registered (m)
 		deferred
 		ensure
-			module_added: modules.has (m)
+			module_registered: module_registered (m)
 		end
 
 end

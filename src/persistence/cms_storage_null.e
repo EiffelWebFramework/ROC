@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {CMS_STORAGE_NULL}."
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
+	revision: "$Revision: 96596 $"
 
 class
 	CMS_STORAGE_NULL
@@ -24,6 +24,20 @@ feature -- Initialization
 	default_create
 		do
 			create error_handler.make
+		end
+
+feature -- Status report
+
+	is_available: BOOLEAN
+			-- Is storage available?
+		do
+			Result := True
+		end
+
+	is_initialized: BOOLEAN
+			-- Is storage initialized?
+		do
+			Result := True
 		end
 
 feature -- Access: user

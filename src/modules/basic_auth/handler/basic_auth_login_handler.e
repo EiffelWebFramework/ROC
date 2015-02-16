@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {BASIC_AUTH_LOGIN_HANDLER}."
-	date: "$Date: 2014-11-13 16:23:47 +0100 (jeu., 13 nov. 2014) $"
-	revision: "$Revision: 96085 $"
+	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
+	revision: "$Revision: 96616 $"
 
 class
 	BASIC_AUTH_LOGIN_HANDLER
@@ -48,7 +48,7 @@ feature -- HTTP Methods
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
 		do
-			log.write_information(generator + ".do_get Processing basic auth login")
+			api.logger.put_information (generator + ".do_get Processing basic auth login", Void)
 			if attached {STRING_32} current_user_name (req) as l_user then
 				(create {CMS_GENERIC_RESPONSE}).new_response_redirect (req, res, req.absolute_script_url("/"))
 			else
