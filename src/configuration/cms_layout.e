@@ -7,8 +7,8 @@ note
 						- documentation 
 						- themes
 			]"
-	date: "$Date: 2015-02-05 10:25:53 +0100 (jeu., 05 févr. 2015) $"
-	revision: "$Revision: 96584 $"
+	date: "$Date: 2015-03-09 19:25:49 +0100 (lun., 09 mars 2015) $"
+	revision: "$Revision: 96797 $"
 
 class
 	CMS_LAYOUT
@@ -44,10 +44,17 @@ feature -- Access
 		do
 			p := internal_cms_config_ini_path
 			if p = Void then
-				p := config_path.extended ("cms.ini")
+				p := config_path.extended (cms_config_ini_name)
 				internal_cms_config_ini_path := p
 			end
 			Result := p
+		end
+
+	cms_config_ini_name: STRING
+			-- CMS Configuration file name.
+			-- Redefine to easily change the name.
+		do
+			Result := "cms.ini"
 		end
 
 feature {NONE} -- Implementation
