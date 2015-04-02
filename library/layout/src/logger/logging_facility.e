@@ -67,7 +67,6 @@ feature -- Output
 		rescue
 			l_retry := True
 			retry
-
 		end
 
 	write_emergency (msg: STRING)
@@ -135,6 +134,6 @@ feature -- Output
 			retry
 		end
 note
-	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	copyright: "2011-2015, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -11,9 +11,6 @@ inherit
 	CMS_LOGGER
 
 	SHARED_LOGGER
-		rename
-			log as log_facility
-		end
 
 create
 	make
@@ -29,32 +26,32 @@ feature -- Logging
 
 	put_information (a_message: READABLE_STRING_8; a_data: detachable ANY)
 		do
-			log_facility.write_information (log_message (a_message, a_data))
+			write_information_log (log_message (a_message, a_data))
 		end
 
 	put_error (a_message: READABLE_STRING_8; a_data: detachable ANY)
 		do
-			log_facility.write_error (log_message (a_message, a_data))
+			write_error_log (log_message (a_message, a_data))
 		end
 
 	put_warning (a_message: READABLE_STRING_8; a_data: detachable ANY)
 		do
-			log_facility.write_warning (log_message (a_message, a_data))
+			write_warning_log (log_message (a_message, a_data))
 		end
 
 	put_critical (a_message: READABLE_STRING_8; a_data: detachable ANY)
 		do
-			log_facility.write_critical (log_message (a_message, a_data))
+			write_critical_log (log_message (a_message, a_data))
 		end
 
 	put_alert (a_message: READABLE_STRING_8; a_data: detachable ANY)
 		do
-			log_facility.write_alert (log_message (a_message, a_data))
+			write_alert_log (log_message (a_message, a_data))
 		end
 
 	put_debug (a_message: READABLE_STRING_8; a_data: detachable ANY)
 		do
-			log_facility.write_debug (log_message (a_message, a_data))
+			write_debug_log (log_message (a_message, a_data))
 		end
 
 end

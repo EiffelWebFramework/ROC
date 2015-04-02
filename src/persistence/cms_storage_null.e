@@ -49,7 +49,7 @@ feature -- Access: user
 
 	users: LIST [CMS_USER]
 		do
-			create {ARRAYED_LIST[CMS_USER]} Result.make (0)
+			create {ARRAYED_LIST [CMS_USER]} Result.make (0)
 		end
 
 	user_by_id (a_id: like {CMS_USER}.id): detachable CMS_USER
@@ -70,16 +70,16 @@ feature -- Access: user
 
 feature -- User Nodes
 
-	user_collaborator_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
+	user_collaborator_nodes (a_id: like {CMS_USER}.id): LIST [CMS_NODE]
 			-- Possible list of nodes where the user identified by `a_id', is a collaborator.
 		do
-			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 		end
 
-	user_author_nodes (a_id: like {CMS_USER}.id): LIST[CMS_NODE]
+	user_author_nodes (a_id: like {CMS_USER}.id): LIST [CMS_NODE]
 			-- Possible list of nodes where the user identified by `a_id', is the author.
 		do
-			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 		end
 
 feature -- Change: user
@@ -87,6 +87,7 @@ feature -- Change: user
 	new_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.
 		do
+			a_user.set_id (1)
 		end
 
 	update_user (a_user: CMS_USER)
@@ -102,9 +103,8 @@ feature -- Access: roles and permissions
 
 	user_roles: LIST [CMS_USER_ROLE]
 		do
-			create {ARRAYED_LIST[CMS_USER_ROLE]} Result.make (0)
+			create {ARRAYED_LIST [CMS_USER_ROLE]} Result.make (0)
 		end
-
 
 feature -- Change: roles and permissions		
 
@@ -122,13 +122,13 @@ feature -- Access: node
 	nodes: LIST[CMS_NODE]
 			-- List of nodes.
 		do
-			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 		end
 
 	recent_nodes (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_NODE]
 			-- List of the `a_count' most recent nodes, starting from `a_lower'.
 		do
-			create {ARRAYED_LIST[CMS_NODE]} Result.make (0)
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 		end
 
 	node_by_id (a_id: INTEGER_64): detachable CMS_NODE
@@ -144,7 +144,7 @@ feature -- Access: node
 	node_collaborators (a_id: like {CMS_NODE}.id): LIST [CMS_USER]
 			-- Possible list of node's collaborator.
 		do
-			create {ARRAYED_LIST[CMS_USER]} Result.make (0)
+			create {ARRAYED_LIST [CMS_USER]} Result.make (0)
 		end
 
 feature -- Node

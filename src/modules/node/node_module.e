@@ -176,9 +176,11 @@ feature -- Handler
 				a_api.user_api.new_user (l_user)
 			end
 			if a_node_api.nodes_count = 0 then
-				create l_node.make ({STRING_32} "This is a content", {STRING_32} "And a summary", {STRING_32} "Nice title")
-				l_node.set_author (l_user)
-				a_node_api.new_node (l_node)
+				if l_user /= Void then
+					create l_node.make ({STRING_32} "This is a content", {STRING_32} "And a summary", {STRING_32} "Nice title")
+					l_node.set_author (l_user)
+					a_node_api.new_node (l_node)
+				end
 			end
 
 			create s.make_from_string ("<p>Nodes:</p>")

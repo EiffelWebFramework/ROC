@@ -28,7 +28,7 @@ feature -- Access: user
 			-- Number of items users.
 		do
 			error_handler.reset
-			log.write_information (generator + ".user_count")
+			write_information_log (generator + ".user_count")
 
 			sql_query (select_users_count, Void)
 			if sql_rows_count = 1 then
@@ -41,7 +41,7 @@ feature -- Access: user
 			create {ARRAYED_LIST [CMS_USER]} Result.make (0)
 
 			error_handler.reset
-			log.write_information (generator + ".all_users")
+			write_information_log (generator + ".all_users")
 
 			from
 				sql_query (select_users, Void)
@@ -62,7 +62,7 @@ feature -- Access: user
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
 			error_handler.reset
-			log.write_information (generator + ".user")
+			write_information_log (generator + ".user")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "uid")
 			sql_query (select_user_by_id, l_parameters)
@@ -79,7 +79,7 @@ feature -- Access: user
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
 			error_handler.reset
-			log.write_information (generator + ".user_by_name")
+			write_information_log (generator + ".user_by_name")
 			create l_parameters.make (1)
 			l_parameters.put (a_name, "name")
 			sql_query (select_user_by_name, l_parameters)
@@ -96,7 +96,7 @@ feature -- Access: user
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
 			error_handler.reset
-			log.write_information (generator + ".user_by_email")
+			write_information_log (generator + ".user_by_email")
 			create l_parameters.make (1)
 			l_parameters.put (a_email, "email")
 			sql_query (select_user_by_email, l_parameters)
@@ -120,10 +120,10 @@ feature -- Access: user
 					then
 						Result := True
 					else
-						log.write_information (generator + ".is_valid_credential User: wrong username or password" )
+						write_information_log (generator + ".is_valid_credential User: wrong username or password" )
 					end
 				else
-					log.write_information (generator + ".is_valid_credential User:" + l_auth_login + "does not exist" )
+					write_information_log (generator + ".is_valid_credential User:" + l_auth_login + "does not exist" )
 				end
 			end
 
@@ -148,7 +148,7 @@ feature -- Change: user
 				l_password_salt := l_security.salt
 				l_password_hash := l_security.password_hash (l_password, l_password_salt)
 
-				log.write_information (generator + ".new_user")
+				write_information_log (generator + ".new_user")
 				create l_parameters.make (4)
 				l_parameters.put (a_user.name, "name")
 				l_parameters.put (l_password_hash, "password")
@@ -189,7 +189,7 @@ feature -- Change: user
 				l_password_hash /= Void and l_password_salt /= Void and
 				attached a_user.email as l_email
 			then
-				log.write_information (generator + ".update_user")
+				write_information_log (generator + ".update_user")
 				create l_parameters.make (6)
 				l_parameters.put (a_user.id, "uid")
 				l_parameters.put (a_user.name, "name")
@@ -233,7 +233,7 @@ feature {NONE} -- Implementation
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
 			error_handler.reset
-			log.write_information (generator + ".user_salt")
+			write_information_log (generator + ".user_salt")
 			create l_parameters.make (1)
 			l_parameters.put (a_username, "name")
 			sql_query (select_salt_by_username, l_parameters)
@@ -282,7 +282,7 @@ feature {NONE} -- Implementation
 			-- Last insert user id.
 		do
 			error_handler.reset
-			log.write_information (generator + ".last_inserted_user_id")
+			write_information_log (generator + ".last_inserted_user_id")
 			sql_query (Sql_last_insert_user_id, Void)
 			if sql_rows_count = 1 then
 				Result := sql_read_integer_64 (1)

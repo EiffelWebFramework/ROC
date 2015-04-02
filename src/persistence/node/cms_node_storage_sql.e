@@ -22,7 +22,7 @@ feature -- Access
 			-- Number of items nodes.
 		do
 			error_handler.reset
-			log.write_information (generator + ".nodes_count")
+			write_information_log (generator + ".nodes_count")
 			sql_query (select_nodes_count, Void)
 			if sql_rows_count = 1 then
 				Result := sql_read_integer_64 (1)
@@ -35,7 +35,7 @@ feature -- Access
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 
 			error_handler.reset
-			log.write_information (generator + ".nodes")
+			write_information_log (generator + ".nodes")
 
 			from
 				sql_query (select_nodes, Void)
@@ -58,7 +58,7 @@ feature -- Access
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 
 			error_handler.reset
-			log.write_information (generator + ".nodes")
+			write_information_log (generator + ".nodes")
 
 			from
 				create l_parameters.make (2)
@@ -82,7 +82,7 @@ feature -- Access
 			l_parameters: STRING_TABLE [ANY]
 		do
 			error_handler.reset
-			log.write_information (generator + ".node")
+			write_information_log (generator + ".node")
 			create l_parameters.make (1)
 			l_parameters.put (a_id,"id")
 			sql_query (select_node_by_id, l_parameters)
@@ -97,7 +97,7 @@ feature -- Access
 			l_parameters: STRING_TABLE [ANY]
 		do
 			error_handler.reset
-			log.write_information (generator + ".node_author")
+			write_information_log (generator + ".node_author")
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "node_id")
 			sql_query (select_node_author, l_parameters)
@@ -110,7 +110,7 @@ feature -- Access
 			-- Last insert node id.
 		do
 			error_handler.reset
-			log.write_information (generator + ".last_inserted_node_id")
+			write_information_log (generator + ".last_inserted_node_id")
 			sql_query (Sql_last_insert_node_id, Void)
 			if sql_rows_count = 1 then
 				Result := sql_read_integer_64 (1)
@@ -126,7 +126,7 @@ feature -- Change: Node
 		do
 				-- New node
 			error_handler.reset
-			log.write_information (generator + ".new_node")
+			write_information_log (generator + ".new_node")
 			create l_parameters.make (7)
 			l_parameters.put (a_node.title, "title")
 			l_parameters.put (a_node.summary, "summary")
@@ -153,7 +153,7 @@ feature -- Change: Node
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			log.write_information (generator + ".delete_node")
+			write_information_log (generator + ".delete_node")
 
 			error_handler.reset
 			create l_parameters.make (1)
@@ -169,7 +169,7 @@ feature -- Change: Node
 		do
 			create now.make_now_utc
 			error_handler.reset
-			log.write_information (generator + ".update_node")
+			write_information_log (generator + ".update_node")
 			create l_parameters.make (7)
 			l_parameters.put (a_node.title, "title")
 			l_parameters.put (a_node.summary, "summary")
@@ -195,7 +195,7 @@ feature -- Change: Node
 		do
 			-- FIXME: unused a_user_id !
 			error_handler.reset
-			log.write_information (generator + ".update_node_title")
+			write_information_log (generator + ".update_node_title")
 			create l_parameters.make (3)
 			l_parameters.put (a_title, "title")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
@@ -210,7 +210,7 @@ feature -- Change: Node
 		do
 			-- FIXME: unused a_user_id !
 			error_handler.reset
-			log.write_information (generator + ".update_node_summary")
+			write_information_log (generator + ".update_node_summary")
 			create l_parameters.make (3)
 			l_parameters.put (a_summary, "summary")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
@@ -225,7 +225,7 @@ feature -- Change: Node
 		do
 			-- FIXME: unused a_user_id !
 			error_handler.reset
-			log.write_information (generator + ".update_node_content")
+			write_information_log (generator + ".update_node_content")
 			create l_parameters.make (3)
 			l_parameters.put (a_content, "content")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
