@@ -111,10 +111,10 @@ feature -- HTTP Methods
 					update_node_from_data_form (req, u_node)
 					u_node.set_author (l_user)
 					node_api.new_node (u_node)
-					(create {CMS_GENERIC_RESPONSE}).new_response_redirect (req, res, req.absolute_script_url (""))
+					redirect_to (req.absolute_script_url (""), res)
 				end
 			else
-				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
+				send_access_denied (res)
 			end
 		end
 
@@ -131,7 +131,7 @@ feature -- HTTP Methods
 						update_node_from_data_form (req, l_node)
 						l_node.set_author (l_user)
 						node_api.update_node (l_node)
-						(create {CMS_GENERIC_RESPONSE}).new_response_redirect (req, res, req.absolute_script_url (""))
+						redirect_to (req.absolute_script_url (""), res)
 					else
 						do_error (req, res, l_id)
 					end
@@ -139,7 +139,7 @@ feature -- HTTP Methods
 					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
-				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
+				send_access_denied (res)
 			end
 		end
 
@@ -153,7 +153,7 @@ feature -- HTTP Methods
 						attached node_api.node (l_id.integer_value) as l_node
 					then
 						node_api.delete_node (l_node)
-						(create {CMS_GENERIC_RESPONSE}).new_response_redirect (req, res, req.absolute_script_url (""))
+						res.send (create {CMS_REDIRECTION_RESPONSE_MESSAGE}.make (req.absolute_script_url ("")))
 					else
 						do_error (req, res, l_id)
 					end
@@ -161,7 +161,7 @@ feature -- HTTP Methods
 					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
-				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
+				send_access_denied (res)
 			end
 		end
 
@@ -196,7 +196,7 @@ feature {NONE} -- Node
 				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
 				l_page.execute
 			else
-				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
+				send_access_denied (res)
 			end
 		end
 

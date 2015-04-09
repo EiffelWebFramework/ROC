@@ -77,7 +77,7 @@ feature -- HTTP Methods
 					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
-				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
+				send_access_denied (res)
 			end
 		end
 
@@ -102,7 +102,7 @@ feature -- HTTP Methods
 					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
-				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
+				send_access_denied (res)
 			end
 		end
 
@@ -117,7 +117,7 @@ feature -- HTTP Methods
 						u_node := extract_data_form (req)
 						u_node.set_id (l_id.value.to_integer_64)
 						node_api.update_node_summary (l_user.id,u_node.id, u_node.summary)
-						(create {CMS_GENERIC_RESPONSE}).new_response_redirect (req, res, req.absolute_script_url (""))
+						redirect_to (req.absolute_script_url (""), res)
 					else
 						do_error (req, res, l_id)
 					end
@@ -125,7 +125,7 @@ feature -- HTTP Methods
 					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
 				end
 			else
-				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
+				send_access_denied (res)
 			end
 		end
 

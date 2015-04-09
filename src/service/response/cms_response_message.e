@@ -1,6 +1,5 @@
 note
-	description: "Summary description for {CMS_RESPONSE_MESSAGE}."
-	author: ""
+	description: "Response message interface specific to the CMS component."
 	date: "$Date$"
 	revision: "$Revision$"
 
