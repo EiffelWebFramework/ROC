@@ -1,5 +1,8 @@
 note
-	description: "This module allows the use of HTTP Basic Authentication to restrict access by looking up users in the given providers."
+	description: "[
+			This module allows the use of HTTP Basic Authentication to restrict access
+			by looking up users in the given providers.
+		]"
 	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
 	revision: "$Revision: 96596 $"
 
@@ -82,7 +85,7 @@ feature -- Hooks configuration
 			-- Module hooks configuration.
 		do
 --			a_response.subscribe_to_block_hook (Current)
-		end 
+		end
 
 feature -- Hooks
 
@@ -107,9 +110,9 @@ feature -- Hooks
 			lnk: CMS_LOCAL_LINK
 		do
 			if attached a_response.current_user (a_response.request) as u then
-				create lnk.make ("Logout", "/basic_auth_logoff")
+				create lnk.make (u.name +  " (Logout)", "/basic_auth_logoff?destination=" + a_response.request.request_uri)
 			else
-				create lnk.make ("Login", "/basic_auth_login")
+				create lnk.make ("Login", "/basic_auth_login?destination=" + a_response.request.request_uri)
 			end
 --			if not a_menu_system.primary_menu.has (lnk) then
 				lnk.set_weight (99)

@@ -14,9 +14,16 @@ inherit
 	REFACTORING_HELPER
 
 create
-	make
+	make,
+	make_empty
 
 feature{NONE} -- Initialization
+
+	make_empty
+			-- Create empty node.
+		do
+			make ({STRING_32} "", {STRING_32} "", {STRING_32} "")
+		end
 
 	make (a_content: READABLE_STRING_32; a_summary: READABLE_STRING_32; a_title: READABLE_STRING_32)
 			-- Create current node with `a_content', `a_summary' and `a_title'.
@@ -82,9 +89,6 @@ feature -- Access
 
 	author: detachable CMS_USER
 			-- Author of current node.
-
---	collaborators: detachable LIST[CMS_USER]
---			-- Users contributed to current Node.
 
 feature -- status report
 
@@ -191,6 +195,6 @@ feature -- Element change
 --		end
 
 note
-	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	copyright: "2011-2015, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
