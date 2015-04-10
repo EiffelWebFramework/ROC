@@ -21,6 +21,8 @@ feature -- Basic operations
 		local
 			l_auth: HTTP_AUTHORIZATION
 		do
+				-- We can inherit from SHARED_LOGGER and write
+				-- write_debug_log ...
 			api.logger.put_debug (generator + ".execute ", Void)
 			create l_auth.make (req.http_authorization)
 			if attached req.raw_header_data as l_raw_data then

@@ -57,6 +57,7 @@ feature -- Access
 
 	id: INTEGER_64 assign set_id
 			-- Unique id.
+			--| Should we use NATURAL_64 instead?
 
 	content: READABLE_STRING_32
 			-- Content of the node.
@@ -180,19 +181,6 @@ feature -- Element change
 		ensure
 			auther_set: author = u
 		end
-
---	add_collaborator (a_user: CMS_USER)
---			-- Add collaborator `a_user' to the collaborators list.
---		local
---			lst: like collaborators
---		do
---			lst := collaborators
---			if lst = Void then
---				create {ARRAYED_SET [CMS_USER]} lst.make (1)
---				collaborators := lst
---			end
---			lst.force (a_user)
---		end
 
 note
 	copyright: "2011-2015, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
