@@ -50,7 +50,7 @@ feature -- Basic operations
 					execute_next (req, res)
 				end
 			else
-				api.logger.put_error (generator + ".execute Not valid", Void)
+				api.logger.put_debug (generator + ".execute without authentication", Void)
 				execute_next (req, res)
 			end
 		end

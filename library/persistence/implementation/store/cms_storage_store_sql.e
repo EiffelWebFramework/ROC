@@ -20,7 +20,7 @@ feature {NONE} -- Initialization
 			is_connected: a_connection.is_connected
 		do
 			connection := a_connection
-			log.write_information (generator + ".make - is database connected?  "+ a_connection.is_connected.out )
+			write_information_log (generator + ".make - is database connected?  "+ a_connection.is_connected.out )
 
 			create {DATABASE_HANDLER_IMPL} db_handler.make (a_connection)
 
@@ -50,7 +50,7 @@ feature -- Query
 		do
 			error_handler.append (db_handler.database_error_handler)
 			if error_handler.has_error then
-				log.write_critical (generator + ".post_execution " +  error_handler.as_string_representation)
+				write_critical_log (generator + ".post_execution " +  error_handler.as_string_representation)
 			end
 		end
 

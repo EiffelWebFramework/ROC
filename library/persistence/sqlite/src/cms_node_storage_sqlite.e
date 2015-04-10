@@ -47,7 +47,7 @@ feature -- Access: iterator
 			l_parameters: STRING_TABLE [ANY]
 		do
 			error_handler.reset
-			log.write_information (generator + ".nodes_iterator")
+			write_information_log (generator + ".nodes_iterator")
 			create l_parameters.make (0)
 			sql_query (select_nodes, l_parameters)
 			create Result.make (db_handler, agent fetch_node)
@@ -61,7 +61,7 @@ feature -- Access: iterator
 		do
 			-- FIXME: check implementation...
 			error_handler.reset
-			log.write_information (generator + ".recent_nodes_iterator")
+			write_information_log (generator + ".recent_nodes_iterator")
 			create l_parameters.make (2)
 			l_parameters.put (a_rows, "rows")
 			l_parameters.put (a_lower, "offset")

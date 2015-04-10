@@ -45,13 +45,29 @@ feature -- HTTP Methods
 			-- <Precursor>
 		local
 			l_page: CMS_RESPONSE
+			l_url: STRING
+			i: INTEGER
 		do
 			api.logger.put_information (generator + ".do_get Processing basic auth logoff", Void)
 			if attached req.query_parameter ("prompt") as l_prompt then
-				(create {CMS_GENERIC_RESPONSE}).new_response_unauthorized (req, res)
+				unset_current_user (req)
+				send_access_denied (res)
 			else
 				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
-				l_page.set_status_code ({HTTP_STATUS_CODE}.unauthorized)
+				unset_current_user (req)
+				l_page.set_status_code ({HTTP_STATUS_CODE}.found) -- Note: can not use {HTTP_STATUS_CODE}.unauthorized for redirection
+				if attached {WSF_STRING} req.query_parameter ("destination") as l_uri then
+					l_url := req.absolute_script_url (l_uri.url_encoded_value)
+				else
+					l_url := req.absolute_script_url ("")
+				end
+				i := l_url.substring_index ("://", 1)
+				if i > 0 then
+						-- Note: this is a hack to have the logout effective on various browser
+						-- (firefox requires this).
+					l_url.replace_substring ("://_logout_basic_auth_@", i, i + 2)
+				end
+				l_page.set_redirection (l_url)
 				l_page.execute
 			end
 		end

@@ -1,5 +1,8 @@
 note
-	description: "Generic CMS Response.It builds the content to get process to render the output"
+	description: "[
+			Generic CMS Response.
+			It builds the content to get process to render the output.
+		]"
 	date: "$Date: 2015-02-16 20:14:19 +0100 (lun., 16 févr. 2015) $"
 	revision: "$Revision: 96643 $"
 
@@ -78,6 +81,9 @@ feature -- Access
 
 	additional_page_head_lines: detachable LIST [READABLE_STRING_8]
 			-- HTML>head>...extra lines
+
+	redirection: detachable READABLE_STRING_8
+			-- Location for eventual redirection.
 
 feature -- Module
 
@@ -239,6 +245,11 @@ feature -- Element change
 			values.remove (k)
 		end
 
+	set_redirection (a_location: READABLE_STRING_8)
+			-- Set `redirection' to `a_location'.
+		do
+			redirection := a_location
+		end
 
 feature -- Logging
 
@@ -247,7 +258,7 @@ feature -- Logging
 --			l_log: CMS_LOG
 		do
 			debug
-				to_implement ("Add implemenatation")
+				to_implement ("Add implementation")
 			end
 --			create l_log.make (a_category, a_message, a_level, Void)
 --			if a_link /= Void then
@@ -964,8 +975,7 @@ feature -- Generation
 feature -- Custom Variables
 
 	variables: detachable STRING_TABLE[ANY]
-		-- Custom variables to feed the templates.
-
+			-- Custom variables to feed the templates.
 
 feature -- Element change: Add custom variables.
 
@@ -980,7 +990,6 @@ feature -- Element change: Add custom variables.
 			end
 			l_variables.force (a_element, a_key)
 		end
-
 
 feature -- Execution
 
@@ -1006,6 +1015,7 @@ feature {NONE} -- Execution
 			cms_page: CMS_HTML_PAGE
 			page: CMS_HTML_PAGE_RESPONSE
 			utf: UTF_CONVERTER
+			h: HTTP_HEADER
 		do
 			if attached {READABLE_STRING_GENERAL} values.item ("optional_content_type") as l_type then
 				create cms_page.make_typed (utf.utf_32_string_to_utf_8_string_8 (l_type))
@@ -1015,8 +1025,13 @@ feature {NONE} -- Execution
 			prepare (cms_page)
 			create page.make (theme.page_html (cms_page))
 			page.set_status_code (status_code)
-			page.header.put_content_length (page.html.count)
-			page.header.put_current_date
+			h := page.header
+			h.put_content_length (page.html.count)
+			h.put_current_date
+			h.put_header_object (header)
+			if attached redirection as l_location then
+				h.put_location (l_location)
+			end
 			response.send (page)
 			on_terminated
 		end

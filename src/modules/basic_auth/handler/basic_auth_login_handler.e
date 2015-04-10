@@ -50,11 +50,21 @@ feature -- HTTP Methods
 		do
 			api.logger.put_information (generator + ".do_get Processing basic auth login", Void)
 			if attached {STRING_32} current_user_name (req) as l_user then
-				(create {CMS_GENERIC_RESPONSE}).new_response_redirect (req, res, req.absolute_script_url("/"))
+				if attached {WSF_STRING} req.query_parameter ("destination") as l_uri then
+					 redirect_to (req.absolute_script_url (l_uri.url_encoded_value), res)
+				else
+					redirect_to (req.absolute_script_url ("/"), res)
+				end
 			else
-				(create {CMS_GENERIC_RESPONSE}).new_response_authenticate (req, res)
+				send_basic_authentication_challenge (Void, res)
 			end
 		end
 
+feature -- Helpers
+
+	send_basic_authentication_challenge (a_realm: detachable READABLE_STRING_8; res: WSF_RESPONSE)
+		do
+			res.send (create {CMS_UNAUTHORIZED_RESPONSE_MESSAGE}.make_with_basic_auth_challenge (a_realm))
+		end
 
 end

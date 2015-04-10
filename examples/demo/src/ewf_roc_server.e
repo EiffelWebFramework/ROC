@@ -71,7 +71,7 @@ feature {NONE} -- Launch operation
 			l_message: STRING
 		do
 			if not l_retry then
-				log.write_debug (generator + ".launch")
+				write_debug_log (generator + ".launch")
 				launcher.launch (a_service, opts)
 			else
 					-- error hanling.
@@ -92,7 +92,7 @@ feature {NONE} -- Launch operation
 					l_message.append ("%N%N")
 				end
 				-- send email shutdown
-				log.write_debug (generator + ".launch shutdown")
+				write_debug_log (generator + ".launch shutdown")
 			end
 		rescue
 			l_retry :=  True
@@ -111,7 +111,7 @@ feature -- CMS Initialization
 				create layout.make_default
 			end
 			initialize_logger (layout)
-			log.write_debug (generator + ".cms_setup based directory %"" + utf.escaped_utf_32_string_to_utf_8_string_8 (layout.path.name) + "%"")
+			write_debug_log (generator + ".cms_setup based directory %"" + utf.escaped_utf_32_string_to_utf_8_string_8 (layout.path.name) + "%"")
 			create Result.make (layout)
 			setup_storage (Result)
 		end
@@ -121,7 +121,7 @@ feature -- CMS Initialization
 			cms: CMS_SERVICE
 			api: CMS_API
 		do
-			log.write_debug (generator + ".initialize_cms")
+			write_debug_log (generator + ".initialize_cms")
 			setup_modules (a_setup)
 			create api.make (a_setup)
 			create cms.make (api)

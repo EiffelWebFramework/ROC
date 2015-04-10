@@ -50,7 +50,7 @@ feature -- Access
 			-- Logger
 
 	storage: CMS_STORAGE
-			-- Persistence storage.				
+			-- Default persistence storage.				
 
 feature -- Status Report
 

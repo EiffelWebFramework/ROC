@@ -56,10 +56,10 @@ feature -- Element Settings
 					l_message.append ("An unknown exception was raised.")
 				end
 				set_last_error (l_message, a_location)
-				log.write_critical (generator + ".set_last_error_from_exception " + l_message)
+				write_critical_log (generator + ".set_last_error_from_exception " + l_message)
 			else
 				set_last_error ("Generic error", "")
-				log.write_critical (generator + ".set_last_error_from_exception Generic Error")
+				write_critical_log (generator + ".set_last_error_from_exception Generic Error")
 			end
 		rescue
 			l_retried := True
@@ -75,7 +75,7 @@ feature -- Element Settings
 			attached_location: a_location /= Void
 		do
 			create last_error.make (a_message, a_location)
-			log.write_critical (generator + ".set_last_error " + a_message)
+			write_critical_log (generator + ".set_last_error " + a_message)
 			successful := False
 		ensure
 			last_error_set: attached last_error
@@ -103,6 +103,6 @@ feature -- Element Settings
 			successful: successful
 		end
 note
-	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	copyright: "2011-2015, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
