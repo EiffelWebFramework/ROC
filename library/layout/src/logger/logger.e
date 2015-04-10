@@ -1,6 +1,5 @@
 note
-	description: "Summary description for {LOGGER}."
-	author: ""
+	description: "Object to log messages for a specific application. "
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -27,11 +26,13 @@ create
 feature {NONE} -- Initialization
 
 	make
+			-- Initialize a logger object.
 		do
 			create log.make
 		end
 
 	make_with_layout (app: APPLICATION_LAYOUT)
+			-- Initialize a logger object with an application layout `app'.
 		do
 			make
 			apply_layout (app)
@@ -51,31 +52,37 @@ feature {NONE} -- Internal
 feature -- Logging
 
 	put_information (a_message: separate READABLE_STRING_8)
+			-- Put message `a_message' to the log at information level.
 		do
 			log.write_information (create {STRING}.make_from_separate (a_message))
 		end
 
 	put_error (a_message: separate READABLE_STRING_8)
+			-- Put message `a_message' to the log at error level.
 		do
 			log.write_error (create {STRING}.make_from_separate (a_message))
 		end
 
 	put_warning (a_message: separate READABLE_STRING_8)
+			-- Put message `a_message' to the log at warning level.
 		do
 			log.write_warning (create {STRING}.make_from_separate (a_message))
 		end
 
 	put_critical (a_message: separate READABLE_STRING_8)
+			-- Put message `a_message' to the log at critical level.
 		do
 			log.write_critical (create {STRING}.make_from_separate (a_message))
 		end
 
 	put_alert (a_message: separate READABLE_STRING_8)
+			-- Put message `a_message' to the log at alert level.
 		do
 			log.write_alert (create {STRING}.make_from_separate (a_message))
 		end
 
 	put_debug (a_message: separate READABLE_STRING_8)
+			-- Put message `a_message' to the log at debug level.
 		do
 			log.write_debug (create {STRING}.make_from_separate (a_message))
 		end

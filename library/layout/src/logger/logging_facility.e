@@ -22,7 +22,7 @@ feature -- Access
 
 
 	register_log_writer (a_log_writer: LOG_WRITER)
-			-- -- Register the non-default log writer `a_log_writer'.
+			-- Register the non-default log writer `a_log_writer'.
 		do
 			logging.register_log_writer (a_log_writer)
 		end
