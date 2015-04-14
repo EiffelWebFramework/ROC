@@ -166,10 +166,17 @@ feature -- Access: CMS
 feature -- Permission
 		-- FIXME: to be implemented has_permissions and has_permission.
 
-feature -- Status		
-		-- FIXME: to be implemented	
-		-- is_from, is_module, has_js.
+	has_permission (a_permission: READABLE_STRING_GENERAL): BOOLEAN
+			-- Does current user has permission `a_permission' ?
+		do
+			Result := user_has_permission (current_user (request), a_permission)
+		end
 
+	user_has_permission (a_user: detachable CMS_USER; a_permission: READABLE_STRING_GENERAL): BOOLEAN
+			-- Does `a_user' has permission `a_permission' ?
+		do
+			Result := api.user_has_permission (a_user, a_permission)
+		end
 
 feature -- Head customization
 
