@@ -58,14 +58,7 @@ feature -- HTTP Methods
 				loop
 					n := ic.item
 					s.append ("<li class=%"cms_type_"+ n.content_type +"%">")
-					s.append ("<a href=%"")
-					s.append (req.script_url ("/node/" + n.id.out))
-					s.append ("%">")
-					s.append (api.html_encoded (n.title))
-					s.append (" (")
-					s.append (n.id.out)
-					s.append (")")
-					s.append ("</a>")
+					s.append (l_page.link (n.title + " (#" + n.id.out + ")", node_api.node_path (n), Void))
 					s.append ("</li>%N")
 				end
 				s.append ("</ul>%N")

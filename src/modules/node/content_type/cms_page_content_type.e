@@ -18,6 +18,9 @@ feature -- Access
 	title: STRING_32 = "Page"
 			-- Human readable name.
 
+	description: STRING_32 = "Use basic pages for your content, such as an 'About us' page."
+			-- Optional description
+
 feature -- Factory
 
 	new_node (a_partial_node: detachable CMS_NODE): CMS_PAGE

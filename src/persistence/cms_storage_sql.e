@@ -163,6 +163,20 @@ feature -- Helper
 				-- FIXME: find better solution
 		end
 
+	sql_table_items_count (a_table_name: READABLE_STRING_8): INTEGER_64
+			-- Number of items in table `a_table_name'?
+		local
+			l_params: STRING_TABLE [detachable ANY]
+		do
+			reset_error
+			create l_params.make (1)
+			l_params.force (a_table_name, "tbname")
+			sql_query ("SELECT count(*) FROM :tbname ;", l_params)
+			if not has_error then
+				Result := sql_read_integer_64 (1)
+			end
+		end
+
 feature -- Access		
 
 	sql_rows_count: INTEGER

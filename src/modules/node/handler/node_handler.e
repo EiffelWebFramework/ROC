@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {NODE_HANDLER}."
+	description: "CMS handler for a node."
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
@@ -76,9 +76,6 @@ feature -- HTTP Methods
 					l_page.add_variable (l_node, "node")
 
 					create s.make_empty
-					s.append ("<h1 class=%"title%">")
-					s.append (html_encoded (l_node.title))
-					s.append ("</h1>")
 					s.append ("<div class=%"info%"> ")
 					if attached l_node.author as l_author then
 						s.append (" by ")
@@ -99,13 +96,11 @@ feature -- HTTP Methods
 					if attached {CMS_PAGE} l_node as l_node_page then
 						if attached l_node_page.parent as l_parent_node then
 							s.append ("<div>Parent page is ")
-							s.append ("<a href=%"/node/" + l_parent_node.id.out + "%">")
-							s.append (l_parent_node.title)
-							s.append (" (#")
-							s.append (l_parent_node.id.out)
-							s.append (")</a></div>")
+							s.append (l_page.link (l_parent_node.title + " (#" + l_parent_node.id.out + ")", node_api.node_path (l_parent_node), Void))
+							s.append ("</div>")
 						end
 					end
+					l_page.set_title (l_node.title)
 					l_page.set_main_content (s)
 					l_page.execute
 				else

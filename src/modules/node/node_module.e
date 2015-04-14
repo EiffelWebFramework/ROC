@@ -42,10 +42,32 @@ feature {CMS_API} -- Module Initialization
 
 	initialize (api: CMS_API)
 			-- <Precursor>
+		local
+			p1,p2: CMS_PAGE
+			ct: CMS_PAGE_CONTENT_TYPE
 		do
 			Precursor (api)
 			if attached {CMS_NODE_STORAGE_SQL} api.storage as l_sql_storage then
 				l_sql_storage.register_node_storage_extension (create {CMS_NODE_STORAGE_SQL_PAGE_EXTENSION}.make (l_sql_storage))
+				if l_sql_storage.sql_table_items_count ("page_nodes") = 0 then
+						-- Data	
+						-- FIXME: for test purpose, remove later
+					if attached api.user_api.user_by_id (1) as u then
+						create ct
+						p1 := ct.new_node (Void)
+						p1.set_title ("Welcome")
+						p1.set_content ("Welcome, you are using the ROC Eiffel CMS", "Welcome Eiffel ROC user", Void) -- Use default format
+						p1.set_author (u)
+						api.storage.save_node (p1)
+
+						p2 := ct.new_node (Void)
+						p2.set_title ("A new page example")
+						p2.set_content ("This is the content of a page", "This is a new page", Void) -- Use default format
+						p2.set_author (u)
+						p2.set_parent (p1)
+						api.storage.save_node (p2)
+					end
+				end
 			else
 					-- FIXME: maybe provide a default solution based on file system, when no SQL storage is available.
 			end
@@ -63,31 +85,10 @@ feature {CMS_API} -- Module management
 		end
 
 	install (api: CMS_API)
-		local
-			p1,p2: CMS_PAGE
-			ct: CMS_PAGE_CONTENT_TYPE
 		do
 				-- Schema
 			if attached {CMS_STORAGE_SQL} api.storage as l_sql_storage then
 				l_sql_storage.sql_execute_file_script (api.setup.layout.path.extended ("scripts").extended (name).appended_with_extension ("sql"))
-			end
-
-				-- Data	
-				-- FIXME: for test purpose, remove later
-			if attached api.user_api.user_by_id (1) as u then
-				create ct
-				p1 := ct.new_node (Void)
-				p1.set_title ("Welcome")
-				p1.set_content ("Welcome, you are using the ROC Eiffel CMS", "Welcome Eiffel ROC user", Void) -- Use default format
-				p1.set_author (u)
-				api.storage.save_node (p1)
-
-				p2 := ct.new_node (Void)
-				p2.set_title ("A new page example")
-				p2.set_content ("This is the content of a page", "This is a new page", Void) -- Use default format
-				p2.set_author (u)
-				p2.set_parent (p1)
-				api.storage.save_node (p2)
 			end
 		end
 
@@ -121,7 +122,7 @@ feature -- Access: router
 
 			create l_new_node_handler.make (a_api, a_node_api)
 			a_router.handle_with_request_methods ("/node/new/{type}", create {WSF_URI_AGENT_HANDLER}.make (agent do_get_node_creation_by_type (?,?, "type", a_node_api)), a_router.methods_get)
-			a_router.handle_with_request_methods ("/node/new", create {WSF_URI_AGENT_HANDLER}.make (agent do_get_node_creation_selection (?,?, a_api)), a_router.methods_get)
+			a_router.handle_with_request_methods ("/node/new", create {WSF_URI_AGENT_HANDLER}.make (agent do_get_node_creation_selection (?,?, a_node_api)), a_router.methods_get)
 
 			create l_edit_node_handler.make (a_api, a_node_api)
 			a_router.handle_with_request_methods ("/node/{id}/edit", l_edit_node_handler, a_router.methods_get_post)
@@ -245,11 +246,30 @@ feature -- Hooks
 
 feature -- Handler
 
-	do_get_node_creation_selection (req: WSF_REQUEST; res: WSF_RESPONSE; a_api: CMS_API)
+	do_get_node_creation_selection (req: WSF_REQUEST; res: WSF_RESPONSE; a_node_api: CMS_NODE_API)
 		local
-			l_page: NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
+			l_page: GENERIC_VIEW_CMS_RESPONSE
+			s: STRING
 		do
-			create l_page.make (req, res, a_api)
+			create l_page.make (req, res, a_node_api.cms_api)
+
+			create s.make_empty
+			s.append ("<ul>")
+			across
+				a_node_api.content_types as ic
+			loop
+				s.append ("<li>")
+				s.append (l_page.link (ic.item.title, a_node_api.new_content_path (ic.item), Void))
+				if attached ic.item.description as l_description then
+					s.append ("<p class=%"description%">")
+					s.append (l_page.html_encoded (l_description))
+					s.append ("</p>")
+				end
+				s.append ("</li>")
+			end
+			s.append ("</ul>")
+			l_page.set_title ("Create new content ...")
+			l_page.set_main_content (s)
 			l_page.execute
 		end
 

@@ -21,6 +21,11 @@ feature -- Access
 		deferred
 		end
 
+	description: detachable READABLE_STRING_32
+			-- Optional description
+		deferred
+		end
+
 feature -- Factory
 
 	new_node (a_partial_node: detachable CMS_NODE): CMS_NODE

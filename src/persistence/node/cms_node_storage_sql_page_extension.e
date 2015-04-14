@@ -48,7 +48,7 @@ feature -- Persistence
 			l_parameters.put (a_node.revision, "revision")
 
 			sql_query (sql_select_page_data, l_parameters)
-			if has_error then
+			if not has_error then
 				if sql_rows_count = 1 then
 					l_previous_parent_id := sql_read_integer_64 (3)
 					l_update := True

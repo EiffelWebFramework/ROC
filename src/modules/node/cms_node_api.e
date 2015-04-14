@@ -59,6 +59,34 @@ feature -- Content type
 			end
 		end
 
+feature -- URL
+
+	new_content_path (ct: detachable CMS_CONTENT_TYPE): STRING
+			-- URI path for new content of type `ct'
+			-- or URI of path for selection of new content possibilities if ct is Void.
+		do
+			if ct /= Void then
+				Result := "/node/new/" + ct.name
+			else
+				Result := "/node/new"
+			end
+		end
+
+	node_path (a_node: CMS_NODE): STRING
+			-- URI path for node `a_node'.
+			-- using the /node/{nid} url.
+		require
+			a_node.has_id
+		do
+			Result := "/node/" + a_node.id.out
+		end
+
+	nodes_path: STRING
+			-- URI path for list of nodes.
+		do
+			Result := "/nodes"
+		end
+
 feature -- Access: Node
 
 	nodes_count: INTEGER_64
