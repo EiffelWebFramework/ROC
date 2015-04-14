@@ -6,33 +6,31 @@ note
 	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
 	revision: "$Revision: 96542 $"
 
-class
+deferred class
 	CMS_NODE
 
 inherit
 
 	REFACTORING_HELPER
 
-create
-	make,
-	make_empty
+--create
+--	make,
+--	make_empty
 
 feature{NONE} -- Initialization
 
 	make_empty
 			-- Create empty node.
 		do
-			make ({STRING_32} "", {STRING_32} "", {STRING_32} "")
+			make ({STRING_32} "")
 		end
 
-	make (a_content: READABLE_STRING_32; a_summary: READABLE_STRING_32; a_title: READABLE_STRING_32)
-			-- Create current node with `a_content', `a_summary' and `a_title'.
+	make (a_title: READABLE_STRING_32)
+			-- Create current node with `a_title'.
 		local
 			l_time: DATE_TIME
 		do
 			create l_time.make_now_utc
-			set_content (a_content)
-			set_summary (a_summary)
 			set_title (a_title)
 			set_creation_date (l_time)
 			set_modification_date (l_time)
@@ -41,16 +39,27 @@ feature{NONE} -- Initialization
 			debug ("refactor_fixme")
 				fixme ("Remove default harcoded format")
 			end
-			set_format ("HTML")
-
-			debug ("refactor_fixme")
-				fixme ("Remove default harcoded content type")
-			end
-			set_content_type ("Page")
 		ensure
-			content_set: content = a_content
-			summary_set: summary = a_summary
 			title_set: title = a_title
+		end
+
+feature {CMS_CONTENT_TYPE} -- Conversion
+
+	import_node (a_node: CMS_NODE)
+			-- Import `a_node' into current node.
+		do
+			set_id (a_node.id)
+			set_revision (a_node.revision)
+			set_title (a_node.title)
+			set_creation_date (a_node.creation_date)
+			set_modification_date (a_node.modification_date)
+			set_publication_date (a_node.publication_date)
+			set_author (a_node.author)
+			set_content (
+						a_node.content,
+						a_node.summary,
+						a_node.format
+					)
 		end
 
 feature -- Access
@@ -59,14 +68,39 @@ feature -- Access
 			-- Unique id.
 			--| Should we use NATURAL_64 instead?
 
-	content: READABLE_STRING_32
-			-- Content of the node.
+	revision: INTEGER_64 assign set_revision
+			-- Revision value.
+			--| Note: for now version is not supported.
 
-	summary: READABLE_STRING_32
-			-- A short summary of the node.
+	content_type: READABLE_STRING_8
+			-- Associated content type name.
+			-- Page, Article, Blog, News, etc.
+		deferred
+		end
+
+feature -- Access		
 
 	title: READABLE_STRING_32
 			-- Full title of the node.
+			-- Required!
+
+	summary: detachable READABLE_STRING_8
+			-- A short summary of the node.
+		deferred
+		end
+
+	content: detachable READABLE_STRING_8
+			-- Content of the node.
+		deferred
+		end
+
+	format: detachable READABLE_STRING_8
+			-- Format associated with `content' and `summary'.
+			-- For example: text, mediawiki, html, etc
+		deferred
+		end
+
+feature -- Access: date			
 
 	modification_date: DATE_TIME
 			-- When the node was updated.
@@ -80,13 +114,7 @@ feature -- Access
 	publication_date_output: READABLE_STRING_32
 			-- Formatted output.
 
-	format: READABLE_STRING_32
-			-- Format associated with `body'.
-			-- For example: text, mediawiki, html, etc
-
-	content_type: READABLE_STRING_32
-			-- Associated content type name.
-			-- Page, Article, Blog, News, etc.
+feature -- Access: author			
 
 	author: detachable CMS_USER
 			-- Author of current node.
@@ -99,22 +127,31 @@ feature -- status report
 			Result := id > 0
 		end
 
-feature -- Element change
-
-	set_content (a_content: like content)
-			-- Assign `content' with `a_content'.
+	same_node (a_node: CMS_NODE): BOOLEAN
+			-- Is `a_node' same node as Current?
 		do
-			content := a_content
+				-- FIXME: if we introduce notion of revision, update this part!
+			Result := Current = a_node or id = a_node.id
 		ensure
-			content_assigned: content = a_content
+			valid_result: Result implies a_node.id = id
 		end
 
-	set_summary (a_summary: like summary)
-			-- Assign `summary' with `a_summary'.
+	is_typed_as (a_content_type: READABLE_STRING_GENERAL): BOOLEAN
+			-- Is current node of type `a_content_type' ?
 		do
-			summary := a_summary
+			Result := a_content_type.is_case_insensitive_equal (content_type)
+		end
+
+feature -- Element change
+
+	set_content (a_content: like content; a_summary: like summary; a_format: like format)
+			-- Set `content', `summary' and `format' to `a_content', `a_summary' and `a_format'.
+			-- The `format' is associated with both `content' and `summary'
+		deferred
 		ensure
+			content_assigned: content = a_content
 			summary_assigned: summary = a_summary
+			format_assigned: format = a_format
 		end
 
 	set_title (a_title: like title)
@@ -150,28 +187,20 @@ feature -- Element change
 			publication_date_assigned: publication_date = a_publication_date
 		end
 
-	set_content_type (a_content_type: like content_type)
-			-- Assign `content_type' with `a_content_type'.
+	set_id (a_id: like id)
+			-- Assign `id' with `a_id'.
 		do
-			content_type := a_content_type
+			id := a_id
 		ensure
-			content_type_assigned: content_type = a_content_type
+			id_assigned: id = a_id
 		end
 
-	set_format (a_format: like format)
-			-- Assign `format' with `a_format'.
+	set_revision (a_revision: like revision)
+			-- Assign `revision' with `a_revision'.
 		do
-			format := a_format
+			revision := a_revision
 		ensure
-			format_assigned: format = a_format
-		end
-
-	set_id (an_id: like id)
-			-- Assign `id' with `an_id'.
-		do
-			id := an_id
-		ensure
-			id_assigned: id = an_id
+			revision_assigned: revision = a_revision
 		end
 
 	set_author (u: like author)

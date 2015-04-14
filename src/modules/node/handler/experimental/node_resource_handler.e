@@ -1,10 +1,10 @@
 note
-	description: "Summary description for {NODE_HANDLER}."
+	description: "Node handler for the API."
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
 class
-	NODE_HANDLER
+	NODE_RESOURCE_HANDLER
 
 inherit
 	CMS_NODE_HANDLER
@@ -62,51 +62,16 @@ feature -- HTTP Methods
 			-- <Precursor>
 		local
 			l_page: CMS_RESPONSE
-			s: STRING
-			hdate: HTTP_DATE
 		do
 				-- Existing node
 			if attached {WSF_STRING} req.path_parameter ("id") as l_id then
 				if
 					l_id.is_integer and then
-					attached {CMS_NODE} node_api.node (l_id.value.to_integer_64) as l_node
+					attached node_api.node (l_id.value.to_integer_64) as l_node
 				then
 						-- FIXME: there is a mix between CMS interface and API interface here.
 					create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
 					l_page.add_variable (l_node, "node")
-
-					create s.make_empty
-					s.append ("<h1 class=%"title%">")
-					s.append (html_encoded (l_node.title))
-					s.append ("</h1>")
-					s.append ("<div class=%"info%"> ")
-					if attached l_node.author as l_author then
-						s.append (" by ")
-						s.append (l_author.name)
-					end
-					if attached l_node.modification_date as l_modified then
-						s.append (" (modified: ")
-						create hdate.make_from_date_time (l_modified)
-						s.append (hdate.yyyy_mmm_dd_string)
-						s.append (")")
-					end
-					s.append ("</div>")
-					if attached l_node.content as l_content then
-						s.append ("<p class=%"content%">")
-						s.append (api.formats.item (l_node.format).formatted_output (l_content))
-						s.append ("</p>")
-					end
-					if attached {CMS_PAGE} l_node as l_node_page then
-						if attached l_node_page.parent as l_parent_node then
-							s.append ("<div>Parent page is ")
-							s.append ("<a href=%"/node/" + l_parent_node.id.out + "%">")
-							s.append (l_parent_node.title)
-							s.append (" (#")
-							s.append (l_parent_node.id.out)
-							s.append (")</a></div>")
-						end
-					end
-					l_page.set_main_content (s)
 					l_page.execute
 				else
 					do_error (req, res, l_id)

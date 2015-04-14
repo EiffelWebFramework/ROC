@@ -22,6 +22,11 @@ feature {NONE} -- Initialization
 		do
 		end
 
+feature -- Access
+
+	api: detachable CMS_API assign set_api
+			-- Associated CMS API.
+
 feature -- Status report
 
 	is_available: BOOLEAN
@@ -38,6 +43,14 @@ feature -- Error Handling
 
 	error_handler: ERROR_HANDLER
 			-- Error handler.
+
+feature -- Element change
+
+	set_api (a_api: like api)
+			-- Set `api' to `a_api'.
+		do
+			api := a_api
+		end
 
 feature -- Misc
 

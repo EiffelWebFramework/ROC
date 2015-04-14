@@ -7,7 +7,6 @@ deferred class
 	CMS_MODULE
 
 inherit
-
 	REFACTORING_HELPER
 
 feature -- Access
@@ -26,6 +25,39 @@ feature -- Access
 
 	version: STRING
 			-- Version od the module?
+
+feature {CMS_API} -- Module Initialization
+
+	initialize (api: CMS_API)
+			-- Initialize Current module with `api'.
+		require
+			is_enabled: is_enabled
+		do
+				-- Redefine to process specific module initialization.
+		end
+
+feature {CMS_API} -- Module management
+
+	is_installed (api: CMS_API): BOOLEAN
+			-- Is Current module installed?
+		do
+			Result := is_enabled
+				-- FIXME: implement proper installation status.
+		end
+
+	install (api: CMS_API)
+		require
+			is_not_installed: not is_installed (api)
+		do
+				-- Not Yet Supported
+		end
+
+	uninstall (api: CMS_API)
+		require
+			is_installed: is_installed (api)
+		do
+				-- Not Yet Supported
+		end
 
 feature -- Router
 

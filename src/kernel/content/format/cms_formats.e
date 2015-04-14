@@ -9,15 +9,18 @@ class
 
 feature -- Access
 
-	format (a_name: like {CONTENT_FORMAT}.name): detachable CONTENT_FORMAT
+	item (a_name: detachable READABLE_STRING_GENERAL): CONTENT_FORMAT
 		do
-			across
-				all_formats as c
-			until
-				Result /= Void
-			loop
-				if c.item.name.same_string (a_name) then
-					Result := c.item
+			Result := default_format
+			if a_name /= Void then
+				across
+					all_formats as c
+				until
+					Result /= Void
+				loop
+					if a_name.same_string (c.item.name) then
+						Result := c.item
+					end
 				end
 			end
 		end

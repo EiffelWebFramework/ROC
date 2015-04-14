@@ -45,47 +45,27 @@ feature -- Factory
 		end
 
 	initialize (a_setup: CMS_SETUP; a_storage: CMS_STORAGE_STORE_SQL)
-		do
-			initialize_schema (a_setup, a_storage)
-			initialize_data (a_setup, a_storage)
-		end
-
-	initialize_schema (a_setup: CMS_SETUP; a_storage: CMS_STORAGE_STORE_SQL)
-		local
-			p: PATH
-			f: PLAIN_TEXT_FILE
-			sql: STRING
-		do
-			p := a_setup.layout.path.extended ("scripts").extended ("sqlite.sql")
-			create f.make_with_path (p)
-			if f.exists and then f.is_access_readable then
-				create sql.make (f.count)
-				f.open_read
-				from
-					f.start
-				until
-					f.exhausted or f.end_of_file
-				loop
-					f.read_stream_thread_aware (1_024)
-					sql.append (f.last_string)
-				end
-				f.close
-				a_storage.error_handler.reset
---				a_storage.sql_begin_transaction
-				a_storage.sql_change (sql, Void)
---				a_storage.sql_commit_transaction
-			end
-		end
-
-	initialize_data (a_setup: CMS_SETUP; a_storage: CMS_STORAGE_STORE_SQL)
 		local
 			u: CMS_USER
+			r: CMS_USER_ROLE
 		do
+				-- Schema
+			a_storage.sql_execute_file_script (a_setup.layout.path.extended ("scripts").extended ("core.sql"))
+
+				-- Data	
+				-- Users
 			create u.make ("admin")
-			u.set_password ("#admin#")
+			u.set_password ("istrator#")
 			u.set_email (a_setup.site_email)
 			a_storage.new_user (u)
-		end
 
+				-- Roles
+			create r.make ("anonymous")
+			a_storage.save_user_role (r)
+			create r.make ("authenticated")
+			r.add_permission ("create page")
+			r.add_permission ("edit page")
+			a_storage.save_user_role (r)
+		end
 
 end

@@ -109,6 +109,11 @@ feature -- Query
 			db_handler.forth
 		end
 
+	sql_valid_item_index (a_index: INTEGER): BOOLEAN
+		do
+			Result := attached {DB_TUPLE} db_handler.item as l_item and then l_item.valid_index (a_index)
+		end
+
 	sql_item (a_index: INTEGER): detachable ANY
 		do
 			if attached {DB_TUPLE} db_handler.item as l_item and then l_item.count >= a_index then

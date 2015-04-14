@@ -1,6 +1,7 @@
 note
-	description: "Summary description for {CMS_NODE_STORAGE_SQL}."
-	author: ""
+	description: "[
+			CMS NODE Storage based on SQL statements.
+		]"
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
@@ -23,7 +24,7 @@ feature -- Access
 		do
 			error_handler.reset
 			write_information_log (generator + ".nodes_count")
-			sql_query (select_nodes_count, Void)
+			sql_query (sql_select_nodes_count, Void)
 			if sql_rows_count = 1 then
 				Result := sql_read_integer_64 (1)
 			end
@@ -38,7 +39,7 @@ feature -- Access
 			write_information_log (generator + ".nodes")
 
 			from
-				sql_query (select_nodes, Void)
+				sql_query (sql_select_nodes, Void)
 				sql_start
 			until
 				sql_after
@@ -48,6 +49,11 @@ feature -- Access
 				end
 				sql_forth
 			end
+--			across
+--				Result as ic
+--			loop
+--				fill_node (ic.item)
+--			end
 		end
 
 	recent_nodes (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_NODE]
@@ -64,7 +70,7 @@ feature -- Access
 				create l_parameters.make (2)
 				l_parameters.put (a_count, "rows")
 				l_parameters.put (a_lower, "offset")
-				sql_query (select_recent_nodes, l_parameters)
+				sql_query (sql_select_recent_nodes, l_parameters)
 				sql_start
 			until
 				sql_after
@@ -84,8 +90,8 @@ feature -- Access
 			error_handler.reset
 			write_information_log (generator + ".node")
 			create l_parameters.make (1)
-			l_parameters.put (a_id,"id")
-			sql_query (select_node_by_id, l_parameters)
+			l_parameters.put (a_id, "nid")
+			sql_query (sql_select_node_by_id, l_parameters)
 			if sql_rows_count = 1 then
 				Result := fetch_node
 			end
@@ -121,31 +127,14 @@ feature -- Change: Node
 
 	new_node (a_node: CMS_NODE)
 			-- Save node `a_node'.
-		local
-			l_parameters: STRING_TABLE [detachable ANY]
 		do
-				-- New node
-			error_handler.reset
-			write_information_log (generator + ".new_node")
-			create l_parameters.make (7)
-			l_parameters.put (a_node.title, "title")
-			l_parameters.put (a_node.summary, "summary")
-			l_parameters.put (a_node.content, "content")
-			l_parameters.put (a_node.publication_date, "publish")
-			l_parameters.put (a_node.creation_date, "created")
-			l_parameters.put (a_node.modification_date, "changed")
-			if
-				attached a_node.author as l_author and then
-			 	l_author.id > 0
-			then
-				l_parameters.put (l_author.id, "author")
-			else
-				l_parameters.put (0, "author")
-			end
-			sql_change (sql_insert_node, l_parameters)
-			if not error_handler.has_error then
-				a_node.set_id (last_inserted_node_id)
-			end
+			store_node (a_node)
+		end
+
+	update_node (a_node: CMS_NODE)
+			-- Update node content `a_node'.
+		do
+			store_node (a_node)
 		end
 
 	delete_node_by_id (a_id: INTEGER_64)
@@ -161,144 +150,184 @@ feature -- Change: Node
 			sql_change (sql_delete_node, l_parameters)
 		end
 
-	update_node (a_node: CMS_NODE)
-			-- Update node content `a_node'.
+--	update_node_title (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
+--			-- <Precursor>
+--		local
+--			l_parameters: STRING_TABLE [detachable ANY]
+--		do
+--			-- FIXME: unused a_user_id !
+--			error_handler.reset
+--			write_information_log (generator + ".update_node_title")
+--			create l_parameters.make (3)
+--			l_parameters.put (a_title, "title")
+--			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
+--			l_parameters.put (a_node_id, "nid")
+--			sql_change (sql_update_node_title, l_parameters)
+--		end
+
+--	update_node_summary (a_user_id: Like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
+--			-- <Precursor>
+--		local
+--			l_parameters: STRING_TABLE [detachable ANY]
+--		do
+--			-- FIXME: unused a_user_id !
+--			error_handler.reset
+--			write_information_log (generator + ".update_node_summary")
+--			create l_parameters.make (3)
+--			l_parameters.put (a_summary, "summary")
+--			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
+--			l_parameters.put (a_node_id, "nid")
+--			sql_change (sql_update_node_summary, l_parameters)
+--		end
+
+--	update_node_content (a_user_id: Like {CMS_USER}.id;a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
+--			-- <Precursor>
+--		local
+--			l_parameters: STRING_TABLE [detachable ANY]
+--		do
+--			-- FIXME: unused a_user_id !
+--			error_handler.reset
+--			write_information_log (generator + ".update_node_content")
+--			create l_parameters.make (3)
+--			l_parameters.put (a_content, "content")
+--			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
+--			l_parameters.put (a_node_id, "nid")
+--			sql_change (sql_update_node_content, l_parameters)
+--		end
+
+feature {NONE} -- Implementation
+
+	store_node (a_node: CMS_NODE)
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 			now: DATE_TIME
+			is_new: BOOLEAN
 		do
 			create now.make_now_utc
 			error_handler.reset
-			write_information_log (generator + ".update_node")
-			create l_parameters.make (7)
+
+			write_information_log (generator + ".store_node")
+			create l_parameters.make (8)
+			l_parameters.put (a_node.content_type, "type")
 			l_parameters.put (a_node.title, "title")
 			l_parameters.put (a_node.summary, "summary")
 			l_parameters.put (a_node.content, "content")
 			l_parameters.put (a_node.publication_date, "publish")
 			l_parameters.put (now, "changed")
-			l_parameters.put (a_node.id, "id")
 			if attached a_node.author as l_author then
+				check valid_author: l_author.has_id end
 				l_parameters.put (l_author.id, "author")
 			else
 				l_parameters.put (0, "author")
 			end
-			sql_change (sql_update_node, l_parameters)
-			if not error_handler.has_error then
-				a_node.set_modification_date (now)
+			sql_begin_transaction
+			if a_node.has_id then
+				is_new := True
+					-- Update
+				l_parameters.put (a_node.id, "id")
+				sql_change (sql_update_node, l_parameters)
+				if not error_handler.has_error then
+					a_node.set_revision (a_node.revision + 1) -- FIXME: Should be incremented by one, in same transaction...but check!
+					a_node.set_modification_date (now)
+				end
+			else
+				is_new := False
+					-- Store new node
+				l_parameters.put (a_node.creation_date, "created")
+				sql_change (sql_insert_node, l_parameters)
+				if not error_handler.has_error then
+					a_node.set_modification_date (now)
+					a_node.set_id (last_inserted_node_id)
+					a_node.set_revision (1) -- New object.
+				end
 			end
+			extended_store (a_node)
+			sql_commit_transaction
 		end
 
-	update_node_title (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
-			-- <Precursor>
-		local
-			l_parameters: STRING_TABLE [detachable ANY]
-		do
-			-- FIXME: unused a_user_id !
-			error_handler.reset
-			write_information_log (generator + ".update_node_title")
-			create l_parameters.make (3)
-			l_parameters.put (a_title, "title")
-			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
-			l_parameters.put (a_node_id, "nid")
-			sql_change (sql_update_node_title, l_parameters)
-		end
+feature -- Helpers
 
-	update_node_summary (a_user_id: Like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
-			-- <Precursor>
-		local
-			l_parameters: STRING_TABLE [detachable ANY]
+	fill_node (a_node: CMS_NODE)
+			-- Fill `a_node' with extra information from database.
+			-- i.e: specific to each content type data.
 		do
-			-- FIXME: unused a_user_id !
 			error_handler.reset
-			write_information_log (generator + ".update_node_summary")
-			create l_parameters.make (3)
-			l_parameters.put (a_summary, "summary")
-			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
-			l_parameters.put (a_node_id, "nid")
-			sql_change (sql_update_node_summary, l_parameters)
-		end
-
-	update_node_content (a_user_id: Like {CMS_USER}.id;a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
-			-- <Precursor>
-		local
-			l_parameters: STRING_TABLE [detachable ANY]
-		do
-			-- FIXME: unused a_user_id !
-			error_handler.reset
-			write_information_log (generator + ".update_node_content")
-			create l_parameters.make (3)
-			l_parameters.put (a_content, "content")
-			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
-			l_parameters.put (a_node_id, "nid")
-			sql_change (sql_update_node_content, l_parameters)
+			write_information_log (generator + ".fill_node")
+			extended_load (a_node)
 		end
 
 feature {NONE} -- Queries
 
-	Select_nodes_count: STRING = "select count(*) from Nodes;"
+	sql_select_nodes_count: STRING = "SELECT count(*) from Nodes;"
 
-	Select_nodes: STRING = "select * from Nodes;"
-		-- SQL Query to retrieve all nodes.
+	sql_select_nodes: STRING = "SELECT * from Nodes;"
+			-- SQL Query to retrieve all nodes.
 
-	Select_node_by_id: STRING = "select * from Nodes where nid =:nid order by nid desc, publish desc;"
+	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, author, publish, created, changed FROM Nodes WHERE nid =:nid ORDER BY revision desc, publish desc LIMIT 1;"
 
-	Select_recent_nodes: STRING = "select * from Nodes order by nid desc, publish desc LIMIT :rows OFFSET :offset ;"
+	sql_select_recent_nodes: STRING = "SELECT nid, revision, type, title, summary, content, author, publish, created, changed FROM Nodes ORDER BY nid desc, publish desc LIMIT :rows OFFSET :offset ;"
 
-	SQL_Insert_node: STRING = "insert into nodes (title, summary, content, publish, created, changed, author) values (:title, :summary, :content, :publish, :created, :changed, :author);"
-		-- SQL Insert to add a new node.
+	sql_insert_node: STRING = "INSERT INTO nodes (revision, type, title, summary, content, publish, created, changed, author) VALUES (1, :type, :title, :summary, :content, :publish, :created, :changed, :author);"
+			-- SQL Insert to add a new node.
 
-	SQL_Update_node : STRING = "update nodes SET title=:title, summary=:summary, content=:content, publish=:publish,  changed=:changed, version = version + 1, author=:author where nid=:nid;"
-		-- SQL node.
+	sql_update_node : STRING = "UPDATE nodes SET revision = revision + 1, type=:type, title=:title, summary=:summary, content=:content, publish=:publish, changed=:changed, revision = revision + 1, author=:author WHERE nid=:nid;"
+			-- SQL node.
 
-	SQL_Delete_node: STRING = "delete from nodes where nid=:nid;"
+	sql_delete_node: STRING = "DELETE FROM nodes WHERE nid=:nid;"
 
-	Sql_update_node_author: STRING  = "update nodes SET author=:author where nid=:nid;"
+--	sql_update_node_author: STRING  = "UPDATE nodes SET author=:author WHERE nid=:nid;"
 
-	SQL_Update_node_title: STRING ="update nodes SET title=:title, changed=:changed, version = version + 1 where nid=:nid;"
-		-- SQL update node title.
+--	sql_update_node_title: STRING ="UPDATE nodes SET title=:title, changed=:changed, revision = revision + 1 WHERE nid=:nid;"
+--			-- SQL update node title.
 
-	SQL_Update_node_summary: STRING ="update nodes SET summary=:summary, changed=:changed, version = version + 1 where nid=:nid;"
-		-- SQL update node summary.
+--	sql_update_node_summary: STRING ="UPDATE nodes SET summary=:summary, changed=:changed, revision = revision + 1 WHERE nid=:nid;"
+--			-- SQL update node summary.
 
-	SQL_Update_node_content: STRING ="update nodes SET content=:content, changed=:changed, version = version + 1 where nid=:nid;"
-		-- SQL node content.
+--	sql_update_node_content: STRING ="UPDATE nodes SET content=:content, changed=:changed, revision = revision + 1 WHERE nid=:nid;"
+--			-- SQL node content.
 
-	Sql_last_insert_node_id: STRING = "SELECT MAX(nid) from nodes;"
+	sql_last_insert_node_id: STRING = "SELECT MAX(nid) FROM nodes;"
 
 feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 
-	Select_user_author: STRING = "SELECT * FROM Nodes INNER JOIN users ON nodes.author=users.uid and users.uid = :uid;"
+	Select_user_author: STRING = "SELECT uid, name, password, salt, email, status, created, signed FROM Nodes INNER JOIN users ON nodes.author=users.uid AND users.uid = :uid;"
 
-	Select_node_author: STRING = "SELECT * FROM Users INNER JOIN nodes ON nodes.author=users.uid and nodes.nid =:nid;"
+	Select_node_author: STRING = "SELECT nid, revision, type, title, summary, content, author, publish, created, changed FROM users INNER JOIN nodes ON nodes.author=users.uid AND nodes.nid =:nid;"
 
 feature {NONE} -- Implementation
 
-	fetch_node: CMS_NODE
+	fetch_node: detachable CMS_PARTIAL_NODE
 		do
-			create Result.make ("", "", "")
-			if attached sql_read_integer_64 (1) as l_id then
-				Result.set_id (l_id)
-			end
-			if attached sql_read_string_32 (4) as l_title then
-				Result.set_title (l_title)
-			end
-			if attached sql_read_string_32 (5) as l_summary then
-				Result.set_summary (l_summary)
-			end
-			if attached sql_read_string (6) as l_content then
-				Result.set_content (l_content)
-			end
-			if attached sql_read_date_time (8) as l_publication_date then
-				Result.set_publication_date (l_publication_date)
-			end
-			if attached sql_read_date_time (9) as l_creation_date then
-				Result.set_creation_date (l_creation_date)
-			end
-			if attached sql_read_date_time (10) as l_modif_date then
-				Result.set_modification_date (l_modif_date)
-			end
-			if attached sql_read_integer_64 (7) as l_author_id then
-				-- access to API ...
+			if attached sql_read_string (3) as l_type then
+				create Result.make_empty (l_type)
+
+				if attached sql_read_integer_64 (1) as l_id then
+					Result.set_id (l_id)
+				end
+				if attached sql_read_integer_64 (2) as l_revision then
+					Result.set_revision (l_revision)
+				end
+				if attached sql_read_string_32 (4) as l_title then
+					Result.set_title (l_title)
+				end
+				if attached sql_read_string_32 (5) as l_summary then
+					Result.set_summary (l_summary)
+				end
+				if attached sql_read_string (6) as l_content then
+					Result.set_content (l_content)
+				end
+				if attached sql_read_date_time (8) as l_publication_date then
+					Result.set_publication_date (l_publication_date)
+				end
+				if attached sql_read_date_time (9) as l_creation_date then
+					Result.set_creation_date (l_creation_date)
+				end
+				if attached sql_read_date_time (10) as l_modif_date then
+					Result.set_modification_date (l_modif_date)
+				end
+				if attached sql_read_integer_64 (7) as l_author_id then
+					Result.set_author (create {CMS_PARTIAL_USER}.make_with_id (l_author_id))
+				end
 			end
 		end
 

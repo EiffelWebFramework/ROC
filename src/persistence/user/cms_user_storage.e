@@ -90,29 +90,29 @@ feature -- Change: user
 
 feature -- Access: roles and permissions
 
-	user_has_permission (u: detachable CMS_USER; s: detachable READABLE_STRING_8): BOOLEAN
-			-- Anonymous or user `u' has permission for `s' ?
-			--| `s' could be "create page",	
-		do
---			if s = Void then
---				Result := True
---			elseif u = Void then
-----				Result := user_role_has_permission (anonymous_user_role, s)
---			else
---				Result := user_role_has_permission (authenticated_user_role, s)
---				if not Result and attached u.roles as l_roles then
---					across
---						l_roles as r
---					until
---						Result
---					loop
---						if attached user_role_by_id (r.item) as ur then
---							Result := user_role_has_permission (ur, s)
---						end
---					end
---				end
---			end
-		end
+--	user_has_permission (u: detachable CMS_USER; s: detachable READABLE_STRING_8): BOOLEAN
+--			-- Anonymous or user `u' has permission for `s' ?
+--			--| `s' could be "create page",	
+--		do
+----			if s = Void then
+----				Result := True
+----			elseif u = Void then
+------				Result := user_role_has_permission (anonymous_user_role, s)
+----			else
+----				Result := user_role_has_permission (authenticated_user_role, s)
+----				if not Result and attached u.roles as l_roles then
+----					across
+----						l_roles as r
+----					until
+----						Result
+----					loop
+----						if attached user_role_by_id (r.item) as ur then
+----							Result := user_role_has_permission (ur, s)
+----						end
+----					end
+----				end
+----			end
+--		end
 
 	user_role_has_permission (a_role: CMS_USER_ROLE; s: READABLE_STRING_8): BOOLEAN
 		do
@@ -121,6 +121,12 @@ feature -- Access: roles and permissions
 
 	user_role_by_id (a_id: like {CMS_USER_ROLE}.id): detachable CMS_USER_ROLE
 			-- User role by id `a_id', if any.
+		deferred
+		end
+
+	user_roles_for (a_user: CMS_USER): LIST [CMS_USER_ROLE]
+			-- User roles for user `a_user'.
+			-- Note: anonymous and authenticated roles are not included.
 		deferred
 		end
 

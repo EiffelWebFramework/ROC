@@ -95,10 +95,18 @@ feature -- Change: user
 		do
 		end
 
+
 feature -- Access: roles and permissions
 
 	user_role_by_id (a_id: like {CMS_USER_ROLE}.id): detachable CMS_USER_ROLE
 		do
+		end
+
+	user_roles_for (a_user: CMS_USER): LIST [CMS_USER_ROLE]
+			-- User roles for user `a_user'.
+			-- Note: anonymous and authenticated roles are not included.
+		do
+			create {ARRAYED_LIST [CMS_USER_ROLE]} Result.make (0)
 		end
 
 	user_roles: LIST [CMS_USER_ROLE]
@@ -176,6 +184,15 @@ feature -- Node
 
 	update_node_content (a_user_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
 			-- <Precursor>
+		do
+		end
+
+
+feature -- Helpers
+
+	fill_node (a_node: CMS_NODE)
+			-- Fill `a_node' with extra information from database.
+			-- i.e: specific to each content type data.
 		do
 		end
 

@@ -268,13 +268,6 @@ feature -- Logging
 --			service.storage.save_log (l_log)
 		end
 
-feature -- Formats
-
-	formats: CMS_FORMATS
-		once
-			create Result
-		end
-
 feature -- Menu
 
 	menu_system: CMS_MENU_SYSTEM

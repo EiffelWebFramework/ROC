@@ -7,6 +7,13 @@ note
 deferred class
 	CMS_STORAGE_SQL
 
+feature -- Access
+
+	api: detachable CMS_API
+			-- Associated CMS api.
+		deferred
+		end
+
 feature -- Error handler
 
 	error_handler: ERROR_HANDLER
@@ -108,6 +115,54 @@ feature -- Operation
 		deferred
 		end
 
+feature -- Helper
+
+	sql_execute_file_script (a_path: PATH)
+			-- Execute SQL script from `a_path'.
+		local
+			f: PLAIN_TEXT_FILE
+			sql: STRING
+		do
+			create f.make_with_path (a_path)
+			if f.exists and then f.is_access_readable then
+				create sql.make (f.count)
+				f.open_read
+				from
+					f.start
+				until
+					f.exhausted or f.end_of_file
+				loop
+					f.read_stream_thread_aware (1_024)
+					sql.append (f.last_string)
+				end
+				f.close
+				sql_execute_script (sql)
+			end
+		end
+
+	sql_execute_script (a_sql_script: STRING)
+			-- Execute SQL script.
+			-- i.e: multiple SQL statements.
+		do
+			reset_error
+--			sql_begin_transaction
+			sql_change (a_sql_script, Void)
+--			sql_commit_transaction
+		end
+
+	sql_table_exists (a_table_name: READABLE_STRING_8): BOOLEAN
+			-- Does table `a_table_name' exists?
+		local
+			l_params: STRING_TABLE [detachable ANY]
+		do
+			reset_error
+			create l_params.make (1)
+			l_params.force (a_table_name, "tbname")
+			sql_query ("SELECT count(*) FROM :tbname ;", l_params)
+			Result := not has_error
+				-- FIXME: find better solution
+		end
+
 feature -- Access		
 
 	sql_rows_count: INTEGER
@@ -130,7 +185,13 @@ feature -- Access
 		deferred
 		end
 
+	sql_valid_item_index (a_index: INTEGER): BOOLEAN
+		deferred
+		end
+
 	sql_item (a_index: INTEGER): detachable ANY
+		require
+			valid_index: sql_valid_item_index (a_index)
 		deferred
 		end
 
@@ -160,7 +221,7 @@ feature -- Access
 			elseif attached {INTEGER_32_REF} l_item as l_value then
 				Result := l_value.item
 			else
---				check is_integer_32: False end
+				check is_integer_32: False end
 			end
 		end
 
@@ -177,7 +238,7 @@ feature -- Access
 			elseif attached {BOOLEAN_REF} l_item as l_boolean_ref then
 				Result := l_boolean_ref.item.out
 			else
---				check is_string: False end
+				check is_string: False end
 			end
 		end
 
@@ -192,7 +253,9 @@ feature -- Access
 				Result := l_string
 			else
 				if attached sql_read_string (a_index) as s8 then
-					Result := s8.to_string_32 -- FIXME
+					Result := s8.to_string_32 -- FIXME: any escape?
+				else
+					check is_string_32: False end
 				end
 			end
 		end

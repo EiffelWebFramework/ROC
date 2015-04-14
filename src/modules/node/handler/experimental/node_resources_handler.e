@@ -4,7 +4,7 @@ note
 	revision: "$Revision: 96616 $"
 
 class
-	NODES_HANDLER
+	NODE_RESOURCES_HANDLER
 
 inherit
 	CMS_NODE_HANDLER
@@ -39,7 +39,6 @@ feature -- HTTP Methods
 		local
 			l_page: CMS_RESPONSE
 			s: STRING
-			n: CMS_NODE
 		do
 				-- At the moment the template is hardcoded, but we can
 				-- get them from the configuration file and load them into
@@ -52,23 +51,20 @@ feature -- HTTP Methods
 				-- NOTE: for development purposes we have the following hardcode output.
 			create s.make_from_string ("<p>Nodes:</p>")
 			if attached node_api.nodes as lst then
-				s.append ("<ul class=%"cms-nodes%">%N")
 				across
 					lst as ic
 				loop
-					n := ic.item
-					s.append ("<li class=%"cms_type_"+ n.content_type +"%">")
+					s.append ("<li>")
 					s.append ("<a href=%"")
-					s.append (req.script_url ("/node/" + n.id.out))
+					s.append (req.script_url ("/node/" + ic.item.id.out))
 					s.append ("%">")
-					s.append (api.html_encoded (n.title))
+					s.append (api.html_encoded (ic.item.title))
 					s.append (" (")
-					s.append (n.id.out)
+					s.append (ic.item.id.out)
 					s.append (")")
 					s.append ("</a>")
 					s.append ("</li>%N")
 				end
-				s.append ("</ul>%N")
 			end
 
 			l_page.set_main_content (s)

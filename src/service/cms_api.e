@@ -32,12 +32,25 @@ feature {NONE} -- Initialize
 
 	initialize
 				-- Initialize the persitent layer.
+		local
+			l_module: CMS_MODULE
 		do
 			to_implement ("Refactor database setup")
 			if attached setup.storage (error_handler) as l_storage then
 				storage := l_storage
 			else
 				create {CMS_STORAGE_NULL} storage
+			end
+			storage.set_api (Current)
+
+			across
+				setup.enabled_modules as ic
+			loop
+				l_module := ic.item
+				if not l_module.is_installed (Current) then
+					l_module.install (Current)
+				end
+				l_module.initialize (Current)
 			end
 		end
 
@@ -50,7 +63,14 @@ feature -- Access
 			-- Logger
 
 	storage: CMS_STORAGE
-			-- Default persistence storage.				
+			-- Default persistence storage.	
+
+feature -- Formats
+
+	formats: CMS_FORMATS
+		once
+			create Result
+		end
 
 feature -- Status Report
 
@@ -64,6 +84,15 @@ feature -- Status Report
 			-- String representation of all error(s).
 		do
 			Result := error_handler.as_string_representation
+		end
+
+feature -- Permissions system
+
+	user_has_permission (a_user: detachable CMS_USER; a_permission: detachable READABLE_STRING_GENERAL): BOOLEAN
+			-- Anonymous or user `a_user' has permission for `a_permission'?
+			--| `a_permission' could be for instance "create page".
+		do
+			Result := user_api.user_has_permission (a_user, a_permission)
 		end
 
 feature -- Query: module
