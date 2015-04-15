@@ -13,6 +13,7 @@
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
 		<library name="cms" location="..\..\cms-safe.ecf" readonly="false"/>
 		<library name="cms_demo_module" location="modules\demo\cms_demo_module-safe.ecf" readonly="false"/>
+		<library name="cms_blog_module" location="modules\blog\cms_blog_module-safe.ecf" readonly="false"/>
 		<library name="cms_model" location="..\..\library\model\cms_model-safe.ecf" readonly="false"/>
 		<library name="layout" location="..\..\library\layout\layout-safe.ecf" readonly="false"/>
 		<!--

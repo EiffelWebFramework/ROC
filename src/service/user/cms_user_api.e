@@ -46,11 +46,20 @@ feature -- Status report
 			elseif a_user = Void then
 				Result := user_role_has_permission (anonymous_user_role, a_permission)
 			else
-				Result := user_role_has_permission (authenticated_user_role, a_permission)
-				if not Result then
-					Result := across user_roles (a_user) as ic some user_role_has_permission (ic.item, a_permission) end
+				if is_admin_user (a_user) then
+					Result := True
+				else
+					Result := user_role_has_permission (authenticated_user_role, a_permission)
+					if not Result then
+						Result := across user_roles (a_user) as ic some user_role_has_permission (ic.item, a_permission) end
+					end
 				end
 			end
+		end
+
+	is_admin_user (u: CMS_USER): BOOLEAN
+		do
+			Result := u.id = 1
 		end
 
 	user_roles (a_user: CMS_USER): LIST [CMS_USER_ROLE]

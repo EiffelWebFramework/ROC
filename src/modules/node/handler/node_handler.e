@@ -129,10 +129,10 @@ feature -- HTTP Methods
 				elseif l_nid > 0 then --| i.e: l_node = Void
 					send_not_found (req, res)
 				else
-					send_bad_request (req, res)
+--					send_bad_request (req, res)
 						-- FIXME: should not be accepted
 						-- Factory
-	--				create_new_node (req, res)
+					create_new_node (req, res)
 				end
 			end
 		end
@@ -143,6 +143,9 @@ feature -- HTTP Methods
 			edit_response: NODE_FORM_RESPONSE
 		do
 			if req.path_info.ends_with_general ("/edit") then
+				create edit_response.make (req, res, api, node_api)
+				edit_response.execute
+			elseif req.path_info.starts_with_general ("/node/add/") then
 				create edit_response.make (req, res, api, node_api)
 				edit_response.execute
 			else
@@ -293,14 +296,52 @@ feature {NONE} -- Node
 
 	create_new_node (req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
-			l_page: CMS_RESPONSE
+			l_page: NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
+			l_node: detachable CMS_NODE
+			l_gen_page: GENERIC_VIEW_CMS_RESPONSE
+			edit_response: NODE_FORM_RESPONSE
+			s: STRING
 		do
-			if api.user_has_permission (current_user (req), "create node") then
-				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
-				l_page.execute
+			if
+				attached {WSF_STRING} req.path_parameter ("type") as p_type and then
+				attached node_api.content_type (p_type.value) as ct
+			then
+				create edit_response.make (req, res, api, node_api)
+				edit_response.execute
+--				create l_page.make (req, res, api)
+--				l_node := ct.new_node (Void)
+--				l_page.set_main_content (l_node.out)
+--				l_page.execute
 			else
-				send_access_denied (req, res)
+				create l_gen_page.make (req, res, api)
+
+				create s.make_empty
+				s.append ("<ul>")
+				across
+					node_api.content_types as ic
+				loop
+					if api.user_has_permission (current_user (req), "create " + ic.item.name) then
+						s.append ("<li>")
+						s.append (l_gen_page.link (ic.item.title, node_api.new_content_path (ic.item), Void))
+						if attached ic.item.description as l_description then
+							s.append ("<p class=%"description%">")
+							s.append (l_gen_page.html_encoded (l_description))
+							s.append ("</p>")
+						end
+						s.append ("</li>")
+					end
+				end
+				s.append ("</ul>")
+				l_gen_page.set_title ("Create new content ...")
+				l_gen_page.set_main_content (s)
+				l_gen_page.execute
 			end
+--			if api.user_has_permission (current_user (req), "create node") then
+--				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
+--				l_page.execute
+--			else
+--				send_access_denied (req, res)
+--			end
 		end
 
 feature -- {NONE} Form data

@@ -1050,11 +1050,20 @@ feature {NONE} -- Execution
 			h := page.header
 			h.put_content_length (page.html.count)
 			h.put_current_date
-			h.put_header_object (header)
 			if attached redirection as l_location then
-				h.put_location (l_location)
+					-- FIXME: find out if this is safe or not.
+				if l_location.has_substring ("://") then
+--					h.put_location (l_location)
+					response.redirect_now (l_location)
+				else
+--					h.put_location (request.absolute_script_url (l_location))
+					response.redirect_now (request.absolute_script_url (l_location))
+				end
+			else
+				h.put_header_object (header)
+
+				response.send (page)
 			end
-			response.send (page)
 			on_terminated
 		end
 

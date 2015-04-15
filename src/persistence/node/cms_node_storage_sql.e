@@ -231,7 +231,8 @@ feature {NONE} -- Implementation
 				l_parameters.put (a_node.id, "nid")
 				sql_change (sql_update_node, l_parameters)
 				if not error_handler.has_error then
-					a_node.set_revision (a_node.revision + 1) -- FIXME: Should be incremented by one, in same transaction...but check!
+					-- FIXED: FOR NOW  no revision
+--					a_node.set_revision (a_node.revision + 1) -- FIXME: Should be incremented by one, in same transaction...but check!
 					a_node.set_modification_date (now)
 				end
 			else
@@ -273,7 +274,9 @@ feature {NONE} -- Queries
 	sql_insert_node: STRING = "INSERT INTO nodes (revision, type, title, summary, content, format, publish, created, changed, author) VALUES (1, :type, :title, :summary, :content, :format, :publish, :created, :changed, :author);"
 			-- SQL Insert to add a new node.
 
-	sql_update_node : STRING = "UPDATE nodes SET revision = revision + 1, type=:type, title=:title, summary=:summary, content=:content, format=:format, publish=:publish, changed=:changed, revision = revision + 1, author=:author WHERE nid=:nid;"
+	sql_update_node : STRING = "UPDATE nodes SET revision = revision, type=:type, title=:title, summary=:summary, content=:content, format=:format, publish=:publish, changed=:changed, author=:author WHERE nid=:nid;"
+-- FIXME: for now no revision inc.!
+--	sql_update_node : STRING = "UPDATE nodes SET revision = revision + 1, type=:type, title=:title, summary=:summary, content=:content, format=:format, publish=:publish, changed=:changed, revision = revision + 1, author=:author WHERE nid=:nid;"
 			-- SQL node.
 
 	sql_delete_node: STRING = "DELETE FROM nodes WHERE nid=:nid;"

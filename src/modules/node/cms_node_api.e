@@ -45,7 +45,7 @@ feature {NONE} -- Implementation
 			add_content_type_webform_manager (create {CMS_PAGE_CONTENT_TYPE_WEBFORM_MANAGER}.make (ct))
 		end
 
-feature {NODE_MODULE} -- Access nodes storage.
+feature {CMS_MODULE} -- Access nodes storage.
 
 	node_storage: CMS_NODE_STORAGE_I
 
@@ -104,7 +104,7 @@ feature -- URL
 			-- or URI of path for selection of new content possibilities if ct is Void.
 		do
 			if ct /= Void then
-				Result := "/node/new/" + ct.name
+				Result := "/node/add/" + ct.name
 			else
 				Result := "/node/new"
 			end

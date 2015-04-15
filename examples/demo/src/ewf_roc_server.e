@@ -144,6 +144,10 @@ feature -- CMS setup
 			create {CMS_DEMO_MODULE} m.make
 			m.enable
 			a_setup.register_module (m)
+
+			create {CMS_BLOG_MODULE} m.make
+			m.enable
+			a_setup.register_module (m)
 		end
 
 	setup_storage (a_setup: CMS_SETUP)

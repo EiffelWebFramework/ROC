@@ -1,10 +1,11 @@
 note
-	description: "A page node."
+	description: "Summary description for {CMS_BLOG}."
+	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_PAGE
+	CMS_BLOG
 
 inherit
 	CMS_NODE
@@ -30,8 +31,8 @@ feature {CMS_CONTENT_TYPE} -- Conversion
 			-- <Precursor>
 		do
 			Precursor (a_node)
-			if attached {CMS_PAGE} a_node as l_page then
-				set_parent (l_page.parent)
+			if attached {CMS_BLOG} a_node as l_blog then
+--				l_blog
 			end
 		end
 
@@ -39,7 +40,7 @@ feature -- Access
 
 	content_type: READABLE_STRING_8
 		once
-			Result := {CMS_PAGE_CONTENT_TYPE}.name
+			Result := {CMS_BLOG_CONTENT_TYPE}.name
 		end
 
 feature -- Access: content
@@ -54,9 +55,8 @@ feature -- Access: content
 			-- Format associated with `content' and `summary'.
 			-- For example: text, mediawiki, html, etc
 
-	parent: detachable CMS_PAGE
-			-- Eventual parent page.
-			--| Used to describe a book structure.
+	tags: detachable ARRAYED_LIST [READABLE_STRING_32]
+			-- Optional tags
 
 feature -- Element change
 
@@ -67,29 +67,37 @@ feature -- Element change
 			format := a_format
 		end
 
-	set_parent (a_page: detachable CMS_PAGE)
+	add_tag (a_tag: READABLE_STRING_32)
 			-- Set `parent' to `a_page'
 		require
-			Current_is_not_parent_of_a_page: not is_parent_of (a_page)
+			not a_tag.is_whitespace
+		local
+			l_tags: like tags
 		do
-			parent := a_page
+			l_tags := tags
+			if l_tags = Void then
+				create l_tags.make (1)
+				tags := l_tags
+			end
+			l_tags.force (a_tag)
 		end
 
-feature -- Status report
-
-	is_parent_of (a_page: detachable CMS_PAGE): BOOLEAN
-			-- Is Current page, a parent of `a_page' ?
+	set_tags_from_string (a_tags: READABLE_STRING_32)
+		local
+			t: STRING_32
 		do
-			if
-				a_page /= Void and then
-				attached a_page.parent as l_parent
-			then
-				if l_parent.same_node (a_page) then
-					Result := True
-				else
-					Result := is_parent_of (l_parent)
+			tags := Void
+			across
+				a_tags.split (',') as ic
+			loop
+				t := ic.item
+				t.left_adjust
+				t.right_adjust
+				if not t.is_whitespace then
+					add_tag (t)
 				end
 			end
 		end
 
 end
+

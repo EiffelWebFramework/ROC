@@ -59,6 +59,41 @@ feature -- Execution
 							fd := f.last_data
 						end
 
+						if attached redirection as l_location then
+								-- FIXME: Hack for now
+							set_title (l_node.title)
+							add_to_menu (create {CMS_LOCAL_LINK}.make ("View", node_url (l_node)), primary_tabs)
+							add_to_menu (create {CMS_LOCAL_LINK}.make ("Edit", "/node/" + l_node.id.out + "/edit"), primary_tabs)
+
+							b.append ("saved")
+						else
+							set_title ("Edit #" + l_node.id.out)
+
+							add_to_menu (create {CMS_LOCAL_LINK}.make ("View", node_url (l_node)), primary_tabs)
+							add_to_menu (create {CMS_LOCAL_LINK}.make ("Edit", "/node/" + l_node.id.out + "/edit"), primary_tabs)
+
+							f.append_to_html (wsf_theme, b)
+						end
+					else
+						b.append ("<h1>Access denied</h1>")
+					end
+				else
+					set_title ("Unknown node")
+				end
+			elseif
+				attached {WSF_STRING} request.path_parameter ("type") as p_type and then
+				attached node_api.content_type (p_type.value) as l_type
+			then
+				if has_permission ("create " + l_type.name) then
+					if attached l_type.new_node (Void) as l_node then
+						f := edit_form (l_node, url (request.path_info, Void), "edit-" + l_type.name, l_type)
+						if request.is_post_request_method then
+							f.validation_actions.extend (agent edit_form_validate (?, b))
+							f.submit_actions.extend (agent edit_form_submit (?, l_node, l_type, b))
+							f.process (Current)
+							fd := f.last_data
+						end
+
 						set_title ("Edit #" + l_node.id.out)
 
 						add_to_menu (create {CMS_LOCAL_LINK}.make ("View", node_url (l_node)), primary_tabs)
@@ -66,11 +101,12 @@ feature -- Execution
 
 						f.append_to_html (wsf_theme, b)
 					else
-						b.append ("<h1>Access denied</h1>")
+						b.append ("<h1>Server error</h1>")
 					end
 				else
-					set_title ("Unknown node")
+					b.append ("<h1>Access denied</h1>")
 				end
+
 			else
 				set_title ("Create new content ...")
 				b.append ("<ul id=%"content-types%">")
@@ -140,10 +176,17 @@ feature -- Form
 				end
 				if a_node /= Void then
 					l_node := a_node
-					change_node (a_type, fd, a_node)
-					s := "modified"
+					if l_node.has_id then
+						change_node (a_type, fd, a_node)
+						s := "modified"
+					else
+						change_node (a_type, fd, a_node)
+						l_node.set_author (user)
+						s := "created"
+					end
 				else
 					l_node := new_node (a_type, fd, Void)
+					l_node.set_author (user)
 					s := "created"
 				end
 				node_api.save_node (l_node)

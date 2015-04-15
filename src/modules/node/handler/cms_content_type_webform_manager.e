@@ -36,8 +36,8 @@ feature -- Forms ...
 		end
 
 	change_node (response: NODE_RESPONSE; a_form_data: WSF_FORM_DATA; a_node: CMS_NODE)
-		require
-			a_node.has_id
+--		require
+--			a_node.has_id
 		deferred
 		end
 

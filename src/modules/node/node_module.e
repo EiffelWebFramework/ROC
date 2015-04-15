@@ -133,21 +133,23 @@ feature -- Access: router
 			l_methods: WSF_REQUEST_METHODS
 		do
 			create l_node_handler.make (a_api, a_node_api)
-			create l_methods
-			l_methods.enable_get
-			l_methods.enable_post
-			l_methods.lock
-			a_router.handle_with_request_methods ("/node", l_node_handler, l_methods)
+			a_router.handle_with_request_methods ("/node", l_node_handler, a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/node/", l_node_handler, a_router.methods_get_post)
 
 			create l_new_node_handler.make (a_api, a_node_api)
-			a_router.handle_with_request_methods ("/node/new/{type}", create {WSF_URI_AGENT_HANDLER}.make (agent do_get_node_creation_by_type (?,?, "type", a_node_api)), a_router.methods_get)
-			a_router.handle_with_request_methods ("/node/new", create {WSF_URI_AGENT_HANDLER}.make (agent do_get_node_creation_selection (?,?, a_node_api)), a_router.methods_get)
+			a_router.handle_with_request_methods ("/node/add/{type}", l_new_node_handler, a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/node/new", l_new_node_handler, a_router.methods_get)
+
+--			a_router.handle_with_request_methods ("/node/new/{type}", create {WSF_URI_AGENT_HANDLER}.make (agent do_get_node_creation_by_type (?,?, "type", a_node_api)), a_router.methods_get)
+--			a_router.handle_with_request_methods ("/node/new", create {WSF_URI_AGENT_HANDLER}.make (agent do_get_node_creation_selection (?,?, a_node_api)), a_router.methods_get)
 
 			create l_edit_node_handler.make (a_api, a_node_api)
 			a_router.handle_with_request_methods ("/node/{id}/edit", l_edit_node_handler, a_router.methods_get_post)
 
 			create l_node_handler.make (a_api, a_node_api)
 			a_router.handle_with_request_methods ("/node/{id}", l_node_handler, a_router.methods_get_put_delete + a_router.methods_get_post)
+
+
 
 				-- Nodes
 			create l_nodes_handler.make (a_api, a_node_api)
@@ -261,51 +263,53 @@ feature -- Hooks
 		do
 			create lnk.make ("List of nodes", a_response.url ("/nodes", Void))
 			a_menu_system.primary_menu.extend (lnk)
+			create lnk.make ("Create ..", a_response.url ("/node/", Void))
+			a_menu_system.primary_menu.extend (lnk)
 		end
 
-feature -- Handler
+--feature -- Handler
 
-	do_get_node_creation_selection (req: WSF_REQUEST; res: WSF_RESPONSE; a_node_api: CMS_NODE_API)
-		local
-			l_page: GENERIC_VIEW_CMS_RESPONSE
-			s: STRING
-		do
-			create l_page.make (req, res, a_node_api.cms_api)
+--	do_get_node_creation_selection (req: WSF_REQUEST; res: WSF_RESPONSE; a_node_api: CMS_NODE_API)
+--		local
+--			l_page: GENERIC_VIEW_CMS_RESPONSE
+--			s: STRING
+--		do
+--			create l_page.make (req, res, a_node_api.cms_api)
 
-			create s.make_empty
-			s.append ("<ul>")
-			across
-				a_node_api.content_types as ic
-			loop
-				s.append ("<li>")
-				s.append (l_page.link (ic.item.title, a_node_api.new_content_path (ic.item), Void))
-				if attached ic.item.description as l_description then
-					s.append ("<p class=%"description%">")
-					s.append (l_page.html_encoded (l_description))
-					s.append ("</p>")
-				end
-				s.append ("</li>")
-			end
-			s.append ("</ul>")
-			l_page.set_title ("Create new content ...")
-			l_page.set_main_content (s)
-			l_page.execute
-		end
+--			create s.make_empty
+--			s.append ("<ul>")
+--			across
+--				a_node_api.content_types as ic
+--			loop
+--				s.append ("<li>")
+--				s.append (l_page.link (ic.item.title, a_node_api.new_content_path (ic.item), Void))
+--				if attached ic.item.description as l_description then
+--					s.append ("<p class=%"description%">")
+--					s.append (l_page.html_encoded (l_description))
+--					s.append ("</p>")
+--				end
+--				s.append ("</li>")
+--			end
+--			s.append ("</ul>")
+--			l_page.set_title ("Create new content ...")
+--			l_page.set_main_content (s)
+--			l_page.execute
+--		end
 
-	do_get_node_creation_by_type (req: WSF_REQUEST; res: WSF_RESPONSE; a_type_varname: READABLE_STRING_8; a_node_api: CMS_NODE_API)
-		local
-			l_page: NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
-			l_node: detachable CMS_NODE
-		do
-			create l_page.make (req, res, a_node_api.cms_api)
-			if
-				attached {WSF_STRING} req.path_parameter (a_type_varname) as p_type and then
-				attached a_node_api.content_type (p_type.value) as ct
-			then
-				l_node := ct.new_node (Void)
-				l_page.set_main_content (l_node.out)
-			end
-			l_page.execute
-		end
+--	do_get_node_creation_by_type (req: WSF_REQUEST; res: WSF_RESPONSE; a_type_varname: READABLE_STRING_8; a_node_api: CMS_NODE_API)
+--		local
+--			l_page: NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
+--			l_node: detachable CMS_NODE
+--		do
+--			create l_page.make (req, res, a_node_api.cms_api)
+--			if
+--				attached {WSF_STRING} req.path_parameter (a_type_varname) as p_type and then
+--				attached a_node_api.content_type (p_type.value) as ct
+--			then
+--				l_node := ct.new_node (Void)
+--				l_page.set_main_content (l_node.out)
+--			end
+--			l_page.execute
+--		end
 
 end

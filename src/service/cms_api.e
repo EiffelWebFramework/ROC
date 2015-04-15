@@ -147,25 +147,38 @@ feature -- Permissions system
 
 feature -- Query: module
 
-	module (a_type: TYPE [CMS_MODULE]): detachable CMS_MODULE
+	module (a_type: TYPE [detachable CMS_MODULE]): detachable CMS_MODULE
 			-- Enabled module typed `a_type', if any.
 			--| usage: if attached module ({FOO_MODULE}) as mod then ...
+		local
+			t: STRING_8
+			l_type: TYPE [detachable CMS_MODULE]
 		do
+			t := a_type.name
+			if t.starts_with ("!") then
+				t.remove_head (1)
+			end
 			across
 				setup.modules as ic
 			until
 				Result /= Void
 			loop
 				Result := ic.item
-				if
-					not Result.is_enabled
-					or else Result.generating_type /~ a_type
-				then
+				if not Result.is_enabled then
 					Result := Void
+				else
+					l_type := Result.generating_type
+					if a_type ~ l_type then
+							-- Found
+					elseif t.same_string (l_type.name) then
+							-- Found
+					else
+						Result := Void
+					end
 				end
 			end
 		ensure
-			Result /= Void implies (Result.is_enabled and Result.generating_type ~ a_type)
+			Result /= Void implies (Result.is_enabled) -- and a_type.is_conforming_to (Result.generating_type))
 		end
 
 	module_api (a_type: TYPE [CMS_MODULE]): detachable CMS_MODULE_API
