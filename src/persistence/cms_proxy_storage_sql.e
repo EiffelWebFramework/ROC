@@ -1,5 +1,5 @@
 note
-	description: "Proxy on a {CMS_STORAGE_SQL} interface."
+	description: "Proxy on a {CMS_STORAGE_SQL_I} interface."
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
@@ -7,7 +7,7 @@ class
 	CMS_PROXY_STORAGE_SQL
 
 inherit
-	CMS_STORAGE_SQL
+	CMS_STORAGE_SQL_I
 
 create
 	make
@@ -19,7 +19,7 @@ feature {NONE} -- Initialization
 			sql_storage := a_sql_storage
 		end
 
-	sql_storage: CMS_STORAGE_SQL
+	sql_storage: CMS_STORAGE_SQL_I
 
 feature -- Access
 

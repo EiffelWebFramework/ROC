@@ -10,7 +10,7 @@ class
 	CMS_STORAGE_SQLITE_BUILDER
 
 inherit
-	CMS_STORAGE_BUILDER
+	CMS_STORAGE_SQL_BUILDER
 
 create
 	make
@@ -66,6 +66,11 @@ feature -- Factory
 			r.add_permission ("create page")
 			r.add_permission ("edit page")
 			a_storage.save_user_role (r)
+
+				-- Test custom value
+
+			a_storage.set_custom_value ("abc", "123", "test")
+			a_storage.set_custom_value ("abc", "OK", "test")
 		end
 
 end

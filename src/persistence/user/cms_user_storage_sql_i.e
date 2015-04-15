@@ -1,16 +1,15 @@
 note
-	description: "Summary description for {CMS_USER_STORAGE_SQL}."
-	author: ""
+	description: "Summary description for {CMS_USER_STORAGE_SQL_I}."
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
 deferred class
-	CMS_USER_STORAGE_SQL
+	CMS_USER_STORAGE_SQL_I
 
 inherit
-	CMS_USER_STORAGE
+	CMS_USER_STORAGE_I
 
-	CMS_STORAGE_SQL
+	CMS_STORAGE_SQL_I
 
 	REFACTORING_HELPER
 
@@ -34,6 +33,7 @@ feature -- Access: user
 			if sql_rows_count = 1 then
 				Result := sql_read_integer_32 (1)
 			end
+			error_handler.reset
 		end
 
 	users: LIST [CMS_USER]

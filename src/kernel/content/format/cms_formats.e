@@ -9,9 +9,8 @@ class
 
 feature -- Access
 
-	item (a_name: detachable READABLE_STRING_GENERAL): CONTENT_FORMAT
+	item (a_name: detachable READABLE_STRING_GENERAL): detachable CONTENT_FORMAT
 		do
-			Result := default_format
 			if a_name /= Void then
 				across
 					all_formats as c

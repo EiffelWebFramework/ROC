@@ -36,6 +36,11 @@ feature {CMS_API} -- Module Initialization
 				-- Redefine to process specific module initialization.
 		end
 
+feature {CMS_API} -- Access: API
+
+	module_api: detachable CMS_MODULE_API
+			-- Eventual module api.
+
 feature {CMS_API} -- Module management
 
 	is_installed (api: CMS_API): BOOLEAN

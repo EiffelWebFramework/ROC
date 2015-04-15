@@ -162,9 +162,14 @@ feature -- Access: CMS
 			-- Associated values indexed by string name.
 
 
+feature -- User access
+
+	user: detachable CMS_USER
+		do
+			Result := current_user (request)
+		end
 
 feature -- Permission
-		-- FIXME: to be implemented has_permissions and has_permission.
 
 	has_permission (a_permission: READABLE_STRING_GENERAL): BOOLEAN
 			-- Does current user has permission `a_permission' ?
@@ -442,6 +447,9 @@ feature -- Blocks
 		do
 			if attached primary_tabs as m and then not m.is_empty then
 				create Result.make (m)
+				Result.is_horizontal := True
+				Result.set_is_raw (True)
+				Result.add_css_class ("tabs")
 			end
 		end
 
@@ -459,7 +467,7 @@ feature -- Blocks
 			s: STRING
 			l_hb: STRING
 		do
-			create s.make_from_string (theme.menu_html (primary_menu, True))
+			create s.make_from_string (theme.menu_html (primary_menu, True, Void))
 			create l_hb.make_empty
 			create Result.make ("header", Void, l_hb, Void)
 			Result.set_is_raw (True)
@@ -469,7 +477,15 @@ feature -- Blocks
 		do
 			create Result.make_empty
 			Result.append ("<div id=%"menu-bar%">")
-			Result.append (theme.menu_html (primary_menu, True))
+			Result.append (theme.menu_html (primary_menu, True, Void))
+			Result.append ("</div>")
+		end
+
+	horizontal_primary_tabs_html: STRING
+		do
+			create Result.make_empty
+			Result.append ("<div id=%"tabs-bar%">")
+			Result.append (theme.menu_html (primary_tabs, True, Void))
 			Result.append ("</div>")
 		end
 
@@ -650,6 +666,11 @@ feature -- Menu: change
 	add_to_primary_menu (lnk: CMS_LINK)
 		do
 			add_to_menu (lnk, primary_menu)
+		end
+
+	add_to_primary_tabs (lnk: CMS_LINK)
+		do
+			add_to_menu (lnk, primary_tabs)
 		end
 
 	add_to_menu (lnk: CMS_LINK; m: CMS_MENU)
@@ -872,6 +893,7 @@ feature -- Generation
 
 				-- Menu...
 			page.register_variable (horizontal_primary_menu_html, "primary_nav")
+			page.register_variable (horizontal_primary_tabs_html, "primary_tabs")
 
 				-- Page related
 			if attached page_title as l_page_title then

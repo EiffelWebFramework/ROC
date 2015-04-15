@@ -10,7 +10,7 @@ deferred class
 inherit
 	CMS_STORAGE
 
-	CMS_STORAGE_SQL
+	CMS_STORAGE_SQL_I
 
 feature {NONE} -- Initialization
 

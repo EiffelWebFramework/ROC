@@ -88,7 +88,7 @@ feature -- Handler
 		local
 			sql: STRING
 		do
-			if attached {CMS_STORAGE_SQL} a_api.storage as sql_db then
+			if attached {CMS_STORAGE_SQL_I} a_api.storage as sql_db then
 				sql_db.sql_query ("select count(*) from tb_demo;", Void)
 				if sql_db.has_error then
 						-- Initialize db for demo module

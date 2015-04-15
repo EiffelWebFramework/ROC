@@ -9,11 +9,14 @@ class
 inherit
 
 	CMS_MODULE
+		rename
+			module_api as node_api
 		redefine
 			register_hooks,
 			initialize,
 			is_installed,
-			install
+			install,
+			node_api
 		end
 
 	CMS_HOOK_MENU_SYSTEM_ALTER
@@ -45,31 +48,38 @@ feature {CMS_API} -- Module Initialization
 		local
 			p1,p2: CMS_PAGE
 			ct: CMS_PAGE_CONTENT_TYPE
+			l_node_api: like node_api
 		do
 			Precursor (api)
-			if attached {CMS_NODE_STORAGE_SQL} api.storage as l_sql_storage then
-				l_sql_storage.register_node_storage_extension (create {CMS_NODE_STORAGE_SQL_PAGE_EXTENSION}.make (l_sql_storage))
-				if l_sql_storage.sql_table_items_count ("page_nodes") = 0 then
-						-- Data	
-						-- FIXME: for test purpose, remove later
+			create l_node_api.make (api)
+			node_api := l_node_api
+
+				-- Add support for CMS_PAGE, which requires a storage extension to store the optional "parent" id.
+				-- For now, we only have extension based on SQL statement.
+			if attached {CMS_NODE_STORAGE_SQL} l_node_api.node_storage as l_sql_node_storage then
+				l_sql_node_storage.register_node_storage_extension (create {CMS_NODE_STORAGE_SQL_PAGE_EXTENSION}.make (l_sql_node_storage))
+
+					-- FIXME: the following code is mostly for test purpose/initialization, remove later
+				if l_sql_node_storage.sql_table_items_count ("page_nodes") = 0 then
 					if attached api.user_api.user_by_id (1) as u then
 						create ct
 						p1 := ct.new_node (Void)
 						p1.set_title ("Welcome")
-						p1.set_content ("Welcome, you are using the ROC Eiffel CMS", "Welcome Eiffel ROC user", Void) -- Use default format
+						p1.set_content ("Welcome, you are using the ROC Eiffel CMS", Void, Void) -- Use default format
 						p1.set_author (u)
-						api.storage.save_node (p1)
+						l_sql_node_storage.save_node (p1)
 
 						p2 := ct.new_node (Void)
 						p2.set_title ("A new page example")
-						p2.set_content ("This is the content of a page", "This is a new page", Void) -- Use default format
+						p2.set_content ("This is the content of a page", Void, Void) -- Use default format
 						p2.set_author (u)
 						p2.set_parent (p1)
-						api.storage.save_node (p2)
+						l_sql_node_storage.save_node (p2)
 					end
 				end
 			else
 					-- FIXME: maybe provide a default solution based on file system, when no SQL storage is available.
+					-- IDEA: we could also have generic extension to node system, that handle generic addition field.
 			end
 		end
 
@@ -78,7 +88,7 @@ feature {CMS_API} -- Module management
 	is_installed (api: CMS_API): BOOLEAN
 			-- Is Current module installed?
 		do
-			if attached {CMS_STORAGE_SQL} api.storage as l_sql_storage then
+			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
 				Result := l_sql_storage.sql_table_exists ("nodes") and
 					l_sql_storage.sql_table_exists ("page_nodes")
 			end
@@ -87,19 +97,28 @@ feature {CMS_API} -- Module management
 	install (api: CMS_API)
 		do
 				-- Schema
-			if attached {CMS_STORAGE_SQL} api.storage as l_sql_storage then
+			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
 				l_sql_storage.sql_execute_file_script (api.setup.layout.path.extended ("scripts").extended (name).appended_with_extension ("sql"))
 			end
 		end
+
+feature {CMS_API} -- Access: API
+
+	node_api: detachable CMS_NODE_API
+			-- <Precursor>
 
 feature -- Access: router
 
 	router (a_api: CMS_API): WSF_ROUTER
 			-- Node router.
 		local
-			l_node_api: CMS_NODE_API
+			l_node_api: like node_api
 		do
-			create l_node_api.make (a_api)
+			l_node_api := node_api
+			if l_node_api = Void then
+				create l_node_api.make (a_api)
+				node_api := l_node_api
+			end
 			create Result.make (2)
 			configure_cms (a_api, l_node_api, Result)
 --			configure_api (a_api, l_node_api, Result)

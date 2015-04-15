@@ -51,7 +51,7 @@ feature -- HTTP Methods
 			api.logger.put_information (generator + ".do_get Processing basic auth logoff", Void)
 			if attached req.query_parameter ("prompt") as l_prompt then
 				unset_current_user (req)
-				send_access_denied (res)
+				send_access_denied_message (res)
 			else
 				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
 				unset_current_user (req)

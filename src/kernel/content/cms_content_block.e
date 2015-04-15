@@ -46,7 +46,7 @@ feature -- Access
 
 feature -- Status report
 
-	is_raw: BOOLEAN
+	is_raw: BOOLEAN assign set_is_raw
 			-- Is raw?
 			-- If True, do not get wrapped it with block specific div	
 

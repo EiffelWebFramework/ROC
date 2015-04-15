@@ -90,6 +90,7 @@ feature -- Persistence
 						l_parent_id /= a_node.id and then
 						attached node_storage.node_by_id (l_parent_id) as l_parent
 					then
+							-- FIXME: find a simple way to access the declared content types.
 						create ct
 						a_node.set_parent (ct.new_node (l_parent))
 					else

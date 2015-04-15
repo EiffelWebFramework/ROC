@@ -1,11 +1,10 @@
 note
-	description: "Summary description for {CMS_NODE_STORAGE}."
-	author: ""
+	description: "Summary description for {CMS_NODE_STORAGE_I}."
 	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
 	revision: "$Revision: 96542 $"
 
 deferred class
-	CMS_NODE_STORAGE
+	CMS_NODE_STORAGE_I
 
 inherit
 	SHARED_LOGGER

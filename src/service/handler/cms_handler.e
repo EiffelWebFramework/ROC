@@ -36,10 +36,37 @@ feature -- Response helpers
 --			res.send (create {CMS_REDIRECTION_RESPONSE_MESSAGE}.make (a_location))
 		end
 
-	send_access_denied (res: WSF_RESPONSE)
+	send_access_denied_message (res: WSF_RESPONSE)
 			-- Send via `res' an access denied response.
 		do
 			res.send (create {CMS_FORBIDDEN_RESPONSE_MESSAGE}.make)
+		end
+
+	send_access_denied (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- Forbidden response.
+		local
+			r: CMS_RESPONSE
+		do
+			create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
+			r.execute
+		end
+
+	send_not_found (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- Send via `res' a not found response.
+		local
+			r: CMS_RESPONSE
+		do
+			create {NOT_FOUND_ERROR_CMS_RESPONSE} r.make (req, res, api)
+			r.execute
+		end
+
+	send_bad_request (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- Send via `res' a bad request response.
+		local
+			r: CMS_RESPONSE
+		do
+			create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
+			r.execute
 		end
 
 end

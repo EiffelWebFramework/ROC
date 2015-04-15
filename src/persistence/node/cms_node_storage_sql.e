@@ -5,17 +5,22 @@ note
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
-deferred class
+class
 	CMS_NODE_STORAGE_SQL
 
 inherit
-	CMS_NODE_STORAGE
+	CMS_PROXY_STORAGE_SQL
 
-	CMS_STORAGE_SQL
+	CMS_NODE_STORAGE_I
+
+	CMS_STORAGE_SQL_I
 
 	REFACTORING_HELPER
 
 	SHARED_LOGGER
+
+create
+	make
 
 feature -- Access	
 
@@ -146,7 +151,7 @@ feature -- Change: Node
 
 			error_handler.reset
 			create l_parameters.make (1)
-			l_parameters.put (a_id, "id")
+			l_parameters.put (a_id, "nid")
 			sql_change (sql_delete_node, l_parameters)
 		end
 
@@ -201,7 +206,6 @@ feature {NONE} -- Implementation
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 			now: DATE_TIME
-			is_new: BOOLEAN
 		do
 			create now.make_now_utc
 			error_handler.reset
@@ -212,6 +216,7 @@ feature {NONE} -- Implementation
 			l_parameters.put (a_node.title, "title")
 			l_parameters.put (a_node.summary, "summary")
 			l_parameters.put (a_node.content, "content")
+			l_parameters.put (a_node.format, "format")
 			l_parameters.put (a_node.publication_date, "publish")
 			l_parameters.put (now, "changed")
 			if attached a_node.author as l_author then
@@ -222,16 +227,14 @@ feature {NONE} -- Implementation
 			end
 			sql_begin_transaction
 			if a_node.has_id then
-				is_new := True
 					-- Update
-				l_parameters.put (a_node.id, "id")
+				l_parameters.put (a_node.id, "nid")
 				sql_change (sql_update_node, l_parameters)
 				if not error_handler.has_error then
 					a_node.set_revision (a_node.revision + 1) -- FIXME: Should be incremented by one, in same transaction...but check!
 					a_node.set_modification_date (now)
 				end
 			else
-				is_new := False
 					-- Store new node
 				l_parameters.put (a_node.creation_date, "created")
 				sql_change (sql_insert_node, l_parameters)
@@ -263,14 +266,14 @@ feature {NONE} -- Queries
 	sql_select_nodes: STRING = "SELECT * from Nodes;"
 			-- SQL Query to retrieve all nodes.
 
-	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, author, publish, created, changed FROM Nodes WHERE nid =:nid ORDER BY revision desc, publish desc LIMIT 1;"
+	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed FROM Nodes WHERE nid =:nid ORDER BY revision desc, publish desc LIMIT 1;"
 
-	sql_select_recent_nodes: STRING = "SELECT nid, revision, type, title, summary, content, author, publish, created, changed FROM Nodes ORDER BY nid desc, publish desc LIMIT :rows OFFSET :offset ;"
+	sql_select_recent_nodes: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed FROM Nodes ORDER BY nid desc, publish desc LIMIT :rows OFFSET :offset ;"
 
-	sql_insert_node: STRING = "INSERT INTO nodes (revision, type, title, summary, content, publish, created, changed, author) VALUES (1, :type, :title, :summary, :content, :publish, :created, :changed, :author);"
+	sql_insert_node: STRING = "INSERT INTO nodes (revision, type, title, summary, content, format, publish, created, changed, author) VALUES (1, :type, :title, :summary, :content, :format, :publish, :created, :changed, :author);"
 			-- SQL Insert to add a new node.
 
-	sql_update_node : STRING = "UPDATE nodes SET revision = revision + 1, type=:type, title=:title, summary=:summary, content=:content, publish=:publish, changed=:changed, revision = revision + 1, author=:author WHERE nid=:nid;"
+	sql_update_node : STRING = "UPDATE nodes SET revision = revision + 1, type=:type, title=:title, summary=:summary, content=:content, format=:format, publish=:publish, changed=:changed, revision = revision + 1, author=:author WHERE nid=:nid;"
 			-- SQL node.
 
 	sql_delete_node: STRING = "DELETE FROM nodes WHERE nid=:nid;"
@@ -292,7 +295,7 @@ feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 
 	Select_user_author: STRING = "SELECT uid, name, password, salt, email, status, created, signed FROM Nodes INNER JOIN users ON nodes.author=users.uid AND users.uid = :uid;"
 
-	Select_node_author: STRING = "SELECT nid, revision, type, title, summary, content, author, publish, created, changed FROM users INNER JOIN nodes ON nodes.author=users.uid AND nodes.nid =:nid;"
+	Select_node_author: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed FROM users INNER JOIN nodes ON nodes.author=users.uid AND nodes.nid =:nid;"
 
 feature {NONE} -- Implementation
 
@@ -316,17 +319,20 @@ feature {NONE} -- Implementation
 				if attached sql_read_string (6) as l_content then
 					Result.set_content (l_content)
 				end
-				if attached sql_read_date_time (8) as l_publication_date then
+				if attached sql_read_string (7) as l_format then
+					Result.set_format (l_format)
+				end
+				if attached sql_read_integer_64 (8) as l_author_id then
+					Result.set_author (create {CMS_PARTIAL_USER}.make_with_id (l_author_id))
+				end
+				if attached sql_read_date_time (9) as l_publication_date then
 					Result.set_publication_date (l_publication_date)
 				end
-				if attached sql_read_date_time (9) as l_creation_date then
+				if attached sql_read_date_time (10) as l_creation_date then
 					Result.set_creation_date (l_creation_date)
 				end
-				if attached sql_read_date_time (10) as l_modif_date then
+				if attached sql_read_date_time (11) as l_modif_date then
 					Result.set_modification_date (l_modif_date)
-				end
-				if attached sql_read_integer_64 (7) as l_author_id then
-					Result.set_author (create {CMS_PARTIAL_USER}.make_with_id (l_author_id))
 				end
 			end
 		end

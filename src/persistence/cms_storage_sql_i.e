@@ -1,11 +1,10 @@
 note
-	description: "Summary description for {CMS_STORAGE_SQL}."
-	author: ""
+	description: "Interface used to implement CMS Storage based on SQL statement."
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
 deferred class
-	CMS_STORAGE_SQL
+	CMS_STORAGE_SQL_I
 
 feature -- Access
 
@@ -161,6 +160,7 @@ feature -- Helper
 			sql_query ("SELECT count(*) FROM :tbname ;", l_params)
 			Result := not has_error
 				-- FIXME: find better solution
+			reset_error
 		end
 
 	sql_table_items_count (a_table_name: READABLE_STRING_8): INTEGER_64
@@ -252,7 +252,7 @@ feature -- Access
 			elseif attached {BOOLEAN_REF} l_item as l_boolean_ref then
 				Result := l_boolean_ref.item.out
 			else
-				check is_string: False end
+				check is_string_nor_null: l_item = Void end
 			end
 		end
 
@@ -269,7 +269,7 @@ feature -- Access
 				if attached sql_read_string (a_index) as s8 then
 					Result := s8.to_string_32 -- FIXME: any escape?
 				else
-					check is_string_32: False end
+					check is_string_nor_null: l_item = Void end
 				end
 			end
 		end
@@ -283,7 +283,7 @@ feature -- Access
 			if attached {DATE_TIME} l_item as dt then
 				Result := dt
 			else
---				check is_date_time: False end
+				check is_date_time_nor_null: l_item = Void end
 			end
 		end
 
