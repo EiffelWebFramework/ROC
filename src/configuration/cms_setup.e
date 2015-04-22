@@ -1,5 +1,7 @@
 note
-	description: "Class that enable to set basic configuration, application layout, core modules and  themes."
+	description: "[
+		Class that enable to set basic configuration, application layout, core modules and themes.
+		]"
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
@@ -104,10 +106,12 @@ feature -- Access: Theme
 feature -- Access: storage
 
 	storage_drivers: STRING_TABLE [CMS_STORAGE_BUILDER]
+			--
 		deferred
 		end
 
 	storage (a_error_handler: ERROR_HANDLER): detachable CMS_STORAGE
+			-- Retrieve current CMS_STORAGE strategy based on a configuration file.
 		local
 			retried: BOOLEAN
 			l_message: STRING
@@ -146,20 +150,24 @@ feature -- Access: storage
 			retry
 		end
 
-feature -- Element change
+feature -- Status Report: Modules
 
 	module_registered (m: CMS_MODULE): BOOLEAN
+			-- Is the module `m' registered?
 		do
 			Result := modules.has (m)
 		end
 
 	module_with_same_type_registered (m: CMS_MODULE): BOOLEAN
+			-- Is there a module `m' already registered with the same type?
 		do
 			Result := modules.has_module_with_same_type (m)
 		end
 
+feature -- Element change
+
 	register_module (m: CMS_MODULE)
-			-- Add module `m' to `modules'
+			-- Add module `m' to `modules'.
 		require
 			module_not_registered: not module_registered (m)
 			no_module_with_same_type_registered: not module_with_same_type_registered (m)

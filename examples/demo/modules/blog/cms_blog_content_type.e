@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {CMS_BLOG_CONTENT_TYPE}."
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
