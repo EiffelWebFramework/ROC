@@ -1,19 +1,21 @@
+var ROC_AUTH = ROC_AUTH || { };
+
 var loginURL = "/login";
 var logoutURL = "/logoff";
 var userAgent = navigator.userAgent.toLowerCase();
 var firstLogIn = true;
  
-var login = function() {
+ROC_AUTH.login = function() {
     var form = document.forms[0];
     var username = form.username.value;
     var password = form.password.value;
 	  //var host = form.host.value;
-  	var host = window.location.hostname;
+  	var origin = window.location.origin.concat(window.location.pathname);
     var _login = function(){
 
  
     if  (document.getElementById('myModalFormId') !== null ) {
-        remove ('myModalFormId');
+        ROC_AUTH.remove ('myModalFormId');
     }
 
 
@@ -35,8 +37,8 @@ var login = function() {
           request.onreadystatechange = function(){
              if (request.readyState == 4) {
                  if (request.status==200) {
-                           delete form
-                           window.location=host.concat("/");
+                        delete form;
+                        window.location=origin;
                 }
                 else{
                   if (navigator.userAgent.toLowerCase().indexOf("firefox") != -1){                       
@@ -68,7 +70,7 @@ var login = function() {
 };
 
 
-var login_with_redirect = function() {
+ROC_AUTH.login_with_redirect = function() {
     var form = document.forms[2];
     var username = form.username.value;
     var password = form.password.value;
@@ -81,7 +83,7 @@ var login_with_redirect = function() {
     $("#imgProgressRedirect").show();  
 
     if  (document.getElementById('myModalFormId') !== null ) {
-        remove ('myModalFormId');
+        ROC_AUTH.remove ('myModalFormId');
     }
 
 
@@ -141,9 +143,15 @@ var login_with_redirect = function() {
     if (firstLogIn) firstLogIn = false;
 };
 
+
+ROC_AUTH.getQueryParameterByName = function (name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? " " : decodeURIComponent(results[1].replace(/\+/g, " "));
+} 
  
- 
-var logoff = function(callback){
+ROC_AUTH.logoff = function(callback){
 	   var form = document.forms[0];
      var host = form.host.value;
 	  
@@ -186,7 +194,7 @@ var logoff = function(callback){
 };
 
 
-function remove(id)
+ROC_AUTH.remove = function (id)
 {
    var element = document.getElementById(id);
    element.outerHTML = "";
@@ -203,45 +211,45 @@ $(document).ready(function() {
       return this.indexOf(str) != -1;
     };
   }
-   progressive_loging();
+   ROC_AUTH.progressive_loging();
 
 });
 
 
-var progressive_loging = function () {
+ROC_AUTH.progressive_loging = function () {
 
-    login_href();
+    ROC_AUTH.login_href();
 };
 
 
+$(document).keypress(function(e) {
+  if ((e.which === 13) && (e.target.localName === 'input' &&  e.target.id === 'password')) {
+      ROC_AUTH.login();
+  }
+});
 
-
-
-
-
-var OnOneClick = function(event) {
+ROC_AUTH.OnOneClick = function(event) {
   event.preventDefault();
   if  ( document.forms[0] === undefined ) {
-    create_form();
+    ROC_AUTH.create_form();
   }
-  this.focus;
   return false;
 };
 
-var login_href = function() {
+ROC_AUTH.login_href = function() {
   var els = document.getElementsByTagName("a");
   for (var i = 0, l = els.length; i < l; i++) {
       var el = els[i];
       if (el.href.contains("/basic_auth_login?destination")) {
         loginURL = el.href;
         var OneClick = el;
-        OneClick.addEventListener('click', OnOneClick, false);
+        OneClick.addEventListener('click', ROC_AUTH.OnOneClick, false);
      }
   }
 };
 
 
-var create_form = function() {
+ROC_AUTH.create_form = function() {
 
     // Fetching HTML Elements in Variables by ID.
   var createform = document.createElement('form'); // Create New Element Form
@@ -290,7 +298,7 @@ var create_form = function() {
 
   var submitelement = document.createElement('button'); // Append Submit Button
   submitelement.setAttribute("type", "button");
-  submitelement.setAttribute("onclick", "login();");
+  submitelement.setAttribute("onclick", "ROC_AUTH.login();");
   submitelement.innerHTML = "Sign In ";
   createform.appendChild(submitelement);
 
