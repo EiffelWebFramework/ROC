@@ -106,7 +106,7 @@ feature -- Access: Theme
 feature -- Access: storage
 
 	storage_drivers: STRING_TABLE [CMS_STORAGE_BUILDER]
-			--
+			-- table of storage drivers that the cms is aware.
 		deferred
 		end
 
