@@ -83,7 +83,6 @@ feature -- Persistence
 		local
 			l_parameters: STRING_TABLE [ANY]
 			n: INTEGER
-			ct: CMS_BLOG_CONTENT_TYPE
 		do
 			error_handler.reset
 			create l_parameters.make (2)
