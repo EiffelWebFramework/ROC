@@ -55,7 +55,6 @@ feature {NONE} -- Initialization
 		do
 			initialize_modules
 			initialize_users
-			initialize_auth_engine
 			initialize_mailer
 				-- initialize_router
 				-- initialize_filter: expanded here, for void-safety concern.
@@ -81,11 +80,6 @@ feature {NONE} -- Initialization
 			-- Initialize mailer engine.
 		do
 			to_implement ("To Implement mailer")
-		end
-
-	initialize_auth_engine
-		do
-			to_implement ("To Implement authentication engine")
 		end
 
 feature -- Settings: router

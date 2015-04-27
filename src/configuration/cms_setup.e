@@ -106,12 +106,15 @@ feature -- Access: Theme
 feature -- Access: storage
 
 	storage_drivers: STRING_TABLE [CMS_STORAGE_BUILDER]
-			-- table of storage drivers that the cms is aware.
+			-- Table of available storage drivers.
+			-- i.e: mysql, sqlite, ...
 		deferred
 		end
 
 	storage (a_error_handler: ERROR_HANDLER): detachable CMS_STORAGE
-			-- Retrieve current CMS_STORAGE strategy based on a configuration file.
+			-- CMS Storage object defined according to the configuration or default.
+			-- Use `a_error_handler' to get eventual error information occurred during the storage
+			-- initialization.
 		local
 			retried: BOOLEAN
 			l_message: STRING
@@ -126,7 +129,7 @@ feature -- Access: storage
 				end
 			else
 				to_implement ("Workaround code, persistence layer does not implement yet this kind of error handling.")
-					-- error hanling.
+					-- error handling.
 				create l_message.make (1024)
 				if attached ((create {EXCEPTION_MANAGER}).last_exception) as l_exception then
 					if attached l_exception.description as l_description then

@@ -134,13 +134,6 @@ feature -- Access
 			end
 		end
 
-	build_auth_engine
-		do
-			to_implement ("Not implemented authentication")
-				-- Note: we can remoce this feature, unless we want to
-				-- provide a custom auth strategy.
-		end
-
 	build_mailer
 		do
 			to_implement ("Not implemented mailer")

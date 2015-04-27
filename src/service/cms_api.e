@@ -35,7 +35,6 @@ feature {NONE} -- Initialize
 		local
 			l_module: CMS_MODULE
 		do
-			to_implement ("Refactor database setup")
 			if attached setup.storage (error_handler) as l_storage then
 				storage := l_storage
 			else
