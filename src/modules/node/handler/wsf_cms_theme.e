@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {WSF_CMS_THEME}."
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 

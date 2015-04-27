@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {CMS_FORMATS}."
-	author: ""
 	date: "$Date: 2014-11-13 16:23:47 +0100 (jeu., 13 nov. 2014) $"
 	revision: "$Revision: 96085 $"
 
@@ -26,6 +25,8 @@ feature -- Access
 
 	all_formats: LIST [CONTENT_FORMAT]
 		once
+				-- Can we provide an external file to read the
+				-- supported formats?
 			create {ARRAYED_LIST [CONTENT_FORMAT]} Result.make (3)
 			Result.force (plain_text)
 			Result.force (full_html)

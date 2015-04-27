@@ -137,6 +137,8 @@ feature -- Access
 	build_auth_engine
 		do
 			to_implement ("Not implemented authentication")
+				-- Note: we can remoce this feature, unless we want to
+				-- provide a custom auth strategy.
 		end
 
 	build_mailer
@@ -157,7 +159,7 @@ feature -- Element change
 			modules.extend (m)
 		end
 
-feature -- Compute location
+feature -- Theme: Compute location
 
 	compute_theme_location
 		do

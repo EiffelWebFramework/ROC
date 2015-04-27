@@ -35,14 +35,17 @@ feature -- Error handler
 feature -- Execution
 
 	sql_begin_transaction
+			-- Start a database transtaction.
 		deferred
 		end
 
 	sql_rollback_transaction
+			-- Rollback updates in the database.
 		deferred
 		end
 
 	sql_commit_transaction
+			-- Commit updates in the database.
 		deferred
 		end
 
@@ -107,10 +110,12 @@ feature -- Operation
 		end
 
 	sql_query (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
+			-- <Precursor>
 		deferred
 		end
 
 	sql_change (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
+			-- <Precursor>
 		deferred
 		end
 

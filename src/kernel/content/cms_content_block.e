@@ -37,12 +37,15 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	name: READABLE_STRING_8
+			-- <Precursor>
 
 	title: detachable READABLE_STRING_32
+			-- <Precursor>
 
 	content: READABLE_STRING_8
 
 	format: detachable CONTENT_FORMAT
+			--
 
 feature -- Status report
 

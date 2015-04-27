@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {CMS_ENCODERS}."
-	author: ""
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
@@ -9,7 +8,7 @@ class
 
 inherit
 	ANY
-	
+
 	SHARED_HTML_ENCODER
 		export
 			{NONE} all

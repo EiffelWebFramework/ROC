@@ -55,21 +55,25 @@ feature -- Query
 		end
 
 	sql_begin_transaction
+			-- <Precursor>
 		do
 			connection.begin_transaction
 		end
 
 	sql_rollback_transaction
+			-- <Precursor>
 		do
 			connection.rollback
 		end
 
 	sql_commit_transaction
+			-- <Precursor>
 		do
 			connection.commit
 		end
 
 	sql_query (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
+			-- Execute an sql query `a_sql_statement' with the params `a_params'.
 		do
 			check_sql_query_validity (a_sql_statement, a_params)
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (a_sql_statement, a_params))
@@ -78,6 +82,7 @@ feature -- Query
 		end
 
 	sql_change (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
+			-- Execute an sql query change `a_sql_statement' with the params `a_params'.
 		do
 			check_sql_query_validity (a_sql_statement, a_params)
 			db_handler.set_query (create {DATABASE_QUERY}.data_reader (a_sql_statement, a_params))

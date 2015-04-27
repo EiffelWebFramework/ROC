@@ -46,6 +46,7 @@ feature -- Access: content
 feature -- Element change
 
 	set_all_content (a_content: like content; a_summary: like summary; a_format: like format)
+			-- <Precursor>
 		do
 			set_content (a_content)
 			set_summary (a_summary)
