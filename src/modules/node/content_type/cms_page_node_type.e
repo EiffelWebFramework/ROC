@@ -7,7 +7,7 @@ class
 	CMS_PAGE_NODE_TYPE
 
 inherit
-	CMS_NODE_TYPE
+	CMS_NODE_TYPE [CMS_PAGE]
 		redefine
 			default_create
 		end

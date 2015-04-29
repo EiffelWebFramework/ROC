@@ -7,7 +7,7 @@ note
 	revision: "$Revision$"
 
 deferred class
-	CMS_NODE_CONTENT_TYPE_WEBFORM_MANAGER
+	CMS_NODE_TYPE_WEBFORM_MANAGER_I [G -> CMS_NODE]
 
 inherit
 	CMS_CONTENT_TYPE_WEBFORM_MANAGER
@@ -17,7 +17,7 @@ inherit
 
 feature -- Access
 
-	content_type: CMS_NODE_TYPE
+	content_type: CMS_NODE_TYPE [G]
 			-- Associated content type.
 
 feature -- Query			
@@ -39,7 +39,7 @@ feature -- Forms ...
 
 feature -- Node ...		
 
-	new_node (response: NODE_RESPONSE; a_form_data: WSF_FORM_DATA; a_node: detachable CMS_NODE): like content_type.new_node
+	new_node (response: NODE_RESPONSE; a_form_data: WSF_FORM_DATA; a_node: detachable CMS_NODE): G
 			-- New typed node with data from `a_form_data', and eventually data from `a_node' if set.
 		require
 			a_node = Void or else has_valid_node_type (a_node)

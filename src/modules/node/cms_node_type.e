@@ -7,19 +7,19 @@ note
 	revision: "$Revision$"
 
 deferred class
-	CMS_NODE_TYPE
+	CMS_NODE_TYPE [G -> CMS_NODE]
 
 inherit
 	CMS_CONTENT_TYPE
 
 feature -- Factory
 
-	new_node_with_title (a_title: READABLE_STRING_32; a_partial_node: detachable CMS_NODE): like  new_node
+	new_node_with_title (a_title: READABLE_STRING_32; a_partial_node: detachable CMS_NODE): like new_node
 			-- New node with `a_title' and fill from partial `a_partial_node' if set.
 		deferred
 		end
 
-	new_node (a_partial_node: detachable CMS_NODE): CMS_NODE
+	new_node (a_partial_node: detachable CMS_NODE): G
 			-- New node based on partial `a_partial_node' if set.
 		deferred
 		end

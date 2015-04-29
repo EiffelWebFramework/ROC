@@ -7,7 +7,7 @@ class
 	CMS_BLOG_NODE_TYPE
 
 inherit
-	CMS_NODE_TYPE
+	CMS_NODE_TYPE [CMS_BLOG]
 		redefine
 			default_create
 		end

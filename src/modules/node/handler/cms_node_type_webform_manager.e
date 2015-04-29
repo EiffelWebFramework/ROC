@@ -3,14 +3,11 @@ note
 	date: "$Date$"
 	revision: "$Revision$"
 
-class
+deferred class
 	CMS_NODE_TYPE_WEBFORM_MANAGER [G -> CMS_NODE]
 
 inherit
-	CMS_NODE_CONTENT_TYPE_WEBFORM_MANAGER
-
-create
-	make
+	CMS_NODE_TYPE_WEBFORM_MANAGER_I [G]
 
 feature -- Forms ...		
 
@@ -68,7 +65,6 @@ feature -- Forms ...
 			fset.extend (tselect)
 
 			f.extend (fset)
-
 		end
 
 	update_node	(response: NODE_RESPONSE; fd: WSF_FORM_DATA; a_node: CMS_NODE)
@@ -98,7 +94,7 @@ feature -- Forms ...
 			end
 		end
 
-	new_node (response: NODE_RESPONSE; fd: WSF_FORM_DATA; a_node: detachable CMS_NODE): like content_type.new_node
+	new_node (response: NODE_RESPONSE; fd: WSF_FORM_DATA; a_node: detachable CMS_NODE): G
 			-- <Precursor>
 		local
 			b: detachable READABLE_STRING_8

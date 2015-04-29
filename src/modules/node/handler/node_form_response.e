@@ -40,7 +40,6 @@ feature -- Execution
 			f: like edit_form
 			fd: detachable WSF_FORM_DATA
 			nid: INTEGER_64
-			l_node_type: CMS_NODE_TYPE
 		do
 			create b.make_empty
 			nid := node_id_path_parameter (request)
@@ -111,10 +110,9 @@ feature -- Execution
 				across
 					node_api.node_types as ic
 				loop
-					l_node_type := ic.item
 					if
-						has_permission ("create any")
-						or has_permission ("create " + l_node_type.name)
+						attached ic.item as l_node_type and then
+						(has_permission ("create any") or has_permission ("create " + l_node_type.name))
 					then
 						b.append ("<li>" + link (l_node_type.name, "/node/add/" + l_node_type.name, Void))
 						if attached l_node_type.description as d then
@@ -157,7 +155,7 @@ feature -- Form
 			end
 		end
 
-	edit_form_submit (fd: WSF_FORM_DATA; a_node: detachable CMS_NODE; a_type: CMS_NODE_TYPE; b: STRING)
+	edit_form_submit (fd: WSF_FORM_DATA; a_node: detachable CMS_NODE; a_type: CMS_NODE_TYPE [CMS_NODE]; b: STRING)
 		local
 			l_preview: BOOLEAN
 			l_node: detachable CMS_NODE
@@ -202,7 +200,7 @@ feature -- Form
 			end
 		end
 
-	edit_form (a_node: detachable CMS_NODE; a_url: READABLE_STRING_8; a_name: STRING; a_type: CMS_NODE_TYPE): CMS_FORM
+	edit_form (a_node: detachable CMS_NODE; a_url: READABLE_STRING_8; a_name: STRING; a_type: CMS_NODE_TYPE [CMS_NODE]): CMS_FORM
 		local
 			f: CMS_FORM
 			ts: WSF_FORM_SUBMIT_INPUT
@@ -233,7 +231,7 @@ feature -- Form
 			Result := f
 		end
 
-	new_node (a_content_type: CMS_NODE_TYPE; a_form_data: WSF_FORM_DATA; a_node: detachable CMS_NODE): CMS_NODE
+	new_node (a_content_type: CMS_NODE_TYPE [CMS_NODE]; a_form_data: WSF_FORM_DATA; a_node: detachable CMS_NODE): CMS_NODE
 			--
 		do
 			if attached node_api.node_type_webform_manager (a_content_type) as wf then
@@ -243,7 +241,7 @@ feature -- Form
 			end
 		end
 
-	change_node (a_content_type: CMS_NODE_TYPE; a_form_data: WSF_FORM_DATA; a_node: CMS_NODE)
+	change_node (a_content_type: CMS_NODE_TYPE [CMS_NODE]; a_form_data: WSF_FORM_DATA; a_node: CMS_NODE)
 			-- Update node `a_node' with form_data `a_form_data' for the given content type `a_content_type'.
 		do
 			if attached node_api.node_type_webform_manager (a_content_type) as wf then
@@ -251,7 +249,7 @@ feature -- Form
 			end
 		end
 
-	fill_edit_form (a_content_type: CMS_NODE_TYPE; a_form: WSF_FORM; a_node: detachable CMS_NODE)
+	fill_edit_form (a_content_type: CMS_NODE_TYPE [CMS_NODE]; a_form: WSF_FORM; a_node: detachable CMS_NODE)
 		do
 			if attached node_api.node_type_webform_manager (a_content_type) as wf then
 				wf.populate_form (Current, a_form, a_node)

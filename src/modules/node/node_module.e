@@ -120,120 +120,32 @@ feature -- Access: router
 				node_api := l_node_api
 			end
 			create Result.make (2)
-			configure_cms (a_api, l_node_api, Result)
---			configure_api (a_api, l_node_api, Result)
+			configure_web (a_api, l_node_api, Result)
 		end
 
-	configure_cms (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
+	configure_web (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
 		local
 			l_node_handler: NODE_HANDLER
-			l_edit_node_handler: NODE_HANDLER
-			l_new_node_handler: NODE_HANDLER
 			l_nodes_handler: NODES_HANDLER
 			l_methods: WSF_REQUEST_METHODS
+			l_uri_mapping: WSF_URI_MAPPING
 		do
+				-- TODO: for now, focused only on web interface, add REST api later. [2015-April-29]
 			create l_node_handler.make (a_api, a_node_api)
-			a_router.handle_with_request_methods ("/node", l_node_handler, a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/node/", l_node_handler, a_router.methods_get_post)
+			create l_uri_mapping.make_trailing_slash_ignored ("/node", l_node_handler)
+			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get_post)
 
-			create l_new_node_handler.make (a_api, a_node_api)
-			a_router.handle_with_request_methods ("/node/add/{type}", l_new_node_handler, a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/node/new", l_new_node_handler, a_router.methods_get)
+			a_router.handle_with_request_methods ("/node/add/{type}", l_node_handler, a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/node/{id}/edit", l_node_handler, a_router.methods_get_post)
 
---			a_router.handle_with_request_methods ("/node/new/{type}", create {WSF_URI_AGENT_HANDLER}.make (agent do_get_node_creation_by_type (?,?, "type", a_node_api)), a_router.methods_get)
---			a_router.handle_with_request_methods ("/node/new", create {WSF_URI_AGENT_HANDLER}.make (agent do_get_node_creation_selection (?,?, a_node_api)), a_router.methods_get)
-
-			create l_edit_node_handler.make (a_api, a_node_api)
-			a_router.handle_with_request_methods ("/node/{id}/edit", l_edit_node_handler, a_router.methods_get_post)
-
-			create l_node_handler.make (a_api, a_node_api)
-			a_router.handle_with_request_methods ("/node/{id}", l_node_handler, a_router.methods_get_put_delete + a_router.methods_get_post)
-
-
+			a_router.handle_with_request_methods ("/node/{id}", l_node_handler, a_router.methods_get)
+				-- For now: no REST API handling... a_router.methods_get_put_delete + a_router.methods_get_post)
 
 				-- Nodes
 			create l_nodes_handler.make (a_api, a_node_api)
-			create l_methods
-			l_methods.enable_get
-			a_router.handle_with_request_methods ("/nodes", l_nodes_handler, l_methods)
+			create l_uri_mapping.make_trailing_slash_ignored ("/nodes", l_nodes_handler)
+			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get)
 		end
-
---	configure_api (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
---		do
---			configure_api_node (a_api, a_node_api, a_router)
---			configure_api_nodes (a_api, a_node_api, a_router)
---			configure_api_node_title (a_api, a_node_api, a_router)
---			configure_api_node_summary (a_api, a_node_api, a_router)
---			configure_api_node_content (a_api, a_node_api, a_router)
---		end
-
-feature {NONE} -- Implementation: routes
-
---	configure_api_node (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
---		local
---			l_node_handler: NODE_RESOURCE_HANDLER
---			l_methods: WSF_REQUEST_METHODS
---		do
---			create l_node_handler.make (a_api, a_node_api)
---			create l_methods
---			l_methods.enable_get
---			l_methods.enable_post
---			l_methods.lock
---			a_router.handle_with_request_methods ("/api/node", l_node_handler, l_methods)
-
---			create l_node_handler.make (a_api, a_node_api)
---			a_router.handle_with_request_methods ("/api/node/{id}", l_node_handler, a_router.methods_get_put_delete + a_router.methods_get_post)
---		end
-
---	configure_api_nodes (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
---		local
---			l_nodes_handler: NODE_RESOURCES_HANDLER
---			l_methods: WSF_REQUEST_METHODS
---		do
---			create l_nodes_handler.make (a_api, a_node_api)
---			create l_methods
---			l_methods.enable_get
---			a_router.handle_with_request_methods ("/api/nodes", l_nodes_handler, l_methods)
---		end
-
---	configure_api_node_summary (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
---		local
---			l_report_handler: NODE_SUMMARY_HANDLER
---			l_methods: WSF_REQUEST_METHODS
---		do
---			create l_report_handler.make (a_api, a_node_api)
---			create l_methods
---			l_methods.enable_get
---			l_methods.enable_post
---			l_methods.enable_put
---			a_router.handle_with_request_methods ("/node/{id}/field/summary", l_report_handler, l_methods)
---		end
-
---	configure_api_node_title (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
---		local
---			l_report_handler: NODE_TITLE_HANDLER
---			l_methods: WSF_REQUEST_METHODS
---		do
---			create l_report_handler.make (a_api, a_node_api)
---			create l_methods
---			l_methods.enable_get
---			l_methods.enable_post
---			l_methods.enable_put
---			a_router.handle_with_request_methods ("/node/{id}/field/title", l_report_handler, l_methods)
---		end
-
---	configure_api_node_content (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
---		local
---			l_report_handler: NODE_CONTENT_HANDLER
---			l_methods: WSF_REQUEST_METHODS
---		do
---			create l_report_handler.make (a_api, a_node_api)
---			create l_methods
---			l_methods.enable_get
---			l_methods.enable_post
---			l_methods.enable_put
---			a_router.handle_with_request_methods ("/node/{id}/field/content", l_report_handler, l_methods)
---		end
 
 feature -- Hooks
 
@@ -265,53 +177,9 @@ feature -- Hooks
 		do
 			create lnk.make ("List of nodes", a_response.url ("/nodes", Void))
 			a_menu_system.primary_menu.extend (lnk)
+
 			create lnk.make ("Create ..", a_response.url ("/node/", Void))
 			a_menu_system.primary_menu.extend (lnk)
 		end
-
---feature -- Handler
-
---	do_get_node_creation_selection (req: WSF_REQUEST; res: WSF_RESPONSE; a_node_api: CMS_NODE_API)
---		local
---			l_page: GENERIC_VIEW_CMS_RESPONSE
---			s: STRING
---		do
---			create l_page.make (req, res, a_node_api.cms_api)
-
---			create s.make_empty
---			s.append ("<ul>")
---			across
---				a_node_api.content_types as ic
---			loop
---				s.append ("<li>")
---				s.append (l_page.link (ic.item.title, a_node_api.new_content_path (ic.item), Void))
---				if attached ic.item.description as l_description then
---					s.append ("<p class=%"description%">")
---					s.append (l_page.html_encoded (l_description))
---					s.append ("</p>")
---				end
---				s.append ("</li>")
---			end
---			s.append ("</ul>")
---			l_page.set_title ("Create new content ...")
---			l_page.set_main_content (s)
---			l_page.execute
---		end
-
---	do_get_node_creation_by_type (req: WSF_REQUEST; res: WSF_RESPONSE; a_type_varname: READABLE_STRING_8; a_node_api: CMS_NODE_API)
---		local
---			l_page: NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
---			l_node: detachable CMS_NODE
---		do
---			create l_page.make (req, res, a_node_api.cms_api)
---			if
---				attached {WSF_STRING} req.path_parameter (a_type_varname) as p_type and then
---				attached a_node_api.content_type (p_type.value) as ct
---			then
---				l_node := ct.new_node (Void)
---				l_page.set_main_content (l_node.out)
---			end
---			l_page.execute
---		end
 
 end

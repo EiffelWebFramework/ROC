@@ -54,14 +54,14 @@ feature -- Content type
 	content_types: ARRAYED_LIST [CMS_CONTENT_TYPE]
 			-- Available content types
 
-	node_types: ARRAYED_LIST [CMS_NODE_TYPE]
+	node_types: ARRAYED_LIST [attached like node_type]
 			-- Node content types.
 		do
 			create Result.make (content_types.count)
 			across
 				content_types as ic
 			loop
-				if attached {CMS_NODE_TYPE} ic.item as l_node_type then
+				if attached {like node_type} ic.item as l_node_type then
 					Result.extend (l_node_type)
 				end
 			end
@@ -88,7 +88,7 @@ feature -- Content type
 			end
 		end
 
-	node_type (a_name: READABLE_STRING_GENERAL): detachable CMS_NODE_TYPE
+	node_type (a_name: READABLE_STRING_GENERAL): detachable CMS_NODE_TYPE [CMS_NODE]
 			-- Content type named `a_named' if any.
 		do
 			across
@@ -105,7 +105,7 @@ feature -- Content type
 			end
 		end
 
-	node_type_for (a_node: CMS_NODE): detachable CMS_NODE_TYPE
+	node_type_for (a_node: CMS_NODE): like node_type
 			-- Content type for node `a_node' if any.
 		local
 			l_type_name: READABLE_STRING_8
@@ -143,7 +143,7 @@ feature -- Content type webform
 			end
 		end
 
-	node_type_webform_manager (a_node_type: CMS_NODE_TYPE): detachable CMS_NODE_CONTENT_TYPE_WEBFORM_MANAGER
+	node_type_webform_manager (a_node_type: CMS_CONTENT_TYPE): detachable CMS_NODE_TYPE_WEBFORM_MANAGER_I [CMS_NODE]
 			-- Web form manager for node type `a_node_type' if any.
 		local
 			l_type_name: READABLE_STRING_GENERAL
@@ -155,7 +155,7 @@ feature -- Content type webform
 				Result /= Void
 			loop
 				if
-					attached {CMS_NODE_CONTENT_TYPE_WEBFORM_MANAGER} ic.item as l_manager and then
+					attached {like node_type_webform_manager} ic.item as l_manager and then
 					l_type_name.is_case_insensitive_equal (l_manager.name)
 				then
 					Result := l_manager
@@ -165,14 +165,14 @@ feature -- Content type webform
 
 feature -- URL
 
-	new_content_path (ct: detachable CMS_NODE_TYPE): STRING
+	new_content_path (ct: detachable CMS_CONTENT_TYPE): STRING
 			-- URI path for new content of type `ct'
 			-- or URI of path for selection of new content possibilities if ct is Void.
 		do
 			if ct /= Void then
 				Result := "/node/add/" + ct.name
 			else
-				Result := "/node/new"
+				Result := "/node/"
 			end
 		end
 

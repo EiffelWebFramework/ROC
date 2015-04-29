@@ -69,4 +69,16 @@ feature -- Response helpers
 			r.execute
 		end
 
+	send_not_implemented (a_message: detachable READABLE_STRING_8; req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- Send via `res' a not implemented response.
+		local
+			r: CMS_RESPONSE
+		do
+			create {NOT_IMPLEMENTED_ERROR_CMS_RESPONSE} r.make (req, res, api)
+			if a_message /= Void then
+				r.set_main_content (a_message)
+			end
+			r.execute
+		end
+
 end
