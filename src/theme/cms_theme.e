@@ -33,6 +33,14 @@ feature -- Access
 		deferred
 		end
 
+feature -- Status report
+
+	has_region (a_region_name: READABLE_STRING_GENERAL): BOOLEAN
+			-- Current theme has region `a_region_name' declared?
+		do
+			Result := across regions as ic some a_region_name.is_case_insensitive_equal (ic.item) end
+		end
+
 feature -- Conversion
 
 	menu_html (a_menu: CMS_MENU; is_horizontal: BOOLEAN; a_options: detachable CMS_HTML_OPTIONS): STRING_8

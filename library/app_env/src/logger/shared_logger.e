@@ -98,11 +98,11 @@ feature {NONE} -- Logger: separate implementation
 
 feature {NONE} -- Implementation
 
-	initialize_logger (app: APPLICATION_LAYOUT)
+	initialize_logger (app: APPLICATION_ENVIRONMENT)
 		local
 			l_logger: LOGGER
 		do
-			create l_logger.make_with_layout (app)
+			create l_logger.make_with_environment (app)
 			set_logger_to (l_logger, logger_cell)
 		end
 

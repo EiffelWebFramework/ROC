@@ -1,6 +1,6 @@
 note
 	description: "[
-				CMS Layout providing file system locations for
+				CMS Environment providing file system locations for
 						- config 
 						- application 
 						- logs 
@@ -11,11 +11,10 @@ note
 	revision: "$Revision: 96797 $"
 
 class
-	CMS_LAYOUT
+	CMS_ENVIRONMENT
 
 inherit
-
-	APPLICATION_LAYOUT
+	APPLICATION_ENVIRONMENT
 
 create
 	make_default,

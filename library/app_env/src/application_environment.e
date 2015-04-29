@@ -1,6 +1,6 @@
 note
 	description: "[
-			Application layout
+			Application environment (layout, ...)
 			Related to file system locations such as 
 				- configuration locations
 				- application
@@ -15,7 +15,7 @@ note
 	revision: "$Revision: 96584 $"
 
 class
-	APPLICATION_LAYOUT
+	APPLICATION_ENVIRONMENT
 
 inherit
 	SHARED_EXECUTION_ENVIRONMENT

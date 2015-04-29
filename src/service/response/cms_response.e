@@ -107,7 +107,7 @@ feature -- Module
 	module_assets_location (a_module: CMS_MODULE): PATH
 			-- Location for the assets associated with `a_module'.
 		do
-			Result := setup.layout.path.extended ("modules").extended (a_module.name)
+			Result := setup.environment.path.extended ("modules").extended (a_module.name)
 		end
 
 	module_assets_theme_location (a_module: CMS_MODULE): PATH

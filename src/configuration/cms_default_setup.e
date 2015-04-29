@@ -18,11 +18,11 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_layout: CMS_LAYOUT)
-				-- Create a default setup with `a_layout'.
+	make (a_env: CMS_ENVIRONMENT)
+			-- Create a default setup with `a_env'.
 		do
-			layout := a_layout
-			create {INI_CONFIG} configuration.make_from_file (layout.cms_config_ini_path)
+			environment := a_env
+			create {INI_CONFIG} configuration.make_from_file (a_env.cms_config_ini_path)
 			initialize
 		end
 
@@ -61,14 +61,14 @@ feature {NONE} -- Initialization
 			if attached text_item ("themes-dir") as s then
 				create themes_location.make_from_string (s)
 			else
-				themes_location := layout.www_path.extended ("themes")
+				themes_location := environment.www_path.extended ("themes")
 			end
 
 				-- Selected theme's name
 			theme_name := text_item_or_default ("theme", "default")
 
 			debug ("refactor_fixme")
-				fixme ("Review export clause for configuration and layout")
+				fixme ("Review export clause for configuration and environment")
 			end
 
 			compute_theme_location

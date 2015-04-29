@@ -21,6 +21,7 @@ inherit
 
 create
 	make,
+	make_with_environment,
 	make_with_layout
 
 feature {NONE} -- Initialization
@@ -31,16 +32,24 @@ feature {NONE} -- Initialization
 			create log.make
 		end
 
-	make_with_layout (app: APPLICATION_LAYOUT)
-			-- Initialize a logger object with an application layout `app'.
+	make_with_environment (app: APPLICATION_ENVIRONMENT)
+			-- Initialize a logger object with an application environment `app'.
 		do
 			make
-			apply_layout (app)
+			apply_environment (app)
+		end
+
+	make_with_layout (app: APPLICATION_ENVIRONMENT)
+			-- Initialize a logger object with an application layout `app'.
+		obsolete
+			"Use make_with_environment"
+		do
+			make_with_environment (app)
 		end
 
 feature -- Change
 
-	apply_layout (app: APPLICATION_LAYOUT)
+	apply_environment (app: APPLICATION_ENVIRONMENT)
 		do
 			initialize_logger (app, log)
 		end
@@ -89,7 +98,7 @@ feature -- Logging
 
 feature {NONE} -- Implementation
 
-	initialize_logger (app: APPLICATION_LAYOUT; a_log: like log)
+	initialize_logger (app: APPLICATION_ENVIRONMENT; a_log: like log)
 		local
 			l_log_writer_file: LOG_ROLLING_WRITER_FILE
 			l_log_writer: LOG_WRITER

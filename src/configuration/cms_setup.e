@@ -1,6 +1,6 @@
 note
 	description: "[
-		Class that enable to set basic configuration, application layout, core modules and themes.
+		Class that enable to set basic configuration, application environment, core modules and themes.
 		]"
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
@@ -13,8 +13,15 @@ inherit
 
 feature -- Access
 
-	layout: CMS_LAYOUT
-			-- CMS layout.
+	environment: CMS_ENVIRONMENT
+			-- CMS environment.	
+
+	layout: CMS_ENVIRONMENT
+			-- CMS environment.
+		obsolete "use `environment' [april-2015]"
+		do
+			Result := environment
+		end
 
 	enabled_modules: CMS_MODULE_COLLECTION
 			-- List of enabled modules.
@@ -122,7 +129,7 @@ feature -- Access: storage
 			if not retried then
 				to_implement ("Refactor database setup")
 				if
-					attached (create {APPLICATION_JSON_CONFIGURATION_HELPER}).new_database_configuration (layout.application_config_path) as l_database_config and then
+					attached (create {APPLICATION_JSON_CONFIGURATION_HELPER}).new_database_configuration (environment.application_config_path) as l_database_config and then
 					attached storage_drivers.item (l_database_config.driver) as l_builder
 				then
 					Result := l_builder.storage (Current)

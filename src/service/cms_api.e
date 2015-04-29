@@ -246,7 +246,7 @@ feature {NONE}-- Implemenation
 	internal_user_api: detachable like user_api
 			-- Cached value for `user_api'.
 
-feature -- Layout
+feature -- Environment
 
 	module_configuration (a_module_name: READABLE_STRING_GENERAL; a_name: detachable READABLE_STRING_GENERAL): detachable CONFIG_READER
 			-- Configuration reader for `a_module', and if `a_name' is set, using name `a_name'.
@@ -254,7 +254,7 @@ feature -- Layout
 			p, l_path: PATH
 			ut: FILE_UTILITIES
 		do
-			p := setup.layout.config_path.extended ("modules").extended (a_module_name)
+			p := setup.environment.config_path.extended ("modules").extended (a_module_name)
 			if a_name = Void then
 				p := p.extended (a_module_name)
 			else

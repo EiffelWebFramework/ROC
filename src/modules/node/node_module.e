@@ -98,7 +98,7 @@ feature {CMS_API} -- Module management
 		do
 				-- Schema
 			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
-				l_sql_storage.sql_execute_file_script (api.setup.layout.path.extended ("scripts").extended (name).appended_with_extension ("sql"))
+				l_sql_storage.sql_execute_file_script (api.setup.environment.path.extended ("scripts").extended (name).appended_with_extension ("sql"))
 			end
 		end
 
@@ -127,7 +127,6 @@ feature -- Access: router
 		local
 			l_node_handler: NODE_HANDLER
 			l_nodes_handler: NODES_HANDLER
-			l_methods: WSF_REQUEST_METHODS
 			l_uri_mapping: WSF_URI_MAPPING
 		do
 				-- TODO: for now, focused only on web interface, add REST api later. [2015-April-29]

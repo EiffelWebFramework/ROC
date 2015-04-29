@@ -28,7 +28,7 @@ feature -- Factory
 		local
 			s: STRING
 		do
-			if attached (create {APPLICATION_JSON_CONFIGURATION_HELPER}).new_database_configuration (a_setup.layout.application_config_path) as l_database_config then
+			if attached (create {APPLICATION_JSON_CONFIGURATION_HELPER}).new_database_configuration (a_setup.environment.application_config_path) as l_database_config then
 				s := "Driver=SQLite3 ODBC Driver;Database="
 				if attached l_database_config.database_name as db_name then
 					s.append (db_name)
@@ -50,7 +50,7 @@ feature -- Factory
 			r: CMS_USER_ROLE
 		do
 				-- Schema
-			a_storage.sql_execute_file_script (a_setup.layout.path.extended ("scripts").extended ("core.sql"))
+			a_storage.sql_execute_file_script (a_setup.environment.path.extended ("scripts").extended ("core.sql"))
 
 				-- Data	
 				-- Users

@@ -41,13 +41,11 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_api: CMS_API)
+	make (a_setup: CMS_SETUP)
 			-- Build a CMS service with `a_api'
 		do
-			api := a_api
+			create api.make (a_setup)
 			initialize
-		ensure
-			api_set: api = a_api
 		end
 
 	initialize
@@ -138,7 +136,7 @@ feature -- Settings: router
 			a_router.handle_with_request_methods ("/theme/", fhdl, router.methods_GET)
 
 
-			create fhdl.make_hidden_with_path (setup.layout.www_path)
+			create fhdl.make_hidden_with_path (setup.environment.www_path)
 			fhdl.disable_index
 			fhdl.set_not_found_handler (agent  (ia_uri: READABLE_STRING_8; ia_req: WSF_REQUEST; ia_res: WSF_RESPONSE)
 				do
