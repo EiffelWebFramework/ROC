@@ -1,13 +1,13 @@
 note
-	description: "Summary description for {CMS_PAGE_CONTENT_TYPE}."
+	description: "Summary description for {CMS_BLOG_NODE_TYPE}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_PAGE_CONTENT_TYPE
+	CMS_BLOG_NODE_TYPE
 
 inherit
-	CMS_CONTENT_TYPE
+	CMS_NODE_TYPE
 		redefine
 			default_create
 		end
@@ -25,13 +25,13 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
-	name: STRING = "page"
+	name: STRING = "blog"
 			-- Internal name.
 
-	title: STRING_32 = "Page"
+	title: STRING_32 = "Blog"
 			-- Human readable name.
 
-	description: STRING_32 = "Use basic pages for your content, such as an 'About us' page."
+	description: STRING_32 = "Content published as a blog post."
 			-- Optional description
 
 feature -- Access
@@ -51,7 +51,7 @@ feature -- Factory
 			end
 		end
 
-	new_node (a_partial_node: detachable CMS_NODE): CMS_PAGE
+	new_node (a_partial_node: detachable CMS_NODE): CMS_BLOG
 			-- New node based on partial `a_partial_node', or from none.
 		do
 			create Result.make_empty

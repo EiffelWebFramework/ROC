@@ -1,16 +1,17 @@
 note
-	description: "Summary description for {CMS_PAGE_CONTENT_TYPE_WEBFORM_MANAGER}."
+	description: "Summary description for {CMS_PAGE_NODE_TYPE_WEBFORM_MANAGER}."
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_PAGE_CONTENT_TYPE_WEBFORM_MANAGER
+	CMS_PAGE_NODE_TYPE_WEBFORM_MANAGER
 
 inherit
-	CMS_NODE_CONTENT_TYPE_WEBFORM_MANAGER [CMS_PAGE]
+	CMS_NODE_TYPE_WEBFORM_MANAGER [CMS_PAGE]
 		redefine
-			content_type
+			content_type,
+			append_html_output_to
 		end
 
 create
@@ -18,7 +19,7 @@ create
 
 feature -- Access
 
-	content_type: CMS_PAGE_CONTENT_TYPE
+	content_type: CMS_PAGE_NODE_TYPE
 			-- Associated content type.	
 
 feature -- Forms ...		
@@ -156,5 +157,29 @@ feature -- Forms ...
 --			Result := l_node
 --		end
 
+feature -- Output
+
+	append_html_output_to (a_node: CMS_NODE; a_response: NODE_RESPONSE)
+			-- <Precursor>
+		local
+			s: STRING
+		do
+			Precursor (a_node, a_response)
+			if attached a_response.main_content as l_main_content then
+				s := l_main_content
+			else
+				create s.make_empty
+			end
+
+			if attached {CMS_PAGE} a_node as l_node_page then
+				if attached l_node_page.parent as l_parent_node then
+					s.append ("<div>Parent page is ")
+					s.append (a_response.link (l_parent_node.title + " (#" + l_parent_node.id.out + ")", a_response.node_api.node_path (l_parent_node), Void))
+					s.append ("</div>")
+				end
+			end
+
+			a_response.set_main_content (s)
+		end
 
 end

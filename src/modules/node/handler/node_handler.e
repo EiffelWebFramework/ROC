@@ -1,5 +1,9 @@
 note
-	description: "handler for CMS node in the CMS interface."
+	description: "[
+			handler for CMS node in the CMS interface.
+			
+			TODO: implement REST API.		
+			]"
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
@@ -61,13 +65,10 @@ feature -- HTTP Methods
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
 		local
-			l_page: CMS_RESPONSE
-			s: STRING
-			hdate: HTTP_DATE
-			lnk: CMS_LOCAL_LINK
 			l_node: detachable CMS_NODE
 			l_nid: INTEGER_64
 			edit_response: NODE_FORM_RESPONSE
+			view_response: NODE_VIEW_RESPONSE
 		do
 			if req.path_info.ends_with_general ("/edit") then
 				create edit_response.make (req, res, api, node_api)
@@ -83,49 +84,9 @@ feature -- HTTP Methods
 					l_node := node_api.node (l_nid)
 				end
 				if l_node /= Void then
-							-- FIXME: allow a per content type display here!
-					create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
-					l_page.add_variable (l_node, "node")
-					create lnk.make ("View", node_api.node_path (l_node))
-					lnk.set_weight (1)
-					l_page.add_to_primary_tabs (lnk)
-					create lnk.make ("Edit", node_api.node_path (l_node) + "/edit")
-					lnk.set_weight (2)
-					l_page.add_to_primary_tabs (lnk)
-
-					create s.make_empty
-					s.append ("<div class=%"info%"> ")
-					if attached l_node.author as l_author then
-						s.append (" by ")
-						s.append (l_author.name)
-					end
-					if attached l_node.modification_date as l_modified then
-						s.append (" (modified: ")
-						create hdate.make_from_date_time (l_modified)
-						s.append (hdate.yyyy_mmm_dd_string)
-						s.append (")")
-					end
-					s.append ("</div>")
-					if attached l_node.content as l_content then
-						s.append ("<p class=%"content%">")
-						if attached api.format (l_node.format) as f then
-							s.append (f.formatted_output (l_content))
-						else
-							s.append (api.formats.default_format.formatted_output (l_content))
-						end
-
-						s.append ("</p>")
-					end
-					if attached {CMS_PAGE} l_node as l_node_page then
-						if attached l_node_page.parent as l_parent_node then
-							s.append ("<div>Parent page is ")
-							s.append (l_page.link (l_parent_node.title + " (#" + l_parent_node.id.out + ")", node_api.node_path (l_parent_node), Void))
-							s.append ("</div>")
-						end
-					end
-					l_page.set_title (l_node.title)
-					l_page.set_main_content (s)
-					l_page.execute
+					create view_response.make (req, res, api, node_api)
+					view_response.set_node (l_node)
+					view_response.execute
 				elseif l_nid > 0 then --| i.e: l_node = Void
 					send_not_found (req, res)
 				else
@@ -149,55 +110,57 @@ feature -- HTTP Methods
 				create edit_response.make (req, res, api, node_api)
 				edit_response.execute
 			else
-				to_implement ("Check user permissions!!!")
-				if attached current_user (req) as l_user then
-					if attached {WSF_STRING} req.path_parameter ("id") as l_id then
-						if
-							l_id.is_integer and then
-							attached node_api.node (l_id.value.to_integer_64) as l_node
-						then
-							if attached {WSF_STRING} req.form_parameter ("method") as l_method then
-								if l_method.is_case_insensitive_equal ("DELETE") then
-									do_delete (req, res)
-								elseif l_method.is_case_insensitive_equal ("PUT") then
-									do_put (req, res)
-								else
-									process_node_update (req, res, l_user, l_node)
-										-- Accept this, even if this is not proper usage of POST
-	--								(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
-								end
-							end
-						else
-							do_error (req, res, l_id)
-						end
-					else
-						process_node_creation (req, res, l_user)
-					end
-				else
-					send_access_denied (req, res)
-				end
+				handle_not_implemented ("REST API not yet implemented", req, res)
+--				to_implement ("Check user permissions!!!")
+--				if attached current_user (req) as l_user then
+--					if attached {WSF_STRING} req.path_parameter ("id") as l_id then
+--						if
+--							l_id.is_integer and then
+--							attached node_api.node (l_id.value.to_integer_64) as l_node
+--						then
+--							if attached {WSF_STRING} req.form_parameter ("method") as l_method then
+--								if l_method.is_case_insensitive_equal ("DELETE") then
+--									do_delete (req, res)
+--								elseif l_method.is_case_insensitive_equal ("PUT") then
+--									do_put (req, res)
+--								else
+--									process_node_update (req, res, l_user, l_node)
+--										-- Accept this, even if this is not proper usage of POST
+--	--								(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
+--								end
+--							end
+--						else
+--							do_error (req, res, l_id)
+--						end
+--					else
+--						process_node_creation (req, res, l_user)
+--					end
+--				else
+--					send_access_denied (req, res)
+--				end
 			end
 		end
 
 	do_put (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
 		do
-			if attached current_user (req) as l_user then
-				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
-					if
-						l_id.is_integer and then
-						attached node_api.node (l_id.value.to_integer_64) as l_node
-					then
-						process_node_update (req, res, l_user, l_node)
-					else
-						do_error (req, res, l_id)
-					end
-				else
-					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
-				end
-			else
-				send_access_denied (req, res)
-			end
+			handle_not_implemented ("REST API not yet implemented", req, res)
+--			if attached current_user (req) as l_user then
+--				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
+--					if
+--						l_id.is_integer and then
+--						attached node_api.node (l_id.value.to_integer_64) as l_node
+--					then
+--						process_node_update (req, res, l_user, l_node)
+--					else
+--						do_error (req, res, l_id)
+--					end
+--				else
+--					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, api)).execute
+--				end
+--			else
+--				send_access_denied (req, res)
+--			end
 		end
 
 	do_delete (req: WSF_REQUEST; res: WSF_RESPONSE)
@@ -228,48 +191,49 @@ feature -- HTTP Methods
 
 	process_node_creation (req: WSF_REQUEST; res: WSF_RESPONSE; a_user: CMS_USER)
 		local
-			u_node: CMS_NODE
+--			u_node: CMS_NODE
 		do
 				-- New node
 				-- FIXME !!!
-			if
-				attached {WSF_STRING} req.form_parameter ("type") as p_type and then
-				attached node_api.content_type (p_type.value) as ct  -- should be string 8 value.
-			then
-				if api.user_has_permission (a_user, "create " + ct.name) then
-					u_node := ct.new_node (Void)
-	--						create {CMS_PARTIAL_NODE} u_node.make_empty (p_type.url_encoded_value)
-					update_node_from_data_form (req, u_node)
-					u_node.set_author (a_user)
-					node_api.new_node (u_node)
-					if attached {WSF_STRING} req.item ("destination") as p_destination then
-						redirect_to (req.absolute_script_url (p_destination.url_encoded_value), res)
-					else
-						redirect_to (req.absolute_script_url (""), res)
-					end
-				else
-					send_access_denied (req, res)
-				end
-			else
-				do_error (req, res, Void)
-			end
+			handle_not_implemented ("REST API not yet implemented", req, res)
+--			if
+--				attached {WSF_STRING} req.form_parameter ("type") as p_type and then
+--				attached node_api.node_type (p_type.value) as ct  -- should be string 8 value.
+--			then
+--				if api.user_has_permission (a_user, "create " + ct.name) then
+--					u_node := ct.new_node (Void)
+--	--						create {CMS_PARTIAL_NODE} u_node.make_empty (p_type.url_encoded_value)
+--					update_node_from_data_form (req, u_node)
+--					u_node.set_author (a_user)
+--					node_api.new_node (u_node)
+--					if attached {WSF_STRING} req.item ("destination") as p_destination then
+--						redirect_to (req.absolute_script_url (p_destination.url_encoded_value), res)
+--					else
+--						redirect_to (req.absolute_script_url (""), res)
+--					end
+--				else
+--					send_access_denied (req, res)
+--				end
+--			else
+--				do_error (req, res, Void)
+--			end
 		end
 
-	process_node_update (req: WSF_REQUEST; res: WSF_RESPONSE; a_user: CMS_USER; a_node: CMS_NODE)
-		do
-			if api.user_has_permission (a_user, "modify " + a_node.content_type) then
-				update_node_from_data_form (req, a_node)
-				a_node.set_author (a_user)
-				node_api.update_node (a_node)
-				if attached {WSF_STRING} req.item ("destination") as p_destination then
-					redirect_to (req.absolute_script_url (p_destination.url_encoded_value), res)
-				else
-					redirect_to (req.absolute_script_url (""), res)
-				end
-			else
-				send_access_denied (req, res)
-			end
-		end
+--	process_node_update (req: WSF_REQUEST; res: WSF_RESPONSE; a_user: CMS_USER; a_node: CMS_NODE)
+--		do
+--			if api.user_has_permission (a_user, "modify " + a_node.content_type) then
+--				update_node_from_data_form (req, a_node)
+--				a_node.set_author (a_user)
+--				node_api.update_node (a_node)
+--				if attached {WSF_STRING} req.item ("destination") as p_destination then
+--					redirect_to (req.absolute_script_url (p_destination.url_encoded_value), res)
+--				else
+--					redirect_to (req.absolute_script_url (""), res)
+--				end
+--			else
+--				send_access_denied (req, res)
+--			end
+--		end
 
 feature -- Error
 
@@ -296,81 +260,47 @@ feature {NONE} -- Node
 
 	create_new_node (req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
-			l_page: NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
-			l_node: detachable CMS_NODE
 			l_gen_page: GENERIC_VIEW_CMS_RESPONSE
 			edit_response: NODE_FORM_RESPONSE
 			s: STRING
 		do
-			if
-				attached {WSF_STRING} req.path_parameter ("type") as p_type and then
-				attached node_api.content_type (p_type.value) as ct
-			then
+			if req.path_info.starts_with_general ("/node/add/") then
 				create edit_response.make (req, res, api, node_api)
 				edit_response.execute
---				create l_page.make (req, res, api)
---				l_node := ct.new_node (Void)
---				l_page.set_main_content (l_node.out)
---				l_page.execute
+			elseif req.is_get_request_method then
+				redirect_to (req.absolute_script_url ("/node/add/"), res)
 			else
-				create l_gen_page.make (req, res, api)
-
-				create s.make_empty
-				s.append ("<ul>")
-				across
-					node_api.content_types as ic
-				loop
-					if api.user_has_permission (current_user (req), "create " + ic.item.name) then
-						s.append ("<li>")
-						s.append (l_gen_page.link (ic.item.title, node_api.new_content_path (ic.item), Void))
-						if attached ic.item.description as l_description then
-							s.append ("<p class=%"description%">")
-							s.append (l_gen_page.html_encoded (l_description))
-							s.append ("</p>")
-						end
-						s.append ("</li>")
-					end
-				end
-				s.append ("</ul>")
-				l_gen_page.set_title ("Create new content ...")
-				l_gen_page.set_main_content (s)
-				l_gen_page.execute
+				send_bad_request (req, res)
 			end
---			if api.user_has_permission (current_user (req), "create node") then
---				create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
---				l_page.execute
---			else
---				send_access_denied (req, res)
---			end
 		end
 
 feature -- {NONE} Form data
 
-	update_node_from_data_form (req: WSF_REQUEST; a_node: CMS_NODE)
-			-- Extract request form data and build a object
-			-- Node
-		local
-			l_title: detachable READABLE_STRING_32
-			l_summary, l_content, l_format: detachable READABLE_STRING_8
-		do
-			if attached {WSF_STRING} req.form_parameter ("title") as p_title then
-				l_title := p_title.value
-				a_node.set_title (l_title)
-			end
-			if attached {WSF_STRING} req.form_parameter ("summary") as p_summary then
-				l_summary := html_encoded (p_summary.value)
-			end
-			if attached {WSF_STRING} req.form_parameter ("content") as p_content then
-				l_content := html_encoded (p_content.value)
-			end
-			if attached {WSF_STRING} req.form_parameter ("format") as p_format then
-				l_format := p_format.url_encoded_value
-			end
-			if l_format = Void then
-				l_format := a_node.format
-			end
-			a_node.set_content (l_content, l_summary, l_format)
-		end
+--	update_node_from_data_form (req: WSF_REQUEST; a_node: CMS_NODE)
+--			-- Extract request form data and build a object
+--			-- Node
+--		local
+--			l_title: detachable READABLE_STRING_32
+--			l_summary, l_content, l_format: detachable READABLE_STRING_8
+--		do
+--			if attached {WSF_STRING} req.form_parameter ("title") as p_title then
+--				l_title := p_title.value
+--				a_node.set_title (l_title)
+--			end
+--			if attached {WSF_STRING} req.form_parameter ("summary") as p_summary then
+--				l_summary := html_encoded (p_summary.value)
+--			end
+--			if attached {WSF_STRING} req.form_parameter ("content") as p_content then
+--				l_content := html_encoded (p_content.value)
+--			end
+--			if attached {WSF_STRING} req.form_parameter ("format") as p_format then
+--				l_format := p_format.url_encoded_value
+--			end
+--			if l_format = Void then
+--				l_format := a_node.format
+--			end
+--			a_node.set_content (l_content, l_summary, l_format)
+--		end
 
 
 end

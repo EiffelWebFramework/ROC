@@ -7,32 +7,20 @@ note
 	revision: "$Revision$"
 
 deferred class
-	CMS_CONTENT_TYPE
+	CMS_NODE_TYPE
 
 inherit
-	CMS_API_ACCESS
+	CMS_CONTENT_TYPE
 
-feature -- Access
+feature -- Factory
 
-	name: READABLE_STRING_8
-			-- Internal name.
+	new_node_with_title (a_title: READABLE_STRING_32; a_partial_node: detachable CMS_NODE): like  new_node
+			-- New node with `a_title' and fill from partial `a_partial_node' if set.
 		deferred
 		end
 
-	title: READABLE_STRING_32
-			-- Human readable name.
-		deferred
-		end
-
-	description: detachable READABLE_STRING_32
-			-- Optional description
-		deferred
-		end
-
-feature -- Access
-
-	available_formats: LIST [CONTENT_FORMAT]
-			-- Available formats for Current type.
+	new_node (a_partial_node: detachable CMS_NODE): CMS_NODE
+			-- New node based on partial `a_partial_node' if set.
 		deferred
 		end
 

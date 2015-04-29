@@ -68,20 +68,6 @@ feature -- Access: user
 		do
 		end
 
-feature -- User Nodes
-
-	user_collaborator_nodes (a_id: like {CMS_USER}.id): LIST [CMS_NODE]
-			-- Possible list of nodes where the user identified by `a_id', is a collaborator.
-		do
-			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
-		end
-
-	user_author_nodes (a_id: like {CMS_USER}.id): LIST [CMS_NODE]
-			-- Possible list of nodes where the user identified by `a_id', is the author.
-		do
-			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
-		end
-
 feature -- Change: user
 
 	new_user (a_user: CMS_USER)

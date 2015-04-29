@@ -1,6 +1,5 @@
 note
-	description: "Summary description for {NODE_RESPONSE}."
-	author: ""
+	description: "Generic CMS Response for a CMS NODE."
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -26,6 +25,7 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	node_api: CMS_NODE_API
+			-- Associated node API.
 
 feature -- Generation
 

@@ -20,7 +20,7 @@ feature {NONE} -- Implementation
 		do
 		end
 
-feature {CMS_MODULE, CMS_API} -- Restricted access		
+feature {CMS_API_ACCESS, CMS_MODULE, CMS_API} -- Restricted access		
 
 	cms_api: CMS_API
 

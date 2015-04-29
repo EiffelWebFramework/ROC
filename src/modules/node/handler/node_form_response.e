@@ -1,7 +1,5 @@
 note
-	description: "Summary description for {NODE_FORM_RESPONSE}."
-	author: ""
-	date: "$Date$"
+	description: "CMS Response handling node editing workflow using Web forms."
 	revision: "$Revision$"
 
 class
@@ -42,6 +40,7 @@ feature -- Execution
 			f: like edit_form
 			fd: detachable WSF_FORM_DATA
 			nid: INTEGER_64
+			l_node_type: CMS_NODE_TYPE
 		do
 			create b.make_empty
 			nid := node_id_path_parameter (request)
@@ -49,7 +48,7 @@ feature -- Execution
 				nid > 0 and then
 				attached node_api.node (nid) as l_node
 			then
-				if attached node_api.content_type (l_node.content_type) as l_type then
+				if attached node_api.node_type_for (l_node) as l_type then
 					if has_permission ("edit " + l_type.name) then
 						f := edit_form (l_node, url (request.path_info, Void), "edit-" + l_type.name, l_type)
 						if request.is_post_request_method then
@@ -65,9 +64,9 @@ feature -- Execution
 							add_to_menu (create {CMS_LOCAL_LINK}.make ("View", node_url (l_node)), primary_tabs)
 							add_to_menu (create {CMS_LOCAL_LINK}.make ("Edit", "/node/" + l_node.id.out + "/edit"), primary_tabs)
 
-							b.append ("saved")
+							b.append (html_encoded (l_type.title) + " saved")
 						else
-							set_title ("Edit #" + l_node.id.out)
+							set_title ("Edit " + html_encoded (l_type.title) + " #" + l_node.id.out)
 
 							add_to_menu (create {CMS_LOCAL_LINK}.make ("View", node_url (l_node)), primary_tabs)
 							add_to_menu (create {CMS_LOCAL_LINK}.make ("Edit", "/node/" + l_node.id.out + "/edit"), primary_tabs)
@@ -82,7 +81,7 @@ feature -- Execution
 				end
 			elseif
 				attached {WSF_STRING} request.path_parameter ("type") as p_type and then
-				attached node_api.content_type (p_type.value) as l_type
+				attached node_api.node_type (p_type.value) as l_type
 			then
 				if has_permission ("create " + l_type.name) then
 					if attached l_type.new_node (Void) as l_node then
@@ -94,7 +93,7 @@ feature -- Execution
 							fd := f.last_data
 						end
 
-						set_title ("Edit #" + l_node.id.out)
+						set_title ("Edit " + html_encoded (l_type.title) + " #" + l_node.id.out)
 
 						add_to_menu (create {CMS_LOCAL_LINK}.make ("View", node_url (l_node)), primary_tabs)
 						add_to_menu (create {CMS_LOCAL_LINK}.make ("Edit", "/node/" + l_node.id.out + "/edit"), primary_tabs)
@@ -106,16 +105,19 @@ feature -- Execution
 				else
 					b.append ("<h1>Access denied</h1>")
 				end
-
 			else
 				set_title ("Create new content ...")
 				b.append ("<ul id=%"content-types%">")
 				across
-					node_api.content_types as c
+					node_api.node_types as ic
 				loop
-					if has_permission ("create " + c.item.name) then
-						b.append ("<li>" + link (c.item.name, "/node/add/" + c.item.name, Void))
-						if attached c.item.description as d then
+					l_node_type := ic.item
+					if
+						has_permission ("create any")
+						or has_permission ("create " + l_node_type.name)
+					then
+						b.append ("<li>" + link (l_node_type.name, "/node/add/" + l_node_type.name, Void))
+						if attached l_node_type.description as d then
 							b.append ("<div class=%"description%">" + d + "</div>")
 						end
 						b.append ("</li>")
@@ -155,7 +157,7 @@ feature -- Form
 			end
 		end
 
-	edit_form_submit (fd: WSF_FORM_DATA; a_node: detachable CMS_NODE; a_type: CMS_CONTENT_TYPE; b: STRING)
+	edit_form_submit (fd: WSF_FORM_DATA; a_node: detachable CMS_NODE; a_type: CMS_NODE_TYPE; b: STRING)
 		local
 			l_preview: BOOLEAN
 			l_node: detachable CMS_NODE
@@ -200,7 +202,7 @@ feature -- Form
 			end
 		end
 
-	edit_form (a_node: detachable CMS_NODE; a_url: READABLE_STRING_8; a_name: STRING; a_type: CMS_CONTENT_TYPE): CMS_FORM
+	edit_form (a_node: detachable CMS_NODE; a_url: READABLE_STRING_8; a_name: STRING; a_type: CMS_NODE_TYPE): CMS_FORM
 		local
 			f: CMS_FORM
 			ts: WSF_FORM_SUBMIT_INPUT
@@ -231,26 +233,28 @@ feature -- Form
 			Result := f
 		end
 
-	new_node (a_content_type: CMS_CONTENT_TYPE; a_form_data: WSF_FORM_DATA; a_node: detachable CMS_NODE): CMS_NODE
+	new_node (a_content_type: CMS_NODE_TYPE; a_form_data: WSF_FORM_DATA; a_node: detachable CMS_NODE): CMS_NODE
+			--
 		do
-			if attached node_api.content_type_webform_manager (a_content_type.name) as wf then
+			if attached node_api.node_type_webform_manager (a_content_type) as wf then
 				Result := wf.new_node (Current, a_form_data, a_node)
 			else
 				Result := a_content_type.new_node (a_node)
 			end
 		end
 
-	change_node (a_content_type: CMS_CONTENT_TYPE; a_form_data: WSF_FORM_DATA; a_node: CMS_NODE)
+	change_node (a_content_type: CMS_NODE_TYPE; a_form_data: WSF_FORM_DATA; a_node: CMS_NODE)
+			-- Update node `a_node' with form_data `a_form_data' for the given content type `a_content_type'.
 		do
-			if attached node_api.content_type_webform_manager (a_content_type.name) as wf then
-				wf.change_node (Current, a_form_data, a_node)
+			if attached node_api.node_type_webform_manager (a_content_type) as wf then
+				wf.update_node (Current, a_form_data, a_node)
 			end
 		end
 
-	fill_edit_form (a_content_type: CMS_CONTENT_TYPE; a_form: WSF_FORM; a_node: detachable CMS_NODE)
+	fill_edit_form (a_content_type: CMS_NODE_TYPE; a_form: WSF_FORM; a_node: detachable CMS_NODE)
 		do
-			if attached node_api.content_type_webform_manager (a_content_type.name) as wf then
-				wf.fill_edit_form (Current, a_form, a_node)
+			if attached node_api.node_type_webform_manager (a_content_type) as wf then
+				wf.populate_form (Current, a_form, a_node)
 			end
 		end
 

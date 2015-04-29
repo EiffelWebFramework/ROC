@@ -30,19 +30,19 @@ feature {NONE} -- Implementation
 			else
 				create {CMS_NODE_STORAGE_NULL} node_storage.make
 			end
-			initialize_content_types
+			initialize_node_types
 		end
 
-	initialize_content_types
+	initialize_node_types
 			-- Initialize content type system.
 		local
-			ct: CMS_PAGE_CONTENT_TYPE
+			ct: CMS_PAGE_NODE_TYPE
 		do
 			create content_types.make (1)
 			create content_type_webform_managers.make (1)
 			create ct
 			add_content_type (ct)
-			add_content_type_webform_manager (create {CMS_PAGE_CONTENT_TYPE_WEBFORM_MANAGER}.make (ct))
+			add_content_type_webform_manager (create {CMS_PAGE_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
 		end
 
 feature {CMS_MODULE} -- Access nodes storage.
@@ -54,12 +54,27 @@ feature -- Content type
 	content_types: ARRAYED_LIST [CMS_CONTENT_TYPE]
 			-- Available content types
 
+	node_types: ARRAYED_LIST [CMS_NODE_TYPE]
+			-- Node content types.
+		do
+			create Result.make (content_types.count)
+			across
+				content_types as ic
+			loop
+				if attached {CMS_NODE_TYPE} ic.item as l_node_type then
+					Result.extend (l_node_type)
+				end
+			end
+		end
+
 	add_content_type (a_type: CMS_CONTENT_TYPE)
+			-- Register content type `a_type'.
 		do
 			content_types.force (a_type)
 		end
 
 	content_type (a_name: READABLE_STRING_GENERAL): detachable CMS_CONTENT_TYPE
+			-- Content type named `a_named' if any.
 		do
 			across
 				content_types as ic
@@ -73,33 +88,84 @@ feature -- Content type
 			end
 		end
 
+	node_type (a_name: READABLE_STRING_GENERAL): detachable CMS_NODE_TYPE
+			-- Content type named `a_named' if any.
+		do
+			across
+				content_types as ic
+			until
+				Result /= Void
+			loop
+				if
+					attached {like node_type} ic.item as l_node_type and then
+					a_name.is_case_insensitive_equal (l_node_type.name)
+				then
+					Result := l_node_type
+				end
+			end
+		end
+
+	node_type_for (a_node: CMS_NODE): detachable CMS_NODE_TYPE
+			-- Content type for node `a_node' if any.
+		local
+			l_type_name: READABLE_STRING_8
+		do
+			l_type_name := a_node.content_type
+			Result := node_type (l_type_name)
+		end
+
 feature -- Content type webform
 
 	content_type_webform_managers: ARRAYED_LIST [CMS_CONTENT_TYPE_WEBFORM_MANAGER]
 			-- Available content types
 
-	add_content_type_webform_manager (a_type: CMS_CONTENT_TYPE_WEBFORM_MANAGER)
+	add_content_type_webform_manager (a_manager: CMS_CONTENT_TYPE_WEBFORM_MANAGER)
+			-- Register webform manager `a_manager'.
 		do
-			content_type_webform_managers.force (a_type)
+			content_type_webform_managers.force (a_manager)
 		end
 
-	content_type_webform_manager (a_name: READABLE_STRING_GENERAL): detachable CMS_CONTENT_TYPE_WEBFORM_MANAGER
+	content_type_webform_manager (a_content_type: CMS_CONTENT_TYPE): detachable CMS_CONTENT_TYPE_WEBFORM_MANAGER
+			-- Web form manager for content type `a_content_type' if any.
+		local
+			l_type_name: READABLE_STRING_GENERAL
 		do
+			l_type_name := a_content_type.name
 			across
 				content_type_webform_managers as ic
 			until
 				Result /= Void
 			loop
 				Result := ic.item
-				if not a_name.is_case_insensitive_equal (Result.name) then
+				if not l_type_name.is_case_insensitive_equal (Result.name) then
 					Result := Void
+				end
+			end
+		end
+
+	node_type_webform_manager (a_node_type: CMS_NODE_TYPE): detachable CMS_NODE_CONTENT_TYPE_WEBFORM_MANAGER
+			-- Web form manager for node type `a_node_type' if any.
+		local
+			l_type_name: READABLE_STRING_GENERAL
+		do
+			l_type_name := a_node_type.name
+			across
+				content_type_webform_managers as ic
+			until
+				Result /= Void
+			loop
+				if
+					attached {CMS_NODE_CONTENT_TYPE_WEBFORM_MANAGER} ic.item as l_manager and then
+					l_type_name.is_case_insensitive_equal (l_manager.name)
+				then
+					Result := l_manager
 				end
 			end
 		end
 
 feature -- URL
 
-	new_content_path (ct: detachable CMS_CONTENT_TYPE): STRING
+	new_content_path (ct: detachable CMS_NODE_TYPE): STRING
 			-- URI path for new content of type `ct'
 			-- or URI of path for selection of new content possibilities if ct is Void.
 		do
@@ -158,7 +224,7 @@ feature -- Access: Node
 			-- otherwise return directly `a_node'.
 		do
 			if attached {CMS_PARTIAL_NODE} a_node as l_partial_node then
-				if attached content_type (l_partial_node.content_type) as ct then
+				if attached node_type_for (l_partial_node) as ct then
 					Result := ct.new_node (l_partial_node)
 					node_storage.fill_node (Result)
 				else

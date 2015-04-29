@@ -24,7 +24,7 @@ feature {NONE} -- Initialization
 			Precursor
 		end
 
-feature {CMS_CONTENT_TYPE} -- Conversion
+feature -- Conversion
 
 	import_node (a_node: CMS_NODE)
 			-- <Precursor>
@@ -39,7 +39,7 @@ feature -- Access
 
 	content_type: READABLE_STRING_8
 		once
-			Result := {CMS_BLOG_CONTENT_TYPE}.name
+			Result := {CMS_BLOG_NODE_TYPE}.name
 		end
 
 feature -- Access: content

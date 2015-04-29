@@ -28,7 +28,7 @@ feature -- Access
 
 	content_type: STRING
 		once
-			Result := {CMS_BLOG_CONTENT_TYPE}.name
+			Result := {CMS_BLOG_NODE_TYPE}.name
 		end
 
 feature -- Persistence

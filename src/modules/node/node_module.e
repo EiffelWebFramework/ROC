@@ -47,7 +47,7 @@ feature {CMS_API} -- Module Initialization
 			-- <Precursor>
 		local
 			p1,p2: CMS_PAGE
-			ct: CMS_PAGE_CONTENT_TYPE
+			ct: CMS_PAGE_NODE_TYPE
 			l_node_api: like node_api
 		do
 			Precursor (api)

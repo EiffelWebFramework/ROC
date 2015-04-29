@@ -6,6 +6,9 @@ note
 deferred class
 	CMS_STORAGE_SQL_I
 
+inherit
+	SHARED_LOGGER
+
 feature -- Access
 
 	api: detachable CMS_API

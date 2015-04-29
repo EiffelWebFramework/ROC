@@ -16,8 +16,6 @@ inherit
 			node_storage
 		end
 
-	SHARED_LOGGER
-
 create
 	make
 
@@ -30,7 +28,7 @@ feature -- Access
 
 	content_type: STRING
 		once
-			Result := {CMS_PAGE_CONTENT_TYPE}.name
+			Result := {CMS_PAGE_NODE_TYPE}.name
 		end
 
 feature -- Persistence
@@ -73,7 +71,7 @@ feature -- Persistence
 		local
 			l_parameters: STRING_TABLE [ANY]
 			n: INTEGER
-			ct: CMS_PAGE_CONTENT_TYPE
+			ct: CMS_PAGE_NODE_TYPE
 		do
 			error_handler.reset
 			write_information_log (generator + ".fill_page")

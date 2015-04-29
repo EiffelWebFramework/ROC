@@ -43,7 +43,7 @@ feature{NONE} -- Initialization
 			title_set: title = a_title
 		end
 
-feature {CMS_CONTENT_TYPE} -- Conversion
+feature -- Conversion
 
 	import_node (a_node: CMS_NODE)
 			-- Import `a_node' into current node.

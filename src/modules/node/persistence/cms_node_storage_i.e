@@ -6,9 +6,6 @@ note
 deferred class
 	CMS_NODE_STORAGE_I
 
-inherit
-	SHARED_LOGGER
-
 feature -- Error Handling
 
 	error_handler: ERROR_HANDLER

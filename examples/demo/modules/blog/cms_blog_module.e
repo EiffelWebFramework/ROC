@@ -35,14 +35,14 @@ feature {CMS_API} -- Module Initialization
 	initialize (api: CMS_API)
 			-- <Precursor>
 		local
-			ct: CMS_BLOG_CONTENT_TYPE
+			ct: CMS_BLOG_NODE_TYPE
 		do
 			Precursor (api)
 
 			if attached {CMS_NODE_API} api.module_api ({NODE_MODULE}) as l_node_api then
 				create ct
 				l_node_api.add_content_type (ct)
-				l_node_api.add_content_type_webform_manager (create {CMS_BLOG_CONTENT_TYPE_WEBFORM_MANAGER}.make (ct))
+				l_node_api.add_content_type_webform_manager (create {CMS_BLOG_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
 					-- Add support for CMS_BLOG, which requires a storage extension to store the optional "tags" value
 					-- For now, we only have extension based on SQL statement.
 				if attached {CMS_NODE_STORAGE_SQL} l_node_api.node_storage as l_sql_node_storage then
