@@ -99,9 +99,9 @@ feature {NONE} -- Initialization
 --			m.enable
 --			register_module (m)
 
-			create {NODE_MODULE} m.make (Current)
-			m.enable
-			register_module (m)
+--			create {NODE_MODULE} m.make (Current)
+--			m.enable
+--			register_module (m)
 		end
 
 feature {NONE} -- Configuration

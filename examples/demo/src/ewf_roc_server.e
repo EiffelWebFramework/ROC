@@ -105,8 +105,6 @@ feature -- CMS Initialization
 			utf: UTF_CONVERTER
 			cms_env: CMS_ENVIRONMENT
 		do
-			write_debug_log (generator + ".initialize_cms / Environment")
-
 				-- Application Environment initialization
 			if attached execution_environment.arguments.separate_character_option_value ('d') as l_dir then
 				create cms_env.make_with_directory_name (l_dir)
@@ -133,6 +131,10 @@ feature -- CMS setup
 		local
 			m: CMS_MODULE
 		do
+			create {NODE_MODULE} m.make (a_setup)
+			m.enable
+			a_setup.register_module (m)
+
 			create {BASIC_AUTH_MODULE} m.make
 			if not a_setup.module_with_same_type_registered (m) then
 				m.enable
