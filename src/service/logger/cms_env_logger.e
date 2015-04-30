@@ -1,8 +1,7 @@
 note
-	description : "Objects that ..."
-	author      : "$Author: jfiat $"
-	date        : "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
-	revision    : "$Revision: 96616 $"
+	description: "Logger for CMS based on the logger provided by the Application Environment library"
+	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
+	revision: "$Revision: 96616 $"
 
 class
 	CMS_ENV_LOGGER
