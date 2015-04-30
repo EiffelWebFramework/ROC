@@ -69,7 +69,7 @@ feature -- Hooks
 				create dbg.make
 				create s.make_empty
 				dbg.append_information_to (a_response.request, a_response.response, s)
-				create b.make ("debug-info", "Debug", s, a_response.api.formats.plain_text)
+				create b.make ("debug-info", "Debug", s, a_response.formats.plain_text)
 				a_response.add_block (b, "footer")
 			end
 		end

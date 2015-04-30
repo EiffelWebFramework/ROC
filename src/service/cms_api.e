@@ -71,11 +71,13 @@ feature -- Access
 feature -- Formats
 
 	formats: CMS_FORMATS
+			-- Available content formats.
 		once
 			create Result
 		end
 
 	format (a_format_name: detachable READABLE_STRING_GENERAL): detachable CONTENT_FORMAT
+			-- Content format name `a_format_name' if any.
 		do
 			Result := formats.item (a_format_name)
 		end

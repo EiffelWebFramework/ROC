@@ -59,15 +59,6 @@ feature -- Access
 
 	response: WSF_RESPONSE
 
-	api: CMS_API
-			-- Current CMS API.
-
-	setup: CMS_SETUP
-			-- Current setup
-		do
-			Result := api.setup
-		end
-
 	status_code: INTEGER
 
 	header: WSF_HEADER
@@ -84,6 +75,23 @@ feature -- Access
 
 	redirection: detachable READABLE_STRING_8
 			-- Location for eventual redirection.
+
+feature -- API
+
+	api: CMS_API
+			-- Current CMS API.
+
+	setup: CMS_SETUP
+			-- Current setup
+		do
+			Result := api.setup
+		end
+
+	formats: CMS_FORMATS
+			-- Available content formats.
+		do
+			Result := api.formats
+		end
 
 feature -- Module
 

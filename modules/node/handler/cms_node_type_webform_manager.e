@@ -87,7 +87,7 @@ feature -- Forms ...
 			elseif a_node /= Void and then attached a_node.format as s_format and then attached response.api.format (s_format) as f_format then
 				f := f_format
 			else
-				f := response.api.formats.default_format
+				f := response.formats.default_format
 			end
 			if b /= Void then
 				a_node.set_content (b, Void, f.name) -- FIXME: summary
@@ -139,7 +139,7 @@ feature -- Forms ...
 			elseif a_node /= Void and then attached a_node.format as s_format and then attached response.api.format (s_format) as f_format then
 				f := f_format
 			else
-				f := response.api.formats.default_format
+				f := response.formats.default_format
 			end
 			if b /= Void then
 				l_node.set_content (b, Void, f.name)
@@ -185,7 +185,7 @@ feature -- Output
 				if attached node_api.cms_api.format (a_node.format) as f then
 					s.append (f.formatted_output (l_content))
 				else
-					s.append (node_api.cms_api.formats.default_format.formatted_output (l_content))
+					s.append (a_response.formats.default_format.formatted_output (l_content))
 				end
 
 				s.append ("</p>")
