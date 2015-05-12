@@ -249,6 +249,29 @@ feature -- Access: Node
 			end
 		end
 
+	is_author_of_node (u: CMS_USER; a_node: CMS_NODE): BOOLEAN
+			-- Is the user `u' owner of the node `n'.
+		do
+			if attached node_storage.node_author (a_node.id) as l_author then
+				Result := u.same_as (l_author)
+			end
+		end
+
+feature -- Permission Scope: Node
+
+	permission_scope (u: detachable CMS_USER; a_node: CMS_NODE): STRING
+			-- Result 'own' if the user `u' is the owner of the node `a_node', in other case
+			-- `any'.
+		do
+			-- FIXME: check if this is ok, since a role may have "any" permission enabled, and "own" disabled,
+			--        in this case, we should check both permissions
+			--        obviously such case should be rare, and look like bad configured permissions, but this may occurs.
+			Result := "any"
+			if u /= Void and then is_author_of_node (u, a_node) then
+				Result := "own"
+			end
+		end
+
 feature -- Change: Node
 
 	save_node (a_node: CMS_NODE)
@@ -279,32 +302,16 @@ feature -- Change: Node
 			node_storage.update_node (a_node)
 		end
 
---	update_node_title (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
---			-- Update node title, with user identified by `a_id', with node id `a_node_id' and a new title `a_title'.
---		do
---			debug ("refactor_fixme")
---				fixme ("Check preconditions")
---			end
---			node_storage.update_node_title (a_user_id, a_node_id, a_title)
---		end
 
---	update_node_summary (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
---			-- Update node summary, with user identified by `a_user_id', with node id `a_node_id' and a new summary `a_summary'.
---		do
---			debug ("refactor_fixme")
---				fixme ("Check preconditions")
---			end
---			node_storage.update_node_summary (a_user_id, a_node_id, a_summary)
---		end
+feature -- Node status
 
---	update_node_content (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
---			-- Update node content, with user identified by `a_user_id', with node id `a_node_id' and a new content `a_content'.
---		do
---			debug ("refactor_fixme")
---				fixme ("Check preconditions")
---			end
---			node_storage.update_node_content (a_user_id, a_node_id, a_content)
---		end
+	Not_published: INTEGER = 0
+			-- The node is not published.
 
+	Published: INTEGER = 1
+			-- The node is published.
+
+	Trashed: INTEGER = -1
+			-- The node is trashed (soft delete), ready to be deleted/destroyed from storage.
 
 end

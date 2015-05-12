@@ -12,6 +12,8 @@ class
 inherit
 	CMS_STORAGE_SQL_BUILDER
 
+	GLOBAL_SETTINGS
+
 create
 	make
 
@@ -35,6 +37,8 @@ feature -- Factory
 				end
 				s.append (";LongNames=0;Timeout=1000;NoTXN=0;SyncPragma=NORMAL;StepAPI=0;")
 				create Result.make (create {DATABASE_CONNECTION_ODBC}.login_with_connection_string (s))
+				set_map_zero_null_value (False)
+					-- This way we map 0 to 0, instead of Null as default.
 				--create Result.make (create {DATABASE_CONNECTION_ODBC}.login_with_connection_string (l_database_config.connection_string))
 				if Result.is_available then
 					if not Result.is_initialized then
@@ -47,30 +51,62 @@ feature -- Factory
 	initialize (a_setup: CMS_SETUP; a_storage: CMS_STORAGE_STORE_SQL)
 		local
 			u: CMS_USER
-			r: CMS_USER_ROLE
+			l_anonymous_role, l_authenticated_role, r: CMS_USER_ROLE
+			l_roles: LIST [CMS_USER_ROLE]
 		do
-				-- Schema
+				--| Schema
 			a_storage.sql_execute_file_script (a_setup.environment.path.extended ("scripts").extended ("core.sql"))
 
-				-- Data	
-				-- Users
+				--| Roles
+			create l_anonymous_role.make ("anonymous")
+			a_storage.save_user_role (l_anonymous_role)
+
+			create l_authenticated_role.make ("authenticated")
+			a_storage.save_user_role (l_authenticated_role)
+
+				--| Users
 			create u.make ("admin")
 			u.set_password ("istrator#")
 			u.set_email (a_setup.site_email)
 			a_storage.new_user (u)
 
-				-- Roles
-			create r.make ("anonymous")
-			a_storage.save_user_role (r)
-			create r.make ("authenticated")
-			r.add_permission ("create page")
-			r.add_permission ("edit page")
+				--| Node			
+				-- FIXME: move that initialization to node module
+			l_anonymous_role.add_permission ("view any page")
+			a_storage.save_user_role (l_anonymous_role)
+
+			l_authenticated_role.add_permission ("create page")
+			l_authenticated_role.add_permission ("view any page")
+			l_authenticated_role.add_permission ("edit own page")
+			l_authenticated_role.add_permission ("delete own page")
+			a_storage.save_user_role (l_authenticated_role)
+
+
+			--| For testing purpose, to be removed later.
+
+				-- Roles, view role for testing.
+			create r.make ("view")
+			r.add_permission ("view page")
 			a_storage.save_user_role (r)
 
-				-- Test custom value
+			create {ARRAYED_LIST [CMS_USER_ROLE]} l_roles.make (1)
+			l_roles.force (r)
 
-			a_storage.set_custom_value ("abc", "123", "test")
-			a_storage.set_custom_value ("abc", "OK", "test")
+			create u.make ("auth")
+			u.set_password ("enticated#")
+			u.set_email (a_setup.site_email)
+			a_storage.new_user (u)
+
+			create u.make ("test")
+			u.set_password ("test#")
+			u.set_email (a_setup.site_email)
+			a_storage.new_user (u)
+
+			create u.make ("view")
+			u.set_password ("only#")
+			u.set_email (a_setup.site_email)
+			u.set_roles (l_roles)
+			a_storage.new_user (u)
 		end
 
 end

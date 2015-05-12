@@ -48,7 +48,7 @@ feature -- Execution
 				attached node_api.node (nid) as l_node
 			then
 				if attached node_api.node_type_for (l_node) as l_type then
-					if has_permission ("edit " + l_type.name) then
+					if has_permission ("edit " + node_api.permission_scope (current_user (request), l_node) + " " +  l_type.name) then
 						f := edit_form (l_node, url (request.path_info, Void), "edit-" + l_type.name, l_type)
 						if request.is_post_request_method then
 							f.validation_actions.extend (agent edit_form_validate (?, b))
@@ -82,7 +82,7 @@ feature -- Execution
 				attached {WSF_STRING} request.path_parameter ("type") as p_type and then
 				attached node_api.node_type (p_type.value) as l_type
 			then
-				if has_permission ("create " + l_type.name) then
+				if has_permission ("create " +  l_type.name) then
 					if attached l_type.new_node (Void) as l_node then
 						f := edit_form (l_node, url (request.path_info, Void), "edit-" + l_type.name, l_type)
 						if request.is_post_request_method then
@@ -227,6 +227,15 @@ feature -- Form
 			create ts.make ("op")
 			ts.set_default_value ("Preview")
 			f.extend (ts)
+
+			if a_node /= Void and then a_node.id > 0 and then has_permission ("delete " + a_name) then
+				create ts.make ("op")
+				ts.set_default_value ("Delete")
+				fixme ("[
+					ts.set_default_value (i18n ("Delete"))i18n or other name such as "translated" or "translation
+					]")
+				f.extend (ts)
+			end
 
 			Result := f
 		end
