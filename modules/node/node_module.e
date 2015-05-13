@@ -135,6 +135,7 @@ feature -- Access: router
 
 			a_router.handle_with_request_methods ("/node/add/{type}", l_node_handler, a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/node/{id}/edit", l_node_handler, a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/node/{id}/delete", l_node_handler, a_router.methods_get_post)
 
 			a_router.handle_with_request_methods ("/node/{id}", l_node_handler, a_router.methods_get)
 				-- For now: no REST API handling... a_router.methods_get_put_delete + a_router.methods_get_post)

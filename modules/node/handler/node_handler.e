@@ -89,6 +89,10 @@ feature -- HTTP Methods
 				check valid_url: req.path_info.starts_with_general ("/node/") end
 				create edit_response.make (req, res, api, node_api)
 				edit_response.execute
+			elseif req.path_info.ends_with_general ("/delete")  then
+				check valid_url: req.path_info.starts_with_general ("/node/") end
+				create edit_response.make (req, res, api, node_api)
+				edit_response.execute
 			else
 					-- Display existing node
 				l_nid := node_id_path_parameter (req)
@@ -116,14 +120,14 @@ feature -- HTTP Methods
 		do
 			fixme ("Refactor code: extract methods: edit_node and add_node")
 			if req.path_info.ends_with_general ("/edit") then
+				create edit_response.make (req, res, api, node_api)
+				edit_response.execute
+			elseif req.path_info.ends_with_general ("/delete") then
 				if
 					attached {WSF_STRING} req.form_parameter ("op") as l_op and then
 					l_op.value.same_string ("Delete")
 				then
 					do_delete (req, res)
-				else
-					create edit_response.make (req, res, api, node_api)
-					edit_response.execute
 				end
 			elseif req.path_info.starts_with_general ("/node/add/") then
 				create edit_response.make (req, res, api, node_api)

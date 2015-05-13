@@ -192,7 +192,7 @@ feature -- Output
 				a_node /= Void and then
 				a_node.id > 0 and then
 				attached node_api.node_type_for (a_node) as l_type and then
-				a_response.has_permission ("delete " + node_api.permission_scope (a_response.current_user (a_response.request), a_node) + " " + l_type.name)
+				node_api.has_permission_for_action_on_node ("delete", a_node, a_response.current_user (a_response.request))
 			then
 				create lnk.make ("Delete", node_api.node_path (a_node) + "/delete")
 				lnk.set_weight (3)
