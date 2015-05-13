@@ -54,6 +54,7 @@ feature -- Conversion
 						a_node.format
 					)
 			set_status (a_node.status)
+			set_link (a_node.link)
 		end
 
 feature -- Access
@@ -142,6 +143,11 @@ feature -- status report
 			Result := a_content_type.is_case_insensitive_equal (content_type)
 		end
 
+feature -- Access: menu		
+
+	link: detachable CMS_LOCAL_LINK
+			-- Associated menu link.
+
 feature -- Element change
 
 	set_content (a_content: like content; a_summary: like summary; a_format: like format)
@@ -158,6 +164,9 @@ feature -- Element change
 			-- Assign `title' with `a_title'.
 		do
 			title := a_title
+			if attached link as lnk then
+				lnk.set_title (a_title)
+			end
 		ensure
 			title_assigned: title = a_title
 		end
@@ -211,6 +220,14 @@ feature -- Element change
 			auther_set: author = u
 		end
 
+	set_link (a_link: like link)
+			-- Set `link' to `a_link'.
+		do
+			link := a_link
+		end
+
+feature -- Status change		
+
 	mark_not_published
 			-- Set status to not_published.
 		do
@@ -234,7 +251,6 @@ feature -- Element change
 		ensure
 			status_trash: status = {CMS_NODE_API}.trashed
 		end
-
 
 feature {CMS_NODE_STORAGE_I} -- Access: status change.
 
