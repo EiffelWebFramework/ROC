@@ -167,6 +167,17 @@ feature -- Output
 			lnk.set_weight (2)
 			a_response.add_to_primary_tabs (lnk)
 
+			if
+				a_node /= Void and then
+				a_node.id > 0 and then
+				attached node_api.node_type_for (a_node) as l_type and then
+				a_response.has_permission ("delete " + node_api.permission_scope (a_response.current_user (a_response.request), a_node) + " " + l_type.name)
+			then
+				create lnk.make ("Delete", node_api.node_path (a_node) + "/delete")
+				lnk.set_weight (3)
+				a_response.add_to_primary_tabs (lnk)
+			end
+
 			create s.make_empty
 			s.append ("<div class=%"info%"> ")
 			if attached a_node.author as l_author then

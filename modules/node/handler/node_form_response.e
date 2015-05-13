@@ -61,13 +61,13 @@ feature -- Execution
 								-- FIXME: Hack for now
 							set_title (l_node.title)
 							add_to_menu (create {CMS_LOCAL_LINK}.make ("View", node_url (l_node)), primary_tabs)
+							add_to_menu (create {CMS_LOCAL_LINK}.make ("Delete", "/node/" + l_node.id.out + "/delete"), primary_tabs)
 							add_to_menu (create {CMS_LOCAL_LINK}.make ("Edit", "/node/" + l_node.id.out + "/edit"), primary_tabs)
-
 							b.append (html_encoded (l_type.title) + " saved")
 						else
 							set_title ("Edit " + html_encoded (l_type.title) + " #" + l_node.id.out)
-
 							add_to_menu (create {CMS_LOCAL_LINK}.make ("View", node_url (l_node)), primary_tabs)
+							add_to_menu (create {CMS_LOCAL_LINK}.make ("Delete", "/node/" + l_node.id.out + "/delete"), primary_tabs)
 							add_to_menu (create {CMS_LOCAL_LINK}.make ("Edit", "/node/" + l_node.id.out + "/edit"), primary_tabs)
 
 							f.append_to_html (wsf_theme, b)
@@ -228,14 +228,14 @@ feature -- Form
 			ts.set_default_value ("Preview")
 			f.extend (ts)
 
-			if a_node /= Void and then a_node.id > 0 and then has_permission ("delete " + a_name) then
-				create ts.make ("op")
-				ts.set_default_value ("Delete")
-				fixme ("[
-					ts.set_default_value (i18n ("Delete"))i18n or other name such as "translated" or "translation
-					]")
-				f.extend (ts)
-			end
+--			if a_node /= Void and then a_node.id > 0 and then has_permission ("delete " + a_name) then
+--				create ts.make ("op")
+--				ts.set_default_value ("Delete")
+--				fixme ("[
+--					ts.set_default_value (i18n ("Delete"))i18n or other name such as "translated" or "translation
+--					]")
+--				f.extend (ts)
+--			end
 
 			Result := f
 		end
