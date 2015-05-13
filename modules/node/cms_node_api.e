@@ -176,6 +176,14 @@ feature -- URL
 			end
 		end
 
+	node_link (a_node: CMS_NODE): CMS_LOCAL_LINK
+			-- CMS link for node `a_node'.
+		require
+			a_node.has_id
+		do
+			create Result.make (a_node.title, cms_api.path_alias (node_path (a_node)))
+		end
+
 	node_path (a_node: CMS_NODE): STRING
 			-- URI path for node `a_node'.
 			-- using the /node/{nid} url.
@@ -234,6 +242,11 @@ feature -- Access: Node
 				Result := a_node
 			end
 
+				-- Update link with aliasing.
+			if a_node /= Void and then a_node.has_id then
+				a_node.set_link (node_link (a_node))
+			end
+
 				-- Update partial user if needed.
 			if
 				Result /= Void and then
@@ -259,16 +272,17 @@ feature -- Access: Node
 
 feature -- Permission Scope: Node
 
-	permission_scope (u: detachable CMS_USER; a_node: CMS_NODE): STRING
-			-- Result 'own' if the user `u' is the owner of the node `a_node', in other case
-			-- `any'.
+	has_permission_for_action_on_node (a_action: READABLE_STRING_8; a_node: CMS_NODE; a_user: detachable CMS_USER; ): BOOLEAN
+			-- Has permission to execute action `a_action' on node `a_node', by eventual user `a_user'?
+		local
+			l_type_name: READABLE_STRING_8
 		do
-			-- FIXME: check if this is ok, since a role may have "any" permission enabled, and "own" disabled,
-			--        in this case, we should check both permissions
-			--        obviously such case should be rare, and look like bad configured permissions, but this may occurs.
-			Result := "any"
-			if u /= Void and then is_author_of_node (u, a_node) then
-				Result := "own"
+			l_type_name := a_node.content_type
+			Result := cms_api.user_has_permission (a_user, a_action + " any " + l_type_name)
+			if not Result and a_user /= Void then
+				if is_author_of_node (a_user, a_node) then
+					Result := cms_api.user_has_permission (a_user, a_action + " own " + l_type_name)
+				end
 			end
 		end
 

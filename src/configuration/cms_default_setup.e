@@ -84,7 +84,7 @@ feature {NONE} -- Initialization
 	initialize_modules
 				-- Intialize core modules.
 		local
-			m: CMS_MODULE
+--			m: CMS_MODULE
 		do
 			-- Core
 --			create {BASIC_AUTH_MODULE} m.make

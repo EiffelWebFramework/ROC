@@ -157,51 +157,6 @@ feature -- Change: Node
 			sql_change (sql_delete_node, l_parameters)
 		end
 
---	update_node_title (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
---			-- <Precursor>
---		local
---			l_parameters: STRING_TABLE [detachable ANY]
---		do
---			-- FIXME: unused a_user_id !
---			error_handler.reset
---			write_information_log (generator + ".update_node_title")
---			create l_parameters.make (3)
---			l_parameters.put (a_title, "title")
---			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
---			l_parameters.put (a_node_id, "nid")
---			sql_change (sql_update_node_title, l_parameters)
---		end
-
---	update_node_summary (a_user_id: Like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
---			-- <Precursor>
---		local
---			l_parameters: STRING_TABLE [detachable ANY]
---		do
---			-- FIXME: unused a_user_id !
---			error_handler.reset
---			write_information_log (generator + ".update_node_summary")
---			create l_parameters.make (3)
---			l_parameters.put (a_summary, "summary")
---			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
---			l_parameters.put (a_node_id, "nid")
---			sql_change (sql_update_node_summary, l_parameters)
---		end
-
---	update_node_content (a_user_id: Like {CMS_USER}.id;a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
---			-- <Precursor>
---		local
---			l_parameters: STRING_TABLE [detachable ANY]
---		do
---			-- FIXME: unused a_user_id !
---			error_handler.reset
---			write_information_log (generator + ".update_node_content")
---			create l_parameters.make (3)
---			l_parameters.put (a_content, "content")
---			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
---			l_parameters.put (a_node_id, "nid")
---			sql_change (sql_update_node_content, l_parameters)
---		end
-
 feature {NONE} -- Implementation
 
 	store_node (a_node: CMS_NODE)
@@ -273,9 +228,9 @@ feature {NONE} -- Queries
 			-- SQL Query to retrieve all nodes.
 			--| note: {CMS_NODE_API}.trashed = -1
 
-	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes WHERE nid =:nid ORDER BY revision desc, publish desc LIMIT 1;"
+	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes WHERE nid =:nid ORDER BY revision DESC, publish DESC LIMIT 1;"
 
-	sql_select_recent_nodes: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes ORDER BY nid desc, publish desc LIMIT :rows OFFSET :offset ;"
+	sql_select_recent_nodes: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes ORDER BY nid DESC, publish DESC LIMIT :rows OFFSET :offset ;"
 
 	sql_insert_node: STRING = "INSERT INTO nodes (revision, type, title, summary, content, format, publish, created, changed, status, author) VALUES (1, :type, :title, :summary, :content, :format, :publish, :created, :changed, :status, :author);"
 			-- SQL Insert to add a new node.
