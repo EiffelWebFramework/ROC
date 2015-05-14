@@ -99,6 +99,29 @@ feature -- Execution
 							set_title (formatted_string (translation ("Delete $1 #$2", Void), [l_type.title, l_node.id]))
 							f.append_to_html (wsf_theme, b)
 						end
+					elseif
+						request.path_info.ends_with_general ("/trash") and then
+						node_api.has_permission_for_action_on_node ("trash", l_node, current_user (request))
+					then
+						f := new_trash_form (l_node, url (request.path_info, Void), "trash-" + l_type.name, l_type)
+						invoke_form_alter (f, fd)
+						if request.is_post_request_method then
+							f.process (Current)
+							fd := f.last_data
+						end
+						if l_node.has_id then
+							add_to_menu (create {CMS_LOCAL_LINK}.make (translation ("View", Void), node_url (l_node)), primary_tabs)
+							add_to_menu (create {CMS_LOCAL_LINK}.make ("Trash", "/node/" + l_node.id.out + "/trash"), primary_tabs)
+						end
+
+						if attached redirection as l_location then
+								-- FIXME: Hack for now
+							set_title (l_node.title)
+							b.append (html_encoded (l_type.title) + " trasged")
+						else
+							set_title (formatted_string (translation ("Trash $1 #$2", Void), [l_type.title, l_node.id]))
+							f.append_to_html (wsf_theme, b)
+						end
 					else
 						b.append ("<h1>")
 						b.append (translation ("Access denied", Void))
@@ -304,6 +327,47 @@ feature -- Form
 
 			Result := f
 		end
+
+
+	new_trash_form (a_node: detachable CMS_NODE; a_url: READABLE_STRING_8; a_name: STRING; a_node_type: CMS_NODE_TYPE [CMS_NODE]): CMS_FORM
+			-- Create a web form named `a_name' for node `a_node' (if set), using form action url `a_url', and for type of node `a_node_type'.
+		local
+			f: CMS_FORM
+			ts: WSF_FORM_SUBMIT_INPUT
+		do
+			create f.make (a_url, a_name)
+
+			f.extend_html_text ("<br/>")
+			f.extend_html_text ("<legend>Are you sure you want to trash the current node?</legend>")
+			if
+				a_node /= Void and then
+				a_node.id > 0
+			then
+				create ts.make ("op")
+				ts.set_default_value ("Trash")
+				fixme ("[
+					ts.set_default_value (translation ("Trash"))
+					]")
+				f.extend (ts)
+			end
+			f.extend_html_text ("<br/>")
+			f.extend_html_text ("<legend>Do you want to revert the current node?</legend>")
+			if
+				a_node /= Void and then
+				a_node.id > 0
+			then
+				create ts.make ("op")
+				ts.set_default_value ("Revert")
+				fixme ("[
+					ts.set_default_value (translation ("Revert"))
+					]")
+				f.extend (ts)
+			end
+			Result := f
+		end
+
+
+
 
 	populate_form (a_content_type: CMS_NODE_TYPE [CMS_NODE]; a_form: WSF_FORM; a_node: detachable CMS_NODE)
 			-- Fill the web form `a_form' with data from `a_node' if set,

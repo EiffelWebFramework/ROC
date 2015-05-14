@@ -127,6 +127,7 @@ feature -- Access: router
 			l_node_handler: NODE_HANDLER
 			l_nodes_handler: NODES_HANDLER
 			l_uri_mapping: WSF_URI_MAPPING
+			l_trash_handler: TRASH_HANDLER
 		do
 				-- TODO: for now, focused only on web interface, add REST api later. [2015-April-29]
 			create l_node_handler.make (a_api, a_node_api)
@@ -136,6 +137,7 @@ feature -- Access: router
 			a_router.handle_with_request_methods ("/node/add/{type}", l_node_handler, a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/node/{id}/edit", l_node_handler, a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/node/{id}/delete", l_node_handler, a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/node/{id}/trash", l_node_handler, a_router.methods_get_post)
 
 			a_router.handle_with_request_methods ("/node/{id}", l_node_handler, a_router.methods_get)
 				-- For now: no REST API handling... a_router.methods_get_put_delete + a_router.methods_get_post)
@@ -144,6 +146,13 @@ feature -- Access: router
 			create l_nodes_handler.make (a_api, a_node_api)
 			create l_uri_mapping.make_trailing_slash_ignored ("/nodes", l_nodes_handler)
 			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get)
+
+				--Trash
+
+			create l_trash_handler.make (a_api, a_node_api)
+			create l_uri_mapping.make_trailing_slash_ignored ("/trash", l_trash_handler)
+			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get)
+
 		end
 
 feature -- Hooks
