@@ -141,7 +141,7 @@ feature -- HTTP Methods
 					do_trash (req, res)
 				elseif
 					attached {WSF_STRING} req.form_parameter ("op") as l_op and then
-					l_op.value.same_string ("Revert")
+					l_op.value.same_string ("Restore")
 				then
 					do_restore (req, res)
 				end
@@ -194,7 +194,7 @@ feature -- HTTP Methods
 			send_not_implemented ("REST API not yet implemented", req, res)
 		end
 
-feature {NONE} -- Trash:Revert
+feature {NONE} -- Trash:Restore
 
 	do_trash (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- Trash a node from the database.
@@ -224,7 +224,7 @@ feature {NONE} -- Trash:Revert
 		end
 
 	do_restore (req: WSF_REQUEST; res: WSF_RESPONSE)
-			-- Revert a node: From {CMS_NODE_API}.trashed to {CMS_NODE_API}.not_published.
+			-- Restore a node: From {CMS_NODE_API}.trashed to {CMS_NODE_API}.not_published.
 		do
 			if attached current_user (req) as l_user then
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then

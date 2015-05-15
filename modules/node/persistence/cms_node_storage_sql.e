@@ -210,7 +210,7 @@ feature -- Change: Node
 			l_time: DATE_TIME
 		do
 			create l_time.make_now_utc
-			write_information_log (generator + ".revert_node {" + a_id.out + "}")
+			write_information_log (generator + ".restore_node {" + a_id.out + "}")
 
 			error_handler.reset
 			create l_parameters.make (1)
@@ -319,7 +319,7 @@ feature {NONE} -- Queries
 			-- Physical deletion with free metadata.		
 
 	sql_restore_node: STRING = "UPDATE nodes SET changed=:changed, status =:status WHERE nid=:nid"
-			-- Revert node to  {CMS_NODE_API}.not_publised.
+			-- Restore node to  {CMS_NODE_API}.not_publised.
 
 --	sql_update_node_author: STRING  = "UPDATE nodes SET author=:author WHERE nid=:nid;"
 

@@ -351,15 +351,15 @@ feature -- Form
 				f.extend (ts)
 			end
 			f.extend_html_text ("<br/>")
-			f.extend_html_text ("<legend>Do you want to revert the current node?</legend>")
+			f.extend_html_text ("<legend>Do you want to restore the current node?</legend>")
 			if
 				a_node /= Void and then
 				a_node.id > 0
 			then
 				create ts.make ("op")
-				ts.set_default_value ("Revert")
+				ts.set_default_value ("Restore")
 				fixme ("[
-					ts.set_default_value (translation ("Revert"))
+					ts.set_default_value (translation ("Restore"))
 					]")
 				f.extend (ts)
 			end
