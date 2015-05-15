@@ -51,11 +51,11 @@ feature -- HTTP Methods
 
 			if attached current_user (req) as l_user then
 
-				l_page.add_variable (node_api.trash_nodes (l_user), "nodes")
+				l_page.add_variable (node_api.trashed_nodes (l_user), "nodes")
 
 					-- NOTE: for development purposes we have the following hardcode output.
 				create s.make_from_string ("<p>Nodes:</p>")
-				if attached node_api.trash_nodes (l_user) as lst then
+				if attached node_api.trashed_nodes (l_user) as lst then
 					s.append ("<ul class=%"cms-nodes%">%N")
 					across
 						lst as ic

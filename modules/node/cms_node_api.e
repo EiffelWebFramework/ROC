@@ -213,7 +213,7 @@ feature -- Access: Node
 		end
 
 
-	trash_nodes (a_user: CMS_USER): LIST [CMS_NODE]
+	trashed_nodes (a_user: CMS_USER): LIST [CMS_NODE]
 			-- List of nodes with status in {CMS_NODE_API}.trashed.
 			-- if the current user is admin, it will retrieve all the trashed nodes
 		do
