@@ -143,7 +143,7 @@ feature -- HTTP Methods
 					attached {WSF_STRING} req.form_parameter ("op") as l_op and then
 					l_op.value.same_string ("Revert")
 				then
-					do_revert (req, res)
+					do_restore (req, res)
 				end
 			elseif req.path_info.starts_with_general ("/node/add/") then
 				create edit_response.make (req, res, api, node_api)
@@ -223,7 +223,7 @@ feature {NONE} -- Trash:Revert
 			end
 		end
 
-	do_revert (req: WSF_REQUEST; res: WSF_RESPONSE)
+	do_restore (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- Revert a node: From {CMS_NODE_API}.trashed to {CMS_NODE_API}.not_published.
 		do
 			if attached current_user (req) as l_user then
