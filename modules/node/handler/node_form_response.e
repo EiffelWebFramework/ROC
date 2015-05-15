@@ -117,7 +117,7 @@ feature -- Execution
 						if attached redirection as l_location then
 								-- FIXME: Hack for now
 							set_title (l_node.title)
-							b.append (html_encoded (l_type.title) + " trasged")
+							b.append (html_encoded (l_type.title) + " trashed")
 						else
 							set_title (formatted_string (translation ("Trash $1 #$2", Void), [l_type.title, l_node.id]))
 							f.append_to_html (wsf_theme, b)
