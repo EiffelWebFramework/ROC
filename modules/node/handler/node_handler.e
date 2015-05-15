@@ -233,7 +233,7 @@ feature {NONE} -- Trash:Revert
 						attached node_api.node (l_id.integer_value) as l_node
 					then
 						if node_api.has_permission_for_action_on_node ("trash", l_node, current_user (req)) then
-							node_api.revert_node (l_node)
+							node_api.restore_node (l_node)
 							res.send (create {CMS_REDIRECTION_RESPONSE_MESSAGE}.make (req.absolute_script_url ("")))
 						else
 							send_access_denied (req, res)

@@ -70,7 +70,7 @@ feature -- Access
 		deferred
 		end
 
-	trash_nodes (a_user_id: INTEGER_64): LIST [CMS_NODE]
+	trashed_nodes (a_user_id: INTEGER_64): LIST [CMS_NODE]
 			-- List of nodes by user `a_user_id'.
 		deferred
 		end
@@ -148,11 +148,11 @@ feature -- Change: Node
 			end
 		end
 
-	revert_node (a_node: CMS_NODE)
-			-- Revert `a_node'.
+	restore_node (a_node: CMS_NODE)
+			-- Restore `a_node'.
 		do
 			if a_node.has_id then
-				revert_node_by_id (a_node.id)
+				restore_node_by_id (a_node.id)
 			end
 		end
 
@@ -163,8 +163,8 @@ feature -- Change: Node
 		deferred
 		end
 
-	revert_node_by_id (a_id: INTEGER_64)
-			-- Revert node by id `a_id'.
+	restore_node_by_id (a_id: INTEGER_64)
+			-- Restore node by id `a_id'.
 		require
 			valid_node_id: a_id > 0
 		deferred

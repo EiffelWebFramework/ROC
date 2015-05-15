@@ -41,7 +41,7 @@ feature -- Access: node
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 		end
 
-	trash_nodes (a_user_id: INTEGER_64): LIST [CMS_NODE]
+	trashed_nodes (a_user_id: INTEGER_64): LIST [CMS_NODE]
 			-- List of nodes by user `a_user_id'.
 		do
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
@@ -91,7 +91,7 @@ feature -- Node
 		do
 		end
 
-	revert_node_by_id (a_id: INTEGER_64)
+	restore_node_by_id (a_id: INTEGER_64)
 			-- <Precursor>
 		do
 		end

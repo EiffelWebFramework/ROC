@@ -217,7 +217,7 @@ feature -- Access: Node
 			-- List of nodes with status in {CMS_NODE_API}.trashed.
 			-- if the current user is admin, it will retrieve all the trashed nodes
 		do
-			Result := node_storage.trash_nodes (a_user.id)
+			Result := node_storage.trashed_nodes (a_user.id)
 		end
 
 	recent_nodes (a_offset, a_rows: INTEGER): LIST [CMS_NODE]
@@ -332,11 +332,11 @@ feature -- Change: Node
 		end
 
 
-	revert_node (a_node: CMS_NODE)
-			-- Revert node `a_node'.
+	restore_node (a_node: CMS_NODE)
+			-- Restore node `a_node'.
 			-- From {CMS_NODE_API}.trashed to {CMS_NODE_API}.not_published.
 		do
-			node_storage.revert_node (a_node)
+			node_storage.restore_node (a_node)
 		end
 
 

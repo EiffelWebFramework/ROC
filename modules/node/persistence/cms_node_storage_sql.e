@@ -59,7 +59,7 @@ feature -- Access
 --			end
 		end
 
-	trash_nodes (a_user_id: INTEGER_64): LIST [CMS_NODE]
+	trashed_nodes (a_user_id: INTEGER_64): LIST [CMS_NODE]
 			-- List of nodes.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
@@ -203,7 +203,7 @@ feature -- Change: Node
 			sql_change (sql_trash_node, l_parameters)
 		end
 
-	revert_node_by_id (a_id: INTEGER_64)
+	restore_node_by_id (a_id: INTEGER_64)
 			-- <Precursor>
 		local
 			l_parameters: STRING_TABLE [ANY]
@@ -217,7 +217,7 @@ feature -- Change: Node
 			l_parameters.put (l_time, "changed")
 			l_parameters.put ({CMS_NODE_API}.not_published, "status")
 			l_parameters.put (a_id, "nid")
-			sql_change (sql_revert_node, l_parameters)
+			sql_change (sql_restore_node, l_parameters)
 		end
 
 
@@ -315,10 +315,10 @@ feature {NONE} -- Queries
 	sql_delete_node: STRING = "UPDATE nodes SET changed=:changed, status =:status WHERE nid=:nid"
 			-- Soft deletion with free metadata.
 
-	sql_trash_node: STRING = "DELETE FROM NODES WHERE nid=:nid"
+	sql_trash_node: STRING = "DELETE FROM nodes WHERE nid=:nid"
 			-- Physical deletion with free metadata.		
 
-	sql_revert_node: STRING = "UPDATE nodes SET changed=:changed, status =:status WHERE nid=:nid"
+	sql_restore_node: STRING = "UPDATE nodes SET changed=:changed, status =:status WHERE nid=:nid"
 			-- Revert node to  {CMS_NODE_API}.not_publised.
 
 --	sql_update_node_author: STRING  = "UPDATE nodes SET author=:author WHERE nid=:nid;"
