@@ -3,3 +3,5 @@ EIFGENs
 *.log*
 *.rc
 *.bak
+*.sqlite
+Thumbs.db
