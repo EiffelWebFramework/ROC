@@ -117,13 +117,13 @@ feature -- Access: router
 configure_web (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
 		local
 			l_blog_handler: BLOG_HANDLER
+			l_node_handler: NODE_HANDLER
 			l_uri_mapping: WSF_URI_MAPPING
 		do
 			-- TODO: for now, focused only on web interface, add REST api later. [2015-May-18]
 			create l_blog_handler.make (a_api, a_node_api)
 			create l_uri_mapping.make_trailing_slash_ignored ("/blogs", l_blog_handler)
 			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get)
-			--a_router.handle_with_request_methods ("/node/{id}", l_node_handler, a_router.methods_get)
 		end
 
 feature -- Hooks
