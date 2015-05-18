@@ -39,19 +39,18 @@ feature {CMS_API} -- Module Initialization
 			-- <Precursor>
 		local
 			ct: CMS_BLOG_NODE_TYPE
-			l_node_api: like node_api
 		do
 			Precursor (api)
-			create l_node_api.make (api)
-			node_api := l_node_api
 
-			create ct
-			l_node_api.add_content_type (ct)
-			l_node_api.add_content_type_webform_manager (create {CMS_BLOG_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
-				-- Add support for CMS_BLOG, which requires a storage extension to store the optional "tags" value
-				-- For now, we only have extension based on SQL statement.
-			if attached {CMS_NODE_STORAGE_SQL} l_node_api.node_storage as l_sql_node_storage then
-				l_sql_node_storage.register_node_storage_extension (create {CMS_NODE_STORAGE_SQL_BLOG_EXTENSION}.make (l_sql_node_storage))
+			if attached {CMS_NODE_API} api.module_api ({NODE_MODULE}) as l_node_api then
+				create ct
+				l_node_api.add_content_type (ct)
+				l_node_api.add_content_type_webform_manager (create {CMS_BLOG_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
+					-- Add support for CMS_BLOG, which requires a storage extension to store the optional "tags" value
+					-- For now, we only have extension based on SQL statement.
+				if attached {CMS_NODE_STORAGE_SQL} l_node_api.node_storage as l_sql_node_storage then
+					l_sql_node_storage.register_node_storage_extension (create {CMS_NODE_STORAGE_SQL_BLOG_EXTENSION}.make (l_sql_node_storage))
+				end
 			end
 		end
 
@@ -121,9 +120,9 @@ configure_web (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
 			l_uri_mapping: WSF_URI_MAPPING
 		do
 			-- TODO: for now, focused only on web interface, add REST api later. [2015-May-18]
-			--create l_blog_handler.make (a_api, a_node_api)
-			--create l_uri_mapping.make_trailing_slash_ignored ("/blogs", l_blog_handler)
-			--a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get)
+			create l_blog_handler.make (a_api, a_node_api)
+			create l_uri_mapping.make_trailing_slash_ignored ("/blogs", l_blog_handler)
+			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get)
 			--a_router.handle_with_request_methods ("/node/{id}", l_node_handler, a_router.methods_get)
 		end
 
