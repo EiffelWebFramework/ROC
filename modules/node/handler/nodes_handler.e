@@ -41,6 +41,9 @@ feature -- HTTP Methods
 			s: STRING
 			n: CMS_NODE
 			lnk: CMS_LOCAL_LINK
+			pager: NODE_PAGE_BUILDER
+			number_of_pages: INTEGER_64
+			current_page: INTEGER
 		do
 				-- At the moment the template is hardcoded, but we can
 				-- get them from the configuration file and load them into
@@ -49,10 +52,68 @@ feature -- HTTP Methods
 			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
 			l_page.add_variable (node_api.nodes, "nodes")
 
+			create pager.make (api, node_api)
+			number_of_pages := (node_api.nodes_count // pager.limit) + 1
+
+				-- Size:limit
+			if
+				attached {WSF_STRING} req.query_parameter ("size") as l_size and then
+				l_size.is_integer
+			then
+				pager.set_limit (l_size.integer_value.to_natural_32)
+			end
+
+
+
+				--Page:offset
+			if
+				attached {WSF_STRING} req.query_parameter ("page") as ll_page and then
+				ll_page.is_integer
+			then
+				current_page := ll_page.integer_value
+				if current_page > 1 then
+					pager.set_offset (((current_page-1)*(pager.limit.to_integer_32)).to_natural_32)
+				end
+			else
+				current_page := 1
+			end
+
+
 
 				-- NOTE: for development purposes we have the following hardcode output.
 			create s.make_from_string ("<p>Nodes:</p>")
-			if attached node_api.nodes as lst then
+
+			s.append ("<p>Current Page:" + current_page.out +  " of " + number_of_pages.out + " pages</p>" )
+				-- pager
+			s.append ("<div class=%"col-xs-12%">%N")
+			s.append ("<ul class=%"pager%">%N")
+			create lnk.make ("First", "nodes/?page=1&size="+pager.limit.out)
+			s.append ("<li>")
+			s.append (l_page.link (lnk.title, lnk.location, Void))
+			s.append ("</li>")
+			if (current_page - 1) > 1 then
+				create lnk.make ("Prev", "nodes/?page="+ (current_page-1).out +"&size="+pager.limit.out)
+				s.append ("<li>")
+				s.append (l_page.link (lnk.title, lnk.location, Void))
+				s.append ("</li>")
+			end
+
+			if (current_page + 1) < number_of_pages then
+				create lnk.make ("Next", "nodes/?page="+ (current_page+1).out +"&size="+pager.limit.out)
+				s.append ("<li>")
+				s.append (l_page.link (lnk.title, lnk.location, Void))
+				s.append ("</li>")
+			end
+			create lnk.make ("Last", "nodes/?page="+ number_of_pages.out +"&size="+pager.limit.out)
+			s.append ("<li>")
+			s.append (l_page.link (lnk.title, lnk.location, Void))
+			s.append ("</li>")
+
+
+			s.append ("</ul>%N")
+			s.append ("<div>%N")
+
+			if attached pager.list as lst then
 				s.append ("<ul class=%"cms-nodes%">%N")
 				across
 					lst as ic
@@ -61,7 +122,6 @@ feature -- HTTP Methods
 					lnk := node_api.node_link (n)
 					s.append ("<li class=%"cms_type_"+ n.content_type +"%">")
 					s.append (l_page.link (lnk.title, lnk.location, Void))
---					s.append (l_page.link (n.title + " (#" + n.id.out + ")", node_api.node_path (n), Void))
 					s.append ("</li>%N")
 				end
 				s.append ("</ul>%N")

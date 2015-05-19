@@ -186,10 +186,12 @@ feature -- Hooks
 			create lnk.make ("List of nodes", "nodes")
 			a_menu_system.primary_menu.extend (lnk)
 
-			create lnk.make ("Trash", a_response.url ("trash", Void))
+--			create lnk.make ("Trash", a_response.url ("trash/", Void))
+			create lnk.make ("Trash", "trash")
 			a_menu_system.primary_menu.extend (lnk)
 
-			create lnk.make ("Create ..", a_response.url ("node/", Void))
+--			create lnk.make ("Create ..", a_response.url ("node/", Void))
+			create lnk.make ("Create ..", "node")
 			a_menu_system.primary_menu.extend (lnk)
 		end
 
