@@ -15,7 +15,7 @@ feature -- Forms ...
 		local
 			ti: WSF_FORM_TEXT_INPUT
 			fset: WSF_FORM_FIELD_SET
-			ta: WSF_FORM_TEXTAREA
+			ta, sum: WSF_FORM_TEXTAREA
 			tselect: WSF_FORM_SELECT
 			opt: WSF_FORM_SELECT_OPTION
 		do
@@ -30,6 +30,7 @@ feature -- Forms ...
 
 			f.extend_html_text ("<br/>")
 
+			-- Main Content
 			create ta.make ("body")
 			ta.set_rows (10)
 			ta.set_cols (70)
@@ -40,10 +41,24 @@ feature -- Forms ...
 			ta.set_description ("This is the main content")
 			ta.set_is_required (False)
 
+			-- Summary
+			create sum.make ("summary")
+			sum.set_rows (10)
+			sum.set_cols (70)
+			if a_node /= Void then
+				sum.set_text_value (a_node.summary)
+			end
+--			sum.set_label ("Summary")
+			sum.set_description ("This is the summary")
+			sum.set_is_required (False)
+
 			create fset.make
 			fset.set_legend ("Body")
+			-- Add summary
+			fset.extend (sum)
+			fset.extend_html_text("<br />")
+			-- Add content (body)
 			fset.extend (ta)
-
 			fset.extend_html_text ("<br/>")
 
 			create tselect.make ("format")
