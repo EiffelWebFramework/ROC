@@ -1,6 +1,6 @@
 note
 	description: "Request handler related to /blogs."
-	author: "Dario Bösch <daboesch@student.ethz.ch"
+	author: "Dario Bösch <daboesch@student.ethz.ch>"
 	date: "$Date: 2015-05-18 13:49:99 +0100 (lun., 18 mai 2015) $"
 	revision: "$966167$"
 
@@ -8,13 +8,30 @@ class
 	BLOG_HANDLER
 
 inherit
-	NODES_HANDLER
+	CMS_BLOG_HANDLER
+
+	WSF_URI_HANDLER
+		rename
+			new_mapping as new_uri_mapping
+		end
+
+	WSF_RESOURCE_HANDLER_HELPER
 		redefine
 			do_get
 		end
 
+	REFACTORING_HELPER
+
 create
 	make
+
+feature -- execute
+
+	execute (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- Execute request handler
+		do
+			execute_methods (req, res)
+		end
 
 feature -- Settings
 	entries_per_page : INTEGER

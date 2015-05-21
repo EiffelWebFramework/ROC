@@ -42,7 +42,7 @@ feature {CMS_API} -- Module Initialization
 		do
 			Precursor (api)
 
-			if attached {CMS_NODE_API} api.module_api ({NODE_MODULE}) as l_node_api then
+			if attached {CMS_BLOG_API} api.module_api ({NODE_MODULE}) as l_node_api then
 				create ct
 				l_node_api.add_content_type (ct)
 				l_node_api.add_content_type_webform_manager (create {CMS_BLOG_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
@@ -87,7 +87,7 @@ CREATE TABLE "blog_post_nodes"(
 
 feature {CMS_API} -- Access: API
 
-	node_api: detachable CMS_NODE_API
+	node_api: detachable CMS_BLOG_API
 			-- <Precursor>
 
 feature -- Access: router
@@ -114,10 +114,9 @@ feature -- Access: router
 	--		a_router.handle_with_request_methods ("/blogs/", create {WSF_URI_AGENT_HANDLER}.make (agent handle_blogs (?,?, a_api)), a_router.methods_get)
 	--	end
 
-configure_web (a_api: CMS_API; a_node_api: CMS_NODE_API; a_router: WSF_ROUTER)
+configure_web (a_api: CMS_API; a_node_api: CMS_BLOG_API; a_router: WSF_ROUTER)
 		local
 			l_blog_handler: BLOG_HANDLER
-			l_node_handler: NODE_HANDLER
 			l_uri_mapping: WSF_URI_MAPPING
 		do
 			-- TODO: for now, focused only on web interface, add REST api later. [2015-May-18]
@@ -140,16 +139,4 @@ feature -- Hooks
 			create lnk.make ("Blogs", "/blogs/")
 			a_menu_system.primary_menu.extend (lnk)
 		end
-
-feature -- Handler
-
-	handle_blogs (req: WSF_REQUEST; res: WSF_RESPONSE; a_api: CMS_API)
-		local
-			r: NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
-		do
-			create r.make (req, res, a_api)
-			r.set_main_content ("Blog module is in development ...")
-			r.execute
-		end
-
 end

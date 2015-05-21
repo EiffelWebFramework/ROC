@@ -212,11 +212,6 @@ feature -- Access: Node
 			Result := node_storage.nodes
 		end
 
-	blogs_order_created_desc: LIST[CMS_NODE]
-			-- List of nodes ordered by creation date (descending)
-		do
-			Result := node_storage.blogs
-		end
 
 	recent_nodes (a_offset, a_rows: INTEGER): LIST [CMS_NODE]
 			-- List of the `a_rows' most recent nodes starting from  `a_offset'.

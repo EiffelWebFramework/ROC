@@ -33,31 +33,6 @@ feature -- Access
 			end
 		end
 
-	blogs: LIST [CMS_NODE]
-			-- List of nodes ordered by creation date (descending).
-		do
-			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
-
-			error_handler.reset
-			write_information_log (generator + ".nodes")
-
-			from
-				sql_query (sql_select_blogs_order_created_desc, Void)
-				sql_start
-			until
-				sql_after
-			loop
-				if attached fetch_node as l_node then
-					Result.force (l_node)
-				end
-				sql_forth
-			end
---			across
---				Result as ic
---			loop
---				fill_node (ic.item)
---			end
-		end
 
 	nodes: LIST [CMS_NODE]
 			-- List of nodes.
@@ -252,10 +227,6 @@ feature {NONE} -- Queries
 
 	sql_select_nodes: STRING = "SELECT * FROM Nodes WHERE status != -1 ;"
 			-- SQL Query to retrieve all nodes.
-			--| note: {CMS_NODE_API}.trashed = -1
-
-	sql_select_blogs_order_created_desc: STRING = "SELECT * FROM Nodes WHERE status != -1 AND type = %"blog%" ORDER BY created DESC;"
-			-- SQL Query to retrieve all nodes that are from the type "blog" ordered by descending creation date.
 			--| note: {CMS_NODE_API}.trashed = -1
 
 	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes WHERE nid =:nid ORDER BY revision DESC, publish DESC LIMIT 1;"

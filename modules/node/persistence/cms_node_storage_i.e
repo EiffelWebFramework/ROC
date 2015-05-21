@@ -70,11 +70,6 @@ feature -- Access
 		deferred
 		end
 
-	blogs: LIST [CMS_NODE]
-			-- List of nodes ordered by creation date (descending).
-		deferred
-		end
-
 	recent_nodes (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_NODE]
 			-- List of recent `a_count' nodes with an offset of `lower'.
 		deferred
