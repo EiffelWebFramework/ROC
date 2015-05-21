@@ -16,6 +16,15 @@ inherit
 create
 	make
 
+feature -- Settings
+	entries_per_page : INTEGER
+		-- The numbers of posts that are shown on one page. If there are more post a pagination is generated
+		do
+			-- For test reasons this is 2, so we don't have to create a lot of blog entries.
+			-- TODO: Set to bigger constant or load from global configuration file.
+			Result := 2
+		end
+
 feature -- HTTP Methods	
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
@@ -35,8 +44,8 @@ feature -- HTTP Methods
 
 
 				-- NOTE: for development purposes we have the following hardcode output.
-			create s.make_from_string ("<h2>Blog entries:</h2>")
-			if attached node_api.nodes_order_created_desc as lst then
+			create s.make_from_string ("<h2>Blog</h2>")
+			if attached node_api.blogs_order_created_desc as lst then
 				-- Filter out blog entries from all nodes
 				--if n.content_type.is_equal ("blog") then
 					s.append ("<ul class=%"cms-blog-nodes%">%N")
@@ -44,41 +53,39 @@ feature -- HTTP Methods
 						lst as ic
 					loop
 						n := ic.item
-						if n.content_type.is_equal ("blog") then
-							lnk := node_api.node_link (n)
-							s.append ("<li class=%"cms_type_"+ n.content_type +"%">")
+						lnk := node_api.node_link (n)
+						s.append ("<li class=%"cms_type_"+ n.content_type +"%">")
 
-							-- Post date (creation)
-							if attached n.creation_date as l_modified then
-								create hdate.make_from_date_time (l_modified)
-								s.append (hdate.yyyy_mmm_dd_string)
-								s.append (" ")
-							end
-
-							-- Author
-							if attached n.author as l_author then
-								s.append ("by ")
-								s.append (l_author.name)
-							end
-
-							-- Title with link
-							s.append (l_page.link (lnk.title, lnk.location, Void))
-
-							-- Summary
-							if attached n.summary as l_summary then
-								s.append ("<p class=%"blog_list_summary%">")
-								if attached api.format (n.format) as f then
-									s.append (f.formatted_output (l_summary))
-								else
-									s.append (l_page.formats.default_format.formatted_output (l_summary))
-								end
-								s.append ("<br />")
-								s.append (l_page.link ("More...", lnk.location, Void))
-								s.append ("</p>")
-							end
-
-							s.append ("</li>%N")
+						-- Post date (creation)
+						if attached n.creation_date as l_modified then
+							create hdate.make_from_date_time (l_modified)
+							s.append (hdate.yyyy_mmm_dd_string)
+							s.append (" ")
 						end
+
+						-- Author
+						if attached n.author as l_author then
+							s.append ("by ")
+							s.append (l_author.name)
+						end
+
+						-- Title with link
+						s.append (l_page.link (lnk.title, lnk.location, Void))
+
+						-- Summary
+						if attached n.summary as l_summary then
+							s.append ("<p class=%"blog_list_summary%">")
+							if attached api.format (n.format) as f then
+								s.append (f.formatted_output (l_summary))
+							else
+								s.append (l_page.formats.default_format.formatted_output (l_summary))
+							end
+							s.append ("<br />")
+							s.append (l_page.link ("See more...", lnk.location, Void))
+							s.append ("</p>")
+						end
+
+						s.append ("</li>%N")
 					end
 					s.append ("</ul>%N")
 				--end

@@ -70,7 +70,7 @@ feature -- Access
 		deferred
 		end
 
-	nodes_order_created_desc: LIST [CMS_NODE]
+	blogs: LIST [CMS_NODE]
 			-- List of nodes ordered by creation date (descending).
 		deferred
 		end
