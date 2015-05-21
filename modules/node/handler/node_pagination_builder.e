@@ -1,13 +1,10 @@
 note
-	description: "Generic Page Builder Interface"
+	description: "Generic Node Pagination Builder Interface"
 	date: "$Date$"
 	revision: "$Revision$"
 
 deferred class
-	PAGE_BUILDER [G->CMS_NODE]
-
-inherit
-	CMS_NODE_HANDLER
+	NODE_PAGINATION_BUILDER [G]
 
 feature -- Access
 
