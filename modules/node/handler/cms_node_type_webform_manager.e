@@ -236,17 +236,21 @@ feature -- Output
 			end
 			s.append ("</div>")
 
-			if attached a_node.summary as l_summary then
-				s.append ("<p class=%"summary%">")
-				if attached node_api.cms_api.format (a_node.format) as f then
-					s.append (f.formatted_output (l_summary))
-				else
-					s.append (a_response.formats.default_format.formatted_output (l_summary))
-				end
 
-				s.append ("</p>")
+			-- We don't show the summary on the detail page, since its just a short view of the full content. Otherwise we would write the same thing twice.
+			-- The usage of the summary is to give a short overview in the list of nodes or for the meta tag "description"
 
-			end
+--			if attached a_node.summary as l_summary then
+--				s.append ("<p class=%"summary%">")
+--				if attached node_api.cms_api.format (a_node.format) as f then
+--					s.append (f.formatted_output (l_summary))
+--				else
+--					s.append (a_response.formats.default_format.formatted_output (l_summary))
+--				end
+
+--				s.append ("</p>")
+
+--			end
 
 			if attached a_node.content as l_content then
 				s.append ("<p class=%"content%">")
