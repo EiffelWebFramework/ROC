@@ -42,7 +42,7 @@ feature {CMS_API} -- Module Initialization
 		do
 			Precursor (api)
 
-			if attached {CMS_BLOG_API} api.module_api ({NODE_MODULE}) as l_node_api then
+			if attached {CMS_NODE_API} api.module_api ({NODE_MODULE}) as l_node_api then
 				create ct
 				l_node_api.add_content_type (ct)
 				l_node_api.add_content_type_webform_manager (create {CMS_BLOG_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
