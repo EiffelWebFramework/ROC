@@ -41,6 +41,12 @@ feature -- Access: node
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 		end
 
+	nodes_order_created_desc: LIST[CMS_NODE]
+			-- List of nodes ordered descending by creation date
+		do
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+		end
+		
 	recent_nodes (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_NODE]
 			-- List of the `a_count' most recent nodes, starting from `a_lower'.
 		do

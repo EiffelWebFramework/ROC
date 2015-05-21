@@ -4,13 +4,13 @@ ul.cms-nodes {
   border: solid 1px #ccc;
 }
 
-li.cms_type_page, li.cms_type_blog {
+.cms-nodes li.cms_type_page, .cms-nodes li.cms_type_blog {
   border-top: dotted 1px #ccc;
 }
 li.cms_type_page a::before {
   content: "[page] ";
 }
-li.cms_type_blog a::before {
+.cms-nodes li.cms_type_blog a::before {
   content: "[blog] ";
 }
 ul.cms-nodes li:first-child {
@@ -20,4 +20,32 @@ ul.cms-nodes li:first-child {
 .summary{
 	margin-top:20px;
 	font-weight:bold;
+}
+.cms-blog-nodes{
+	padding:0;
+	margin:0;
+}
+.cms-blog-nodes li{
+	list-style: none;
+	display: block;
+	margin-top:20px;
+	padding-bottom:20px;
+	border-bottom:1px dotted black;
+}
+
+.cms-blog-nodes li > a{
+	color:black;
+	font-size:18px;
+	text-decoration: none;
+	display:block;
+	margin:6px 0;
+}
+
+.cms-blog-nodes li > a:hover{
+	color:#999;
+}
+
+.blog_list_summary a{
+	margin-top:20px;
+	display:block;
 }
