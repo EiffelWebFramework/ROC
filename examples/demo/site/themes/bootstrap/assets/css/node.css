@@ -16,3 +16,8 @@ li.cms_type_blog a::before {
 ul.cms-nodes li:first-child {
   border-top: none;
 }
+
+.summary{
+	margin-top:20px;
+	font-weight:bold;
+}

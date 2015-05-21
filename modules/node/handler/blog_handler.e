@@ -46,8 +46,20 @@ feature -- HTTP Methods
 						if n.content_type.is_equal ("blog") then
 							lnk := node_api.node_link (n)
 							s.append ("<li class=%"cms_type_"+ n.content_type +"%">")
+
+							-- Title with link
 							s.append (l_page.link (lnk.title, lnk.location, Void))
-							--s.append (l_page.link (n.title + " (#" + n.id.out + ")", node_api.node_path (n), Void))
+
+							-- Summary
+							if attached n.summary as l_summary then
+								s.append ("<br />")
+								if attached api.format (n.format) as f then
+									s.append (f.formatted_output (l_summary))
+								else
+									s.append (l_page.formats.default_format.formatted_output (l_summary))
+								end
+							end
+
 							s.append ("</li>%N")
 						end
 					end
