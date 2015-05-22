@@ -66,7 +66,7 @@ feature -- HTTP Methods
 			n: CMS_NODE
 			lnk: CMS_LOCAL_LINK
 			hdate: HTTP_DATE
-			page_number:NATURAL_16
+			page_number, tmp:NATURAL_16
 		do
 				-- At the moment the template is hardcoded, but we can
 				-- get them from the configuration file and load them into
@@ -81,7 +81,7 @@ feature -- HTTP Methods
 				page_number := page_number_path_parameter (req)
 			end
 
-			-- Ensure that page is never 0 (happens if /blogs/ is routed)
+			-- Ensure that page is never 0 (happens if /blogs/ is routed and then "" interpreted as 0)
 			if page_number = 0 then page_number := 1 end
 
 			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
@@ -96,10 +96,10 @@ feature -- HTTP Methods
 			end
 			s.append ("</h2>")
 
-
+			-- Get the posts from the current page (given by page number and entries per page)
 			if attached node_api.blogs_order_created_desc_limited (entries_per_page, (page_number-1) * entries_per_page) as lst then
-				-- Filter out blog entries from all nodes
-				--if n.content_type.is_equal ("blog") then
+
+					-- List all posts of the blog
 					s.append ("<ul class=%"cms-blog-nodes%">%N")
 					across
 						lst as ic
@@ -108,23 +108,23 @@ feature -- HTTP Methods
 						lnk := node_api.node_link (n)
 						s.append ("<li class=%"cms_type_"+ n.content_type +"%">")
 
-						-- Post date (creation)
+						-- Output the date of creation of the post
 						if attached n.creation_date as l_modified then
 							create hdate.make_from_date_time (l_modified)
 							s.append (hdate.yyyy_mmm_dd_string)
 							s.append (" ")
 						end
 
-						-- Author
+						-- Output the author of the post
 						if attached n.author as l_author then
 							s.append ("by ")
 							s.append (l_author.name)
 						end
 
-						-- Title with link
+						-- Output the title of the post as a link (to the detail page)
 						s.append (l_page.link (lnk.title, lnk.location, Void))
 
-						-- Summary
+						-- Output the summary of the post and a more link to the detail page
 						if attached n.summary as l_summary then
 							s.append ("<p class=%"blog_list_summary%">")
 							if attached api.format (n.format) as f then
@@ -139,13 +139,32 @@ feature -- HTTP Methods
 
 						s.append ("</li>%N")
 					end
+
+					-- End of post list
 					s.append ("</ul>%N")
 
-					-- Show the pagination if there are more than one page
-					if more_than_one_page then
-						s.append ("<ul class=%"pagination%">")
+					-- Pagination
+					s.append ("<div class=%"pagination%">")
 
+					-- If exist older posts show link to next page
+					if page_number < pages then
+						tmp := page_number + 1
+						s.append (" <a class=%"older_posts%" href=%"/blogs/" + tmp.out + "%"><< Older Posts</a> ")
 					end
+
+					-- Delmiter
+					if page_number < pages AND page_number > 1 then
+						s.append (" | ")
+					end
+
+					-- If exist newer posts show link to previous page
+					if page_number > 1 then
+						tmp := page_number -1
+						s.append (" <a class=%"newer_posts%" href=%"/blogs/" + tmp.out + "%">Newer Posts >></a> ")
+					end
+
+					s.append ("</div>")
+
 				--end
 			end
 
