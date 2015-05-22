@@ -33,6 +33,8 @@ inherit
 
 	REFACTORING_HELPER
 
+	CMS_API_ACCESS
+
 create
 	make
 

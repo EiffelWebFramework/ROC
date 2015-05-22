@@ -54,9 +54,11 @@ feature -- Forms ...
 
 			create fset.make
 			fset.set_legend ("Body")
+
 			-- Add summary
 			fset.extend (sum)
 			fset.extend_html_text("<br />")
+			
 			-- Add content (body)
 			fset.extend (ta)
 			fset.extend_html_text ("<br/>")

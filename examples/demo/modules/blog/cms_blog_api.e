@@ -46,13 +46,41 @@ feature -- Access node
 	blogs_order_created_desc: LIST[CMS_NODE]
 			-- List of nodes ordered by creation date (descending)
 		do
-			Result := node_storage.blogs
+			Result := add_authors(node_storage.blogs)
 		end
 
 	blogs_order_created_desc_limited (a_limit:INTEGER_32; a_offset:INTEGER_32) : LIST[CMS_NODE]
 			-- List of nodes ordered by creation date and limited by limit and offset
+		local
+			tmp: LIST[CMS_NODE]
 		do
-			Result := node_storage.blogs_limited (a_limit, a_offset)
+			-- load all posts and add the authors to each post
+			Result := add_authors(node_storage.blogs_limited (a_limit, a_offset))
+
+		end
+
+feature {NONE} -- Helpers
+
+	add_authors(posts: LIST[CMS_NODE]) : LIST[CMS_NODE]
+			-- sets the authors of all given sql results	
+		do
+			Result := posts
+			if posts /= Void then
+				across
+					Result
+				as
+					sql_result
+				loop
+					if
+						sql_result.item /= Void and then
+						attached {CMS_PARTIAL_USER} sql_result.item.author as l_partial_author
+					then
+						if attached cms_api.user_api.user_by_id (l_partial_author.id) as l_author then
+							sql_result.item.set_author (l_author)
+						end
+					end
+				end
+			end
 		end
 
 end
