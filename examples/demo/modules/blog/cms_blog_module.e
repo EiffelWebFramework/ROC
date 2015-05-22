@@ -127,6 +127,9 @@ configure_web (a_api: CMS_API; a_node_api: CMS_BLOG_API; a_router: WSF_ROUTER)
 			-- If a user id is given route with blog user handler
 			a_router.handle_with_request_methods ("/blogs/user/{user}", l_blog_user_handler, a_router.methods_get)
 
+			-- If a user id is given we also want to allow different pages
+			a_router.handle_with_request_methods ("/blogs/user/{user}/page/{page}", l_blog_user_handler, a_router.methods_get)
+
 		end
 
 feature -- Hooks

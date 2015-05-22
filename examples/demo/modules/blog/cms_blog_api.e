@@ -43,6 +43,12 @@ feature -- Access node
 			Result := node_storage.blogs_count
 		end
 
+	blogs_count_from_user (user_id: INTEGER_64) : INTEGER_64
+			-- Number of nodes of type blog from user with user_id
+		do
+			Result := node_storage.blogs_count_from_user(user_id)
+		end
+
 	blogs_order_created_desc: LIST[CMS_NODE]
 			-- List of nodes ordered by creation date (descending)
 		do
@@ -56,6 +62,16 @@ feature -- Access node
 		do
 			-- load all posts and add the authors to each post
 			Result := add_authors(node_storage.blogs_limited (a_limit, a_offset))
+
+		end
+
+	blogs_from_user_order_created_desc_limited (a_user_id: INTEGER_32; a_limit:NATURAL_32; a_offset:NATURAL_32) : LIST[CMS_NODE]
+			-- List of nodes ordered by creation date and limited by limit and offset
+		local
+			tmp: LIST[CMS_NODE]
+		do
+			-- load all posts and add the authors to each post
+			Result := add_authors(node_storage.blogs_from_user_limited (a_user_id, a_limit, a_offset))
 
 		end
 

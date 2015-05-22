@@ -75,7 +75,6 @@ feature -- HTTP Methods
 			page_number := page_number_path_parameter (req)
 
 			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
-			l_page.add_variable (node_api.nodes, "nodes")
 			l_page.set_main_content (main_content_html(l_page))
 			l_page.execute
 		end
@@ -88,7 +87,7 @@ feature -- Query
 		do
 			Result := node_api.blogs_order_created_desc_limited (entries_per_page, (page_number-1) * entries_per_page)
 		end
-		
+
 	more_than_one_page : BOOLEAN
 			-- Checks if all posts fit on one page (FALSE) or if more than one page is needed (TRUE)
 		do
@@ -255,7 +254,7 @@ feature -- HTML Output
 				-- If exist older posts show link to next page
 				if page_number < pages then
 					tmp := page_number + 1
-					Result.append (" <a class=%"blog_older_posts%" href=%"/blogs/page/" + tmp.out + "%"><< Older Posts</a> ")
+					Result.append (" <a class=%"blog_older_posts%" href=%"" + base_path + "/page/" + tmp.out + "%"><< Older Posts</a> ")
 				end
 
 				-- Delmiter
@@ -266,13 +265,19 @@ feature -- HTML Output
 				-- If exist newer posts show link to previous page
 				if page_number > 1 then
 					tmp := page_number -1
-					Result.append (" <a class=%"blog_newer_posts%" href=%"/blogs/page/" + tmp.out + "%">Newer Posts >></a> ")
+					Result.append (" <a class=%"blog_newer_posts%" href=%"" + base_path + "/page/" + tmp.out + "%">Newer Posts >></a> ")
 				end
 
 				Result.append ("</div>")
 
 			end
 
+		end
+
+	base_path : STRING
+			-- the path to the page that lists all blogs
+		do
+			Result := "/blogs"
 		end
 
 end

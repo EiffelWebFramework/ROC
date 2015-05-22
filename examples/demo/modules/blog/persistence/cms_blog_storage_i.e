@@ -16,13 +16,23 @@ feature -- Access
 		deferred
 		end
 
+	blogs_count_from_user (user_id: INTEGER_64) : INTEGER_64
+			-- Number of nodes of type blog from user with user_id
+		deferred
+		end
+
 	blogs: LIST [CMS_NODE]
 			-- List of nodes ordered by creation date (descending).
 		deferred
 		end
 
 	blogs_limited (limit:NATURAL_32; offset:NATURAL_32) : LIST[CMS_NODE]
-			-- List of nodes ordered by creation date from limit to limit + offset
+			-- List of posts ordered by creation date from offset to offset + limit
+		deferred
+		end
+
+	blogs_from_user_limited (user_id: INTEGER_32; limit:NATURAL_32; offset:NATURAL_32) : LIST[CMS_NODE]
+			-- List of posts from user_id ordered by creation date from offset to offset + limit
 		deferred
 		end
 

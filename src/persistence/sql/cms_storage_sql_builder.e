@@ -38,6 +38,11 @@ feature -- Initialization
 			u.set_email (a_setup.site_email)
 			a_storage.new_user (u)
 
+			create u.make ("daboesch")
+			u.set_password ("eiffel")
+			u.set_email ("daboesch@student.ethz.ch")
+			a_storage.new_user (u)
+
 				--| Node			
 				-- FIXME: move that initialization to node module
 			l_anonymous_role.add_permission ("view any page")

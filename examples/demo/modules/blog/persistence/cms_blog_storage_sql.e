@@ -28,6 +28,21 @@ feature -- Access
 			end
 		end
 
+	blogs_count_from_user (user_id: INTEGER_64) : INTEGER_64
+			-- Number of nodes of type blog from user with user_id
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			error_handler.reset
+			write_information_log (generator + ".nodes_count")
+			create l_parameters.make (2)
+			l_parameters.put (user_id, "user")
+			sql_query (sql_select_blog_count_from_user, l_parameters)
+			if sql_rows_count = 1 then
+				Result := sql_read_integer_64 (1)
+			end
+		end
+
 	blogs: LIST [CMS_NODE]
 			-- List of nodes ordered by creation date (descending).
 		do
@@ -75,9 +90,40 @@ feature -- Access
 			end
 		end
 
+	blogs_from_user_limited (a_user_id:INTEGER_32; a_limit:NATURAL_32; a_offset:NATURAL_32) : LIST[CMS_NODE]
+			-- List of posts of the author with a_user_id ordered by creation date starting at offset and limited by limit
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+
+			error_handler.reset
+			write_information_log (generator + ".nodes")
+
+			from
+				create l_parameters.make (2)
+				l_parameters.put (a_limit, "limit")
+				l_parameters.put (a_offset, "offset")
+				l_parameters.put (a_user_id, "user")
+				sql_query (sql_blogs_from_user_limited, l_parameters)
+				sql_start
+			until
+				sql_after
+			loop
+				if attached fetch_node as l_node then
+					Result.force (l_node)
+				end
+				sql_forth
+			end
+		end
+
 feature {NONE} -- Queries
 
 	sql_select_blog_count: STRING = "SELECT count(*) FROM Nodes WHERE status != -1 AND type = %"blog%";"
+			-- Nodes count (Published and not Published)
+			--| note: {CMS_NODE_API}.trashed = -1
+
+	sql_select_blog_count_from_user: STRING = "SELECT count(*) FROM Nodes WHERE status != -1 AND type = %"blog%" AND author = :user ;"
 			-- Nodes count (Published and not Published)
 			--| note: {CMS_NODE_API}.trashed = -1
 
@@ -85,6 +131,10 @@ feature {NONE} -- Queries
 			-- SQL Query to retrieve all nodes that are from the type "blog" ordered by descending creation date.
 
 	sql_blogs_limited: STRING = "SELECT * FROM Nodes WHERE status != -1 AND type = %"blog%" ORDER BY created DESC LIMIT :limit OFFSET :offset ;"
-			--- SQL Query to retrieve all node of type "blog" from limit to limit + offset
+			--- SQL Query to retrieve all node of type "blog" limited by limit and starting at offset
+
+	sql_blogs_from_user_limited: STRING = "SELECT * FROM Nodes WHERE status != -1 AND type = %"blog%" AND author = :user ORDER BY created DESC LIMIT :limit OFFSET :offset ;"
+			--- SQL Query to retrieve all node of type "blog" from author with id limited by limit + offset
+
 
 end
