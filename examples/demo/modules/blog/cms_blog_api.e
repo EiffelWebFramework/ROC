@@ -49,7 +49,7 @@ feature -- Access node
 			Result := add_authors(node_storage.blogs)
 		end
 
-	blogs_order_created_desc_limited (a_limit:INTEGER_32; a_offset:INTEGER_32) : LIST[CMS_NODE]
+	blogs_order_created_desc_limited (a_limit:NATURAL_32; a_offset:NATURAL_32) : LIST[CMS_NODE]
 			-- List of nodes ordered by creation date and limited by limit and offset
 		local
 			tmp: LIST[CMS_NODE]

@@ -49,7 +49,7 @@ feature -- Access
 			end
 		end
 
-	blogs_limited (a_limit:INTEGER_32; a_offset:INTEGER_32) : LIST[CMS_NODE]
+	blogs_limited (a_limit:NATURAL_32; a_offset:NATURAL_32) : LIST[CMS_NODE]
 			-- List of nodes ordered by creation date from limit to limit + offset
 		local
 			l_parameters: STRING_TABLE [detachable ANY]

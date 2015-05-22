@@ -8,9 +8,9 @@ class
 	CMS_BLOG_CONFIG
 
 
-feature {BLOG_HANDLER}-- Configuration of blog handler
+feature -- Configuration of blog handlers
 
-	entries_per_page : INTEGER
+	entries_per_page : NATURAL_32
 			-- The numbers of posts that are shown on one page. If there are more post a pagination is generated
 		do
 			-- For test reasons this is 2, so we don't have to create a lot of blog entries.

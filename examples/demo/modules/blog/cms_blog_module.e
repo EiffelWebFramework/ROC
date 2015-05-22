@@ -1,7 +1,8 @@
 note
-	description: "Summary description for {CMS_BLOG_MODULE}."
-	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 fÃ©vr. 2015) $"
-	revision: "$Revision: 96616 $"
+	description: "Displays all posts (pages with type blog). It's possible to list posts by user."
+	author: "Dario Bösch <daboesch@student.ethz.ch>"
+	date: "$Date: 2015-05-22 15:13:00 +0100 (lun., 18 mai 2015) $"
+	revision: "$Revision 96616$"
 
 class
 	CMS_BLOG_MODULE
@@ -109,10 +110,12 @@ feature -- Access: router
 configure_web (a_api: CMS_API; a_node_api: CMS_BLOG_API; a_router: WSF_ROUTER)
 		local
 			l_blog_handler: BLOG_HANDLER
+			l_blog_user_handler: BLOG_USER_HANDLER
 			l_uri_mapping: WSF_URI_MAPPING
 		do
 			-- TODO: for now, focused only on web interface, add REST api later. [2015-May-18]
 			create l_blog_handler.make (a_api, a_node_api)
+			create l_blog_user_handler.make (a_api, a_node_api)
 
 			-- Let the class BLOG_HANDLER handle the requests on "/blogs"
 			create l_uri_mapping.make_trailing_slash_ignored("/blogs", l_blog_handler)
@@ -120,6 +123,9 @@ configure_web (a_api: CMS_API; a_node_api: CMS_BLOG_API; a_router: WSF_ROUTER)
 
 			-- We can add a page number after /blogs/ to get older posts
 			a_router.handle_with_request_methods ("/blogs/page/{page}", l_blog_handler, a_router.methods_get)
+
+			-- If a user id is given route with blog user handler
+			a_router.handle_with_request_methods ("/blogs/user/{user}", l_blog_user_handler, a_router.methods_get)
 
 		end
 
