@@ -1,8 +1,8 @@
 note
-	description: "Summary description for {CMS_NODE_HANDLER}."
-	author: ""
-	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 fÃ©vr. 2015) $"
-	revision: "$Revision: 96616 $"
+	description: "Deferred request handler related to /blogs/... Has an own blog api."
+	author: "Dario Bösch <daboesch@student.ethz.ch>"
+	date: "$Date: 2015-05-18 13:49:00 +0100 (lun., 18 mai 2015) $"
+	revision: "$9661667$"
 
 deferred class
 	CMS_BLOG_HANDLER

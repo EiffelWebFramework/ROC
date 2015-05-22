@@ -1,5 +1,5 @@
 note
-	description: "Request handler related to /blogs."
+	description: "Request handler related to /blogs and /blogs/{page}. Displays all posts in the blog."
 	author: "Dario Bösch <daboesch@student.ethz.ch>"
 	date: "$Date: 2015-05-18 13:49:00 +0100 (lun., 18 mai 2015) $"
 	revision: "$9661667$"
@@ -67,13 +67,11 @@ feature -- HTTP Methods
 		local
 			l_page: CMS_RESPONSE
 		do
-				-- At the moment the template is hardcoded, but we can
-				-- get them from the configuration file and load them into
-				-- the setup class.
 
 			-- Read the page number from get variable
 			page_number := page_number_path_parameter (req)
 
+			-- execute response by setting the main content
 			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
 			l_page.set_main_content (main_content_html(l_page))
 			l_page.execute
@@ -83,7 +81,7 @@ feature -- Query
 
 
 	posts : LIST[CMS_NODE]
-			-- The posts to list on the given page
+			-- The posts to list on the given page ordered by date (descending)
 		do
 			Result := node_api.blogs_order_created_desc_limited (entries_per_page, (page_number-1) * entries_per_page)
 		end
@@ -142,7 +140,7 @@ feature -- HTML Output
 			-- Get the posts from the current page (given by page number and entries per page)
 			if attached posts as lst then
 
-					-- List all posts of the blog
+					-- Start list of posts
 					Result.append ("<ul class=%"cms_blog_nodes%">%N")
 					across
 						lst as ic
@@ -169,7 +167,7 @@ feature -- HTML Output
 					-- End of post list
 					Result.append ("</ul>%N")
 
-					-- Pagination
+					-- Pagination (older and newer links)
 					Result.append (pagination_html)
 
 				--end
@@ -182,13 +180,12 @@ feature -- HTML Output
 			create Result.make_from_string ("<h2>Blog")
 			if more_than_one_page then
 				Result.append (" (Page " + page_number.out + " of " + pages.out + ")")
-				-- Get the posts from the current page (limited by entries per page)
 			end
 			Result.append ("</h2>")
 		end
 
 	creation_date_html (n: CMS_NODE) : STRING
-			-- returns the creation date. At the moment hard coded as html
+			-- returns the creation date as a html string
 		local
 			hdate: HTTP_DATE
 		do

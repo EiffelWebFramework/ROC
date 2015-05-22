@@ -1,5 +1,5 @@
 note
-	description: "API to handle nodes of type blog"
+	description: "API to handle nodes of type blog. Extends the node API."
 	author: "Dario Bösch <daboesch@student.ethz.ch"
 	date: "$Date: 2015-05-21 14:46:00 +0100$"
 	revision: "$Revision: 96616 $"
@@ -23,6 +23,7 @@ feature {NONE} -- Implementation
 			-- <Precursor>
 		do
 			Precursor
+			-- Create the node storage for type blog
 			if attached {CMS_STORAGE_SQL_I} storage as l_storage_sql then
 				create {CMS_BLOG_STORAGE_SQL} node_storage.make (l_storage_sql)
 			else
