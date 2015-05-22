@@ -58,13 +58,14 @@ feature -- execute
 			execute (req, res)
 		end
 
+feature -- Global Variables
+	page_number: NATURAL_32
 
 feature -- HTTP Methods	
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
 		local
 			l_page: CMS_RESPONSE
-			page_number:NATURAL_32
 		do
 				-- At the moment the template is hardcoded, but we can
 				-- get them from the configuration file and load them into
@@ -75,19 +76,19 @@ feature -- HTTP Methods
 
 			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
 			l_page.add_variable (node_api.nodes, "nodes")
-			l_page.set_main_content (main_content_html(page_number, l_page))
-			l_page.add_block (create {CMS_CONTENT_BLOCK}.make ("nodes_warning", Void, "/blogs/ is not yet fully implemented<br/>", Void), "highlighted")
+			l_page.set_main_content (main_content_html(l_page))
 			l_page.execute
 		end
 
 feature -- Query
 
 
-	posts (page_number: NATURAL_32) : LIST[CMS_NODE]
+	posts : LIST[CMS_NODE]
 			-- The posts to list on the given page
 		do
 			Result := node_api.blogs_order_created_desc_limited (entries_per_page, (page_number-1) * entries_per_page)
 		end
+		
 	more_than_one_page : BOOLEAN
 			-- Checks if all posts fit on one page (FALSE) or if more than one page is needed (TRUE)
 		do
@@ -130,17 +131,17 @@ feature -- Query
 
 feature -- HTML Output
 
-	main_content_html (page_number: NATURAL_32; page: CMS_RESPONSE) : STRING
+	main_content_html (page: CMS_RESPONSE) : STRING
 			-- Return the content of the page as a html string
 		local
 			n: CMS_NODE
 			lnk: CMS_LOCAL_LINK
 		do
 			-- Output the title. If more than one page, also output the current page number
-			create Result.make_from_string (page_title_html(page_number))
+			create Result.make_from_string (page_title_html)
 
 			-- Get the posts from the current page (given by page number and entries per page)
-			if attached posts(page_number) as lst then
+			if attached posts as lst then
 
 					-- List all posts of the blog
 					Result.append ("<ul class=%"cms_blog_nodes%">%N")
@@ -170,13 +171,13 @@ feature -- HTML Output
 					Result.append ("</ul>%N")
 
 					-- Pagination
-					Result.append (pagination_html(page_number))
+					Result.append (pagination_html)
 
 				--end
 			end
 		end
 
-	page_title_html (page_number: NATURAL_32) : STRING
+	page_title_html : STRING
 			-- Returns the title of the page as a html string. It shows the current page number
 		do
 			create Result.make_from_string ("<h2>Blog")
@@ -241,7 +242,7 @@ feature -- HTML Output
 			end
 		end
 
-	pagination_html (page_number: NATURAL_32) : STRING
+	pagination_html : STRING
 			-- returns a html string with the pagination links (if necessary)
 		local
 			tmp: NATURAL_32
