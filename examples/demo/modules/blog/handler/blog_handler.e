@@ -62,7 +62,6 @@ feature -- HTTP Methods
 			-- <Precursor>
 		local
 			l_page: CMS_RESPONSE
-			l_posts: LIST[CMS_NODE]
 			s: STRING
 			n: CMS_NODE
 			lnk: CMS_LOCAL_LINK
@@ -92,7 +91,7 @@ feature -- HTTP Methods
 			-- Output the title. If more than one page, also output the current page number
 			create s.make_from_string ("<h2>Blog")
 			if more_than_one_page then
-				s.append (" (Page " + page_number.out + ")")
+				s.append (" (Page " + page_number.out + " of " + pages.out + ")")
 				-- Get the posts from the current page (limited by entries per page)
 			end
 			s.append ("</h2>")
@@ -141,6 +140,12 @@ feature -- HTTP Methods
 						s.append ("</li>%N")
 					end
 					s.append ("</ul>%N")
+
+					-- Show the pagination if there are more than one page
+					if more_than_one_page then
+						s.append ("<ul class=%"pagination%">")
+
+					end
 				--end
 			end
 
@@ -149,12 +154,24 @@ feature -- HTTP Methods
 			l_page.execute
 		end
 
-feature -- Query
+feature {NONE} -- Query
 
 	more_than_one_page : BOOLEAN
 			-- Checks if all posts fit on one page (FALSE) or if more than one page is needed (TRUE)
 		do
 			Result := entries_per_page < node_api.blogs_count
+		end
+
+
+	pages : NATURAL_16
+			-- Returns the number of pages needed to display all posts
+		require
+			entries_per_page > 0
+		local
+			tmp: REAL_32
+		do
+			tmp := node_api.blogs_count.to_real / entries_per_page.to_real;
+			Result := tmp.ceiling.to_natural_16
 		end
 
 	page_number_path_parameter (req: WSF_REQUEST): NATURAL_16
