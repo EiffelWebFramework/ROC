@@ -67,8 +67,7 @@ feature -- HTTP Methods
 			s: STRING
 			n: CMS_NODE
 			lnk: CMS_LOCAL_LINK
-			hdate: HTTP_DATE
-			page_number, tmp:NATURAL_16
+			page_number:NATURAL_16
 		do
 				-- At the moment the template is hardcoded, but we can
 				-- get them from the configuration file and load them into
@@ -110,36 +109,17 @@ feature -- HTTP Methods
 						lnk := node_api.node_link (n)
 						s.append ("<li class=%"cms_type_"+ n.content_type +"%">")
 
-						-- Output the date of creation of the post
-						if attached n.creation_date as l_modified then
-							create hdate.make_from_date_time (l_modified)
-							s.append (hdate.yyyy_mmm_dd_string)
-							s.append (" ")
-						end
+						-- Output the creation date
+						s.append (creation_date_html(n))
 
 						-- Output the author of the post
-						if attached n.author as l_author then
-							s.append ("by ")
-							s.append ("<a class=%"blog_user_link%" href=%"/blog/user/" + l_author.id.out + "%">" + l_author.name + "</a>")
-						end
+						s.append (author_html(n))
 
 						-- Output the title of the post as a link (to the detail page)
-						s.append ("<span class=%"blog_title%">")
-						s.append (l_page.link (lnk.title, lnk.location, Void))
-						s.append ("</span>")
+						s.append (title_html(n, l_page))
 
 						-- Output the summary of the post and a more link to the detail page
-						if attached n.summary as l_summary then
-							s.append ("<p class=%"blog_list_summary%">")
-							if attached api.format (n.format) as f then
-								s.append (f.formatted_output (l_summary))
-							else
-								s.append (l_page.formats.default_format.formatted_output (l_summary))
-							end
-							s.append ("<br />")
-							s.append (l_page.link ("See more...", lnk.location, Void))
-							s.append ("</p>")
-						end
+						s.append (summary_html(n, l_page))
 
 						s.append ("</li>%N")
 					end
@@ -148,26 +128,7 @@ feature -- HTTP Methods
 					s.append ("</ul>%N")
 
 					-- Pagination
-					s.append ("<div class=%"pagination%">")
-
-					-- If exist older posts show link to next page
-					if page_number < pages then
-						tmp := page_number + 1
-						s.append (" <a class=%"blog_older_posts%" href=%"/blogs/page/" + tmp.out + "%"><< Older Posts</a> ")
-					end
-
-					-- Delmiter
-					if page_number < pages AND page_number > 1 then
-						s.append (" | ")
-					end
-
-					-- If exist newer posts show link to previous page
-					if page_number > 1 then
-						tmp := page_number -1
-						s.append (" <a class=%"blog_newer_posts%" href=%"/blogs/page/" + tmp.out + "%">Newer Posts >></a> ")
-					end
-
-					s.append ("</div>")
+					s.append (pagination_html(page_number))
 
 				--end
 			end
@@ -208,6 +169,95 @@ feature {NONE} -- Query
 					Result := s.to_natural_16
 				end
 			end
+		end
+
+feature {NONE} -- HTML Output
+
+	creation_date_html (n: CMS_NODE) : STRING
+			-- returns the creation date. At the moment hard coded as html
+		local
+			hdate: HTTP_DATE
+		do
+			Result := ""
+			if attached n.creation_date as l_modified then
+				create hdate.make_from_date_time (l_modified)
+				Result.append (hdate.yyyy_mmm_dd_string)
+				Result.append (" ")
+			end
+		end
+
+	author_html (n: CMS_NODE) : STRING
+			-- returns a html string with a link to the autors posts
+		do
+			Result := ""
+			if attached n.author as l_author then
+				Result.append ("by ")
+				Result.append ("<a class=%"blog_user_link%" href=%"/blogs/user/" + l_author.id.out + "%">" + l_author.name + "</a>")
+			end
+		end
+
+	title_html (n: CMS_NODE;  page : CMS_RESPONSE) : STRING
+			-- returns a html string the title of the node that links on the detail page
+		local
+			lnk: CMS_LOCAL_LINK
+		do
+			lnk := node_api.node_link (n)
+			Result := "<span class=%"blog_title%">"
+			Result.append (page.link (lnk.title, lnk.location, Void))
+			Result.append ("</span>")
+		end
+
+	summary_html (n: CMS_NODE;  page : CMS_RESPONSE) : STRING
+			-- returns a html string with the summary of the node and a link to the detail page
+		local
+			lnk: CMS_LOCAL_LINK
+		do
+			Result := ""
+			lnk := node_api.node_link (n)
+			if attached n.summary as l_summary then
+				Result.append ("<p class=%"blog_list_summary%">")
+				if attached api.format (n.format) as f then
+					Result.append (f.formatted_output (l_summary))
+				else
+					Result.append (page.formats.default_format.formatted_output (l_summary))
+				end
+				Result.append ("<br />")
+				Result.append (page.link ("See more...", lnk.location, Void))
+				Result.append ("</p>")
+			end
+		end
+
+	pagination_html (page_number: NATURAL_16) : STRING
+			-- returns a html string with the pagination links (if necessary)
+		local
+			tmp: NATURAL_16
+		do
+			Result := ""
+			if more_than_one_page then
+
+				Result.append ("<div class=%"pagination%">")
+
+				-- If exist older posts show link to next page
+				if page_number < pages then
+					tmp := page_number + 1
+					Result.append (" <a class=%"blog_older_posts%" href=%"/blogs/page/" + tmp.out + "%"><< Older Posts</a> ")
+				end
+
+				-- Delmiter
+				if page_number < pages AND page_number > 1 then
+					Result.append (" | ")
+				end
+
+				-- If exist newer posts show link to previous page
+				if page_number > 1 then
+					tmp := page_number -1
+					Result.append (" <a class=%"blog_newer_posts%" href=%"/blogs/page/" + tmp.out + "%">Newer Posts >></a> ")
+				end
+
+				Result.append ("</div>")
+
+			end
+
 		end
 
 end
