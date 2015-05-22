@@ -49,4 +49,10 @@ feature -- Access node
 			Result := node_storage.blogs
 		end
 
+	blogs_order_created_desc_limited (a_limit:INTEGER_32; a_offset:INTEGER_32) : LIST[CMS_NODE]
+			-- List of nodes ordered by creation date and limited by limit and offset
+		do
+			Result := node_storage.blogs_limited (a_limit, a_offset)
+		end
+
 end

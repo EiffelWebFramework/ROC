@@ -21,4 +21,9 @@ feature -- Access
 		deferred
 		end
 
+	blogs_limited (limit:INTEGER_32; offset:INTEGER_32) : LIST[CMS_NODE]
+			-- List of nodes ordered by creation date from limit to limit + offset
+		deferred
+		end
+
 end

@@ -49,6 +49,32 @@ feature -- Access
 			end
 		end
 
+	blogs_limited (a_limit:INTEGER_32; a_offset:INTEGER_32) : LIST[CMS_NODE]
+			-- List of nodes ordered by creation date from limit to limit + offset
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+
+			error_handler.reset
+			write_information_log (generator + ".nodes")
+
+			from
+				create l_parameters.make (2)
+				l_parameters.put (a_limit, "limit")
+				l_parameters.put (a_offset, "offset")
+				sql_query (sql_blogs_limited, l_parameters)
+				sql_start
+			until
+				sql_after
+			loop
+				if attached fetch_node as l_node then
+					Result.force (l_node)
+				end
+				sql_forth
+			end
+		end
+
 feature {NONE} -- Queries
 
 	sql_select_blog_count: STRING = "SELECT count(*) FROM Nodes WHERE status != -1 AND type = %"blog%";"
@@ -57,5 +83,8 @@ feature {NONE} -- Queries
 
 	sql_select_blogs_order_created_desc: STRING = "SELECT * FROM Nodes WHERE status != -1 AND type = %"blog%" ORDER BY created DESC;"
 			-- SQL Query to retrieve all nodes that are from the type "blog" ordered by descending creation date.
+
+	sql_blogs_limited: STRING = "SELECT * FROM Nodes WHERE status != -1 AND type = %"blog%" ORDER BY created DESC LIMIT :limit OFFSET :offset ;"
+			--- SQL Query to retrieve all node of type "blog" from limit to limit + offset
 
 end

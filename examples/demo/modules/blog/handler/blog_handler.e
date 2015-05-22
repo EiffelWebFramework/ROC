@@ -12,7 +12,16 @@ inherit
 
 	WSF_URI_HANDLER
 		rename
+			execute as uri_execute,
 			new_mapping as new_uri_mapping
+		end
+
+	WSF_URI_TEMPLATE_HANDLER
+		rename
+			execute as uri_template_execute,
+			new_mapping as new_uri_template_mapping
+		select
+			new_uri_template_mapping
 		end
 
 	WSF_RESOURCE_HANDLER_HELPER
@@ -33,6 +42,18 @@ feature -- execute
 			execute_methods (req, res)
 		end
 
+	uri_execute (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- Execute request handler
+		do
+			execute (req, res)
+		end
+
+	uri_template_execute (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- Execute request handler
+		do
+			execute (req, res)
+		end
+
 feature -- Settings
 	entries_per_page : INTEGER
 		-- The numbers of posts that are shown on one page. If there are more post a pagination is generated
@@ -42,27 +63,54 @@ feature -- Settings
 			Result := 2
 		end
 
+	more_than_one_page : BOOLEAN
+		-- Checks if all posts fit on one page (FALSE) or if more than one page is needed (TRUE)
+		do
+			Result := entries_per_page < node_api.blogs_count
+		end
+
 feature -- HTTP Methods	
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
 		local
 			l_page: CMS_RESPONSE
+			l_posts: LIST[CMS_NODE]
 			s: STRING
 			n: CMS_NODE
 			lnk: CMS_LOCAL_LINK
 			hdate: HTTP_DATE
+			page_number:NATURAL_16
 		do
 				-- At the moment the template is hardcoded, but we can
 				-- get them from the configuration file and load them into
 				-- the setup class.
 
+			--Check if a page is given, if not start with page 1
+			if req.path_info.ends_with_general ("/blogs") then
+				-- No page number given, set to 0
+				page_number := 1
+			else
+				-- Read page number from get variable
+				page_number := page_number_path_parameter (req)
+			end
+
+			-- Ensure that page is never 0 (happens if /blogs/ is routed)
+			if page_number = 0 then page_number := 1 end
+
 			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
 			l_page.add_variable (node_api.nodes, "nodes")
 
 
-				-- NOTE: for development purposes we have the following hardcode output.
-			create s.make_from_string ("<h2>Blog</h2>")
-			if attached node_api.blogs_order_created_desc as lst then
+			-- Output the title. If more than one page, also output the current page number
+			create s.make_from_string ("<h2>Blog")
+			if more_than_one_page then
+				s.append (" (Page " + page_number.out + ")")
+				-- Get the posts from the current page (limited by entries per page)
+			end
+			s.append ("</h2>")
+
+
+			if attached node_api.blogs_order_created_desc_limited (entries_per_page, (page_number-1) * entries_per_page) as lst then
 				-- Filter out blog entries from all nodes
 				--if n.content_type.is_equal ("blog") then
 					s.append ("<ul class=%"cms-blog-nodes%">%N")
@@ -113,5 +161,19 @@ feature -- HTTP Methods
 			l_page.execute
 		end
 
+feature -- Query
+
+	page_number_path_parameter (req: WSF_REQUEST): NATURAL_16
+			-- Returns the page number from the path /blogs/{page}. It's an unsigned integere since negative pages are not allowed
+		local
+			s: STRING
+		do
+			if attached {WSF_STRING} req.path_parameter ("page") as p_page then
+				s := p_page.value
+				if s.is_natural_16 then
+					Result := s.to_natural_16
+				end
+			end
+		end
 
 end

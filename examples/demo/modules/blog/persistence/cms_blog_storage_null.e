@@ -28,4 +28,9 @@ feature -- Access
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 		end
 
+	blogs_limited (limit:INTEGER_32; offset:INTEGER_32) : LIST[CMS_NODE]
+			-- List of nodes ordered by creation date from limit to limit + offset
+		do
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+		end
 end
