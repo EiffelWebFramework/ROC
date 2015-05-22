@@ -6,6 +6,10 @@
 	<!-- EWF CMS -->
 	<link rel="stylesheet" href="{$site_url/}/theme/css/style.css">
 	<link rel="stylesheet" href="{$site_url/}/theme/css/node.css">
+
+  <!-- CMS Blog Module -->
+  <link rel="stylesheet" href="{$site_url/}/theme/css/blog.css">
+
   <script src="{$site_url/}/theme/js/jquery-1.10.2.min.js"></script>
   <script src="{$site_url/}/theme/js/roc_auth.js"></script>
 

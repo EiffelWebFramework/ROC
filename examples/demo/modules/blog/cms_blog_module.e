@@ -119,7 +119,7 @@ configure_web (a_api: CMS_API; a_node_api: CMS_BLOG_API; a_router: WSF_ROUTER)
 			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get)
 
 			-- We can add a page number after /blogs/ to get older posts
-			a_router.handle_with_request_methods ("/blogs/{page}", l_blog_handler, a_router.methods_get)
+			a_router.handle_with_request_methods ("/blogs/page/{page}", l_blog_handler, a_router.methods_get)
 
 		end
 

@@ -102,7 +102,7 @@ feature -- HTTP Methods
 			if attached node_api.blogs_order_created_desc_limited (entries_per_page, (page_number-1) * entries_per_page) as lst then
 
 					-- List all posts of the blog
-					s.append ("<ul class=%"cms-blog-nodes%">%N")
+					s.append ("<ul class=%"cms_blog_nodes%">%N")
 					across
 						lst as ic
 					loop
@@ -120,11 +120,13 @@ feature -- HTTP Methods
 						-- Output the author of the post
 						if attached n.author as l_author then
 							s.append ("by ")
-							s.append (l_author.name)
+							s.append ("<a class=%"blog_user_link%" href=%"/blog/user/" + l_author.id.out + "%">" + l_author.name + "</a>")
 						end
 
 						-- Output the title of the post as a link (to the detail page)
+						s.append ("<span class=%"blog_title%">")
 						s.append (l_page.link (lnk.title, lnk.location, Void))
+						s.append ("</span>")
 
 						-- Output the summary of the post and a more link to the detail page
 						if attached n.summary as l_summary then
@@ -151,7 +153,7 @@ feature -- HTTP Methods
 					-- If exist older posts show link to next page
 					if page_number < pages then
 						tmp := page_number + 1
-						s.append (" <a class=%"older_posts%" href=%"/blogs/" + tmp.out + "%"><< Older Posts</a> ")
+						s.append (" <a class=%"blog_older_posts%" href=%"/blogs/page/" + tmp.out + "%"><< Older Posts</a> ")
 					end
 
 					-- Delmiter
@@ -162,7 +164,7 @@ feature -- HTTP Methods
 					-- If exist newer posts show link to previous page
 					if page_number > 1 then
 						tmp := page_number -1
-						s.append (" <a class=%"newer_posts%" href=%"/blogs/" + tmp.out + "%">Newer Posts >></a> ")
+						s.append (" <a class=%"blog_newer_posts%" href=%"/blogs/page/" + tmp.out + "%">Newer Posts >></a> ")
 					end
 
 					s.append ("</div>")
