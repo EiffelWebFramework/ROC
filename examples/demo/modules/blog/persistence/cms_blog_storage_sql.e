@@ -1,8 +1,8 @@
 note
-	description: "Summary description for {CMS_BLOG_STORAGE_SQL}."
-	author: ""
-	date: "$Date$"
-	revision: "$Revision$"
+	description: "Access to the sql database for the blog module"
+	author: "Dario Bösch <daboesch@student.ethz.ch>"
+	date: "$Date: 2015-05-21 14:46:00 +0100$"
+	revision: "$Revision: 96616 $"
 
 class
 	CMS_BLOG_STORAGE_SQL

@@ -8,6 +8,8 @@ class
 	BLOG_HANDLER
 
 inherit
+	CMS_BLOG_CONFIG
+
 	CMS_BLOG_HANDLER
 
 	WSF_URI_HANDLER
@@ -54,20 +56,6 @@ feature -- execute
 			execute (req, res)
 		end
 
-feature -- Settings
-	entries_per_page : INTEGER
-		-- The numbers of posts that are shown on one page. If there are more post a pagination is generated
-		do
-			-- For test reasons this is 2, so we don't have to create a lot of blog entries.
-			-- TODO: Set to bigger constant or load from global configuration file.
-			Result := 2
-		end
-
-	more_than_one_page : BOOLEAN
-		-- Checks if all posts fit on one page (FALSE) or if more than one page is needed (TRUE)
-		do
-			Result := entries_per_page < node_api.blogs_count
-		end
 
 feature -- HTTP Methods	
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
@@ -162,6 +150,12 @@ feature -- HTTP Methods
 		end
 
 feature -- Query
+
+	more_than_one_page : BOOLEAN
+			-- Checks if all posts fit on one page (FALSE) or if more than one page is needed (TRUE)
+		do
+			Result := entries_per_page < node_api.blogs_count
+		end
 
 	page_number_path_parameter (req: WSF_REQUEST): NATURAL_16
 			-- Returns the page number from the path /blogs/{page}. It's an unsigned integere since negative pages are not allowed
