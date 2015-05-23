@@ -15,9 +15,10 @@ feature -- Forms ...
 		local
 			ti: WSF_FORM_TEXT_INPUT
 			fset: WSF_FORM_FIELD_SET
-			ta, sum: WSF_FORM_TEXTAREA
+			ta, sum: CMS_FORM_TEXTAREA
 			tselect: WSF_FORM_SELECT
 			opt: WSF_FORM_SELECT_OPTION
+			full_format: FULL_HTML_CONTENT_FORMAT
 		do
 			create ti.make ("title")
 			ti.set_label ("Title")
@@ -30,10 +31,18 @@ feature -- Forms ...
 
 			f.extend_html_text ("<br/>")
 
+			-- Select field has to be initialized before textareas are replaced, because they depend on the selection of the field
+			create tselect.make ("format")
+			tselect.set_label ("Body's format")
+			tselect.set_is_required (True)
+
+
+			create full_format.default_create
 			-- Main Content
 			create ta.make ("body")
 			ta.set_rows (10)
 			ta.set_cols (70)
+			ta.show_as_editor_if_selected (tselect, full_format.name)
 			if a_node /= Void then
 				ta.set_text_value (a_node.content)
 			end
@@ -45,6 +54,8 @@ feature -- Forms ...
 			create sum.make ("summary")
 			sum.set_rows (10)
 			sum.set_cols (70)
+			-- if full_html is selected
+			sum.show_as_editor_if_selected (tselect, full_format.name)
 			if a_node /= Void then
 				sum.set_text_value (a_node.summary)
 			end
@@ -58,14 +69,12 @@ feature -- Forms ...
 			-- Add summary
 			fset.extend (sum)
 			fset.extend_html_text("<br />")
-			
+
 			-- Add content (body)
 			fset.extend (ta)
 			fset.extend_html_text ("<br/>")
 
-			create tselect.make ("format")
-			tselect.set_label ("Body's format")
-			tselect.set_is_required (True)
+
 			across
 				 content_type.available_formats as c
 			loop
