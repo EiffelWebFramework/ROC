@@ -41,7 +41,7 @@ feature -- HTTP Methods
 			s: STRING
 			n: CMS_NODE
 			lnk: CMS_LOCAL_LINK
-			pager: NODE_PAGE_BUILDER
+			pager: CMS_NODE_PAGINATION_BUILDER
 			number_of_pages: INTEGER_64
 			current_page: INTEGER
 		do
