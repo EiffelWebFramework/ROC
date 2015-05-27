@@ -8,12 +8,12 @@ deferred class
 
 feature -- Access
 
-	set_limit (a_limit: NATURAL)
-			-- Set limit with `a_limit'.
+	set_count (a_count: NATURAL)
+			-- Set `count' with `a_count'.
 		do
-			limit := a_limit
+			count := a_count
 		ensure
-			limit_set: limit = a_limit
+			count_set: count = a_count
 		end
 
 	set_offset (a_offset: NATURAL)
@@ -46,21 +46,21 @@ feature -- Access
 
 feature -- Pager
 
-	list: ITERABLE[G]
+	items: ITERABLE [G]
 			-- Iterable of G with filters.
 		deferred
 		end
 
 feature -- Access
 
-	limit: NATURAL
-		-- Number of rows per page.
+	count: NATURAL
+		-- Number of items per page.
 
 	offset: NATURAL
-		-- rows starting from the next row to the given OFFSET.
+		--  lower index of `items' pagination.
 
 	order_by: detachable STRING
-		-- field to order by
+		-- field to order by.
 
 	order_ascending: BOOLEAN
 		-- is ascending ordering?	

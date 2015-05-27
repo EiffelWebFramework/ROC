@@ -10,35 +10,35 @@ inherit
 
 	CMS_PAGINATION_BUILDER [CMS_NODE]
 
-	CMS_NODE_HANDLER
-		redefine
-			make
-		end
 create
 	make
 
 feature {NONE} -- Initialization
 
-	make (a_api: CMS_API; a_module_api: CMS_NODE_API)
+	make (a_api: CMS_NODE_API)
 			-- Create an object.
 		do
-			Precursor (a_api, a_module_api)
-			limit := 5
+			node_api := a_api
+			count := 5
 			offset := 0
-		ensure then
-			limit_set: limit = 5
+		ensure
+			node_api_set: node_api = a_api
+			limit_set: count = 5
 			offset_set: offset = 0
 		end
 
+	node_api: CMS_NODE_API
+			-- CMS API.
+
 feature -- Pager
 
-	list: ITERABLE [CMS_NODE]
+	items: ITERABLE [CMS_NODE]
 			-- <Precursor>.
 		do
 				--NOTE: the current implementation does not use
 				-- order by and ordering.
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
-			Result := node_api.recent_nodes (offset.as_integer_32, limit.as_integer_32)
+			Result := node_api.recent_nodes (offset.as_integer_32, count.as_integer_32)
 		end
 
 end
