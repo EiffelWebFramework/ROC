@@ -22,25 +22,25 @@ feature -- Access
 		do
 		end
 
-	blogs_count_from_user (user_id: INTEGER_64) : INTEGER_64
-			-- Number of nodes of type blog from user with user_id
+	blogs_count_from_user (a_user: CMS_USER) : INTEGER_64
+			-- <Precursor>
 		do
 		end
 
-	blogs: LIST[CMS_NODE]
-			-- List of nodes.
-		do
-			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
-		end
-
-	blogs_limited (limit:NATURAL_32; offset:NATURAL_32) : LIST[CMS_NODE]
-			-- List of posts ordered by creation date from offset to offset + limit
+	blogs: LIST [CMS_NODE]
+			-- <Precursor>
 		do
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 		end
 
-	blogs_from_user_limited (user_id: INTEGER_32; limit:NATURAL_32; offset:NATURAL_32) : LIST[CMS_NODE]
-			-- List of posts from user_id ordered by creation date from offset to offset + limit
+	blogs_limited (limit: NATURAL_32; offset: NATURAL_32) : LIST [CMS_NODE]
+			-- <Precursor>
+		do
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+		end
+
+	blogs_from_user_limited (a_user: CMS_USER; limit: NATURAL_32; offset: NATURAL_32): LIST [CMS_NODE]
+			-- <Precursor>
 		do
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 		end

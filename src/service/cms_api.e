@@ -185,8 +185,10 @@ feature -- Query: module
 	module_api (a_type: TYPE [CMS_MODULE]): detachable CMS_MODULE_API
 			-- Enabled module API associated with module typed `a_type'.
 		do
-			if attached module (a_type) as mod then
-				Result := mod.module_api
+			if attached {CMS_MODULE} module (a_type) as mod then
+				if mod.is_enabled then
+					Result := mod.module_api
+				end
 			end
 		end
 

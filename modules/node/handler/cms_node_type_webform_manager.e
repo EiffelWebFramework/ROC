@@ -18,8 +18,10 @@ feature -- Forms ...
 			ta, sum: CMS_FORM_TEXTAREA
 			tselect: WSF_FORM_SELECT
 			opt: WSF_FORM_SELECT_OPTION
-			full_format: FULL_HTML_CONTENT_FORMAT
+			cms_format: CMS_EDITOR_CONTENT_FORMAT
 		do
+			create cms_format
+			
 			create ti.make ("title")
 			ti.set_label ("Title")
 			ti.set_size (70)
@@ -31,18 +33,16 @@ feature -- Forms ...
 
 			f.extend_html_text ("<br/>")
 
-			-- Select field has to be initialized before textareas are replaced, because they depend on the selection of the field
+				-- Select field has to be initialized before textareas are replaced, because they depend on the selection of the field
 			create tselect.make ("format")
 			tselect.set_label ("Body's format")
 			tselect.set_is_required (True)
 
-
-			create full_format.default_create
-			-- Main Content
+				-- Main Content
 			create ta.make ("body")
 			ta.set_rows (10)
 			ta.set_cols (70)
-			ta.show_as_editor_if_selected (tselect, full_format.name)
+			ta.show_as_editor_if_selected (tselect, cms_format.name)
 			if a_node /= Void then
 				ta.set_text_value (a_node.content)
 			end
@@ -50,12 +50,12 @@ feature -- Forms ...
 			ta.set_description ("This is the main content")
 			ta.set_is_required (False)
 
-			-- Summary
+				-- Summary
 			create sum.make ("summary")
-			sum.set_rows (10)
+			sum.set_rows (3)
 			sum.set_cols (70)
-			-- if full_html is selected
-			sum.show_as_editor_if_selected (tselect, full_format.name)
+				-- if cms_html is selected
+			sum.show_as_editor_if_selected (tselect, cms_format.name)
 			if a_node /= Void then
 				sum.set_text_value (a_node.summary)
 			end
@@ -66,14 +66,13 @@ feature -- Forms ...
 			create fset.make
 			fset.set_legend ("Body")
 
-			-- Add summary
+				-- Add summary
 			fset.extend (sum)
 			fset.extend_html_text("<br />")
 
-			-- Add content (body)
+				-- Add content (body)
 			fset.extend (ta)
 			fset.extend_html_text ("<br/>")
-
 
 			across
 				 content_type.available_formats as c
@@ -92,7 +91,7 @@ feature -- Forms ...
 
 			f.extend (fset)
 
-				-- Path aliase			
+				-- Path alias		
 			create ti.make ("path_alias")
 			ti.set_label ("Path")
 			ti.set_size (70)

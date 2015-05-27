@@ -8,93 +8,108 @@ class
 	CMS_BLOG_API
 
 inherit
-	CMS_NODE_API
+	CMS_MODULE_API
+		rename
+			make as make_with_cms_api
 		redefine
-			initialize,
-			node_storage
+			initialize
 		end
+
+	REFACTORING_HELPER
 
 create
 	make
 
-feature {NONE} -- Implementation
+feature {NONE} -- Initialization
+
+	make (a_api: CMS_API; a_node_api: CMS_NODE_API)
+			-- (from CMS_MODULE_API)
+			-- (export status {NONE})
+		do
+			node_api := a_node_api
+			make_with_cms_api (a_api)
+		end
 
 	initialize
 			-- <Precursor>
 		do
 			Precursor
-			-- Create the node storage for type blog
+
+				-- Create the node storage for type blog
 			if attached {CMS_STORAGE_SQL_I} storage as l_storage_sql then
-				create {CMS_BLOG_STORAGE_SQL} node_storage.make (l_storage_sql)
+				create {CMS_BLOG_STORAGE_SQL} blog_storage.make (l_storage_sql)
 			else
-				create {CMS_BLOG_STORAGE_NULL} node_storage.make
+				create {CMS_BLOG_STORAGE_NULL} blog_storage.make
 			end
-			initialize_node_types
+--			initialize_node_types
 		end
+
+feature {CMS_API_ACCESS, CMS_MODULE, CMS_API} -- Restricted access		
+
+	node_api: CMS_NODE_API
 
 feature {CMS_MODULE} -- Access nodes storage.
 
-	node_storage: CMS_BLOG_STORAGE_I
+	blog_storage: CMS_BLOG_STORAGE_I
+
+feature -- Configuration of blog handlers
+
+	entries_per_page : NATURAL_32 = 2
+			-- The numbers of posts that are shown on one page. If there are more post a pagination is generated
+			--| For test reasons this is 2, so we don't have to create a lot of blog entries.
+			--| TODO: Set to bigger constant.
 
 feature -- Access node
 
 	blogs_count: INTEGER_64
-			-- Number of nodes of type blog
+			-- Number of nodes of type blog.
 		do
-			Result := node_storage.blogs_count
+			Result := blog_storage.blogs_count
 		end
 
-	blogs_count_from_user (user_id: INTEGER_64) : INTEGER_64
-			-- Number of nodes of type blog from user with user_id
+	blogs_count_from_user (a_user: CMS_USER): INTEGER_64
+			-- Number of nodes of type blog from user with `a_user_id'.
+		require
+			has_id: a_user.has_id
 		do
-			Result := node_storage.blogs_count_from_user(user_id)
+			Result := blog_storage.blogs_count_from_user (a_user)
 		end
 
-	blogs_order_created_desc: LIST[CMS_NODE]
+	blogs_order_created_desc: LIST [CMS_BLOG]
 			-- List of nodes ordered by creation date (descending)
 		do
-			Result := add_authors(node_storage.blogs)
+			Result := nodes_to_blogs (blog_storage.blogs)
 		end
 
-	blogs_order_created_desc_limited (a_limit:NATURAL_32; a_offset:NATURAL_32) : LIST[CMS_NODE]
+	blogs_order_created_desc_limited (a_limit: NATURAL_32; a_offset: NATURAL_32): LIST [CMS_BLOG]
 			-- List of nodes ordered by creation date and limited by limit and offset
-		local
-			tmp: LIST[CMS_NODE]
 		do
-			-- load all posts and add the authors to each post
-			Result := add_authors(node_storage.blogs_limited (a_limit, a_offset))
-
+				-- load all posts and add the authors to each post
+			Result := nodes_to_blogs (blog_storage.blogs_limited (a_limit, a_offset))
 		end
 
-	blogs_from_user_order_created_desc_limited (a_user_id: INTEGER_32; a_limit:NATURAL_32; a_offset:NATURAL_32) : LIST[CMS_NODE]
+	blogs_from_user_order_created_desc_limited (a_user: CMS_USER; a_limit: NATURAL_32; a_offset: NATURAL_32) : LIST [CMS_BLOG]
 			-- List of nodes ordered by creation date and limited by limit and offset
-		local
-			tmp: LIST[CMS_NODE]
+		require
+			has_id: a_user.has_id
 		do
-			-- load all posts and add the authors to each post
-			Result := add_authors(node_storage.blogs_from_user_limited (a_user_id, a_limit, a_offset))
-
+				-- load all posts and add the authors to each post
+			Result := nodes_to_blogs (blog_storage.blogs_from_user_limited (a_user, a_limit, a_offset))
 		end
 
 feature {NONE} -- Helpers
 
-	add_authors(posts: LIST[CMS_NODE]) : LIST[CMS_NODE]
-			-- sets the authors of all given sql results	
+	nodes_to_blogs (a_nodes: LIST [CMS_NODE]): ARRAYED_LIST [CMS_BLOG]
+			-- Convert list of nodes into a list of blog when possible.
 		do
-			Result := posts
-			if posts /= Void then
+			create {ARRAYED_LIST [CMS_BLOG]} Result.make (a_nodes.count)
+
+			if attached node_api as l_node_api then
 				across
-					Result
-				as
-					sql_result
+					a_nodes as ic
 				loop
-					if
-						sql_result.item /= Void and then
-						attached {CMS_PARTIAL_USER} sql_result.item.author as l_partial_author
-					then
-						if attached cms_api.user_api.user_by_id (l_partial_author.id) as l_author then
-							sql_result.item.set_author (l_author)
-						end
+					if attached {CMS_BLOG} l_node_api.full_node (ic.item) as l_blog then
+						Result.force (l_blog)
 					end
 				end
 			end

@@ -1,5 +1,11 @@
 note
-	description: "Request handler related to /blogs/user/{id}/ or /blogs/user/{id}/page/{page}. Displays all posts of the given user"
+	description: "[
+			Request handler related to 
+				/blogs/user/{id}/ 
+				or /blogs/user/{id}/page/{page}. 
+				
+			Displays all posts of the given user
+		]"
 	author: "Dario Bösch <daboesch@student.ethz.ch>"
 	date: "$Date: 2015-05-22 15:13:00 +0100 (lun., 18 mai 2015) $"
 	revision: "$Revision 96616$"
@@ -13,13 +19,12 @@ inherit
 			do_get,
 			posts,
 			total_entries,
-			page_title_html,
+			append_page_title_html_to,
 			base_path
 		end
 
 create
 	make
-
 
 feature -- Global Variables
 
@@ -30,71 +35,76 @@ feature -- HTTP Methods
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
 		local
-			l_error: GENERIC_VIEW_CMS_RESPONSE
+			l_error: NOT_FOUND_ERROR_CMS_RESPONSE
 		do
-			-- Check if userID valid
-			if user_valid (req) then
-				user := load_user(req)
-				-- Output the results, similar as in the blog hanlder (but with other queries)
-				precursor(req, res)
+			user := Void
+			if attached user_from_request (req) as l_user then
+				user := l_user
+					-- Output the results, similar as in the blog hanlder (but with other queries)
+				Precursor (req, res)
 			else
-				-- Throw a bad request error because the user is not valid
+					-- Throw a bad request error because the user is not valid
 				create l_error.make (req, res, api)
-				l_error.set_main_content ("<h1>Error</h1>User with id " + user_path_parameter(req).out + " doesn't exist!")
+				l_error.set_main_content ("<h1>Error</h1>User with id " + user_id_path_parameter (req).out + " doesn't exist!")
 				l_error.execute
 			end
-
 		end
 
 feature -- Query
 
 	user_valid (req: WSF_REQUEST) : BOOLEAN
-			-- Returns true if a valid user id is given and a user with this id exists; otherwise returns false.
+			-- Returns true if a valid user id is given and a user with this id exists,
+			-- otherwise returns false.
 		local
 			user_id: INTEGER_32
 		do
-
-			user_id := user_path_parameter(req)
+			user_id := user_id_path_parameter (req)
 
 			if user_id <= 0 then
-				--Given user id is not valid
-				Result := false
+					-- Given user id is not valid
+				Result := False
 			else
-				--Check if user with user_id exists
+					--Check if user with user_id exists
 				Result := api.user_api.user_by_id (user_id) /= Void
 			end
 		end
 
-	load_user (req: WSF_REQUEST) :  detachable CMS_USER
-			-- Returnes the user with the given id in the request req
-		require
-			user_valid(req)
+	user_from_request (req: WSF_REQUEST): detachable CMS_USER
+			-- Eventual user with given id in the path of request `req'.
+		local
+			uid: like user_id_path_parameter
 		do
-			Result := api.user_api.user_by_id (user_path_parameter(req))
+			uid := user_id_path_parameter (req)
+			if uid > 0 then
+				Result := api.user_api.user_by_id (uid)
+			else
+					-- Missing or invalid user id.
+			end
 		end
 
-	user_path_parameter (req: WSF_REQUEST): INTEGER_32
-			-- Returns the user id from the path /blogs/{user}. It's an unsigned integer since negative ids are not allowed. If no valid id can be read it returns -1
+	user_id_path_parameter (req: WSF_REQUEST): INTEGER_32
+			-- User id from path /blogs/{user}.
+			-- Unsigned integer since negative ids are not allowed.
+			-- If no valid id can be read it returns -1
 		local
 			s: STRING
 		do
-			if attached {WSF_STRING} req.path_parameter ("user") as user_id then
-				s := user_id.value
-				if s.is_integer_32 then
-					if s.to_integer_32 > 0 then
-						Result := s.to_integer_32
-					end
+			Result := -1
+			if attached {WSF_STRING} req.path_parameter ("user") as l_user_id then
+				if l_user_id.is_integer then
+					Result := l_user_id.integer_value
 				end
 			end
 		end
 
-	posts : LIST[CMS_NODE]
-			-- The posts to list on the given page. Filters out the posts of the current user
+	posts: LIST [CMS_BLOG]
+			-- Blog posts to display on given page.
+			-- Filters out the posts of the current user.
 		do
 			if attached user as l_user then
-				Result := node_api.blogs_from_user_order_created_desc_limited (l_user.id.to_integer_32, entries_per_page, (page_number-1) * entries_per_page)
+				Result := blog_api.blogs_from_user_order_created_desc_limited (l_user, entries_per_page, entries_per_page * (page_number - 1))
 			else
-				create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+				create {ARRAYED_LIST [CMS_BLOG]} Result.make (0)
 			end
 		end
 
@@ -102,33 +112,33 @@ feature -- Query
 			-- Returns the number of total entries/posts of the current user
 		do
 			if attached user as l_user then
-				Result := node_api.blogs_count_from_user(l_user.id).to_natural_32
+				Result := blog_api.blogs_count_from_user (l_user).to_natural_32
 			else
-				Result := precursor
+				Result := Precursor
 			end
-
 		end
 
 feature -- HTML Output
 
-	page_title_html : STRING
+	append_page_title_html_to (a_output: STRING)
 			-- Returns the title of the page as a html string. It shows the current page number and the name of the current user
 		do
-			create Result.make_from_string ("<h2>Posts from ")
+			a_output.append ("<h2>Posts from ")
 			if attached user as l_user then
-				Result.append(l_user.name)
+				a_output.append (l_user.name)
 			else
-				Result.append ("unknown user")
+				a_output.append ("unknown user")
 			end
-			if more_than_one_page then
-				Result.append (" (Page " + page_number.out + " of " + pages.out + ")")
-				-- Get the posts from the current page (limited by entries per page)
+			if multiple_pages_needed then
+				a_output.append (" (Page " + page_number.out + " of " + pages_count.out + ")")
+					-- Get the posts from the current page (limited by entries per page)
 			end
-			Result.append ("</h2>")
+			a_output.append ("</h2>")
 		end
 
 	base_path : STRING
-			-- the path to the page that lists all blogs. It must include the user id
+			-- Path to page listing all blogs.
+			-- If user is logged in, include user id
 		do
 			if attached user as l_user then
 				Result := "/blogs/user/" + l_user.id.out

@@ -8,8 +8,6 @@ class
 	BLOG_HANDLER
 
 inherit
-	CMS_BLOG_CONFIG
-
 	CMS_BLOG_HANDLER
 
 	WSF_URI_HANDLER
@@ -41,60 +39,63 @@ create
 feature -- execute
 
 	execute (req: WSF_REQUEST; res: WSF_RESPONSE)
-			-- Execute request handler
+			-- Execute request handler for any kind of mapping.
 		do
 			execute_methods (req, res)
 		end
 
 	uri_execute (req: WSF_REQUEST; res: WSF_RESPONSE)
-			-- Execute request handler
+			-- Execute request handler for URI mapping.
 		do
 			execute (req, res)
 		end
 
 	uri_template_execute (req: WSF_REQUEST; res: WSF_RESPONSE)
-			-- Execute request handler
+			-- Execute request handler for URI-template mapping.
 		do
 			execute (req, res)
 		end
 
 feature -- Global Variables
+
 	page_number: NATURAL_32
+			-- Current page number.
 
 feature -- HTTP Methods	
+
 	do_get (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
 		local
 			l_page: CMS_RESPONSE
 		do
-
-			-- Read the page number from get variable
+				-- Read page number from path parameter.
 			page_number := page_number_path_parameter (req)
 
-			-- execute response by setting the main content
+				-- Responding with `main_content_html (l_page)'.
 			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
-			l_page.set_main_content (main_content_html(l_page))
+			l_page.set_main_content (main_content_html (l_page))
 			l_page.execute
 		end
 
 feature -- Query
 
-
-	posts : LIST[CMS_NODE]
-			-- The posts to list on the given page ordered by date (descending)
+	posts: LIST [CMS_NODE]
+			-- Blog posts to display on given page ordered by date (descending).
 		do
-			Result := node_api.blogs_order_created_desc_limited (entries_per_page, (page_number-1) * entries_per_page)
+			Result := blog_api.blogs_order_created_desc_limited (
+						entries_per_page,
+						entries_per_page * (page_number - 1)
+					)
 		end
 
-	more_than_one_page : BOOLEAN
-			-- Checks if all posts fit on one page (FALSE) or if more than one page is needed (TRUE)
+	multiple_pages_needed : BOOLEAN
+			-- Return if more that one page is needed to display posts.
 		do
 			Result := entries_per_page < total_entries
 		end
 
-
-	pages : NATURAL_32
-			-- Returns the number of pages needed to display all posts
+	pages_count: NATURAL_32
+			-- Number of pages needed to display all posts.
 		require
 			entries_per_page > 0
 		local
@@ -105,7 +106,8 @@ feature -- Query
 		end
 
 	page_number_path_parameter (req: WSF_REQUEST): NATURAL_32
-			-- Returns the page number from the path /blogs/{page}. It's an unsigned integer since negative pages are not allowed
+			-- Page number from path /blogs/{page}.
+			-- Unsigned integer since negative pages are not allowed.
 		local
 			s: STRING
 		do
@@ -120,153 +122,150 @@ feature -- Query
 			end
 		end
 
-	total_entries : NATURAL_32
-			-- Returns the number of total entries/posts
+	total_entries: NATURAL_32
+			-- Total number of entries/posts.
 		do
-			Result := node_api.blogs_count.to_natural_32
+			Result := blog_api.blogs_count.to_natural_32
 		end
 
 feature -- HTML Output
 
-	main_content_html (page: CMS_RESPONSE) : STRING
-			-- Return the content of the page as a html string
+	frozen main_content_html (page: CMS_RESPONSE): STRING
+			-- Content of the page as a html string.
+		do
+			create Result.make_empty
+			append_main_content_html_to (page, Result)
+		end
+
+	append_main_content_html_to (page: CMS_RESPONSE; a_output: STRING)
+			-- Append to `a_output, the content of the page as a html string.
 		local
 			n: CMS_NODE
 			lnk: CMS_LOCAL_LINK
 		do
-			-- Output the title. If more than one page, also output the current page number
-			create Result.make_from_string (page_title_html)
+				-- Output the title. If more than one page, also output the current page number
+			append_page_title_html_to (a_output)
 
-			-- Get the posts from the current page (given by page number and entries per page)
-			if attached posts as lst then
+				-- Get the posts from the current page (given by page number and entries per page)
+				-- Start list of posts
+			a_output.append ("<ul class=%"cms_blog_nodes%">%N")
+			across
+				posts as ic
+			loop
+				n := ic.item
+				lnk := blog_api.node_api.node_link (n)
+				a_output.append ("<li class=%"cms_type_"+ n.content_type +"%">")
 
-					-- Start list of posts
-					Result.append ("<ul class=%"cms_blog_nodes%">%N")
-					across
-						lst as ic
-					loop
-						n := ic.item
-						lnk := node_api.node_link (n)
-						Result.append ("<li class=%"cms_type_"+ n.content_type +"%">")
+					-- Output the creation date
+				append_creation_date_html_to (n, a_output)
 
-						-- Output the creation date
-						Result.append (creation_date_html(n))
+					-- Output the author of the post
+				append_author_html_to (n, a_output)
 
-						-- Output the author of the post
-						Result.append (author_html(n))
+					-- Output the title of the post as a link (to the detail page)
+				append_title_html_to (n, page, a_output)
 
-						-- Output the title of the post as a link (to the detail page)
-						Result.append (title_html(n, page))
+					-- Output the summary of the post and a more link to the detail page
+				append_summary_html_to (n, page, a_output)
 
-						-- Output the summary of the post and a more link to the detail page
-						Result.append (summary_html(n, page))
-
-						Result.append ("</li>%N")
-					end
-
-					-- End of post list
-					Result.append ("</ul>%N")
-
-					-- Pagination (older and newer links)
-					Result.append (pagination_html)
-
-				--end
+				a_output.append ("</li>%N")
 			end
+
+				-- End of post list
+			a_output.append ("</ul>%N")
+
+				-- Pagination (older and newer links)
+			append_pagination_html_to (a_output)
 		end
 
-	page_title_html : STRING
-			-- Returns the title of the page as a html string. It shows the current page number
+	append_page_title_html_to (a_output: STRING)
+			-- Append the title of the page as a html string to `a_output'.
+			-- It shows the current page number.
 		do
-			create Result.make_from_string ("<h2>Blog")
-			if more_than_one_page then
-				Result.append (" (Page " + page_number.out + " of " + pages.out + ")")
+			a_output.append ("<h2>Blog")
+			if multiple_pages_needed then
+				a_output.append (" (Page " + page_number.out + " of " + pages_count.out + ")")
 			end
-			Result.append ("</h2>")
+			a_output.append ("</h2>")
 		end
 
-	creation_date_html (n: CMS_NODE) : STRING
-			-- returns the creation date as a html string
+	append_creation_date_html_to (n: CMS_NODE; a_output: STRING)
+			-- Append the creation date as a html string to `a_output'.
 		local
 			hdate: HTTP_DATE
 		do
-			Result := ""
 			if attached n.creation_date as l_modified then
 				create hdate.make_from_date_time (l_modified)
-				Result.append (hdate.yyyy_mmm_dd_string)
-				Result.append (" ")
+				hdate.append_to_yyyy_mmm_dd_string (a_output)
+				a_output.append (" ")
 			end
 		end
 
-	author_html (n: CMS_NODE) : STRING
-			-- returns a html string with a link to the autors posts
+	append_author_html_to (n: CMS_NODE; a_output: STRING)
+			-- Append to `a_output', the author of node `n' as html link to author's posts.
 		do
-			Result := ""
 			if attached n.author as l_author then
-				Result.append ("by ")
-				Result.append ("<a class=%"blog_user_link%" href=%"/blogs/user/" + l_author.id.out + "%">" + l_author.name + "</a>")
+				a_output.append ("by ")
+				a_output.append ("<a class=%"blog_user_link%" href=%"/blogs/user/" + l_author.id.out + "%">" + l_author.name + "</a>")
 			end
 		end
 
-	title_html (n: CMS_NODE;  page : CMS_RESPONSE) : STRING
-			-- returns a html string the title of the node that links on the detail page
+	append_title_html_to (n: CMS_NODE; page: CMS_RESPONSE; a_output: STRING)
+			-- Append to `a_output', the title of node `n' as html link to detail page.
 		local
 			lnk: CMS_LOCAL_LINK
 		do
-			lnk := node_api.node_link (n)
-			Result := "<span class=%"blog_title%">"
-			Result.append (page.link (lnk.title, lnk.location, Void))
-			Result.append ("</span>")
+			lnk := blog_api.node_api.node_link (n)
+			a_output.append ("<span class=%"blog_title%">")
+			a_output.append (page.link (lnk.title, lnk.location, Void))
+			a_output.append ("</span>")
 		end
 
-	summary_html (n: CMS_NODE;  page : CMS_RESPONSE) : STRING
+	append_summary_html_to (n: CMS_NODE; page: CMS_RESPONSE; a_output: STRING)
 			-- returns a html string with the summary of the node and a link to the detail page
 		local
 			lnk: CMS_LOCAL_LINK
 		do
-			Result := ""
-			lnk := node_api.node_link (n)
 			if attached n.summary as l_summary then
-				Result.append ("<p class=%"blog_list_summary%">")
+				lnk := blog_api.node_api.node_link (n)
+				a_output.append ("<p class=%"blog_list_summary%">")
 				if attached api.format (n.format) as f then
-					Result.append (f.formatted_output (l_summary))
+					a_output.append (f.formatted_output (l_summary))
 				else
-					Result.append (page.formats.default_format.formatted_output (l_summary))
+					a_output.append (page.formats.default_format.formatted_output (l_summary))
 				end
-				Result.append ("<br />")
-				Result.append (page.link ("See more...", lnk.location, Void))
-				Result.append ("</p>")
+				a_output.append ("<br />")
+				a_output.append (page.link ("See more...", lnk.location, Void))
+				a_output.append ("</p>")
 			end
 		end
 
-	pagination_html : STRING
-			-- returns a html string with the pagination links (if necessary)
+	append_pagination_html_to (a_output: STRING)
+			-- Append to `a_output' with the pagination links (if necessary).
 		local
 			tmp: NATURAL_32
 		do
-			Result := ""
-			if more_than_one_page then
+			if multiple_pages_needed then
+				a_output.append ("<div class=%"pagination%">")
 
-				Result.append ("<div class=%"pagination%">")
-
-				-- If exist older posts show link to next page
-				if page_number < pages then
+					-- If exist older posts show link to next page
+				if page_number < pages_count then
 					tmp := page_number + 1
-					Result.append (" <a class=%"blog_older_posts%" href=%"" + base_path + "/page/" + tmp.out + "%"><< Older Posts</a> ")
+					a_output.append (" <a class=%"blog_older_posts%" href=%"" + base_path + "/page/" + tmp.out + "%"><< Older Posts</a> ")
 				end
 
-				-- Delmiter
-				if page_number < pages AND page_number > 1 then
-					Result.append (" | ")
+				-- Delimiter
+				if page_number < pages_count AND page_number > 1 then
+					a_output.append (" | ")
 				end
 
 				-- If exist newer posts show link to previous page
 				if page_number > 1 then
 					tmp := page_number -1
-					Result.append (" <a class=%"blog_newer_posts%" href=%"" + base_path + "/page/" + tmp.out + "%">Newer Posts >></a> ")
+					a_output.append (" <a class=%"blog_newer_posts%" href=%"" + base_path + "/page/" + tmp.out + "%">Newer Posts >></a> ")
 				end
 
-				Result.append ("</div>")
-
+				a_output.append ("</div>")
 			end
 
 		end

@@ -10,7 +10,14 @@ deferred class
 inherit
 	CMS_MODULE_HANDLER [CMS_BLOG_API]
 		rename
-			module_api as node_api
+			module_api as blog_api
+		end
+
+feature -- Access
+
+	entries_per_page: NATURAL_32
+		do
+			Result := blog_api.entries_per_page
 		end
 
 end

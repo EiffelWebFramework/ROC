@@ -10,13 +10,13 @@ class
 inherit
 	CMS_MODULE
 		rename
-			module_api as node_api
+			module_api as blog_api
 		redefine
 			register_hooks,
 			initialize,
 			is_installed,
 			install,
-			node_api
+			blog_api
 		end
 
 	CMS_HOOK_MENU_SYSTEM_ALTER
@@ -44,6 +44,10 @@ feature {CMS_API} -- Module Initialization
 			Precursor (api)
 
 			if attached {CMS_NODE_API} api.module_api ({NODE_MODULE}) as l_node_api then
+				create blog_api.make (api, l_node_api)
+
+				node_api := l_node_api
+					-- Depends on {NODE_MODULE}
 				create ct
 				l_node_api.add_content_type (ct)
 				l_node_api.add_content_type_webform_manager (create {CMS_BLOG_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
@@ -88,46 +92,49 @@ CREATE TABLE "blog_post_nodes"(
 
 feature {CMS_API} -- Access: API
 
-	node_api: detachable CMS_BLOG_API
+	blog_api: detachable CMS_BLOG_API
 			-- <Precursor>
+
+	node_api: detachable CMS_NODE_API
 
 feature -- Access: router
 
 	setup_router (a_router: WSF_ROUTER; a_api: CMS_API)
 			-- <Precursor>
-		local
-			l_node_api: like node_api
 		do
-			l_node_api := node_api
-			if l_node_api = Void then
-				create l_node_api.make (a_api)
-				node_api := l_node_api
+			if attached blog_api as l_blog_api then
+				configure_web (a_api, l_blog_api, a_router)
+			else
+					-- Issue with api/dependencies,
+					-- thus Current module should not be used!
+					-- thus no url mapping
 			end
-			configure_web (a_api, l_node_api, a_router)
 		end
 
-
-configure_web (a_api: CMS_API; a_node_api: CMS_BLOG_API; a_router: WSF_ROUTER)
+	configure_web (a_api: CMS_API; a_blog_api: CMS_BLOG_API; a_router: WSF_ROUTER)
+			-- Configure router mapping for web interface.
 		local
 			l_blog_handler: BLOG_HANDLER
 			l_blog_user_handler: BLOG_USER_HANDLER
 			l_uri_mapping: WSF_URI_MAPPING
 		do
-			-- TODO: for now, focused only on web interface, add REST api later. [2015-May-18]
-			create l_blog_handler.make (a_api, a_node_api)
-			create l_blog_user_handler.make (a_api, a_node_api)
+				-- TODO: for now, focused only on web interface, add REST api later. [2015-May-18]
+			create l_blog_handler.make (a_api, a_blog_api)
+			create l_blog_user_handler.make (a_api, a_blog_api)
 
-			-- Let the class BLOG_HANDLER handle the requests on "/blogs"
-			create l_uri_mapping.make_trailing_slash_ignored("/blogs", l_blog_handler)
+				-- Let the class BLOG_HANDLER handle the requests on "/blogs"
+			create l_uri_mapping.make_trailing_slash_ignored ("/blogs", l_blog_handler)
 			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get)
 
-			-- We can add a page number after /blogs/ to get older posts
+				-- We can add a page number after /blogs/ to get older posts
 			a_router.handle_with_request_methods ("/blogs/page/{page}", l_blog_handler, a_router.methods_get)
 
-			-- If a user id is given route with blog user handler
+				-- If a user id is given route with blog user handler
+				--| FIXME: maybe /user/{user}/blogs/  would be better.
 			a_router.handle_with_request_methods ("/blogs/user/{user}", l_blog_user_handler, a_router.methods_get)
 
-			-- If a user id is given we also want to allow different pages
+				-- If a user id is given we also want to allow different pages
+				--| FIXME: what about /user/{user}/blogs/?page={page} ?
 			a_router.handle_with_request_methods ("/blogs/user/{user}/page/{page}", l_blog_user_handler, a_router.methods_get)
 
 		end

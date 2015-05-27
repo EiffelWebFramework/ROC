@@ -212,7 +212,6 @@ feature -- Access: Node
 			Result := node_storage.nodes
 		end
 
-
 	recent_nodes (a_offset, a_rows: INTEGER): LIST [CMS_NODE]
 			-- List of the `a_rows' most recent nodes starting from  `a_offset'.
 		do

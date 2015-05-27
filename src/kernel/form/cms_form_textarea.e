@@ -21,22 +21,22 @@ create
 
 feature -- Initialisation
 
-make (a_name: like name)
-		-- <Precursor>
-	do
-		precursor(a_name)
+	make (a_name: like name)
+			-- <Precursor>
+		do
+			precursor(a_name)
 
-		-- By default we don't replace the textarea by an editor
-		editor := False;
-	end
+				-- By default we don't replace the textarea by an editor
+			editor := False;
+		end
 
 feature -- Access
 
 	editor : BOOLEAN
-		-- True if the textarea should be replaced by the editor. Default is false.
+			-- True if the textarea should be replaced by the editor. Default is false.
 
 	format_field : detachable WSF_FORM_SELECT
-		-- Selection field for the format on that it depends, if the editor is shown or not.
+			-- Selection field for the format on that it depends, if the editor is shown or not.
 
 	condition_value : detachable STRING
 
@@ -58,7 +58,6 @@ feature -- Editor
 
 feature -- Conversion
 
-
 	append_item_to_html (a_theme: WSF_THEME; a_html: STRING_8)
 		do
 			-- Add javascript to replace textarea with editor
@@ -67,16 +66,12 @@ feature -- Conversion
 				a_html.append (load_assets)
 				a_html.append ("<script type=%"text/javascript%">");
 				if attached format_field as l_field and then attached condition_value as l_value then
-					a_html.append (javascript_textarea_to_editor_if_selected(current, l_field, l_value))
+					a_html.append (javascript_textarea_to_editor_if_selected (Current, l_field, l_value))
 				else
-					a_html.append (javascript_textarea_to_editor(current))
+					a_html.append (javascript_textarea_to_editor (Current))
 				end
 				a_html.append ("</script>")
 			end
 		end
-
-feature -- Javascript Output
-
-	javascript_show_editor_on_full_html_select : STRING = ""
 
 end

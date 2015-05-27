@@ -32,9 +32,18 @@ feature {CMS_API} -- Module Initialization
 			-- Initialize Current module with `api'.
 		require
 			is_enabled: is_enabled
+			is_not_initialized: not is_initialized
 		do
 				-- Redefine to process specific module initialization.
+			is_initialized := True
+		ensure
+			is_initialized: is_initialized
 		end
+
+feature -- Status		
+
+	is_initialized: BOOLEAN
+			-- Is Current module initialized?		
 
 feature {CMS_API} -- Access: API
 
@@ -68,6 +77,8 @@ feature -- Router
 
 	setup_router (a_router: WSF_ROUTER; a_api: CMS_API)
 			-- Setup url dispatching for Current module.
+		require
+			is_initialized: is_initialized
 		deferred
 		end
 

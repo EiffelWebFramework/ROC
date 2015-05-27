@@ -27,8 +27,6 @@ feature -- Javascript
 
 	javascript_textarea_to_editor(a_textarea : WSF_FORM_TEXTAREA) : STRING
 			-- Javascript code to display the textarea as a WYSIWIG editor as soon as the document is loaded
-		local
-			l_code : STRING
 		do
 			Result := javascript_ready(javascript_replace_textarea (a_textarea))
 		end

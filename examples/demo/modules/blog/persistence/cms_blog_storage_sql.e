@@ -18,25 +18,25 @@ create
 feature -- Access
 
 	blogs_count: INTEGER_64
-			-- Count of blog nodes
+			-- <Precursor>
 		do
 			error_handler.reset
-			write_information_log (generator + ".nodes_count")
+			write_information_log (generator + ".blogs_count")
 			sql_query (sql_select_blog_count, Void)
 			if sql_rows_count = 1 then
 				Result := sql_read_integer_64 (1)
 			end
 		end
 
-	blogs_count_from_user (user_id: INTEGER_64) : INTEGER_64
-			-- Number of nodes of type blog from user with user_id
+	blogs_count_from_user (a_user: CMS_USER) : INTEGER_64
+			-- <Precursor>
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
 			error_handler.reset
-			write_information_log (generator + ".nodes_count")
+			write_information_log (generator + ".blogs_count_from_user")
 			create l_parameters.make (2)
-			l_parameters.put (user_id, "user")
+			l_parameters.put (a_user.id, "user")
 			sql_query (sql_select_blog_count_from_user, l_parameters)
 			if sql_rows_count = 1 then
 				Result := sql_read_integer_64 (1)
@@ -44,12 +44,12 @@ feature -- Access
 		end
 
 	blogs: LIST [CMS_NODE]
-			-- List of nodes ordered by creation date (descending).
+			-- <Precursor>
 		do
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 
 			error_handler.reset
-			write_information_log (generator + ".nodes")
+			write_information_log (generator + ".blogs")
 
 			from
 				sql_query (sql_select_blogs_order_created_desc, Void)
@@ -64,15 +64,15 @@ feature -- Access
 			end
 		end
 
-	blogs_limited (a_limit:NATURAL_32; a_offset:NATURAL_32) : LIST[CMS_NODE]
-			-- List of nodes ordered by creation date from limit to limit + offset
+	blogs_limited (a_limit: NATURAL_32; a_offset: NATURAL_32): LIST [CMS_NODE]
+			-- <Precursor>
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 
 			error_handler.reset
-			write_information_log (generator + ".nodes")
+			write_information_log (generator + ".blogs_limited")
 
 			from
 				create l_parameters.make (2)
@@ -90,21 +90,21 @@ feature -- Access
 			end
 		end
 
-	blogs_from_user_limited (a_user_id:INTEGER_32; a_limit:NATURAL_32; a_offset:NATURAL_32) : LIST[CMS_NODE]
-			-- List of posts of the author with a_user_id ordered by creation date starting at offset and limited by limit
+	blogs_from_user_limited (a_user: CMS_USER; a_limit: NATURAL_32; a_offset: NATURAL_32): LIST [CMS_NODE]
+			-- <Precursor>
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 
 			error_handler.reset
-			write_information_log (generator + ".nodes")
+			write_information_log (generator + ".blogs_from_user_limited")
 
 			from
 				create l_parameters.make (2)
 				l_parameters.put (a_limit, "limit")
 				l_parameters.put (a_offset, "offset")
-				l_parameters.put (a_user_id, "user")
+				l_parameters.put (a_user.id, "user")
 				sql_query (sql_blogs_from_user_limited, l_parameters)
 				sql_start
 			until
