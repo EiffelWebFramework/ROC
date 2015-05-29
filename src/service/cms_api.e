@@ -158,6 +158,8 @@ feature -- Query: module
 			t := a_type.name
 			if t.starts_with ("!") then
 				t.remove_head (1)
+			elseif t.starts_with ("?") then
+				t.remove_head (1)
 			end
 			across
 				setup.modules as ic
@@ -186,7 +188,12 @@ feature -- Query: module
 			-- Enabled module API associated with module typed `a_type'.
 		do
 			if attached module (a_type) as mod then
-				Result := mod.module_api
+				if mod.is_enabled then
+					if not mod.is_initialized then
+						mod.initialize (Current)
+					end
+					Result := mod.module_api
+				end
 			end
 		end
 

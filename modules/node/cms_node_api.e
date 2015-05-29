@@ -16,20 +16,21 @@ inherit
 
 	REFACTORING_HELPER
 
-create
-	make
+create {NODE_MODULE}
+	make_with_storage
 
-feature {NONE} -- Implementation
+feature {NONE} -- Initialization
+
+	make_with_storage (a_api: CMS_API; a_node_storage: CMS_NODE_STORAGE_I)
+		do
+			node_storage := a_node_storage
+			make (a_api)
+		end
 
 	initialize
 			-- <Precursor>
 		do
 			Precursor
-			if attached {CMS_STORAGE_SQL_I} storage as l_storage_sql then
-				create {CMS_NODE_STORAGE_SQL} node_storage.make (l_storage_sql)
-			else
-				create {CMS_NODE_STORAGE_NULL} node_storage.make
-			end
 			initialize_node_types
 		end
 
@@ -211,7 +212,6 @@ feature -- Access: Node
 		do
 			Result := node_storage.nodes
 		end
-
 
 	trashed_nodes (a_user: CMS_USER): LIST [CMS_NODE]
 			-- List of nodes with status in {CMS_NODE_API}.trashed.

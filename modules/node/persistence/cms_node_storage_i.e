@@ -113,7 +113,7 @@ feature -- Change: Node
 			valid_user: attached a_node.author as l_author and then l_author.id > 0
 		deferred
 		ensure
-			has_id: a_node.has_id
+			has_id: not error_handler.has_error implies a_node.has_id
 		end
 
 	update_node (a_node: CMS_NODE)
@@ -169,33 +169,6 @@ feature -- Change: Node
 			valid_node_id: a_id > 0
 		deferred
 		end
-
---	update_node_title (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
---			-- Update node title to `a_title', node identified by id `a_node_id'.
---			-- The user `a_user_id' is an existing or new collaborator.
---		require
---			valid_node_id: a_node_id > 0
---			valid_user_id: a_user_id > 0
---		deferred
---		end
-
---	update_node_summary (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
---			-- Update node summary to `a_summary', node identified by id `a_node_id'.
---			-- The user `a_user_id' is an existing or new collaborator.
---		require
---			valid_id: a_node_id > 0
---			valid_user_id: a_user_id > 0
---		deferred
---		end
-
---	update_node_content (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
---			-- Update node content to `a_content', node identified by id `a_node_id'.
---			-- The user `a_user_id' is an existing or new collaborator.
---		require
---			valid_id: a_node_id > 0
---			valid_user_id: a_user_id > 0
---		deferred
---		end
 
 feature -- Helpers
 
