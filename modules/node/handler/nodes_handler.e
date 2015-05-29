@@ -41,84 +41,20 @@ feature -- HTTP Methods
 			s: STRING
 			n: CMS_NODE
 			lnk: CMS_LOCAL_LINK
-			pager: CMS_NODE_PAGINATION_BUILDER
-			number_of_pages: INTEGER_64
-			current_page: INTEGER
+			l_page_helper: CMS_NODE_PAGINATION_HELPER
 		do
 				-- At the moment the template is hardcoded, but we can
 				-- get them from the configuration file and load them into
 				-- the setup class.
 
 			create {GENERIC_VIEW_CMS_RESPONSE} l_response.make (req, res, api)
-			l_response.add_variable (node_api.nodes, "nodes")
+			create l_page_helper.make (req, l_response, node_api.nodes_count)
 
-			create pager.make (node_api)
-			number_of_pages := (node_api.nodes_count // pager.count) + 1
+			create s.make_empty
+			s.append (l_page_helper.paging_summary)
+			s.append (l_page_helper.build_html_node_paging)
 
-				-- Size:limit
-			if
-				attached {WSF_STRING} req.query_parameter ("size") as l_size and then
-				l_size.is_integer
-			then
-				pager.set_count (l_size.integer_value.to_natural_32)
-			end
-
-
-
-				--Page:offset
-			if
-				attached {WSF_STRING} req.query_parameter ("page") as l_page and then
-				l_page.is_integer
-			then
-				current_page := l_page.integer_value
-				if current_page > 1 then
-					pager.set_offset (((current_page-1)*(pager.count.to_integer_32)).to_natural_32)
-				end
-			else
-				current_page := 1
-			end
-
-
-
-				-- NOTE: for development purposes we have the following hardcode output.
-			create s.make_from_string ("<p>Items:</p>")
-
-			s.append ("<p>Current Page:")
-			s.append_integer (current_page)
-			s.append (" of ")
-			s.append_integer_64 (number_of_pages)
-			s.append (" pages</p>")
-
-				-- pager
-			s.append ("<div class=%"col-xs-12%">%N")
-			s.append ("<ul class=%"pager%">%N")
-			create lnk.make ("First", "nodes/?page=1&size="+pager.count.out)
-			s.append ("<li>")
-			s.append (l_response.link (lnk.title, lnk.location, Void))
-			s.append ("</li>")
-			if (current_page - 1) > 1 then
-				create lnk.make ("Prev", "nodes/?page="+ (current_page-1).out +"&size="+pager.count.out)
-				s.append ("<li>")
-				s.append (l_response.link (lnk.title, lnk.location, Void))
-				s.append ("</li>")
-			end
-
-			if (current_page + 1) < number_of_pages then
-				create lnk.make ("Next", "nodes/?page="+ (current_page+1).out +"&size="+pager.count.out)
-				s.append ("<li>")
-				s.append (l_response.link (lnk.title, lnk.location, Void))
-				s.append ("</li>")
-			end
-			create lnk.make ("Last", "nodes/?page="+ number_of_pages.out +"&size="+pager.count.out)
-			s.append ("<li>")
-			s.append (l_response.link (lnk.title, lnk.location, Void))
-			s.append ("</li>")
-
-
-			s.append ("</ul>%N")
-			s.append ("<div>%N")
-
-			if attached pager.items as lst then
+			if attached node_api.recent_nodes (l_page_helper.pager) as lst then
 				s.append ("<ul class=%"cms-nodes%">%N")
 				across
 					lst as ic
@@ -131,6 +67,8 @@ feature -- HTTP Methods
 				end
 				s.append ("</ul>%N")
 			end
+
+			s.append (l_page_helper.build_html_node_paging)
 
 			l_response.set_main_content (s)
 			l_response.add_block (create {CMS_CONTENT_BLOCK}.make ("nodes_warning", Void, "/nodes/ is not yet fully implemented<br/>", Void), "highlighted")

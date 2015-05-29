@@ -3,8 +3,26 @@ note
 	date: "$Date$"
 	revision: "$Revision$"
 
-deferred class
-	CMS_PAGINATION_BUILDER [G]
+class
+	CMS_PAGINATION_BUILDER
+
+inherit
+
+	ANY
+		redefine
+			default_create
+		end
+
+feature {NONE} -- Initialization
+
+	default_create
+		do
+			count := 5
+			offset := 0
+		ensure then
+			limit_set: count = 5
+			offset_set: offset = 0
+		end
 
 feature -- Access
 
@@ -44,12 +62,6 @@ feature -- Access
 			asc_fasle: not order_ascending
 		end
 
-feature -- Pager
-
-	items: ITERABLE [G]
-			-- Iterable of G with filters.
-		deferred
-		end
 
 feature -- Access
 
