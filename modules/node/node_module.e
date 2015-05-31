@@ -206,7 +206,7 @@ feature -- Hooks
 			create lnk.make ("Trash", "trash")
 			a_menu_system.primary_menu.extend (lnk)
 
-			create lnk.make ("Create ..", "node/")
+			create lnk.make ("Create ..", "node")
 			a_menu_system.primary_menu.extend (lnk)
 		end
 
