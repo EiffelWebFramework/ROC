@@ -17,8 +17,6 @@ feature {NONE} -- Initialization
 		require
 			a_page_size > 0
 		do
-			create query_parameters.make (0, 25)
-
 			create resource.make (a_resource)
 			set_page_size (a_page_size)
 			set_upper (a_count)
@@ -40,9 +38,6 @@ feature -- Access
 
 	page_size: NATURAL
 			-- Number of items per page.
-		do
-			Result := query_parameters.size
-		end
 
 	upper: NATURAL_64
 			-- number of items.
@@ -51,8 +46,15 @@ feature -- Access
 	current_page_index: INTEGER
 			-- Current page index.
 
-	query_parameters: CMS_DATA_QUERY_PARAMETERS
-			-- Parameter for the associated query/resource.
+	current_page_offset: NATURAL_64
+			-- Lower index - 1 for current page.
+		do
+			if current_page_index > 1 then
+				Result := (current_page_index - 1).to_natural_32 * page_size
+			else
+				Result := 0
+			end
+		end
 
 feature -- Status report			
 
@@ -96,7 +98,7 @@ feature -- Element change
 	set_page_size (a_size: NATURAL)
 			-- Set `page_size' to `a_size'.
 		do
-			query_parameters.set_size (a_size)
+			page_size := a_size
 		end
 
 	set_upper (a_upper: NATURAL_64)
@@ -109,11 +111,6 @@ feature -- Element change
 			-- Set Current page index to `a_page_index'.
 		do
 			current_page_index := a_page_index
-			if a_page_index > 1 then
-				query_parameters.set_offset ((a_page_index - 1).to_natural_32 * page_size)
-			else
-				query_parameters.set_offset (0)
-			end
 		end
 
 	set_page_parameter_id (a_id: READABLE_STRING_8)

@@ -65,12 +65,12 @@ feature -- HTTP Methods
 			l_page_helper.get_setting_from_request (req)
 			if l_page_helper.pages_count > 1 then
 				l_page_helper.append_to_html (l_response, s_pager)
-				if l_page_helper.page_size > 20 then
+				if l_page_helper.page_size > 25 then
 					s.append (s_pager)
 				end
 			end
 
-			if attached node_api.recent_nodes (l_page_helper.query_parameters) as lst then
+			if attached node_api.recent_nodes (create {CMS_DATA_QUERY_PARAMETERS}.make (l_page_helper.current_page_offset, l_page_helper.page_size)) as lst then
 				s.append ("<ul class=%"cms-nodes%">%N")
 				across
 					lst as ic

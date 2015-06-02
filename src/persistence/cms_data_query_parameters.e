@@ -14,7 +14,7 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_offset: NATURAL; a_size: NATURAL)
+	make (a_offset: NATURAL_64; a_size: NATURAL)
 		do
 			offset := a_offset
 			size := a_size
@@ -28,7 +28,7 @@ feature -- Access
 	size: NATURAL assign set_size
 			-- Number of items per page.
 
-	offset: NATURAL assign set_offset
+	offset: NATURAL_64 assign set_offset
 			--  lower index of `items' pagination.
 
 	order_by: detachable READABLE_STRING_8
@@ -47,7 +47,7 @@ feature -- Element change
 			size_set: size = a_size
 		end
 
-	set_offset (a_offset: NATURAL)
+	set_offset (a_offset: NATURAL_64)
 			-- Set offset with `a_offset'.
 		do
 			offset := a_offset
