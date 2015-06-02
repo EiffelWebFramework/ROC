@@ -1,18 +1,35 @@
 note
-	description: "Pagination parameters with order capability"
+	description: "[
+			Parameters associated with data query.
+			It could be query over http, or storage.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_ORDERED_PAGINATION
-
-inherit
-	CMS_PAGINATION
+	CMS_DATA_QUERY_PARAMETERS
 
 create
 	make
-	
+
+feature {NONE} -- Initialization
+
+	make (a_offset: NATURAL; a_size: NATURAL)
+		do
+			offset := a_offset
+			size := a_size
+		ensure
+			size_set: size = a_size
+			offset_set: offset = a_offset
+		end
+
 feature -- Access
+
+	size: NATURAL assign set_size
+			-- Number of items per page.
+
+	offset: NATURAL assign set_offset
+			--  lower index of `items' pagination.
 
 	order_by: detachable READABLE_STRING_8
 			-- field to order by.
@@ -21,6 +38,22 @@ feature -- Access
 			-- is ascending ordering?
 
 feature -- Element change
+
+	set_size (a_size: NATURAL)
+			-- Set `size' with `a_size'.
+		do
+			size := a_size
+		ensure
+			size_set: size = a_size
+		end
+
+	set_offset (a_offset: NATURAL)
+			-- Set offset with `a_offset'.
+		do
+			offset := a_offset
+		ensure
+			limit_set: offset = a_offset
+		end
 
 	set_ascending_order_by_field (a_field: detachable READABLE_STRING_8)
 			-- Pager with a order_by `a_field' asc.	

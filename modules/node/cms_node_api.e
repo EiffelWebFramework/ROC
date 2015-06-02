@@ -202,7 +202,7 @@ feature -- URL
 
 feature -- Access: Node
 
-	nodes_count: INTEGER_64
+	nodes_count: NATURAL_64
 		do
 			Result := node_storage.nodes_count
 		end
@@ -220,7 +220,7 @@ feature -- Access: Node
 			Result := node_storage.trashed_nodes (a_user.id)
 		end
 
-	recent_nodes (a_pagination: CMS_PAGINATION): ITERABLE [CMS_NODE]
+	recent_nodes (a_pagination: CMS_DATA_QUERY_PARAMETERS): ITERABLE [CMS_NODE]
 			-- List of the `a_rows' most recent nodes starting from  `a_offset'.
 		do
 			Result := node_storage.recent_nodes (a_pagination.offset.to_integer_32, a_pagination.size.to_integer_32)
