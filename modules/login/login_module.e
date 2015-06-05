@@ -133,159 +133,27 @@ feature -- Hooks
 				a_block_id.is_case_insensitive_equal_general ("login") and then
 				a_response.request.path_info.starts_with ("/roc-login")
 			then
-				if attached template_block (a_block_id, a_response) as l_tpl_block then
-					create vals.make (1)
-						-- add the variable to the block
-					value_table_alter (vals, a_response)
-					across
-						vals as ic
-					loop
-						l_tpl_block.set_value (ic.item, ic.key)
-					end
-					a_response.add_block (l_tpl_block, "content")
-				else
-					debug ("cms")
-						a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-					end
-				end
+				get_block_view_login (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("register") and then
 				a_response.request.path_info.starts_with ("/roc-register")
 			then
-				if a_response.request.is_get_request_method then
-					if attached template_block (a_block_id, a_response) as l_tpl_block then
-						a_response.add_block (l_tpl_block, "content")
-					else
-						debug ("cms")
-							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-						end
-					end
-				elseif a_response.request.is_post_request_method then
-					if a_response.values.has ("error_name") or else a_response.values.has ("error_email") then
-						if attached template_block (a_block_id, a_response) as l_tpl_block then
-							l_tpl_block.set_value (a_response.values.item ("error_name"), "error_name")
-							l_tpl_block.set_value (a_response.values.item ("error_email"), "error_email")
-							l_tpl_block.set_value (a_response.values.item ("email"), "email")
-							l_tpl_block.set_value (a_response.values.item ("name"), "name")
-							a_response.add_block (l_tpl_block, "content")
-						else
-							debug ("cms")
-								a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-							end
-						end
-					else
-						if attached template_block ("post_register", a_response) as l_tpl_block then
-							a_response.add_block (l_tpl_block, "content")
-						else
-							debug ("cms")
-								a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-							end
-						end
-					end
-				end
+				get_block_view_register (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("reactivate") and then
 				a_response.request.path_info.starts_with ("/reactivate")
 			then
-				if a_response.request.is_get_request_method then
-					if attached template_block (a_block_id, a_response) as l_tpl_block then
-						a_response.add_block (l_tpl_block, "content")
-					else
-						debug ("cms")
-							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-						end
-					end
-				elseif a_response.request.is_post_request_method then
-					if a_response.values.has ("error_email") or else a_response.values.has ("is_active") then
-						if attached template_block (a_block_id, a_response) as l_tpl_block then
-							l_tpl_block.set_value (a_response.values.item ("error_email"), "error_email")
-							l_tpl_block.set_value (a_response.values.item ("email"), "email")
-							l_tpl_block.set_value (a_response.values.item ("is_active"), "is_active")
-							a_response.add_block (l_tpl_block, "content")
-						else
-							debug ("cms")
-								a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-							end
-						end
-					else
-						if attached template_block ("post_reactivate", a_response) as l_tpl_block then
-							a_response.add_block (l_tpl_block, "content")
-						else
-							debug ("cms")
-								a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-							end
-						end
-					end
-				end
+				get_block_view_reactivate (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("new_password") and then
 				a_response.request.path_info.starts_with ("/new-password")
 			then
-				if a_response.request.is_get_request_method then
-					if attached template_block (a_block_id, a_response) as l_tpl_block then
-						a_response.add_block (l_tpl_block, "content")
-					else
-						debug ("cms")
-							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-						end
-					end
-				elseif a_response.request.is_post_request_method then
-					if a_response.values.has ("error_email")  then
-						if attached template_block (a_block_id, a_response) as l_tpl_block then
-							l_tpl_block.set_value (a_response.values.item ("error_email"), "error_email")
-							l_tpl_block.set_value (a_response.values.item ("email"), "email")
-							a_response.add_block (l_tpl_block, "content")
-						else
-							debug ("cms")
-								a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-							end
-						end
-					else
-						if attached template_block ("post_password", a_response) as l_tpl_block then
-							a_response.add_block (l_tpl_block, "content")
-						else
-							debug ("cms")
-								a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-							end
-						end
-					end
-				end
+				get_block_view_new_password (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("reset_password") and then
 				a_response.request.path_info.starts_with ("/reset-password")
 			then
-				if a_response.request.is_get_request_method then
-					if attached template_block (a_block_id, a_response) as l_tpl_block then
-						l_tpl_block.set_value (a_response.values.item ("token"), "token")
-						l_tpl_block.set_value (a_response.values.item ("error_token"), "error_token")
-						a_response.add_block (l_tpl_block, "content")
-					else
-						debug ("cms")
-							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-						end
-					end
-				elseif a_response.request.is_post_request_method then
-					if a_response.values.has ("error_token") or else a_response.values.has ("error_password")   then
-						if attached template_block (a_block_id, a_response) as l_tpl_block then
-							l_tpl_block.set_value (a_response.values.item ("error_token"), "error_token")
-							l_tpl_block.set_value (a_response.values.item ("error_password"), "error_password")
-							l_tpl_block.set_value (a_response.values.item ("token"), "token")
-							a_response.add_block (l_tpl_block, "content")
-						else
-							debug ("cms")
-								a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-							end
-						end
-					else
-						if attached template_block ("post_reset", a_response) as l_tpl_block then
-							a_response.add_block (l_tpl_block, "content")
-						else
-							debug ("cms")
-								a_response.add_warning_message ("Error with block [" + a_block_id + "]")
-							end
-						end
-					end
-				end
+				get_block_view_reset_password (a_block_id, a_response)
 			end
 		end
 
@@ -564,6 +432,176 @@ feature {NONE} -- Helpers
 					create Result.make (a_block_id, Void, p.parent, e)
 				else
 					create Result.make (a_block_id, Void, p.parent, p)
+				end
+			end
+		end
+
+feature {NONE} -- Block views
+
+	get_block_view_login (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+		local
+			vals: CMS_VALUE_TABLE
+		do
+			if attached template_block (a_block_id, a_response) as l_tpl_block then
+				create vals.make (1)
+					-- add the variable to the block
+				value_table_alter (vals, a_response)
+				across
+					vals as ic
+				loop
+					l_tpl_block.set_value (ic.item, ic.key)
+				end
+					a_response.add_block (l_tpl_block, "content")
+			else
+				debug ("cms")
+					a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+				end
+			end
+		end
+
+	get_block_view_register (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+		local
+			vals: CMS_VALUE_TABLE
+		do
+			if a_response.request.is_get_request_method then
+				if attached template_block (a_block_id, a_response) as l_tpl_block then
+					a_response.add_block (l_tpl_block, "content")
+				else
+					debug ("cms")
+						a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+					end
+				end
+			elseif a_response.request.is_post_request_method then
+				if a_response.values.has ("error_name") or else a_response.values.has ("error_email") then
+					if attached template_block (a_block_id, a_response) as l_tpl_block then
+						l_tpl_block.set_value (a_response.values.item ("error_name"), "error_name")
+						l_tpl_block.set_value (a_response.values.item ("error_email"), "error_email")
+						l_tpl_block.set_value (a_response.values.item ("email"), "email")
+						l_tpl_block.set_value (a_response.values.item ("name"), "name")
+						a_response.add_block (l_tpl_block, "content")
+					else
+						debug ("cms")
+							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+						end
+					end
+				else
+					if attached template_block ("post_register", a_response) as l_tpl_block then
+						a_response.add_block (l_tpl_block, "content")
+					else
+						debug ("cms")
+							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+						end
+					end
+				end
+			end
+		end
+
+
+	get_block_view_reactivate (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+		local
+			vals: CMS_VALUE_TABLE
+		do
+			if a_response.request.is_get_request_method then
+				if attached template_block (a_block_id, a_response) as l_tpl_block then
+					a_response.add_block (l_tpl_block, "content")
+				else
+					debug ("cms")
+						a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+					end
+				end
+			elseif a_response.request.is_post_request_method then
+				if a_response.values.has ("error_email") or else a_response.values.has ("is_active") then
+					if attached template_block (a_block_id, a_response) as l_tpl_block then
+						l_tpl_block.set_value (a_response.values.item ("error_email"), "error_email")
+						l_tpl_block.set_value (a_response.values.item ("email"), "email")
+						l_tpl_block.set_value (a_response.values.item ("is_active"), "is_active")
+						a_response.add_block (l_tpl_block, "content")
+					else
+						debug ("cms")
+							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+						end
+					end
+				else
+					if attached template_block ("post_reactivate", a_response) as l_tpl_block then
+						a_response.add_block (l_tpl_block, "content")
+					else
+						debug ("cms")
+							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+						end
+					end
+				end
+			end
+		end
+
+	get_block_view_new_password (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+		local
+			vals: CMS_VALUE_TABLE
+		do
+			if a_response.request.is_get_request_method then
+				if attached template_block (a_block_id, a_response) as l_tpl_block then
+					a_response.add_block (l_tpl_block, "content")
+				else
+					debug ("cms")
+						a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+					end
+				end
+			elseif a_response.request.is_post_request_method then
+				if a_response.values.has ("error_email")  then
+					if attached template_block (a_block_id, a_response) as l_tpl_block then
+						l_tpl_block.set_value (a_response.values.item ("error_email"), "error_email")
+						l_tpl_block.set_value (a_response.values.item ("email"), "email")
+						a_response.add_block (l_tpl_block, "content")
+					else
+						debug ("cms")
+							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+						end
+					end
+				else
+					if attached template_block ("post_password", a_response) as l_tpl_block then
+						a_response.add_block (l_tpl_block, "content")
+					else
+						debug ("cms")
+							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+						end
+					end
+				end
+			end
+		end
+
+	get_block_view_reset_password (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+		local
+			vals: CMS_VALUE_TABLE
+		do
+			if a_response.request.is_get_request_method then
+				if attached template_block (a_block_id, a_response) as l_tpl_block then
+					l_tpl_block.set_value (a_response.values.item ("token"), "token")
+					l_tpl_block.set_value (a_response.values.item ("error_token"), "error_token")
+					a_response.add_block (l_tpl_block, "content")
+				else
+					debug ("cms")
+						a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+					end
+				end
+			elseif a_response.request.is_post_request_method then
+				if a_response.values.has ("error_token") or else a_response.values.has ("error_password")   then
+					if attached template_block (a_block_id, a_response) as l_tpl_block then
+						l_tpl_block.set_value (a_response.values.item ("error_token"), "error_token")
+						l_tpl_block.set_value (a_response.values.item ("error_password"), "error_password")
+						l_tpl_block.set_value (a_response.values.item ("token"), "token")
+						a_response.add_block (l_tpl_block, "content")
+					else
+						debug ("cms")
+							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+						end
+					end
+				else
+					if attached template_block ("post_reset", a_response) as l_tpl_block then
+						a_response.add_block (l_tpl_block, "content")
+					else
+						debug ("cms")
+							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+						end
+					end
 				end
 			end
 		end
