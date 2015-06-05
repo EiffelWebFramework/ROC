@@ -1,0 +1,5 @@
+{
+	"email": "webmaster@example.com",
+	"subjet": "Thank you for regitering with us",
+	"smtp": "127.0.0.1"
+}

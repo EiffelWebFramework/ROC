@@ -15,6 +15,7 @@
 		<library name="cms" location="..\..\cms-safe.ecf" readonly="false"/>
 		<library name="cms_app_env" location="..\..\library\app_env\app_env-safe.ecf" readonly="false"/>
 		<library name="cms_basic_auth_module" location="..\..\modules\basic_auth\basic_auth-safe.ecf" readonly="false"/>
+		<library name="cms_login_module" location="..\..\modules\login\login-safe.ecf" readonly="false"/>
 		<library name="cms_blog_module" location="modules\blog\cms_blog_module-safe.ecf" readonly="false"/>
 		<library name="cms_demo_module" location="modules\demo\cms_demo_module-safe.ecf" readonly="false"/>
 		<library name="cms_model" location="..\..\library\model\cms_model-safe.ecf" readonly="false"/>
