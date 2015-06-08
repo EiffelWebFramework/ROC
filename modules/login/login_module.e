@@ -9,6 +9,7 @@ class
 inherit
 	CMS_MODULE
 		redefine
+			filters,
 			register_hooks
 		end
 
@@ -48,6 +49,16 @@ feature {NONE} -- Initialization
 			cache_duration := 0
 		end
 
+
+feature -- Filters
+
+	filters (a_api: CMS_API): detachable LIST [WSF_FILTER]
+			-- Possibly list of Filter's module.
+		do
+			create {ARRAYED_LIST [WSF_FILTER]} Result.make (1)
+			Result.extend (create {OAUTH_GMAIL_FILTER}.make (a_api))
+		end
+
 feature -- Access: docs
 
 	root_dir: PATH
@@ -75,6 +86,8 @@ feature -- Router
 			a_router.handle_with_request_methods ("/new-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_new_password (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/reset-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/roc-logout", create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/login-with-google", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login_with_google (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/oauthgmail", create {WSF_URI_AGENT_HANDLER}.make (agent handle_callback_gmail (a_api, ?, ?)), a_router.methods_get_post)
 		end
 
 feature -- Hooks configuration
@@ -171,15 +184,33 @@ feature -- Hooks
 	handle_logout (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			br: BAD_REQUEST_ERROR_CMS_RESPONSE
 			l_url: STRING
+			l_oauth_gmail: OAUTH_LOGIN_GMAIL
+			l_cookie: WSF_COOKIE
 		do
-			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-			r.set_status_code ({HTTP_CONSTANTS}.found)
-			l_url := req.absolute_script_url ("")
-			l_url.append ("/basic_auth_logoff")
-			r.set_redirection (l_url)
-			r.execute
+			if
+				attached {WSF_STRING} req.cookie ("EWF_ROC_OAUTH_GMAIL_SESSION_") as l_cookie_token and then
+				attached {CMS_USER} current_user (req) as l_user
+			then
+					-- Logout gmail
+				create l_oauth_gmail.make (api, req.absolute_script_url (""))
+				l_oauth_gmail.sign_out (l_cookie_token.value)
+				create l_cookie.make ("EWF_ROC_OAUTH_GMAIL_SESSION_", l_cookie_token.value)
+				l_cookie.set_max_age (-1)
+				res.add_cookie (l_cookie)
+				unset_current_user (req)
+				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+				r.set_status_code ({HTTP_CONSTANTS}.found)
+				r.set_redirection (req.absolute_script_url (""))
+				r.execute
+			else
+				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+				r.set_status_code ({HTTP_CONSTANTS}.found)
+				l_url := req.absolute_script_url ("")
+				l_url.append ("/basic_auth_logoff")
+				r.set_redirection (l_url)
+				r.execute
+			end
 		end
 
 	handle_register (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
@@ -604,6 +635,92 @@ feature {NONE} -- Block views
 					end
 				end
 			end
+		end
+
+feature -- OAuth2 Login with google.
+
+	handle_login_with_google (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+		local
+			r: CMS_RESPONSE
+			l_oauth_gmail: OAUTH_LOGIN_GMAIL
+		do
+			create l_oauth_gmail.make (api, req.absolute_script_url (""))
+			if attached  l_oauth_gmail.authorization_url as l_authorization then
+				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+				r.set_redirection (l_authorization)
+				r.execute
+			else
+				create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
+				r.set_main_content ("Bad request")
+				r.execute
+			end
+		end
+
+	handle_callback_gmail (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+		local
+			r: CMS_RESPONSE
+			l_auth_gmail: OAUTH_LOGIN_GMAIL
+			l_user_api: CMS_USER_API
+			l_user: CMS_USER
+			l_roles: LIST [CMS_USER_ROLE]
+			l_cookie: WSF_COOKIE
+		do
+			if attached {WSF_STRING} req.query_parameter ("code") as l_code then
+				create l_auth_gmail.make (api, req.server_url)
+				l_auth_gmail.sign_request (l_code.value)
+				if
+					attached l_auth_gmail.access_token as l_access_token and then
+					attached l_auth_gmail.user_profile as l_user_profile
+				then
+					create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+						-- extract user email
+						-- check if the user exist
+					l_user_api := api.user_api
+						-- 1 if the user exit put it in the context
+					if
+						attached l_auth_gmail.user_email as l_email
+					then
+						if attached {CMS_USER} l_user_api.user_by_email (l_email) as p_user then
+								-- User with email exist
+							if	attached {CMS_USER} l_user_api.user_oauth2_gmail_by_id (p_user.id)	then
+									-- Update oauth entry
+								l_user_api.update_user_oauth2_gmail (l_access_token.token, l_user_profile, p_user )
+							else
+									-- create a oauth entry
+								l_user_api.new_user_oauth2_gmail (l_access_token.token, l_user_profile, p_user )
+							end
+							create l_cookie.make ("EWF_ROC_OAUTH_GMAIL_SESSION_", l_access_token.token)
+							l_cookie.set_max_age (l_access_token.expires_in)
+							res.add_cookie (l_cookie)
+						else
+
+							create {ARRAYED_LIST [CMS_USER_ROLE]}l_roles.make (1)
+							l_roles.force (l_user_api.authenticated_user_role)
+
+								-- Create a new user and oauth entry
+							create l_user.make (l_email)
+							l_user.set_email (l_email)
+							l_user.set_password (new_token) -- generate a random password.
+							l_user.set_roles (l_roles)
+							l_user.mark_active
+							l_user_api.new_user (l_user)
+
+								-- Add oauth entry
+							l_user_api.new_user_oauth2_gmail (l_access_token.token, l_user_profile, l_user )
+							create l_cookie.make ("EWF_ROC_OAUTH_GMAIL_SESSION_", l_access_token.token)
+							l_cookie.set_max_age (l_access_token.expires_in)
+							res.add_cookie (l_cookie)
+						end
+					else
+
+
+					end
+					r.set_redirection (req.absolute_script_url (""))
+					r.execute
+				end
+
+			end
+
 		end
 
 feature {NONE} -- Token Generation

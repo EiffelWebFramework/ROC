@@ -579,6 +579,82 @@ feature -- Change: User password recovery
 		end
 
 
+feature -- User Oauth2
+
+	new_user_oauth2_gmail (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER)
+			-- Add a new user with oauth2 gmail authentication.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			error_handler.reset
+			sql_begin_transaction
+
+			write_information_log (generator + ".new_user_oauth2_gmail")
+			create l_parameters.make (4)
+			l_parameters.put (a_user.id, "uid")
+			l_parameters.put (a_token, "token")
+			l_parameters.put (a_user_profile, "profile")
+			l_parameters.put (create {DATE_TIME}.make_now_utc, "utc_date")
+
+			sql_change (sql_insert_oauth2_gmail, l_parameters)
+			sql_commit_transaction
+		end
+
+
+	update_user_oauth2_gmail (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER)
+			-- Add a new user with oauth2 gmail authentication.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			error_handler.reset
+			sql_begin_transaction
+
+			write_information_log (generator + ".new_user_oauth2_gmail")
+			create l_parameters.make (4)
+			l_parameters.put (a_user.id, "uid")
+			l_parameters.put (a_token, "token")
+			l_parameters.put (a_user_profile, "profile")
+
+			sql_change (sql_update_oauth2_gmail, l_parameters)
+			sql_commit_transaction
+		end
+
+
+	user_by_oauth2_gmail_token (a_token: READABLE_STRING_32): detachable CMS_USER
+			-- User for the given password token `a_token', if any.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			error_handler.reset
+			write_information_log (generator + ".user_by_oauth2_gmail_token")
+			create l_parameters.make (1)
+			l_parameters.put (a_token, "token")
+			sql_query (select_user_by_oauth2_gmail_token, l_parameters)
+			if sql_rows_count = 1 then
+				Result := fetch_user
+			else
+				check no_more_than_one: sql_rows_count = 0 end
+			end
+		end
+
+	user_oauth2_gmail_by_id (a_uid: like {CMS_USER}.id): detachable CMS_USER
+			-- User for the given password token `a_token', if any.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			error_handler.reset
+			write_information_log (generator + ".user_oauth2_gmail_by_id")
+			create l_parameters.make (1)
+			l_parameters.put (a_uid, "uid")
+			sql_query (select_user_oauth2_gmail_by_id, l_parameters)
+			if sql_rows_count = 1 then
+				Result := fetch_user
+			else
+				check no_more_than_one: sql_rows_count = 0 end
+			end
+		end
+
+
 feature {NONE} -- Implementation: User
 
 	user_salt (a_username: READABLE_STRING_32): detachable READABLE_STRING_8
@@ -743,7 +819,7 @@ feature {NONE} -- Sql Queries: USER ACTIVATION
 	Sql_remove_activation: STRING = "DELETE FROM users_activations WHERE token = :token;"
 			-- Remove activation token.
 
-feature {NONE}
+feature {NONE} -- User Password Recovery
 
 	sql_insert_password: STRING = "INSERT INTO users_password_recovery (token, uid, created) VALUES (:token, :uid, :utc_date);"
 			-- SQL insert a new password recovery :token.
@@ -754,6 +830,14 @@ feature {NONE}
 	Select_user_by_password_token: STRING = "SELECT u.* FROM users as u JOIN users_password_recovery as ua ON ua.uid = u.uid and ua.token = :token;"
 			-- Retrieve user by password token if exist.
 
+feature {NONE}-- User Oauth2 Gmail.
 
+	Sql_insert_oauth2_gmail: STRING = "INSERT INTO oauth2_gmail (uid, access_token, details, created) VALUES (:uid, :token, :profile, :utc_date);"
+
+	Sql_update_oauth2_gmail: STRING = "UPDATE oauth2_gmail SET access_token = :token, details = :profile WHERE uid =:uid;"
+
+	Select_user_by_oauth2_gmail_token: STRING = "SELECT u.* FROM users as u JOIN oauth2_gmail as og ON og.uid = u.uid and og.access_token = :token;"
+
+	Select_user_oauth2_gmail_by_id: STRING = "SELECT u.* FROM users as u JOIN oauth2_gmail as og ON og.uid = u.uid and og.uid = :uid;"
 
 end

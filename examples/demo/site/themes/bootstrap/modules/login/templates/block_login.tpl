@@ -1,6 +1,6 @@
  	<div>
  		{if isset="$user"}
-    		<h3><a href="/basic_auth_logoff">Logout</a> </h3>
+    		<h3><a href="/roc-logout">Logout</a> </h3>
 		{/if}
 		{unless isset="$user"}
 			<h3>Login or <a href="/roc-register">Register</a></h3>
@@ -28,5 +28,8 @@
 				</p>
 			</div>
 		</div>	
-		{/unless}    	
+		{/unless}
+		<div>
+				<a href="/login-with-google"><img src="http://qpleple.com/img/post-how-to-make-people-login-into-your-website-with-their-google-account/signin-google-3.png"></a>
+		</div>    	
 	</div>
