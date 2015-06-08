@@ -179,24 +179,4 @@ feature -- Change: User password recovery
 		deferred
 		end
 
-feature -- Change: User Oauth2
-
-	new_user_oauth2_gmail (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER)
-			-- Add a new user with oauth2 gmail authentication.
-		deferred
-		end
-
-	update_user_oauth2_gmail (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER)
-			-- Update user `a_user' with oauth2 gmail authentication.
-		deferred
-		end
-
-	user_oauth2_gmail_by_id (a_uid: like {CMS_USER}.id): detachable CMS_USER
-		deferred
-		end
-
-	user_by_oauth2_gmail_token (a_token: READABLE_STRING_32): detachable CMS_USER
-		deferred
-		end
-
 end

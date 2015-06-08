@@ -151,35 +151,6 @@ feature -- Change User
 			storage.update_user (a_user)
 		end
 
-
-	new_user_oauth2_gmail (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER)
-			-- Add a new user with oauth2 gmail authentication.
-		require
-			has_id: a_user.has_id
-		do
-			storage.new_user_oauth2_gmail (a_token, a_user_profile, a_user)
-		end
-
-
-	update_user_oauth2_gmail (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER)
-			-- Updaate user `a_user' with oauth2 gmail authentication.
-		require
-			has_id: a_user.has_id
-		do
-			storage.update_user_oauth2_gmail (a_token, a_user_profile, a_user)
-		end
-
-
-	user_oauth2_gmail_by_id	(a_uid: like {CMS_USER}.id): detachable CMS_USER
-		do
-			Result := storage.user_oauth2_gmail_by_id (a_uid)
-		end
-
-	user_by_oauth2_gmail_token (a_token: READABLE_STRING_32): detachable CMS_USER
-		do
-			Result := storage.user_by_oauth2_gmail_token (a_token)
-		end
-
 feature -- User Activation
 
 	new_activation (a_token: READABLE_STRING_32; a_id: INTEGER_64)

@@ -8,10 +8,17 @@ class
 
 inherit
 	CMS_MODULE
+		rename
+			module_api as user_oauth_api
 		redefine
 			filters,
-			register_hooks
+			register_hooks,
+			initialize,
+			is_installed,
+			install,
+			user_oauth_api
 		end
+
 
 	CMS_HOOK_BLOCK
 
@@ -49,6 +56,65 @@ feature {NONE} -- Initialization
 			cache_duration := 0
 		end
 
+feature {CMS_API} -- Module Initialization			
+
+	initialize (a_api: CMS_API)
+			-- <Precursor>
+		local
+			l_user_auth_api: like user_oauth_api
+			l_user_auth_storage: CMS_USER_OAUTH_STORAGE_I
+		do
+			Precursor (a_api)
+
+				-- Storage initialization
+			if attached {CMS_STORAGE_SQL_I} a_api.storage as l_storage_sql then
+				create {CMS_USER_OAUTH_STORAGE_SQL} l_user_auth_storage.make (l_storage_sql)
+			else
+				-- FIXME: in case of NULL storage, should Current be disabled?
+				create {CMS_USER_OAUTH_STORAGE_NULL} l_user_auth_storage
+			end
+
+				-- Node API initialization
+			create l_user_auth_api.make_with_storage (a_api, l_user_auth_storage)
+			user_oauth_api := l_user_auth_api
+		ensure then
+			user_oauth_api_set: user_oauth_api /= Void
+		end
+
+feature {CMS_API} -- Module management
+
+	is_installed (api: CMS_API): BOOLEAN
+			-- Is Current module installed?
+		do
+			Result := attached api.storage.custom_value ("is_initialized", "module-" + name) as v and then v.is_case_insensitive_equal_general ("yes")
+		end
+
+	install (api: CMS_API)
+		local
+			sql: STRING
+			l_setup: CMS_SETUP
+		do
+			l_setup := api.setup
+
+				-- Schema
+			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
+				if not l_sql_storage.sql_table_exists ("oauth2_gmail") then
+					--| Schema
+					l_sql_storage.sql_execute_file_script (l_setup.environment.path.extended ("scripts").extended ("core.sql"))
+
+					if l_sql_storage.has_error then
+						api.logger.put_error ("Could not initialize database for blog module", generating_type)
+					end
+				end
+				api.storage.set_custom_value ("is_initialized", "module-" + name, "yes")
+			end
+		end
+
+feature {CMS_API} -- Access: API
+
+	user_oauth_api: detachable CMS_USER_OAUTH_API
+			-- <Precursor>		
+
 
 feature -- Filters
 
@@ -56,7 +122,9 @@ feature -- Filters
 			-- Possibly list of Filter's module.
 		do
 			create {ARRAYED_LIST [WSF_FILTER]} Result.make (1)
-			Result.extend (create {OAUTH_GMAIL_FILTER}.make (a_api))
+			if attached user_oauth_api as l_user_oauth_api then
+				Result.extend (create {OAUTH_GMAIL_FILTER}.make (a_api, l_user_oauth_api))
+			end
 		end
 
 feature -- Access: docs
@@ -76,8 +144,17 @@ feature -- Access: docs
 
 feature -- Router
 
+
 	setup_router (a_router: WSF_ROUTER; a_api: CMS_API)
-			-- Router configuration.
+			-- <Precursor>
+		do
+			if attached user_oauth_api as l_user_oauth_api then
+				configure_web (a_api, l_user_oauth_api, a_router)
+			end
+		end
+
+
+	configure_web (a_api: CMS_API; a_user_oauth_api: CMS_USER_OAUTH_API; a_router: WSF_ROUTER)
 		do
 			a_router.handle_with_request_methods ("/roc-login", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login (a_api, ?, ?)), a_router.methods_head_get)
 			a_router.handle_with_request_methods ("/roc-register", create {WSF_URI_AGENT_HANDLER}.make (agent handle_register (a_api, ?, ?)), a_router.methods_get_post)
@@ -87,8 +164,10 @@ feature -- Router
 			a_router.handle_with_request_methods ("/reset-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/roc-logout", create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/login-with-google", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login_with_google (a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/oauthgmail", create {WSF_URI_AGENT_HANDLER}.make (agent handle_callback_gmail (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/oauthgmail", create {WSF_URI_AGENT_HANDLER}.make (agent handle_callback_gmail (a_api, a_user_oauth_api, ?, ?)), a_router.methods_get_post)
+
 		end
+
 
 feature -- Hooks configuration
 
@@ -656,7 +735,7 @@ feature -- OAuth2 Login with google.
 			end
 		end
 
-	handle_callback_gmail (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+	handle_callback_gmail (api: CMS_API; a_user_oauth_api: CMS_USER_OAUTH_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
 			l_auth_gmail: OAUTH_LOGIN_GMAIL
@@ -682,12 +761,12 @@ feature -- OAuth2 Login with google.
 					then
 						if attached {CMS_USER} l_user_api.user_by_email (l_email) as p_user then
 								-- User with email exist
-							if	attached {CMS_USER} l_user_api.user_oauth2_gmail_by_id (p_user.id)	then
+							if	attached {CMS_USER} a_user_oauth_api.user_oauth2_gmail_by_id (p_user.id)	then
 									-- Update oauth entry
-								l_user_api.update_user_oauth2_gmail (l_access_token.token, l_user_profile, p_user )
+								a_user_oauth_api.update_user_oauth2_gmail (l_access_token.token, l_user_profile, p_user )
 							else
 									-- create a oauth entry
-								l_user_api.new_user_oauth2_gmail (l_access_token.token, l_user_profile, p_user )
+								a_user_oauth_api.new_user_oauth2_gmail (l_access_token.token, l_user_profile, p_user )
 							end
 							create l_cookie.make ("EWF_ROC_OAUTH_GMAIL_SESSION_", l_access_token.token)
 							l_cookie.set_max_age (l_access_token.expires_in)
@@ -706,7 +785,7 @@ feature -- OAuth2 Login with google.
 							l_user_api.new_user (l_user)
 
 								-- Add oauth entry
-							l_user_api.new_user_oauth2_gmail (l_access_token.token, l_user_profile, l_user )
+							a_user_oauth_api.new_user_oauth2_gmail (l_access_token.token, l_user_profile, l_user )
 							create l_cookie.make ("EWF_ROC_OAUTH_GMAIL_SESSION_", l_access_token.token)
 							l_cookie.set_max_age (l_access_token.expires_in)
 							res.add_cookie (l_cookie)

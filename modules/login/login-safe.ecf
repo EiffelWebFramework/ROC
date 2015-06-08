@@ -18,8 +18,9 @@
 		<library name="http" location="$ISE_LIBRARY\contrib\library\network\protocol\http\http-safe.ecf"/>
 		<library name="time" location="$ISE_LIBRARY\library\time\time-safe.ecf"/>
 		<library name="wsf" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf-safe.ecf"/>
+		<library name="error" location="$ISE_LIBRARY\contrib\library\utility\general\error\error-safe.ecf"/>
 
-		<library name="apis" location="..\..\..\cypress_jv\consumer\apis\apis.ecf" readonly="false"/>
+		<library name="apis" location="..\..\..\cypress_jv\consumer\apis\apis.ecf" readonly="false"/>	
 		<library name="cypress_consumer" location="..\..\..\cypress_jv\consumer\cypress_consumer-safe.ecf" readonly="false"/>
 		<library name="json" location="$ISE_LIBRARY\contrib\library\text\parser\json\library\json-safe.ecf" readonly="false"/>
 
