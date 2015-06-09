@@ -1,5 +1,5 @@
  <div>
-    <form action="/roc-register" method="post">
+    <form action="/account/roc-register" method="post">
         <fieldset>
             <legend>Register Form</legend>
             <div>

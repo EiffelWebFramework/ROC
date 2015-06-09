@@ -1,5 +1,5 @@
  <div>
-    <form action="/reset-password" method="post">
+    <form action="/account/reset-password" method="post">
         <fieldset>
             <legend>Generate New Password Form</legend>
             <div>

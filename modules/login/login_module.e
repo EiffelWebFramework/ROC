@@ -39,6 +39,7 @@ inherit
 
 	CMS_REQUEST_UTIL
 
+
 create
 	make
 
@@ -100,7 +101,7 @@ feature {CMS_API} -- Module management
 			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
 				if not l_sql_storage.sql_table_exists ("oauth2_gmail") then
 					--| Schema
-					l_sql_storage.sql_execute_file_script (l_setup.environment.path.extended ("scripts").extended ("core.sql"))
+					l_sql_storage.sql_execute_file_script (l_setup.environment.path.extended ("scripts").extended ("oauth2_gmail.sql"))
 
 					if l_sql_storage.has_error then
 						api.logger.put_error ("Could not initialize database for blog module", generating_type)
@@ -156,16 +157,15 @@ feature -- Router
 
 	configure_web (a_api: CMS_API; a_user_oauth_api: CMS_USER_OAUTH_API; a_router: WSF_ROUTER)
 		do
-			a_router.handle_with_request_methods ("/roc-login", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login (a_api, ?, ?)), a_router.methods_head_get)
-			a_router.handle_with_request_methods ("/roc-register", create {WSF_URI_AGENT_HANDLER}.make (agent handle_register (a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/activate/{token}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_activation (a_api, ?, ?)), a_router.methods_head_get)
-			a_router.handle_with_request_methods ("/reactivate", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reactivation (a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/new-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_new_password (a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/reset-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password (a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/roc-logout", create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout (a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/login-with-google", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login_with_google (a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/oauthgmail", create {WSF_URI_AGENT_HANDLER}.make (agent handle_callback_gmail (a_api, a_user_oauth_api, ?, ?)), a_router.methods_get_post)
-
+			a_router.handle_with_request_methods ("/account/roc-login", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login (a_api, ?, ?)), a_router.methods_head_get)
+			a_router.handle_with_request_methods ("/account/roc-register", create {WSF_URI_AGENT_HANDLER}.make (agent handle_register (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/account/activate/{token}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_activation (a_api, ?, ?)), a_router.methods_head_get)
+			a_router.handle_with_request_methods ("/account/reactivate", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reactivation (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/account/new-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_new_password (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/account/reset-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/account/roc-logout", create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/account/login-with-google", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login_with_google (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/account/oauthgmail", create {WSF_URI_AGENT_HANDLER}.make (agent handle_callback_gmail (a_api, a_user_oauth_api, ?, ?)), a_router.methods_get_post)
 		end
 
 
@@ -196,9 +196,9 @@ feature -- Hooks
 			lnk: CMS_LOCAL_LINK
 		do
 			if attached a_response.current_user (a_response.request) as u then
-				create lnk.make (u.name +  " (Logout)", "roc-logout" )
+				create lnk.make (u.name +  " (Logout)", "account/roc-logout" )
 			else
-				create lnk.make ("Login", "roc-login")
+				create lnk.make ("Login", "account/roc-login")
 			end
 			a_menu_system.primary_menu.extend (lnk)
 			lnk.set_weight (98)
@@ -223,27 +223,27 @@ feature -- Hooks
 		do
 			if
 				a_block_id.is_case_insensitive_equal_general ("login") and then
-				a_response.request.path_info.starts_with ("/roc-login")
+				a_response.request.path_info.starts_with ("/account/roc-login")
 			then
 				get_block_view_login (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("register") and then
-				a_response.request.path_info.starts_with ("/roc-register")
+				a_response.request.path_info.starts_with ("/account/roc-register")
 			then
 				get_block_view_register (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("reactivate") and then
-				a_response.request.path_info.starts_with ("/reactivate")
+				a_response.request.path_info.starts_with ("/account/reactivate")
 			then
 				get_block_view_reactivate (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("new_password") and then
-				a_response.request.path_info.starts_with ("/new-password")
+				a_response.request.path_info.starts_with ("/account/new-password")
 			then
 				get_block_view_new_password (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("reset_password") and then
-				a_response.request.path_info.starts_with ("/reset-password")
+				a_response.request.path_info.starts_with ("/account/reset-password")
 			then
 				get_block_view_reset_password (a_block_id, a_response)
 			end
@@ -259,6 +259,15 @@ feature -- Hooks
 			r.execute
 		end
 
+	handle_workaround_filter (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+		local
+			r: CMS_RESPONSE
+			br: BAD_REQUEST_ERROR_CMS_RESPONSE
+		do
+			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+			r.execute
+		end
+
 
 	handle_logout (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
@@ -268,13 +277,14 @@ feature -- Hooks
 			l_cookie: WSF_COOKIE
 		do
 			if
-				attached {WSF_STRING} req.cookie ("EWF_ROC_OAUTH_GMAIL_SESSION_") as l_cookie_token and then
+				attached {WSF_STRING} req.cookie ({LOGIN_CONSTANTS}.oauth_gmail_session) as l_cookie_token and then
 				attached {CMS_USER} current_user (req) as l_user
 			then
 					-- Logout gmail
 				create l_oauth_gmail.make (api, req.absolute_script_url (""))
 				l_oauth_gmail.sign_out (l_cookie_token.value)
-				create l_cookie.make ("EWF_ROC_OAUTH_GMAIL_SESSION_", l_cookie_token.value)
+				create l_cookie.make ({LOGIN_CONSTANTS}.oauth_gmail_session, l_cookie_token.value)
+				l_cookie.set_path ("/")
 				l_cookie.set_max_age (-1)
 				res.add_cookie (l_cookie)
 				unset_current_user (req)
@@ -340,16 +350,14 @@ feature -- Hooks
 						l_token := new_token
 						l_user_api.new_activation (l_token, u.id)
 						create l_link.make_from_string (req.server_url)
-						l_link.append ("/activate/")
+						l_link.append ("/account/activate/")
 						l_link.append (l_token)
 
-						create l_message.make_from_string (account_activation)
-						l_message.replace_substring_all ("$link", l_link)
 
 							-- Send Email
 						create es.make (create {LOGIN_EMAIL_SERVICE_PARAMETERS}.make (api))
 						write_debug_log (generator + ".handle register: send_contact_email")
-						es.send_contact_email (l_email.value, l_message)
+						es.send_contact_email (l_email.value, l_link)
 
 					else
 						r.values.force (l_name.value, "name")
@@ -385,7 +393,7 @@ feature -- Hooks
 					-- the token does not exist, or it was already used.
 					r.set_status_code ({HTTP_CONSTANTS}.bad_request)
 					r.set_value ("Account not activated", "optional_content_type")
-					r.set_main_content ("<p>The token <i>"+ l_token.value +"</i> is not valid <a href=%"/reactivate%">Reactivate Account</a></p>"  )
+					r.set_main_content ("<p>The token <i>"+ l_token.value +"</i> is not valid <a href=%"/account/reactivate%">Reactivate Account</a></p>"  )
 
 				end
 				r.execute
@@ -421,16 +429,13 @@ feature -- Hooks
 							l_token := new_token
 							l_user_api.new_activation (l_token, l_user.id)
 							create l_link.make_from_string (req.server_url)
-							l_link.append ("/activate/")
+							l_link.append ("/account/activate/")
 							l_link.append (l_token)
-
-							create l_message.make_from_string (account_activation)
-							l_message.replace_substring_all ("$link", l_link)
 
 								-- Send Email
 							create es.make (create {LOGIN_EMAIL_SERVICE_PARAMETERS}.make (api))
-							write_debug_log (generator + ".handle register: send_contact_email")
-							es.send_contact_email (l_email.value, l_message)
+							write_debug_log (generator + ".handle register: send_contact_activation_email")
+							es.send_contact_activation_email (l_email.value, l_link)
 						end
 					else
 						r.values.force ("The email does not exist or !", "error_email")
@@ -462,16 +467,13 @@ feature -- Hooks
 						l_token := new_token
 						l_user_api.new_password (l_token, l_user.id)
 						create l_link.make_from_string (req.server_url)
-						l_link.append ("/reset-password?token=")
+						l_link.append ("/account/reset-password?token=")
 						l_link.append (l_token)
-
-						create l_message.make_from_string (account_new_password)
-						l_message.replace_substring_all ("$link", l_link)
 
 								-- Send Email
 						create es.make (create {LOGIN_EMAIL_SERVICE_PARAMETERS}.make (api))
-						write_debug_log (generator + ".handle register: send_contact_email")
-						es.send_contact_email (l_email.value, l_message)
+						write_debug_log (generator + ".handle register: send_contact_password_email")
+						es.send_contact_password_email (l_email.value, l_link)
 					else
 						r.values.force ("The email does not exist !", "error_email")
 						r.values.force (l_email.value, "email")
@@ -497,7 +499,7 @@ feature -- Hooks
 			if	attached {WSF_STRING} req.query_parameter ("token") as l_token then
 				r.values.force (l_token.value, "token")
 				if l_user_api.user_by_password_token (l_token.value) = Void  then
-					r.values.force ("The token " + l_token.value + " is not valid, click <a href=%"/new-password%">here</a> to generate a new token.", "error_token")
+					r.values.force ("The token " + l_token.value + " is not valid, click <a href=%"/account/new-password%">here</a> to generate a new token.", "error_token")
 					r.set_status_code ({HTTP_CONSTANTS}.bad_request)
 				end
 			end
@@ -743,6 +745,7 @@ feature -- OAuth2 Login with google.
 			l_user: CMS_USER
 			l_roles: LIST [CMS_USER_ROLE]
 			l_cookie: WSF_COOKIE
+			es: LOGIN_EMAIL_SERVICE
 		do
 			if attached {WSF_STRING} req.query_parameter ("code") as l_code then
 				create l_auth_gmail.make (api, req.server_url)
@@ -768,8 +771,9 @@ feature -- OAuth2 Login with google.
 									-- create a oauth entry
 								a_user_oauth_api.new_user_oauth2_gmail (l_access_token.token, l_user_profile, p_user )
 							end
-							create l_cookie.make ("EWF_ROC_OAUTH_GMAIL_SESSION_", l_access_token.token)
+							create l_cookie.make ({LOGIN_CONSTANTS}.oauth_gmail_session, l_access_token.token)
 							l_cookie.set_max_age (l_access_token.expires_in)
+							l_cookie.set_path ("/")
 							res.add_cookie (l_cookie)
 						else
 
@@ -786,13 +790,19 @@ feature -- OAuth2 Login with google.
 
 								-- Add oauth entry
 							a_user_oauth_api.new_user_oauth2_gmail (l_access_token.token, l_user_profile, l_user )
-							create l_cookie.make ("EWF_ROC_OAUTH_GMAIL_SESSION_", l_access_token.token)
+							create l_cookie.make ({LOGIN_CONSTANTS}.oauth_gmail_session, l_access_token.token)
 							l_cookie.set_max_age (l_access_token.expires_in)
+							l_cookie.set_path ("/")
 							res.add_cookie (l_cookie)
+							set_current_user (req, l_user)
+
+
+									-- Send Email
+							create es.make (create {LOGIN_EMAIL_SERVICE_PARAMETERS}.make (api))
+							write_debug_log (generator + ".handle register: send_contact_welcome_email")
+							es.send_contact_welcome_email (l_email, "")
 						end
 					else
-
-
 					end
 					r.set_redirection (req.absolute_script_url (""))
 					r.execute
@@ -823,48 +833,7 @@ feature {NONE} -- Token Generation
 			Result := l_token
 		end
 
-feature --{NONE} -- Message email
 
-	account_activation: STRING= "[
-		<!doctype html>
-		<html lang="en">
-		<head>
-		  <meta charset="utf-8">
-		  <title>Eiffel.org Activation</title>
-		  <meta name="description" content="Eiffel.org Activation">
-		  <meta name="author" content="Eiffel.org">
-		</head>
-
-		<body>
-			<p>Thank you for registering at <a href="eiffel.org">Eiffel.org</a></p>
-
-			<p>To complete your registration, please click on this link to activate your account:<p>
-
-			<p><a href="$link">$link</a></p>
-			<p>Thank you for joining us.</p>
-		</body>
-		</html>
-	]"
-
-	account_new_password: STRING= "[
-		<!doctype html>
-		<html lang="en">
-		<head>
-		  <meta charset="utf-8">
-		  <title>Eiffel.org New Password</title>
-		  <meta name="description" content="Eiffel.org New Password">
-		  <meta name="author" content="Eiffel.org">
-		</head>
-
-		<body>
-			<p>You have required a new password at <a href="eiffel.org">Eiffel.org</a></p>
-
-			<p>To complete your request, please click on this link to genereate a new password:<p>
-
-			<p><a href="$link">$link</a></p>
-		</body>
-		</html>
-	]"
 
 feature {NONE} -- Implementation: date and time
 

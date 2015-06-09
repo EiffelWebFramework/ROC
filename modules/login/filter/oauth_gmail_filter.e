@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {OAUTH_GMAIL_FILTER}."
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -42,7 +41,7 @@ feature -- Basic operations
 			end
 				-- A valid user
 			if
-				attached {WSF_STRING} req.cookie ("EWF_ROC_OAUTH_GMAIL_SESSION_") as l_roc_auth_session_token
+				attached {WSF_STRING} req.cookie ({LOGIN_CONSTANTS}.oauth_gmail_session) as l_roc_auth_session_token
 			then
 				if attached {CMS_USER} user_oauth_api.user_by_oauth2_gmail_token (l_roc_auth_session_token.value) as l_user then
 					set_current_user (req, l_user)

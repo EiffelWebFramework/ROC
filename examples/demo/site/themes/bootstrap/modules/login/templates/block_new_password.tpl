@@ -1,5 +1,5 @@
  <div>
-    <form action="/new-password" method="post">
+    <form action="/account/new-password" method="post">
         <fieldset>
             <legend>Require new password</legend>
             <div>

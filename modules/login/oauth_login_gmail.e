@@ -21,7 +21,7 @@ feature {NONE} -- Initialization
 			cms_api := a_cms_api
 			initilize
 			create config.make_default (api_key, api_secret)
-			config.set_callback (a_host + "/oauthgmail")
+			config.set_callback (a_host + "/account/oauthgmail")
 			config.set_scope (scope)
 			create goauth
 			api_service := goauth.create_service (config)
