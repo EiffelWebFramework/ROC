@@ -61,10 +61,10 @@ echo Install ROC as CMS ewf
 %COPYCMD% %TMP_DIR%\modules	%TMP_UNSTABLE_DIR%\library\web\cms\modules
 %COPYCMD% %TMP_DIR%\examples	%TMP_UNSTABLE_DIR%\library\web\cms\examples
 
-copy %TMP_DIR%\cms.ecf %TMP_UNSTABLE_DIR%\cms.ecf
-copy %TMP_DIR%\cms-safe.ecf %TMP_UNSTABLE_DIR%\cms-safe.ecf
-copy %TMP_DIR%\README.md %TMP_UNSTABLE_DIR%\README.md
-copy %TMP_DIR%\package.iron %TMP_UNSTABLE_DIR%\package.iron
+copy %TMP_DIR%\cms.ecf %TMP_UNSTABLE_DIR%\library\web\cms\cms.ecf
+copy %TMP_DIR%\cms-safe.ecf %TMP_UNSTABLE_DIR%\library\web\cms\cms-safe.ecf
+copy %TMP_DIR%\README.md %TMP_UNSTABLE_DIR%\library\web\cms\README.md
+copy %TMP_DIR%\package.iron %TMP_UNSTABLE_DIR%\library\web\cms\package.iron
 
 :end
 del %TMP_EXCLUDE%
