@@ -94,17 +94,46 @@ feature {CMS_API} -- Module management
 		local
 			sql: STRING
 			l_setup: CMS_SETUP
+			l_params: detachable STRING_TABLE [detachable ANY]
+			l_consumers: LIST [STRING]
 		do
 			l_setup := api.setup
 
 				-- Schema
 			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
-				if not l_sql_storage.sql_table_exists ("oauth2_gmail") then
+				if not l_sql_storage.sql_table_exists ("oauth2_consumers") then
 					--| Schema
-					l_sql_storage.sql_execute_file_script (l_setup.environment.path.extended ("scripts").extended ("oauth2_gmail.sql"))
+					l_sql_storage.sql_execute_file_script (l_setup.environment.path.extended ("scripts").extended ("oauth2_consumers.sql"))
 
 					if l_sql_storage.has_error then
 						api.logger.put_error ("Could not initialize database for blog module", generating_type)
+					end
+						-- TODO workaround.
+					l_sql_storage.sql_execute_file_script (l_setup.environment.path.extended ("scripts").extended ("oauth2_consumers_initialize.sql"))
+				end
+
+					-- TODO workaround, until we have an admin module
+				l_sql_storage.sql_query ("SELECT name FROM oauth2_consumers;", Void)
+				if l_sql_storage.has_error then
+					api.logger.put_error ("Could not initialize database for differnent consumerns", generating_type)
+				else
+					from
+						l_sql_storage.sql_start
+						create {ARRAYED_LIST[STRING]} l_consumers.make (2)
+					until
+						l_sql_storage.sql_after
+					loop
+						if attached l_sql_storage.sql_read_string (1) as l_name then
+							l_consumers.force ("oauth2_"+l_name)
+						end
+						l_sql_storage.sql_forth
+					end
+					across l_consumers as ic  loop
+						if not l_sql_storage.sql_table_exists (ic.item) then
+							create l_params.make (1)
+							l_params.force (ic.item, "table_name")
+							l_sql_storage.sql_execute_file_script_with_params (l_setup.environment.path.extended ("scripts").extended ("oauth2_template.sql"), l_params)
+						end
 					end
 				end
 				api.storage.set_custom_value ("is_initialized", "module-" + name, "yes")
@@ -116,7 +145,6 @@ feature {CMS_API} -- Access: API
 	user_oauth_api: detachable CMS_USER_OAUTH_API
 			-- <Precursor>		
 
-
 feature -- Filters
 
 	filters (a_api: CMS_API): detachable LIST [WSF_FILTER]
@@ -124,7 +152,7 @@ feature -- Filters
 		do
 			create {ARRAYED_LIST [WSF_FILTER]} Result.make (1)
 			if attached user_oauth_api as l_user_oauth_api then
-				Result.extend (create {OAUTH_GMAIL_FILTER}.make (a_api, l_user_oauth_api))
+				Result.extend (create {OAUTH_FILTER}.make (a_api, l_user_oauth_api))
 			end
 		end
 
@@ -164,8 +192,8 @@ feature -- Router
 			a_router.handle_with_request_methods ("/account/new-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_new_password (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/account/reset-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/account/roc-logout", create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout (a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/account/login-with-google", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login_with_google (a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/account/oauthgmail", create {WSF_URI_AGENT_HANDLER}.make (agent handle_callback_gmail (a_api, a_user_oauth_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/account/login-with-oauth/{callback}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_login_with_oauth (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/account/{callback}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_callback_oauth (a_api, a_user_oauth_api, ?, ?)), a_router.methods_get_post)
 		end
 
 
@@ -273,17 +301,15 @@ feature -- Hooks
 		local
 			r: CMS_RESPONSE
 			l_url: STRING
-			l_oauth_gmail: OAUTH_LOGIN_GMAIL
+			l_oauth_gmail: OAUTH_LOGIN
 			l_cookie: WSF_COOKIE
 		do
 			if
-				attached {WSF_STRING} req.cookie ({LOGIN_CONSTANTS}.oauth_gmail_session) as l_cookie_token and then
+				attached {WSF_STRING} req.cookie ({LOGIN_CONSTANTS}.oauth_session) as l_cookie_token and then
 				attached {CMS_USER} current_user (req) as l_user
 			then
 					-- Logout gmail
-				create l_oauth_gmail.make (api, req.absolute_script_url (""))
-				l_oauth_gmail.sign_out (l_cookie_token.value)
-				create l_cookie.make ({LOGIN_CONSTANTS}.oauth_gmail_session, l_cookie_token.value)
+				create l_cookie.make ({LOGIN_CONSTANTS}.oauth_session, l_cookie_token.value)
 				l_cookie.set_path ("/")
 				l_cookie.set_max_age (-1)
 				res.add_cookie (l_cookie)
@@ -563,7 +589,14 @@ feature {NONE} -- Block views
 				loop
 					l_tpl_block.set_value (ic.item, ic.key)
 				end
-					a_response.add_block (l_tpl_block, "content")
+				if
+					attached user_oauth_api as l_auth_api and then
+					attached l_auth_api.oauth2_consumers as l_list
+				then
+					l_tpl_block.set_value (l_list, "oauth_consumers")
+				end
+
+				a_response.add_block (l_tpl_block, "content")
 			else
 				debug ("cms")
 					a_response.add_warning_message ("Error with block [" + a_block_id + "]")
@@ -720,16 +753,25 @@ feature {NONE} -- Block views
 
 feature -- OAuth2 Login with google.
 
-	handle_login_with_google (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+	handle_login_with_oauth (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			l_oauth_gmail: OAUTH_LOGIN_GMAIL
+			l_oauth: OAUTH_LOGIN
 		do
-			create l_oauth_gmail.make (api, req.absolute_script_url (""))
-			if attached  l_oauth_gmail.authorization_url as l_authorization then
-				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-				r.set_redirection (l_authorization)
-				r.execute
+			if
+				attached {WSF_STRING} req.path_parameter ("callback") as p_consumer and then
+				attached {CMS_OAUTH_CONSUMER} oauth_consumer_by_name (api, p_consumer.value) as l_consumer
+			then
+				create l_oauth.make (req.server_url, l_consumer)
+				if attached l_oauth.authorization_url as l_authorization_url then
+					create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+					r.set_redirection (l_authorization_url)
+					r.execute
+				else
+					create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
+					r.set_main_content ("Bad request")
+					r.execute
+				end
 			else
 				create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
 				r.set_main_content ("Bad request")
@@ -737,22 +779,25 @@ feature -- OAuth2 Login with google.
 			end
 		end
 
-	handle_callback_gmail (api: CMS_API; a_user_oauth_api: CMS_USER_OAUTH_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+	handle_callback_oauth (api: CMS_API; a_user_oauth_api: CMS_USER_OAUTH_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			l_auth_gmail: OAUTH_LOGIN_GMAIL
+			l_auth: OAUTH_LOGIN
 			l_user_api: CMS_USER_API
 			l_user: CMS_USER
 			l_roles: LIST [CMS_USER_ROLE]
 			l_cookie: WSF_COOKIE
 			es: LOGIN_EMAIL_SERVICE
 		do
-			if attached {WSF_STRING} req.query_parameter ("code") as l_code then
-				create l_auth_gmail.make (api, req.server_url)
-				l_auth_gmail.sign_request (l_code.value)
+			if  attached {WSF_STRING} req.path_parameter ("callback") as l_callback and then
+			    attached {CMS_OAUTH_CONSUMER} oauth_consumer_by_callback (api, l_callback.value) as l_consumer and then
+				attached {WSF_STRING} req.query_parameter ("code") as l_code
+			then
+				create l_auth.make (req.server_url, l_consumer)
+				l_auth.sign_request (l_code.value)
 				if
-					attached l_auth_gmail.access_token as l_access_token and then
-					attached l_auth_gmail.user_profile as l_user_profile
+					attached l_auth.access_token as l_access_token and then
+					attached l_auth.user_profile as l_user_profile
 				then
 					create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 						-- extract user email
@@ -760,18 +805,18 @@ feature -- OAuth2 Login with google.
 					l_user_api := api.user_api
 						-- 1 if the user exit put it in the context
 					if
-						attached l_auth_gmail.user_email as l_email
+						attached l_auth.user_email as l_email
 					then
 						if attached {CMS_USER} l_user_api.user_by_email (l_email) as p_user then
 								-- User with email exist
-							if	attached {CMS_USER} a_user_oauth_api.user_oauth2_gmail_by_id (p_user.id)	then
+							if	attached {CMS_USER} a_user_oauth_api.user_oauth2_by_id (p_user.id, "oauth2_" + l_consumer.name)	then
 									-- Update oauth entry
-								a_user_oauth_api.update_user_oauth2_gmail (l_access_token.token, l_user_profile, p_user )
+								a_user_oauth_api.update_user_oauth2 (l_access_token.token, l_user_profile, p_user, "oauth2_" + l_consumer.name )
 							else
 									-- create a oauth entry
-								a_user_oauth_api.new_user_oauth2_gmail (l_access_token.token, l_user_profile, p_user )
+								a_user_oauth_api.new_user_oauth2 (l_access_token.token, l_user_profile, p_user, "oauth2_" + l_consumer.name )
 							end
-							create l_cookie.make ({LOGIN_CONSTANTS}.oauth_gmail_session, l_access_token.token)
+							create l_cookie.make ({LOGIN_CONSTANTS}.oauth_session, l_access_token.token)
 							l_cookie.set_max_age (l_access_token.expires_in)
 							l_cookie.set_path ("/")
 							res.add_cookie (l_cookie)
@@ -789,8 +834,8 @@ feature -- OAuth2 Login with google.
 							l_user_api.new_user (l_user)
 
 								-- Add oauth entry
-							a_user_oauth_api.new_user_oauth2_gmail (l_access_token.token, l_user_profile, l_user )
-							create l_cookie.make ({LOGIN_CONSTANTS}.oauth_gmail_session, l_access_token.token)
+							a_user_oauth_api.new_user_oauth2 (l_access_token.token, l_user_profile, l_user, "oauth_" + l_consumer.name )
+							create l_cookie.make ({LOGIN_CONSTANTS}.oauth_session, l_access_token.token)
 							l_cookie.set_max_age (l_access_token.expires_in)
 							l_cookie.set_path ("/")
 							res.add_cookie (l_cookie)
@@ -864,6 +909,120 @@ feature {NONE} -- Implementation: date and time
 			create d.make_from_timestamp (n)
 			Result := d.date_time
 		end
+
+feature --{NONE} -- Helper OAUTH Consumers.
+
+
+	oauth_consumer_by_name (a_api: CMS_API; a_name: READABLE_STRING_8): detachable CMS_OAUTH_CONSUMER
+		local
+			l_params: detachable STRING_TABLE [detachable ANY]
+			l_setup:  CMS_SETUP
+		do
+				-- TODO workaround!!, move to the persistence layer
+			l_setup := a_api.setup
+
+				-- Schema
+			if attached {CMS_STORAGE_SQL_I} a_api.storage as l_sql_storage then
+
+					-- Todo workaround, move this to his own database layer.
+				create l_params.make (1)
+				l_params.force (a_name, "name")
+				l_sql_storage.sql_query ("SELECT * FROM oauth2_consumers where name =:name;", l_params)
+				if l_sql_storage.has_error then
+						a_api.logger.put_error ("Could not retrieve a consumer from the database", generating_type)
+				else
+						-- Fetch a Consumer
+					create Result
+					if attached l_sql_storage.sql_read_integer_64 (1) as l_id then
+						Result.set_id (l_id)
+					end
+					if attached l_sql_storage.sql_read_string_32 (2) as l_name then
+						Result.set_name (l_name)
+					end
+					if attached l_sql_storage.sql_read_string_32 (3) as l_api_secret then
+						Result.set_api_secret (l_api_secret)
+					end
+					if attached l_sql_storage.sql_read_string_32 (4) as l_api_key then
+						Result.set_api_key (l_api_key)
+					end
+					if attached l_sql_storage.sql_read_string_32 (5) as l_scope then
+						Result.set_scope (l_scope)
+					end
+					if attached l_sql_storage.sql_read_string_32 (6) as l_resource_url then
+						Result.set_protected_resource_url (l_resource_url)
+					end
+					if attached l_sql_storage.sql_read_string_32 (7) as l_callback_name then
+						Result.set_callback_name (l_callback_name)
+					end
+					if attached l_sql_storage.sql_read_string_32 (8) as l_extractor then
+						Result.set_extractor (l_extractor)
+					end
+					if attached l_sql_storage.sql_read_string_32 (9) as l_authorize_url then
+						Result.set_authorize_url (l_authorize_url)
+					end
+					if attached l_sql_storage.sql_read_string_32 (10) as l_endpoint then
+						Result.set_endpoint (l_endpoint)
+					end
+				end
+			end
+		end
+
+
+	oauth_consumer_by_callback (a_api: CMS_API; a_name: READABLE_STRING_8): detachable CMS_OAUTH_CONSUMER
+		local
+			l_params: detachable STRING_TABLE [detachable ANY]
+			l_setup:  CMS_SETUP
+		do
+			-- TODO workaround !!! move to the persistence layer.
+			l_setup := a_api.setup
+
+
+				-- Schema
+			if attached {CMS_STORAGE_SQL_I} a_api.storage as l_sql_storage then
+
+					-- Todo workaround, move this to his own database layer.
+				create l_params.make (1)
+				l_params.force (a_name, "name")
+				l_sql_storage.sql_query ("SELECT * FROM oauth2_consumers where callback_name =:name;", l_params)
+				if l_sql_storage.has_error then
+						a_api.logger.put_error ("Could not retrieve a consumer from the database", generating_type)
+				else
+						-- Fetch a Consumer
+					create Result
+					if attached l_sql_storage.sql_read_integer_64 (1) as l_id then
+						Result.set_id (l_id)
+					end
+					if attached l_sql_storage.sql_read_string_32 (2) as l_name then
+						Result.set_name (l_name)
+					end
+					if attached l_sql_storage.sql_read_string_32 (3) as l_api_secret then
+						Result.set_api_secret (l_api_secret)
+					end
+					if attached l_sql_storage.sql_read_string_32 (4) as l_api_key then
+						Result.set_api_key (l_api_key)
+					end
+					if attached l_sql_storage.sql_read_string_32 (5) as l_scope then
+						Result.set_scope (l_scope)
+					end
+					if attached l_sql_storage.sql_read_string_32 (6) as l_resource_url then
+						Result.set_protected_resource_url (l_resource_url)
+					end
+					if attached l_sql_storage.sql_read_string_32 (7) as l_callback_name then
+						Result.set_callback_name (l_callback_name)
+					end
+					if attached l_sql_storage.sql_read_string_32 (8) as l_extractor then
+						Result.set_extractor (l_extractor)
+					end
+					if attached l_sql_storage.sql_read_string_32 (9) as l_authorize_url then
+						Result.set_authorize_url (l_authorize_url)
+					end
+					if attached l_sql_storage.sql_read_string_32 (10) as l_endpoint then
+						Result.set_endpoint (l_endpoint)
+					end
+				end
+			end
+		end
+
 
 note
 	copyright: "Copyright (c) 1984-2013, Eiffel Software and others"

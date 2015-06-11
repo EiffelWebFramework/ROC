@@ -8,6 +8,6 @@ class
 
 feature -- Access
 
-	oauth_gmail_session: STRING = "EWF_ROC_OAUTH_GMAIL_SESSION_"
-	
+	oauth_session: STRING = "EWF_ROC_OAUTH_TOKEN_"
+
 end

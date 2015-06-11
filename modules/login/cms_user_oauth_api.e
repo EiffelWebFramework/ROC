@@ -31,34 +31,70 @@ feature {CMS_MODULE} -- Access user oauth storage.
 
 feature -- Access: OAuth2 Gmail
 
-	user_oauth2_gmail_by_id	(a_uid: like {CMS_USER}.id): detachable CMS_USER
+--	user_oauth2_gmail_by_id	(a_uid: like {CMS_USER}.id): detachable CMS_USER
+--		do
+--			Result := user_oauth_storage.user_oauth2_gmail_by_id (a_uid)
+--		end
+
+--	user_by_oauth2_gmail_token (a_token: READABLE_STRING_32): detachable CMS_USER
+--		do
+--			Result := user_oauth_storage.user_by_oauth2_gmail_token (a_token)
+--		end
+
+	user_oauth2_by_id	(a_uid: like {CMS_USER}.id; a_consumer_table: READABLE_STRING_32): detachable CMS_USER
 		do
-			Result := user_oauth_storage.user_oauth2_gmail_by_id (a_uid)
+			Result := user_oauth_storage.user_oauth2_by_id (a_uid, a_consumer_table)
 		end
 
-	user_by_oauth2_gmail_token (a_token: READABLE_STRING_32): detachable CMS_USER
+	user_by_oauth2_token (a_token: READABLE_STRING_32; a_consumer_table: READABLE_STRING_32): detachable CMS_USER
 		do
-			Result := user_oauth_storage.user_by_oauth2_gmail_token (a_token)
+			Result := user_oauth_storage.user_by_oauth2_token (a_token, a_consumer_table)
 		end
 
+	user_by_oauth2_global_token (a_token: READABLE_STRING_32 ): detachable CMS_USER
+		do
+			Result := user_oauth_storage.user_by_oauth2_global_token (a_token)
+		end
+
+	oauth2_consumers: LIST [STRING]
+		do
+			Result := user_oauth_storage.oauth2_consumers
+		end
 
 feature	-- Change: OAuth2 Gmail
 
-	new_user_oauth2_gmail (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER)
+--	new_user_oauth2_gmail (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER)
+--			-- Add a new user with oauth2 gmail authentication.
+--		require
+--			has_id: a_user.has_id
+--		do
+--			user_oauth_storage.new_user_oauth2_gmail (a_token, a_user_profile, a_user)
+--		end
+
+
+--	update_user_oauth2_gmail (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER)
+--			-- Updaate user `a_user' with oauth2 gmail authentication.
+--		require
+--			has_id: a_user.has_id
+--		do
+--			user_oauth_storage.update_user_oauth2_gmail (a_token, a_user_profile, a_user)
+--		end
+
+	new_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer_table: READABLE_STRING_32)
 			-- Add a new user with oauth2 gmail authentication.
 		require
 			has_id: a_user.has_id
 		do
-			user_oauth_storage.new_user_oauth2_gmail (a_token, a_user_profile, a_user)
+			user_oauth_storage.new_user_oauth2 (a_token, a_user_profile, a_user, a_consumer_table)
 		end
 
 
-	update_user_oauth2_gmail (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER)
+	update_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer_table: READABLE_STRING_32)
 			-- Updaate user `a_user' with oauth2 gmail authentication.
 		require
 			has_id: a_user.has_id
 		do
-			user_oauth_storage.update_user_oauth2_gmail (a_token, a_user_profile, a_user)
+			user_oauth_storage.update_user_oauth2 (a_token, a_user_profile, a_user, a_consumer_table)
 		end
 
 end
