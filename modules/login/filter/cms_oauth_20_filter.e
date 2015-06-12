@@ -1,10 +1,10 @@
 note
-	description: "Summary description for {OAUTH_FILTER}."
+	description: "Summary description for {CMS_OAUTH_20_FILTER}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	OAUTH_FILTER
+	CMS_OAUTH_20_FILTER
 
 inherit
 	WSF_URI_TEMPLATE_HANDLER
@@ -20,13 +20,13 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_api: CMS_API; a_user_oauth_api: CMS_USER_OAUTH_API)
+	make (a_api: CMS_API; a_user_oauth_api: CMS_OAUTH_20_API)
 		do
 			make_handler (a_api)
 			user_oauth_api := a_user_oauth_api
 		end
 
-	user_oauth_api: CMS_USER_OAUTH_API
+	user_oauth_api: CMS_OAUTH_20_API
 
 feature -- Basic operations
 
@@ -41,9 +41,9 @@ feature -- Basic operations
 --			end
 				-- A valid user
 			if
-				attached {WSF_STRING} req.cookie ({LOGIN_CONSTANTS}.oauth_session) as l_roc_auth_session_token
+				attached {WSF_STRING} req.cookie ({CMS_AUTHENTICATION_CONSTANTS}.oauth_session) as l_roc_auth_session_token
 			then
-				if attached {CMS_USER} user_oauth_api.user_by_oauth2_global_token (l_roc_auth_session_token.value) as l_user then
+				if attached {CMS_USER} user_oauth_api.user_oauth2_without_consumer_by_token (l_roc_auth_session_token.value) as l_user then
 					set_current_user (req, l_user)
 					execute_next (req, res)
 				else

@@ -1,10 +1,10 @@
 note
-	description: "Summary description for {LOGIN_EMAIL_SERVICE}."
+	description: "Summary description for {CMS_AUTHENTICATON_EMAIL_SERVICE}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	LOGIN_EMAIL_SERVICE
+	CMS_AUTHENTICATON_EMAIL_SERVICE
 
 inherit
 	EMAIL_SERVICE
@@ -24,7 +24,7 @@ feature {NONE} -- Initialization
 			contact_email := parameters.contact_email
 		end
 
-	parameters: LOGIN_EMAIL_SERVICE_PARAMETERS
+	parameters: CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS
 			-- Associated parameters.		
 
 feature -- Access		

@@ -1,10 +1,10 @@
 note
-	description: "Summary description for {LOGIN_CONSTANTS}."
+	description: "Summary description for {CMS_AUTHENTICATION_CONSTANTS}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	LOGIN_CONSTANTS
+	CMS_AUTHENTICATION_CONSTANTS
 
 feature -- Access
 

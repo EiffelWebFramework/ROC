@@ -51,18 +51,18 @@ feature -- Access
 			end
 		end
 
-	access_token_verb: READABLE_STRING_GENERAL
+	access_token_verb: STRING_32
 		do
 			Result := "POST"
 		end
 
-	access_token_endpoint: READABLE_STRING_GENERAL
+	access_token_endpoint: STRING_32
 			-- Url that receives the access token request
 		do
 			create {STRING_32} Result.make_from_string (endpoint)
 		end
 
-	authorization_url (config: OAUTH_CONFIG): detachable READABLE_STRING_GENERAL
+	authorization_url (config: OAUTH_CONFIG): detachable STRING_32
 			-- Url where you should redirect your users to authneticate
 		local
 			l_result: STRING_32

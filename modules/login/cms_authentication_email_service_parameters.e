@@ -1,10 +1,10 @@
 note
-	description: "Summary description for {LOGIN_EMAIL_SERVICE_PARAMETERS}."
+	description: "Summary description for {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	LOGIN_EMAIL_SERVICE_PARAMETERS
+	CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS
 
 inherit
 	EMAIL_SERVICE_PARAMETERS

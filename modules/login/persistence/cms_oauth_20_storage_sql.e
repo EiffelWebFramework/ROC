@@ -1,17 +1,17 @@
 note
-	description: "Summary description for {CMS_USER_OAUTH_STORAGE_SQL}."
+	description: "Summary description for {CMS_OAUTH_20_STORAGE_SQL}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_USER_OAUTH_STORAGE_SQL
+	CMS_OAUTH_20_STORAGE_SQL
 
 inherit
-	CMS_USER_OAUTH_STORAGE_I
+	CMS_OAUTH_20_STORAGE_I
 
 	CMS_PROXY_STORAGE_SQL
 
-	CMS_USER_OAUTH_STORAGE_I
+	CMS_OAUTH_20_STORAGE_I
 
 	CMS_STORAGE_SQL_I
 
@@ -20,29 +20,29 @@ inherit
 create
 	make
 
-feature -- Access User Outh Gmail
+feature -- Access User Outh
 
-
-	user_by_oauth2_global_token (a_token: READABLE_STRING_32 ): detachable CMS_USER
+	user_oauth2_without_consumer_by_token (a_token: READABLE_STRING_32 ): detachable CMS_USER
+			-- Retrieve a user by token `a_token' searching in all the registered consumers in the system.
 		local
 			l_list: LIST[STRING]
 		do
 			error_handler.reset
-			write_information_log (generator + ".user_by_oauth2_global_token")
+			write_information_log (generator + ".user_oauth2_without_consumer_by_token")
 			l_list := oauth2_consumers
 			from
 				l_list.start
 			until
 				l_list.after or attached Result
 			loop
-				if attached {CMS_USER} user_by_oauth2_token (a_token, "oauth2_"+l_list.item) as l_user then
+				if attached {CMS_USER} user_oauth2_by_token (a_token, l_list.item) as l_user then
 					Result := l_user
 				end
 				l_list.forth
 			end
 		end
 
-	user_oauth2_by_id (a_uid: like {CMS_USER}.id; a_consumer_table: READABLE_STRING_32): detachable CMS_USER
+	user_oauth2_by_id (a_uid: like {CMS_USER}.id; a_consumer: READABLE_STRING_32): detachable CMS_USER
 			-- <Precursor>
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
@@ -53,7 +53,7 @@ feature -- Access User Outh Gmail
 			create l_parameters.make (1)
 			l_parameters.put (a_uid, "uid")
 			create l_string.make_from_string (select_user_oauth2_template_by_id)
-			l_string.replace_substring_all ("$table_name", a_consumer_table)
+			l_string.replace_substring_all ("$table_name", sql_table_name (a_consumer))
 			sql_query (l_string, l_parameters)
 			if sql_rows_count = 1 then
 				Result := fetch_user
@@ -62,7 +62,7 @@ feature -- Access User Outh Gmail
 			end
 		end
 
-	user_by_oauth2_token (a_token: READABLE_STRING_32; a_consumer_table: READABLE_STRING_32): detachable CMS_USER
+	user_oauth2_by_token (a_token: READABLE_STRING_32; a_consumer: READABLE_STRING_32): detachable CMS_USER
 			-- <Precursor>
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
@@ -73,7 +73,7 @@ feature -- Access User Outh Gmail
 			create l_parameters.make (1)
 			l_parameters.put (a_token, "token")
 			create l_string.make_from_string (select_user_by_oauth2_template_token)
-			l_string.replace_substring_all ("$table_name", a_consumer_table)
+			l_string.replace_substring_all ("$table_name", sql_table_name (a_consumer))
 			sql_query (l_string, l_parameters)
 			if sql_rows_count = 1 then
 				Result := fetch_user
@@ -81,6 +81,9 @@ feature -- Access User Outh Gmail
 				check no_more_than_one: sql_rows_count = 0 end
 			end
 		end
+
+
+feature --Access: Consumers	
 
 	oauth2_consumers: LIST[STRING]
 			-- Return a list of consumers, or empty
@@ -103,9 +106,45 @@ feature -- Access User Outh Gmail
 			end
 		end
 
-feature -- Change: User Oauth2 Gmail
+	oauth_consumer_by_name (a_name: READABLE_STRING_8): detachable CMS_OAUTH_20_CONSUMER
+			-- Retrieve a consumer by name `a_name', if any.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+			l_string: STRING
+		do
+			error_handler.reset
+			write_information_log (generator + ".oauth_consumer_by_name")
+			create l_parameters.make (1)
+			l_parameters.put (a_name, "name")
+			sql_query (sql_oauth_consumer_name, l_parameters)
+			if sql_rows_count = 1 then
+				Result := fetch_consumer
+			else
+				check no_more_than_one: sql_rows_count = 0 end
+			end
+		end
 
-	new_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer_table: READABLE_STRING_32)
+	oauth_consumer_by_callback  (a_callback: READABLE_STRING_8): detachable CMS_OAUTH_20_CONSUMER
+			-- Retrieve a consumer by callback `a_callback', if any.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+			l_string: STRING
+		do
+			error_handler.reset
+			write_information_log (generator + ".oauth_consumer_by_callback")
+			create l_parameters.make (1)
+			l_parameters.put (a_callback, "name")
+			sql_query (sql_oauth_consumer_callback, l_parameters)
+			if sql_rows_count = 1 then
+				Result := fetch_consumer
+			else
+				check no_more_than_one: sql_rows_count = 0 end
+			end
+		end
+
+feature -- Change: User OAuth
+
+	new_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer: READABLE_STRING_32)
 			-- Add a new user with oauth2  authentication.
 		-- <Precursor>.
 		local
@@ -123,12 +162,12 @@ feature -- Change: User Oauth2 Gmail
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "utc_date")
 
 			create l_string.make_from_string (sql_insert_oauth2_template)
-			l_string.replace_substring_all ("$table_name", a_consumer_table)
+			l_string.replace_substring_all ("$table_name", sql_table_name (a_consumer))
 			sql_change (l_string, l_parameters)
 			sql_commit_transaction
 		end
 
-	update_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer_table: READABLE_STRING_32 )
+	update_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer: READABLE_STRING_32 )
 			-- Update user `a_user' with oauth2 authentication.
 			-- <Precursor>
 		local
@@ -145,11 +184,49 @@ feature -- Change: User Oauth2 Gmail
 			l_parameters.put (a_user_profile, "profile")
 
 			create l_string.make_from_string (sql_update_oauth2_template)
-			l_string.replace_substring_all ("$table_name", a_consumer_table)
+			l_string.replace_substring_all ("$table_name", sql_table_name (a_consumer))
 			sql_change (l_string, l_parameters)
 			sql_commit_transaction
 		end
 
+feature {NONE} -- Implementation OAuth Consumer
+
+	fetch_consumer: detachable CMS_OAUTH_20_CONSUMER
+		do
+			if attached sql_read_integer_64 (1) as l_id then
+				create Result
+				Result.set_id (l_id)
+			end
+			if Result /= Void then
+				if attached sql_read_string_32 (2) as l_name then
+					Result.set_name (l_name)
+				end
+				if attached sql_read_string_32 (3) as l_api_secret then
+					Result.set_api_secret (l_api_secret)
+				end
+				if attached sql_read_string_32 (4) as l_api_key then
+					Result.set_api_key (l_api_key)
+				end
+				if attached sql_read_string_32 (5) as l_scope then
+					Result.set_scope (l_scope)
+				end
+				if attached sql_read_string_32 (6) as l_resource_url then
+					Result.set_protected_resource_url (l_resource_url)
+				end
+				if attached sql_read_string_32 (7) as l_callback_name then
+					Result.set_callback_name (l_callback_name)
+				end
+				if attached sql_read_string_32 (8) as l_extractor then
+					Result.set_extractor (l_extractor)
+				end
+				if attached sql_read_string_32 (9) as l_authorize_url then
+					Result.set_authorize_url (l_authorize_url)
+				end
+				if attached sql_read_string_32 (10) as l_endpoint then
+					Result.set_endpoint (l_endpoint)
+				end
+			end
+		end
 feature {NONE} -- Implementation: User
 
 	fetch_user: detachable CMS_USER
@@ -191,15 +268,28 @@ feature {NONE} -- Implementation: User
 
 feature -- {NONE} User OAuth2
 
+	sql_table_name (a_consumer: READABLE_STRING_8): STRING_8
+		do
+			Result := Sql_table_prefix.twin
+			Result.append (a_consumer)
+		end
+
 	Select_user_by_oauth2_template_token: STRING = "SELECT u.* FROM users as u JOIN $table_name as og ON og.uid = u.uid and og.access_token = :token;"
 
 	Select_user_oauth2_template_by_id: STRING = "SELECT u.* FROM users as u JOIN $table_name as og ON og.uid = u.uid and og.uid = :uid;"
-
 
 	Sql_insert_oauth2_template: STRING = "INSERT INTO $table_name (uid, access_token, details, created) VALUES (:uid, :token, :profile, :utc_date);"
 
 	Sql_update_oauth2_template: STRING = "UPDATE $table_name SET access_token = :token, details = :profile WHERE uid =:uid;"
 
 	Sql_oauth_consumers: STRING = "SELECT name FROM oauth2_consumers";
+
+	Sql_table_prefix: STRING = "oauth2_"
+
+feature -- {NONE} Consumer
+
+	Sql_oauth_consumer_callback: STRING ="SELECT * FROM oauth2_consumers where callback_name =:name;"
+
+	Sql_oauth_consumer_name: STRING ="SELECT * FROM oauth2_consumers where name =:name;"
 
 end

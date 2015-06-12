@@ -4,7 +4,7 @@
 	revision: "$Revision: 97328 $"
 
 class
-	LOGIN_MODULE
+	CMS_AUTHENTICATION_MODULE
 
 inherit
 	CMS_MODULE
@@ -63,16 +63,16 @@ feature {CMS_API} -- Module Initialization
 			-- <Precursor>
 		local
 			l_user_auth_api: like user_oauth_api
-			l_user_auth_storage: CMS_USER_OAUTH_STORAGE_I
+			l_user_auth_storage: CMS_OAUTH_20_STORAGE_I
 		do
 			Precursor (a_api)
 
 				-- Storage initialization
 			if attached {CMS_STORAGE_SQL_I} a_api.storage as l_storage_sql then
-				create {CMS_USER_OAUTH_STORAGE_SQL} l_user_auth_storage.make (l_storage_sql)
+				create {CMS_OAUTH_20_STORAGE_SQL} l_user_auth_storage.make (l_storage_sql)
 			else
 				-- FIXME: in case of NULL storage, should Current be disabled?
-				create {CMS_USER_OAUTH_STORAGE_NULL} l_user_auth_storage
+				create {CMS_OAUTH_20_STORAGE_NULL} l_user_auth_storage
 			end
 
 				-- Node API initialization
@@ -92,7 +92,6 @@ feature {CMS_API} -- Module management
 
 	install (api: CMS_API)
 		local
-			sql: STRING
 			l_setup: CMS_SETUP
 			l_params: detachable STRING_TABLE [detachable ANY]
 			l_consumers: LIST [STRING]
@@ -142,7 +141,7 @@ feature {CMS_API} -- Module management
 
 feature {CMS_API} -- Access: API
 
-	user_oauth_api: detachable CMS_USER_OAUTH_API
+	user_oauth_api: detachable CMS_OAUTH_20_API
 			-- <Precursor>		
 
 feature -- Filters
@@ -152,7 +151,7 @@ feature -- Filters
 		do
 			create {ARRAYED_LIST [WSF_FILTER]} Result.make (1)
 			if attached user_oauth_api as l_user_oauth_api then
-				Result.extend (create {OAUTH_FILTER}.make (a_api, l_user_oauth_api))
+				Result.extend (create {CMS_OAUTH_20_FILTER}.make (a_api, l_user_oauth_api))
 			end
 		end
 
@@ -183,7 +182,7 @@ feature -- Router
 		end
 
 
-	configure_web (a_api: CMS_API; a_user_oauth_api: CMS_USER_OAUTH_API; a_router: WSF_ROUTER)
+	configure_web (a_api: CMS_API; a_user_oauth_api: CMS_OAUTH_20_API; a_router: WSF_ROUTER)
 		do
 			a_router.handle_with_request_methods ("/account/roc-login", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login (a_api, ?, ?)), a_router.methods_head_get)
 			a_router.handle_with_request_methods ("/account/roc-register", create {WSF_URI_AGENT_HANDLER}.make (agent handle_register (a_api, ?, ?)), a_router.methods_get_post)
@@ -192,7 +191,7 @@ feature -- Router
 			a_router.handle_with_request_methods ("/account/new-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_new_password (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/account/reset-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/account/roc-logout", create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout (a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/account/login-with-oauth/{callback}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_login_with_oauth (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle_with_request_methods ("/account/login-with-oauth/{callback}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_login_with_oauth (a_api,a_user_oauth_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle_with_request_methods ("/account/{callback}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_callback_oauth (a_api, a_user_oauth_api, ?, ?)), a_router.methods_get_post)
 		end
 
@@ -246,8 +245,6 @@ feature -- Hooks
 		end
 
 	get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
-		local
-			vals: CMS_VALUE_TABLE
 		do
 			if
 				a_block_id.is_case_insensitive_equal_general ("login") and then
@@ -280,36 +277,24 @@ feature -- Hooks
 	handle_login (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			br: BAD_REQUEST_ERROR_CMS_RESPONSE
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			r.set_value ("Login", "optional_content_type")
 			r.execute
 		end
 
-	handle_workaround_filter (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
-		local
-			r: CMS_RESPONSE
-			br: BAD_REQUEST_ERROR_CMS_RESPONSE
-		do
-			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-			r.execute
-		end
-
-
 	handle_logout (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
 			l_url: STRING
-			l_oauth_gmail: OAUTH_LOGIN
 			l_cookie: WSF_COOKIE
 		do
 			if
-				attached {WSF_STRING} req.cookie ({LOGIN_CONSTANTS}.oauth_session) as l_cookie_token and then
+				attached {WSF_STRING} req.cookie ({CMS_AUTHENTICATION_CONSTANTS}.oauth_session) as l_cookie_token and then
 				attached {CMS_USER} current_user (req) as l_user
 			then
 					-- Logout gmail
-				create l_cookie.make ({LOGIN_CONSTANTS}.oauth_session, l_cookie_token.value)
+				create l_cookie.make ({CMS_AUTHENTICATION_CONSTANTS}.oauth_session, l_cookie_token.value)
 				l_cookie.set_path ("/")
 				l_cookie.set_max_age (-1)
 				res.add_cookie (l_cookie)
@@ -335,10 +320,9 @@ feature -- Hooks
 			u: CMS_USER
 			l_roles: LIST [CMS_USER_ROLE]
 			l_exist: BOOLEAN
-			es: LOGIN_EMAIL_SERVICE
+			es: CMS_AUTHENTICATON_EMAIL_SERVICE
 			l_link: STRING
 			l_token: STRING
-			l_message: STRING
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			r.set_value ("Register", "optional_content_type")
@@ -381,7 +365,7 @@ feature -- Hooks
 
 
 							-- Send Email
-						create es.make (create {LOGIN_EMAIL_SERVICE_PARAMETERS}.make (api))
+						create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
 						write_debug_log (generator + ".handle register: send_contact_email")
 						es.send_contact_email (l_email.value, l_link)
 
@@ -400,9 +384,7 @@ feature -- Hooks
 		local
 			r: CMS_RESPONSE
 			l_user_api: CMS_USER_API
-			l_id: INTEGER_64
 			l_ir: INTERNAL_SERVER_ERROR_CMS_RESPONSE
-			l_link: CMS_LOCAL_LINK
 		do
 			l_user_api := api.user_api
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
@@ -433,12 +415,10 @@ feature -- Hooks
 	handle_reactivation (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			br: BAD_REQUEST_ERROR_CMS_RESPONSE
-			es: LOGIN_EMAIL_SERVICE
+			es: CMS_AUTHENTICATON_EMAIL_SERVICE
 			l_user_api: CMS_USER_API
 			l_token: STRING
 			l_link: STRING
-			l_message: STRING
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			if req.is_post_request_method then
@@ -459,7 +439,7 @@ feature -- Hooks
 							l_link.append (l_token)
 
 								-- Send Email
-							create es.make (create {LOGIN_EMAIL_SERVICE_PARAMETERS}.make (api))
+							create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
 							write_debug_log (generator + ".handle register: send_contact_activation_email")
 							es.send_contact_activation_email (l_email.value, l_link)
 						end
@@ -477,12 +457,10 @@ feature -- Hooks
 	handle_new_password (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			br: BAD_REQUEST_ERROR_CMS_RESPONSE
-			es: LOGIN_EMAIL_SERVICE
+			es: CMS_AUTHENTICATON_EMAIL_SERVICE
 			l_user_api: CMS_USER_API
 			l_token: STRING
 			l_link: STRING
-			l_message: STRING
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			if req.is_post_request_method then
@@ -497,7 +475,7 @@ feature -- Hooks
 						l_link.append (l_token)
 
 								-- Send Email
-						create es.make (create {LOGIN_EMAIL_SERVICE_PARAMETERS}.make (api))
+						create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
 						write_debug_log (generator + ".handle register: send_contact_password_email")
 						es.send_contact_password_email (l_email.value, l_link)
 					else
@@ -514,11 +492,7 @@ feature -- Hooks
 	handle_reset_password (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			br: BAD_REQUEST_ERROR_CMS_RESPONSE
-			es: LOGIN_EMAIL_SERVICE
 			l_user_api: CMS_USER_API
-			l_link: STRING
-			l_message: STRING
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			l_user_api := api.user_api
@@ -605,8 +579,6 @@ feature {NONE} -- Block views
 		end
 
 	get_block_view_register (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
-		local
-			vals: CMS_VALUE_TABLE
 		do
 			if a_response.request.is_get_request_method then
 				if attached template_block (a_block_id, a_response) as l_tpl_block then
@@ -643,8 +615,6 @@ feature {NONE} -- Block views
 
 
 	get_block_view_reactivate (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
-		local
-			vals: CMS_VALUE_TABLE
 		do
 			if a_response.request.is_get_request_method then
 				if attached template_block (a_block_id, a_response) as l_tpl_block then
@@ -679,8 +649,6 @@ feature {NONE} -- Block views
 		end
 
 	get_block_view_new_password (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
-		local
-			vals: CMS_VALUE_TABLE
 		do
 			if a_response.request.is_get_request_method then
 				if attached template_block (a_block_id, a_response) as l_tpl_block then
@@ -714,8 +682,6 @@ feature {NONE} -- Block views
 		end
 
 	get_block_view_reset_password (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
-		local
-			vals: CMS_VALUE_TABLE
 		do
 			if a_response.request.is_get_request_method then
 				if attached template_block (a_block_id, a_response) as l_tpl_block then
@@ -753,14 +719,14 @@ feature {NONE} -- Block views
 
 feature -- OAuth2 Login with google.
 
-	handle_login_with_oauth (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+	handle_login_with_oauth (api: CMS_API; a_oauth_api: CMS_OAUTH_20_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			l_oauth: OAUTH_LOGIN
+			l_oauth: CMS_OAUTH_20_WORKFLOW
 		do
 			if
 				attached {WSF_STRING} req.path_parameter ("callback") as p_consumer and then
-				attached {CMS_OAUTH_CONSUMER} oauth_consumer_by_name (api, p_consumer.value) as l_consumer
+				attached {CMS_OAUTH_20_CONSUMER} a_oauth_api.oauth_consumer_by_name (p_consumer.value) as l_consumer
 			then
 				create l_oauth.make (req.server_url, l_consumer)
 				if attached l_oauth.authorization_url as l_authorization_url then
@@ -779,18 +745,18 @@ feature -- OAuth2 Login with google.
 			end
 		end
 
-	handle_callback_oauth (api: CMS_API; a_user_oauth_api: CMS_USER_OAUTH_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+	handle_callback_oauth (api: CMS_API; a_user_oauth_api: CMS_OAUTH_20_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			l_auth: OAUTH_LOGIN
+			l_auth: CMS_OAUTH_20_WORKFLOW
 			l_user_api: CMS_USER_API
 			l_user: CMS_USER
 			l_roles: LIST [CMS_USER_ROLE]
 			l_cookie: WSF_COOKIE
-			es: LOGIN_EMAIL_SERVICE
+			es: CMS_AUTHENTICATON_EMAIL_SERVICE
 		do
 			if  attached {WSF_STRING} req.path_parameter ("callback") as l_callback and then
-			    attached {CMS_OAUTH_CONSUMER} oauth_consumer_by_callback (api, l_callback.value) as l_consumer and then
+			    attached {CMS_OAUTH_20_CONSUMER} a_user_oauth_api.oauth_consumer_by_callback (l_callback.value) as l_consumer and then
 				attached {WSF_STRING} req.query_parameter ("code") as l_code
 			then
 				create l_auth.make (req.server_url, l_consumer)
@@ -809,14 +775,14 @@ feature -- OAuth2 Login with google.
 					then
 						if attached {CMS_USER} l_user_api.user_by_email (l_email) as p_user then
 								-- User with email exist
-							if	attached {CMS_USER} a_user_oauth_api.user_oauth2_by_id (p_user.id, "oauth2_" + l_consumer.name)	then
+							if	attached {CMS_USER} a_user_oauth_api.user_oauth2_by_id (p_user.id, l_consumer.name)	then
 									-- Update oauth entry
-								a_user_oauth_api.update_user_oauth2 (l_access_token.token, l_user_profile, p_user, "oauth2_" + l_consumer.name )
+								a_user_oauth_api.update_user_oauth2 (l_access_token.token, l_user_profile, p_user, l_consumer.name )
 							else
 									-- create a oauth entry
-								a_user_oauth_api.new_user_oauth2 (l_access_token.token, l_user_profile, p_user, "oauth2_" + l_consumer.name )
+								a_user_oauth_api.new_user_oauth2 (l_access_token.token, l_user_profile, p_user, l_consumer.name )
 							end
-							create l_cookie.make ({LOGIN_CONSTANTS}.oauth_session, l_access_token.token)
+							create l_cookie.make ({CMS_AUTHENTICATION_CONSTANTS}.oauth_session, l_access_token.token)
 							l_cookie.set_max_age (l_access_token.expires_in)
 							l_cookie.set_path ("/")
 							res.add_cookie (l_cookie)
@@ -834,8 +800,8 @@ feature -- OAuth2 Login with google.
 							l_user_api.new_user (l_user)
 
 								-- Add oauth entry
-							a_user_oauth_api.new_user_oauth2 (l_access_token.token, l_user_profile, l_user, "oauth_" + l_consumer.name )
-							create l_cookie.make ({LOGIN_CONSTANTS}.oauth_session, l_access_token.token)
+							a_user_oauth_api.new_user_oauth2 (l_access_token.token, l_user_profile, l_user, l_consumer.name )
+							create l_cookie.make ({CMS_AUTHENTICATION_CONSTANTS}.oauth_session, l_access_token.token)
 							l_cookie.set_max_age (l_access_token.expires_in)
 							l_cookie.set_path ("/")
 							res.add_cookie (l_cookie)
@@ -843,7 +809,7 @@ feature -- OAuth2 Login with google.
 
 
 									-- Send Email
-							create es.make (create {LOGIN_EMAIL_SERVICE_PARAMETERS}.make (api))
+							create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
 							write_debug_log (generator + ".handle register: send_contact_welcome_email")
 							es.send_contact_welcome_email (l_email, "")
 						end
@@ -908,119 +874,6 @@ feature {NONE} -- Implementation: date and time
 		do
 			create d.make_from_timestamp (n)
 			Result := d.date_time
-		end
-
-feature --{NONE} -- Helper OAUTH Consumers.
-
-
-	oauth_consumer_by_name (a_api: CMS_API; a_name: READABLE_STRING_8): detachable CMS_OAUTH_CONSUMER
-		local
-			l_params: detachable STRING_TABLE [detachable ANY]
-			l_setup:  CMS_SETUP
-		do
-				-- TODO workaround!!, move to the persistence layer
-			l_setup := a_api.setup
-
-				-- Schema
-			if attached {CMS_STORAGE_SQL_I} a_api.storage as l_sql_storage then
-
-					-- Todo workaround, move this to his own database layer.
-				create l_params.make (1)
-				l_params.force (a_name, "name")
-				l_sql_storage.sql_query ("SELECT * FROM oauth2_consumers where name =:name;", l_params)
-				if l_sql_storage.has_error then
-						a_api.logger.put_error ("Could not retrieve a consumer from the database", generating_type)
-				else
-						-- Fetch a Consumer
-					create Result
-					if attached l_sql_storage.sql_read_integer_64 (1) as l_id then
-						Result.set_id (l_id)
-					end
-					if attached l_sql_storage.sql_read_string_32 (2) as l_name then
-						Result.set_name (l_name)
-					end
-					if attached l_sql_storage.sql_read_string_32 (3) as l_api_secret then
-						Result.set_api_secret (l_api_secret)
-					end
-					if attached l_sql_storage.sql_read_string_32 (4) as l_api_key then
-						Result.set_api_key (l_api_key)
-					end
-					if attached l_sql_storage.sql_read_string_32 (5) as l_scope then
-						Result.set_scope (l_scope)
-					end
-					if attached l_sql_storage.sql_read_string_32 (6) as l_resource_url then
-						Result.set_protected_resource_url (l_resource_url)
-					end
-					if attached l_sql_storage.sql_read_string_32 (7) as l_callback_name then
-						Result.set_callback_name (l_callback_name)
-					end
-					if attached l_sql_storage.sql_read_string_32 (8) as l_extractor then
-						Result.set_extractor (l_extractor)
-					end
-					if attached l_sql_storage.sql_read_string_32 (9) as l_authorize_url then
-						Result.set_authorize_url (l_authorize_url)
-					end
-					if attached l_sql_storage.sql_read_string_32 (10) as l_endpoint then
-						Result.set_endpoint (l_endpoint)
-					end
-				end
-			end
-		end
-
-
-	oauth_consumer_by_callback (a_api: CMS_API; a_name: READABLE_STRING_8): detachable CMS_OAUTH_CONSUMER
-		local
-			l_params: detachable STRING_TABLE [detachable ANY]
-			l_setup:  CMS_SETUP
-		do
-			-- TODO workaround !!! move to the persistence layer.
-			l_setup := a_api.setup
-
-
-				-- Schema
-			if attached {CMS_STORAGE_SQL_I} a_api.storage as l_sql_storage then
-
-					-- Todo workaround, move this to his own database layer.
-				create l_params.make (1)
-				l_params.force (a_name, "name")
-				l_sql_storage.sql_query ("SELECT * FROM oauth2_consumers where callback_name =:name;", l_params)
-				if l_sql_storage.has_error then
-						a_api.logger.put_error ("Could not retrieve a consumer from the database", generating_type)
-				else
-						-- Fetch a Consumer
-					create Result
-					if attached l_sql_storage.sql_read_integer_64 (1) as l_id then
-						Result.set_id (l_id)
-					end
-					if attached l_sql_storage.sql_read_string_32 (2) as l_name then
-						Result.set_name (l_name)
-					end
-					if attached l_sql_storage.sql_read_string_32 (3) as l_api_secret then
-						Result.set_api_secret (l_api_secret)
-					end
-					if attached l_sql_storage.sql_read_string_32 (4) as l_api_key then
-						Result.set_api_key (l_api_key)
-					end
-					if attached l_sql_storage.sql_read_string_32 (5) as l_scope then
-						Result.set_scope (l_scope)
-					end
-					if attached l_sql_storage.sql_read_string_32 (6) as l_resource_url then
-						Result.set_protected_resource_url (l_resource_url)
-					end
-					if attached l_sql_storage.sql_read_string_32 (7) as l_callback_name then
-						Result.set_callback_name (l_callback_name)
-					end
-					if attached l_sql_storage.sql_read_string_32 (8) as l_extractor then
-						Result.set_extractor (l_extractor)
-					end
-					if attached l_sql_storage.sql_read_string_32 (9) as l_authorize_url then
-						Result.set_authorize_url (l_authorize_url)
-					end
-					if attached l_sql_storage.sql_read_string_32 (10) as l_endpoint then
-						Result.set_endpoint (l_endpoint)
-					end
-				end
-			end
 		end
 
 

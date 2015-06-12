@@ -5,7 +5,7 @@ note
 	revision: "$Revision$"
 
 class
-	CMS_OAUTH_CONSUMER
+	CMS_OAUTH_20_CONSUMER
 
 inherit
 

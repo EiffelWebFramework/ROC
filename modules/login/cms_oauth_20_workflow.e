@@ -4,7 +4,7 @@ note
 	revision: "$Revision$"
 
 class
-	OAUTH_LOGIN
+	CMS_OAUTH_20_WORKFLOW
 
 inherit
 
@@ -15,19 +15,19 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_host: READABLE_STRING_32; a_consumer: CMS_OAUTH_CONSUMER)
+	make (a_host: READABLE_STRING_32; a_consumer: CMS_OAUTH_20_CONSUMER)
 			-- Create an object with the host `a_host'.
 		do
 			initilize (a_consumer)
-			create config.make_default (api_key, api_secret)
+			create config.make_default (a_consumer.api_key, a_consumer.api_secret)
 			config.set_callback (a_host + "/account/"+ a_consumer.callback_name)
-			config.set_scope (scope)
+			config.set_scope (a_consumer.scope)
 				--Todo create a generic OAUTH_20_GENERIC_API
 			create oauth_api.make (a_consumer.endpoint, a_consumer.authorize_url, a_consumer.extractor)
 			api_service := oauth_api.create_service (config)
 		end
 
-	initilize (a_consumer: CMS_OAUTH_CONSUMER)
+	initilize (a_consumer: CMS_OAUTH_20_CONSUMER)
 		do
 				--Use configuration values if any if not defaul
 			api_key := a_consumer.api_key

@@ -135,7 +135,7 @@ feature -- CMS setup
 			m.enable
 			a_setup.register_module (m)
 
-			create {LOGIN_MODULE} m.make
+			create {CMS_AUTHENTICATION_MODULE} m.make
 			m.enable
 			a_setup.register_module (m)
 
