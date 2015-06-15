@@ -3,8 +3,8 @@ note
 			Generic CMS Response.
 			It builds the content to get process to render the output.
 		]"
-	date: "$Date: 2015-02-16 20:14:19 +0100 (lun., 16 févr. 2015) $"
-	revision: "$Revision: 96643 $"
+	date: "$Date: 2015-05-20 11:48:26 +0200 (mer., 20 mai 2015) $"
+	revision: "$Revision: 97327 $"
 
 deferred class
 	CMS_RESPONSE
@@ -29,11 +29,41 @@ feature {NONE} -- Initialization
 
 	initialize
 		do
+			initialize_site_url
 			get_theme
 			create menu_system.make
 			initialize_block_region_settings
 			create hook_subscribers.make (0)
 			register_hooks
+		end
+
+	initialize_site_url
+				-- Initialize site and base url.
+		local
+			l_url: detachable STRING_8
+			i,j: INTEGER
+		do
+				--| WARNING: do not use `absolute_url' and `url', since it relies on site_url and base_url.
+			if attached setup.site_url as l_site_url and then not l_site_url.is_empty then
+				create l_url.make_from_string (l_site_url)
+			else
+				l_url := request.absolute_script_url ("/")
+			end
+			check is_not_empty: not l_url.is_empty end
+			if l_url [l_url.count] /= '/' then
+				l_url.append_character ('/')
+			end
+			site_url := l_url
+			i := l_url.substring_index ("://", 1)
+			if i > 0 then
+				j := l_url.index_of ('/', i + 3)
+				if j > 0 then
+					base_url := l_url.substring (j, l_url.count)
+				end
+			end
+		ensure
+			site_url_set: site_url /= Void
+			site_url_ends_with_slash: site_url.ends_with_general ("/")
 		end
 
 	register_hooks
@@ -75,6 +105,15 @@ feature -- Access
 
 	redirection: detachable READABLE_STRING_8
 			-- Location for eventual redirection.
+
+	location: STRING_8
+			-- Associated cms local location.
+		do
+			create Result.make_from_string (request.percent_encoded_path_info)
+			if not Result.is_empty and then Result[1] = '/' then
+				Result.remove_head (1)
+			end
+		end
 
 feature -- Internationalization (i18n)
 
@@ -121,9 +160,11 @@ feature -- Module
 			rp: PATH
 			ut: FILE_UTILITIES
 		do
+				-- Check first in selected theme folder.
 			rp := module_assets_theme_location (a_module)
 			Result := rp.extended_path (a_resource)
 			if not ut.file_path_exists (Result) then
+					-- And if not found, look into site/modules/$a_module.name/.... folders.
 				rp := module_assets_location (a_module)
 				Result := rp.extended_path (a_resource)
 				if not ut.file_path_exists (Result) then
@@ -163,16 +204,13 @@ feature -- URL utilities
 			end
 		end
 
-	site_url: READABLE_STRING_8
-		do
-			Result := absolute_host (request, "")
-		end
+	site_url: IMMUTABLE_STRING_8
+			-- Absolute site url.
 
-	base_url: detachable READABLE_STRING_8
+	base_url: detachable IMMUTABLE_STRING_8
 			-- Base url if any.
 			--| Usually it is Void, but it could be
 			--|  /project/demo/
-			--| FIXME: for now, no way to change that. Always at the root "/"
 
 feature -- Access: CMS
 
@@ -183,7 +221,7 @@ feature -- Access: CMS
 
 	front_page_url: READABLE_STRING_8
 		do
-			Result := request.absolute_script_url ("/")
+			Result := absolute_url ("/", Void)
 		end
 
 	values: CMS_VALUE_TABLE
@@ -806,9 +844,9 @@ feature -- Theme
 				create l_info.make_default
 			end
 			if l_info.engine.is_case_insensitive_equal_general ("smarty") then
-				create {SMARTY_CMS_THEME} theme.make (setup, l_info)
+				create {SMARTY_CMS_THEME} theme.make (setup, l_info, site_url)
 			else
-				create {MISSING_CMS_THEME} theme.make (setup)
+				create {MISSING_CMS_THEME} theme.make (setup, l_info, site_url)
 				status_code := {HTTP_STATUS_CODE}.service_unavailable
 				to_implement ("Check how to add the Retry-after, http://tools.ietf.org/html/rfc7231#section-6.6.4 and http://tools.ietf.org/html/rfc7231#section-7.1.3")
 			end
@@ -834,7 +872,7 @@ feature -- Generation
 			lnk: CMS_LINK
 		do
 				-- Menu
-			create {CMS_LOCAL_LINK} lnk.make ("Home", "/")
+			create {CMS_LOCAL_LINK} lnk.make ("Home", "")
 			lnk.set_weight (-10)
 			add_to_primary_menu (lnk)
 			invoke_menu_system_alter (menu_system)
@@ -920,8 +958,8 @@ feature -- Generation
 			end
 
 				-- Variables
-			page.register_variable (request.absolute_script_url (""), "site_url")
-			page.register_variable (request.absolute_script_url (""), "host") -- Same as `site_url'.
+			page.register_variable (absolute_url ("", Void), "site_url")
+			page.register_variable (absolute_url ("", Void), "host") -- Same as `site_url'.
 			page.register_variable (request.is_https, "is_https")
 			if attached current_user_name (request) as l_user then
 				page.register_variable (l_user, "user")
@@ -1029,6 +1067,9 @@ feature -- Generation
 			l_is_active: BOOLEAN
 		do
 			create qs.make_from_string (request.percent_encoded_path_info)
+			if qs.starts_with ("/") then
+				qs.remove_head (1)
+			end
 			l_is_active := qs.same_string (a_lnk.location)
 			if not l_is_active then
 				if attached request.query_string as l_query_string and then not l_query_string.is_empty then
@@ -1102,8 +1143,8 @@ feature {NONE} -- Execution
 --					h.put_location (l_location)
 					response.redirect_now (l_location)
 				else
---					h.put_location (request.absolute_script_url (l_location))
-					response.redirect_now (request.absolute_script_url (l_location))
+--					h.put_location (request.absolute_url (l_location, Void))
+					response.redirect_now (absolute_url (l_location, Void))
 				end
 			else
 				h.put_header_object (header)

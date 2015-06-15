@@ -16,20 +16,21 @@ inherit
 
 	REFACTORING_HELPER
 
-create
-	make
+create {NODE_MODULE}
+	make_with_storage
 
-feature {NONE} -- Implementation
+feature {NONE} -- Initialization
+
+	make_with_storage (a_api: CMS_API; a_node_storage: CMS_NODE_STORAGE_I)
+		do
+			node_storage := a_node_storage
+			make (a_api)
+		end
 
 	initialize
 			-- <Precursor>
 		do
 			Precursor
-			if attached {CMS_STORAGE_SQL_I} storage as l_storage_sql then
-				create {CMS_NODE_STORAGE_SQL} node_storage.make (l_storage_sql)
-			else
-				create {CMS_NODE_STORAGE_NULL} node_storage.make
-			end
 			initialize_node_types
 		end
 
@@ -170,9 +171,9 @@ feature -- URL
 			-- or URI of path for selection of new content possibilities if ct is Void.
 		do
 			if ct /= Void then
-				Result := "/node/add/" + ct.name
+				Result := "node/add/" + ct.name
 			else
-				Result := "/node/"
+				Result := "node/"
 			end
 		end
 
@@ -190,18 +191,18 @@ feature -- URL
 		require
 			a_node.has_id
 		do
-			Result := "/node/" + a_node.id.out
+			Result := "node/" + a_node.id.out
 		end
 
 	nodes_path: STRING
 			-- URI path for list of nodes.
 		do
-			Result := "/nodes"
+			Result := "nodes"
 		end
 
 feature -- Access: Node
 
-	nodes_count: INTEGER_64
+	nodes_count: NATURAL_64
 		do
 			Result := node_storage.nodes_count
 		end
@@ -212,10 +213,17 @@ feature -- Access: Node
 			Result := node_storage.nodes
 		end
 
-	recent_nodes (a_offset, a_rows: INTEGER): LIST [CMS_NODE]
+	trashed_nodes (a_user: CMS_USER): LIST [CMS_NODE]
+			-- List of nodes with status in {CMS_NODE_API}.trashed.
+			-- if the current user is admin, it will retrieve all the trashed nodes
+		do
+			Result := node_storage.trashed_nodes (a_user.id)
+		end
+
+	recent_nodes (params: CMS_DATA_QUERY_PARAMETERS): ITERABLE [CMS_NODE]
 			-- List of the `a_rows' most recent nodes starting from  `a_offset'.
 		do
-			Result := node_storage.recent_nodes (a_offset, a_rows)
+			Result := node_storage.recent_nodes (params.offset.to_integer_32, params.size.to_integer_32)
 		end
 
 	node (a_id: INTEGER_64): detachable CMS_NODE
@@ -314,6 +322,21 @@ feature -- Change: Node
 			-- Update node `a_node' data.
 		do
 			node_storage.update_node (a_node)
+		end
+
+	trash_node (a_node: CMS_NODE)
+			-- Trash node `a_node'.
+			--! remove the node from the storage.
+		do
+			node_storage.trash_node (a_node)
+		end
+
+
+	restore_node (a_node: CMS_NODE)
+			-- Restore node `a_node'.
+			-- From {CMS_NODE_API}.trashed to {CMS_NODE_API}.not_published.
+		do
+			node_storage.restore_node (a_node)
 		end
 
 

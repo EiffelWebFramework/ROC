@@ -30,13 +30,19 @@ feature -- Error Handling
 
 feature -- Access: node
 
-	nodes_count: INTEGER_64
+	nodes_count: NATURAL_64
 			-- Count of nodes.
 		do
 		end
 
 	nodes: LIST[CMS_NODE]
 			-- List of nodes.
+		do
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+		end
+
+	trashed_nodes (a_user_id: INTEGER_64): LIST [CMS_NODE]
+			-- List of nodes by user `a_user_id'.
 		do
 			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
 		end
@@ -76,6 +82,16 @@ feature -- Node
 		end
 
 	update_node (a_node: CMS_NODE)
+			-- <Precursor>
+		do
+		end
+
+	trash_node_by_id (a_id: INTEGER_64)
+			-- <Precursor>
+		do
+		end
+
+	restore_node_by_id (a_id: INTEGER_64)
 			-- <Precursor>
 		do
 		end

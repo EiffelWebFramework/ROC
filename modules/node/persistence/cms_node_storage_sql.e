@@ -22,14 +22,14 @@ create
 
 feature -- Access	
 
-	nodes_count: INTEGER_64
+	nodes_count: NATURAL_64
 			-- Number of items nodes.
 		do
 			error_handler.reset
 			write_information_log (generator + ".nodes_count")
 			sql_query (sql_select_nodes_count, Void)
 			if sql_rows_count = 1 then
-				Result := sql_read_integer_64 (1)
+				Result := sql_read_natural_64 (1)
 			end
 		end
 
@@ -58,6 +58,36 @@ feature -- Access
 --			loop
 --				fill_node (ic.item)
 --			end
+		end
+
+	trashed_nodes (a_user_id: INTEGER_64): LIST [CMS_NODE]
+			-- List of nodes.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+
+			error_handler.reset
+			write_information_log (generator + ".trash_nodes")
+
+			from
+				create l_parameters.make (1)
+				if a_user_id > 1 then
+					-- Not admin user
+					l_parameters.put (a_user_id, "author")
+					sql_query (sql_select_trash_nodes_by_author, l_parameters)
+				else
+					sql_query (sql_select_trash_nodes, Void)
+				end
+				sql_start
+			until
+				sql_after
+			loop
+				if attached fetch_node as l_node then
+					Result.force (l_node)
+				end
+				sql_forth
+			end
 		end
 
 	recent_nodes (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_NODE]
@@ -148,7 +178,7 @@ feature -- Change: Node
 			l_time: DATE_TIME
 		do
 			create l_time.make_now_utc
-			write_information_log (generator + ".delete_node")
+			write_information_log (generator + ".delete_node {" + a_id.out + "}")
 
 			error_handler.reset
 			create l_parameters.make (1)
@@ -157,6 +187,40 @@ feature -- Change: Node
 			l_parameters.put (a_id, "nid")
 			sql_change (sql_delete_node, l_parameters)
 		end
+
+
+	trash_node_by_id (a_id: INTEGER_64)
+			-- <Precursor>
+		local
+			l_parameters: STRING_TABLE [ANY]
+			l_time: DATE_TIME
+		do
+			create l_time.make_now_utc
+			write_information_log (generator + ".trash_node {" + a_id.out + "}")
+
+			error_handler.reset
+			create l_parameters.make (1)
+			l_parameters.put (a_id, "nid")
+			sql_change (sql_trash_node, l_parameters)
+		end
+
+	restore_node_by_id (a_id: INTEGER_64)
+			-- <Precursor>
+		local
+			l_parameters: STRING_TABLE [ANY]
+			l_time: DATE_TIME
+		do
+			create l_time.make_now_utc
+			write_information_log (generator + ".restore_node {" + a_id.out + "}")
+
+			error_handler.reset
+			create l_parameters.make (1)
+			l_parameters.put (l_time, "changed")
+			l_parameters.put ({CMS_NODE_API}.not_published, "status")
+			l_parameters.put (a_id, "nid")
+			sql_change (sql_restore_node, l_parameters)
+		end
+
 
 feature {NONE} -- Implementation
 
@@ -204,8 +268,14 @@ feature {NONE} -- Implementation
 					a_node.set_revision (1) -- New object.
 				end
 			end
-			extended_store (a_node)
-			sql_commit_transaction
+			if not error_handler.has_error then
+				extended_store (a_node)
+			end
+			if error_handler.has_error then
+				sql_rollback_transaction
+			else
+				sql_commit_transaction
+			end
 		end
 
 feature -- Helpers
@@ -229,6 +299,14 @@ feature {NONE} -- Queries
 			-- SQL Query to retrieve all nodes.
 			--| note: {CMS_NODE_API}.trashed = -1
 
+	sql_select_trash_nodes: STRING = "SELECT * FROM Nodes WHERE status = -1 ;"
+			-- SQL Query to retrieve all trahsed nodes.
+			--| note: {CMS_NODE_API}.trashed = -1		
+
+	sql_select_trash_nodes_by_author: STRING = "SELECT * FROM Nodes WHERE status = -1 and author = :author ;"
+			-- SQL Query to retrieve all nodes by a given author.
+			--| note: {CMS_NODE_API}.trashed = -1				
+
 	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes WHERE nid =:nid ORDER BY revision DESC, publish DESC LIMIT 1;"
 
 	sql_select_recent_nodes: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes ORDER BY nid DESC, publish DESC LIMIT :rows OFFSET :offset ;"
@@ -243,6 +321,12 @@ feature {NONE} -- Queries
 
 	sql_delete_node: STRING = "UPDATE nodes SET changed=:changed, status =:status WHERE nid=:nid"
 			-- Soft deletion with free metadata.
+
+	sql_trash_node: STRING = "DELETE FROM nodes WHERE nid=:nid"
+			-- Physical deletion with free metadata.		
+
+	sql_restore_node: STRING = "UPDATE nodes SET changed=:changed, status =:status WHERE nid=:nid"
+			-- Restore node to  {CMS_NODE_API}.not_publised.
 
 --	sql_update_node_author: STRING  = "UPDATE nodes SET author=:author WHERE nid=:nid;"
 

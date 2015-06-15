@@ -49,28 +49,32 @@ feature {CMS_API} -- Access: API
 
 	module_api: detachable CMS_MODULE_API
 			-- Eventual module api.
+		require
+			is_initialized: is_initialized
+		do
+				-- No API by default.
+		end
 
 feature {CMS_API} -- Module management
 
 	is_installed (api: CMS_API): BOOLEAN
 			-- Is Current module installed?
 		do
-			Result := is_enabled
-				-- FIXME: implement proper installation status.
+			Result := attached api.storage.custom_value ("is_initialized", "module-" + name) as v and then v.is_case_insensitive_equal_general ("yes")
 		end
 
 	install (api: CMS_API)
 		require
 			is_not_installed: not is_installed (api)
 		do
-				-- Not Yet Supported
+			api.storage.set_custom_value ("is_initialized", "module-" + name, "yes")
 		end
 
 	uninstall (api: CMS_API)
 		require
 			is_installed: is_installed (api)
 		do
-				-- Not Yet Supported
+			api.storage.set_custom_value ("is_initialized", "module-" + name, "no")
 		end
 
 feature -- Router

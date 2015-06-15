@@ -43,6 +43,8 @@ feature {NONE} -- Implementation
 
 	extended_store (a_node: CMS_NODE)
 			-- Store extended data from `a_node'.
+		require
+			not error_handler.has_error
 		do
 			if attached node_storage_extension (a_node) as ext then
 				ext.store_node (a_node)
@@ -51,22 +53,28 @@ feature {NONE} -- Implementation
 
 	extended_load (a_node: CMS_NODE)
 			-- Load extended data into `a_node'.
+		require
+			not error_handler.has_error
 		do
 			if attached node_storage_extension (a_node) as ext then
 				ext.load_node (a_node)
 			end
 		end
 
-
 feature -- Access		
 
-	nodes_count: INTEGER_64
+	nodes_count: NATURAL_64
 			-- Count of nodes.
 		deferred
 		end
 
 	nodes: LIST [CMS_NODE]
 			-- List of nodes.
+		deferred
+		end
+
+	trashed_nodes (a_user_id: INTEGER_64): LIST [CMS_NODE]
+			-- List of nodes by user `a_user_id'.
 		deferred
 		end
 
@@ -108,7 +116,7 @@ feature -- Change: Node
 			valid_user: attached a_node.author as l_author and then l_author.id > 0
 		deferred
 		ensure
-			has_id: a_node.has_id
+			has_id: not error_handler.has_error implies a_node.has_id
 		end
 
 	update_node (a_node: CMS_NODE)
@@ -135,32 +143,35 @@ feature -- Change: Node
 		deferred
 		end
 
---	update_node_title (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
---			-- Update node title to `a_title', node identified by id `a_node_id'.
---			-- The user `a_user_id' is an existing or new collaborator.
---		require
---			valid_node_id: a_node_id > 0
---			valid_user_id: a_user_id > 0
---		deferred
---		end
+	trash_node (a_node: CMS_NODE)
+			-- Trash `a_node'.
+		do
+			if a_node.has_id then
+				trash_node_by_id (a_node.id)
+			end
+		end
 
---	update_node_summary (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
---			-- Update node summary to `a_summary', node identified by id `a_node_id'.
---			-- The user `a_user_id' is an existing or new collaborator.
---		require
---			valid_id: a_node_id > 0
---			valid_user_id: a_user_id > 0
---		deferred
---		end
+	restore_node (a_node: CMS_NODE)
+			-- Restore `a_node'.
+		do
+			if a_node.has_id then
+				restore_node_by_id (a_node.id)
+			end
+		end
 
---	update_node_content (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
---			-- Update node content to `a_content', node identified by id `a_node_id'.
---			-- The user `a_user_id' is an existing or new collaborator.
---		require
---			valid_id: a_node_id > 0
---			valid_user_id: a_user_id > 0
---		deferred
---		end
+	trash_node_by_id (a_id: INTEGER_64)
+			-- Trash node by id `a_id'.
+		require
+			valid_node_id: a_id > 0
+		deferred
+		end
+
+	restore_node_by_id (a_id: INTEGER_64)
+			-- Restore node by id `a_id'.
+		require
+			valid_node_id: a_id > 0
+		deferred
+		end
 
 feature -- Helpers
 
