@@ -76,7 +76,7 @@ feature -- Operation
 				i := a_sql_statement.index_of (':', i)
 				if i = 0 then
 					i := n -- exit
-				else
+				elseif a_sql_statement.at (i-1).is_equal ('%'') or else  a_sql_statement.at (i-1).is_equal ('%"') or else a_sql_statement.at (i-1).is_equal (' ') or else a_sql_statement.at (i-1).is_equal ('=') then
 					from
 						j := i + 1
 					until
@@ -123,6 +123,30 @@ feature -- Operation
 		end
 
 feature -- Helper
+
+	sql_execute_file_script_with_params (a_path: PATH; a_params: detachable STRING_TABLE [detachable ANY])
+			-- Execute SQL script from `a_path' and with params `a_params'.
+		local
+			f: PLAIN_TEXT_FILE
+			sql: STRING
+		do
+			create f.make_with_path (a_path)
+			if f.exists and then f.is_access_readable then
+				create sql.make (f.count)
+				f.open_read
+				from
+					f.start
+				until
+					f.exhausted or f.end_of_file
+				loop
+					f.read_stream_thread_aware (1_024)
+					sql.append (f.last_string)
+				end
+				f.close
+				sql_execute_script_with_params (sql, a_params)
+			end
+		end
+
 
 	sql_execute_file_script (a_path: PATH)
 			-- Execute SQL script from `a_path'.
@@ -179,6 +203,14 @@ feature -- Helper
 			else
 				sql_commit_transaction
 			end
+		end
+
+	sql_execute_script_with_params (a_sql_script: STRING; a_params: detachable STRING_TABLE [detachable ANY])
+			-- Execute SQL script.
+			-- i.e: multiple SQL statements.
+		do
+			reset_error
+			sql_change (a_sql_script, a_params)
 		end
 
 	sql_table_exists (a_table_name: READABLE_STRING_8): BOOLEAN
@@ -364,6 +396,26 @@ feature {NONE} -- Implementation
 			loop
 				c := a_script[i]
 				inspect c
+				when '-' then
+					if i < n and then a_script[i + 1] = '-' then
+							-- Commented line "--" until New Line
+						j := a_script.index_of ('%N', i)
+						if j > 0 then
+							i := j
+						else
+							i := n
+						end
+					end
+				when '/' then
+					if i < n and then a_script[i + 1] = '*' then
+							-- Commented text "/*" until closing "*/"
+						j := a_script.substring_index ("*/", i)
+						if j > 0 then
+							i := j
+						else
+							i := n
+						end
+					end
 				when '`', '"', '%'' then
 					from
 						j := i
