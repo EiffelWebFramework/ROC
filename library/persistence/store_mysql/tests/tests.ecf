@@ -11,7 +11,7 @@
 		<library name="crypto" location="$ISE_LIBRARY\unstable\library\text\encryption\crypto\crypto-safe.ecf"/>
 		<library name="model" location="..\..\..\model\cms_model-safe.ecf"/>
 		<library name="module_node" location="..\..\..\..\modules\node\node-safe.ecf"/>
-		<library name="persitence_mysql" location="..\persistence_mysql-safe.ecf" readonly="false"/>
+		<library name="persitence_store_mysql" location="..\store_mysql-safe.ecf" readonly="false"/>
 		<library name="process" location="$ISE_LIBRARY\library\process\process-safe.ecf"/>
 		<library name="testing" location="$ISE_LIBRARY\library\testing\testing-safe.ecf"/>
 		<cluster name="tests" location=".\" recursive="true">
