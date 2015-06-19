@@ -76,7 +76,13 @@ feature -- Operation
 				i := a_sql_statement.index_of (':', i)
 				if i = 0 then
 					i := n -- exit
-				elseif a_sql_statement.at (i-1).is_equal ('%'') or else  a_sql_statement.at (i-1).is_equal ('%"') or else a_sql_statement.at (i-1).is_equal (' ') or else a_sql_statement.at (i-1).is_equal ('=') then
+				elseif
+					a_sql_statement [i-1] = '%''
+					or else  a_sql_statement [i-1] = '%"'
+					or else a_sql_statement [i-1] = ' '
+					or else a_sql_statement [i-1] = '='
+					or else a_sql_statement [i-1] = '('
+				then
 					from
 						j := i + 1
 					until
@@ -177,6 +183,7 @@ feature -- Helper
 		local
 			i: INTEGER
 			err: BOOLEAN
+			cl: CELL [INTEGER]
 		do
 			reset_error
 			sql_begin_transaction
@@ -184,16 +191,17 @@ feature -- Helper
 --			sql_change (a_sql_script, Void)
 			from
 				i := 1
+				create cl.put (0)
 			until
 				i > a_sql_script.count or err
 			loop
-				if attached next_sql_statement (a_sql_script, i) as s then
+				if attached next_sql_statement (a_sql_script, i, cl) as s then
 					if not s.is_whitespace then
 						sql_change (sql_statement (s), Void)
 						err := err or has_error
 						reset_error
 					end
-					i := i + s.count
+					i := i + cl.item
 				else
 					i := a_sql_script.count + 1
 				end
@@ -382,11 +390,12 @@ feature -- Conversion
 
 feature {NONE} -- Implementation
 
-	next_sql_statement (a_script: STRING; a_start_index: INTEGER): detachable STRING
+	next_sql_statement (a_script: STRING; a_start_index: INTEGER; a_offset: CELL [INTEGER]): detachable STRING
 		local
 			i,j,n: INTEGER
 			c: CHARACTER
 			l_end: INTEGER
+			l_removals: detachable ARRAYED_LIST [TUPLE [start_index,end_index: INTEGER]]
 		do
 			from
 				i := a_start_index
@@ -400,21 +409,32 @@ feature {NONE} -- Implementation
 					if i < n and then a_script[i + 1] = '-' then
 							-- Commented line "--" until New Line
 						j := a_script.index_of ('%N', i)
-						if j > 0 then
-							i := j
+						if j = 0 then
+							j := n
 						else
-							i := n
+							j := j + 1 -- include %N
 						end
+						if l_removals = Void then
+							create l_removals.make (1)
+						end
+						l_removals.force ([i,j])
+						i := j
 					end
 				when '/' then
 					if i < n and then a_script[i + 1] = '*' then
 							-- Commented text "/*" until closing "*/"
 						j := a_script.substring_index ("*/", i)
-						if j > 0 then
-							i := j
+
+						if j = 0 then
+							j := n
 						else
-							i := n
+							j := j + 1 -- Include '/'
 						end
+						if l_removals = Void then
+							create l_removals.make (1)
+						end
+						l_removals.force ([i,j])
+						i := j
 					end
 				when '`', '"', '%'' then
 					from
@@ -428,6 +448,8 @@ feature {NONE} -- Implementation
 							if a_script [j - 1] /= '\' then
 								l_end := j
 							end
+						else
+							l_end := i
 						end
 					end
 					if l_end > 0 then
@@ -440,9 +462,20 @@ feature {NONE} -- Implementation
 				end
 				i := i + 1
 			end
-			i := a_script.index_of (';', a_start_index)
-			if i > a_start_index then
+--			i := a_script.index_of (';', a_start_index)
+			if i <= n and i > a_start_index then
 				Result := a_script.substring (a_start_index, i)
+				a_offset.replace (Result.count)
+				if l_removals /= Void then
+					j := 0
+					across
+						l_removals as ic
+					loop
+						Result.remove_substring (ic.item.start_index - j, ic.item.end_index - j)
+						j := j + ic.item.end_index - ic.item.start_index + 1
+					end
+					a_offset.replace (a_offset.item - j)
+				end
 			end
 		end
 

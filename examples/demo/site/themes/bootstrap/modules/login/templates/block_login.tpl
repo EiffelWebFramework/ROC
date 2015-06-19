@@ -1,6 +1,6 @@
  	<div class="primary-tabs">
  		{unless isset="$user"}
-			<h3>Login or <a href="/account/roc-register">Register</a></h3>
+			<h3>Login or <a href="{$site_url/}account/roc-register">Register</a></h3>
 		<div>
 			<div>	
 			    <form action method="POST">
@@ -21,13 +21,13 @@
 		<div>
 			<div>
 				<p>
-					<a href="/account/new-password">Forgot password?</a>
+					<a href="{$site_url/}account/new-password">Forgot password?</a>
 				</p>
 			</div>
 		</div>	
 		<div>
 			{foreach item="item" from="$oauth_consumers"}
-				<a href="/account/login-with-oauth/{$item/}">Login with {$item/}</a><br>
+				<a href="{$site_url/}account/login-with-oauth/{$item/}">Login with {$item/}</a><br>
 			{/foreach}	
 		</div>    	
 		{/unless}
