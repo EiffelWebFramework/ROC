@@ -412,7 +412,7 @@ feature {NONE} -- Implementation
 						if j = 0 then
 							j := n
 						else
-							j := j + 1 -- include %N
+--							j := j
 						end
 						if l_removals = Void then
 							create l_removals.make (1)
@@ -462,7 +462,6 @@ feature {NONE} -- Implementation
 				end
 				i := i + 1
 			end
---			i := a_script.index_of (';', a_start_index)
 			if i <= n and i > a_start_index then
 				Result := a_script.substring (a_start_index, i)
 				a_offset.replace (Result.count)
@@ -474,7 +473,7 @@ feature {NONE} -- Implementation
 						Result.remove_substring (ic.item.start_index - j, ic.item.end_index - j)
 						j := j + ic.item.end_index - ic.item.start_index + 1
 					end
-					a_offset.replace (a_offset.item - j)
+--					a_offset.replace (a_offset.item  j)
 				end
 			end
 		end
