@@ -8,16 +8,22 @@ class
 	CMS_OAUTH_20_CONSUMER
 
 inherit
-
 	ANY
 		redefine
 			default_create
 		end
 
 create
-	default_create
+	default_create,
+	make_with_id
 
 feature {NONE} -- Initialization
+
+	make_with_id (a_id: like id)
+		do
+			id := a_id
+			default_create
+		end
 
 	default_create
 		do
@@ -34,29 +40,29 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
-	endpoint: READABLE_STRING_32
+	endpoint: READABLE_STRING_8
 			-- 	Url that receives the access token request.
 
-	authorize_url: READABLE_STRING_32
+	authorize_url: READABLE_STRING_8
 			--
 
-	extractor: READABLE_STRING_32
+	extractor: READABLE_STRING_8
 			-- text, json		
 
 
-	callback_name: READABLE_STRING_32
+	callback_name: READABLE_STRING_8
 			-- consumer callback name
 
-	protected_resource_url: READABLE_STRING_32
+	protected_resource_url: READABLE_STRING_8
 			-- consumer resource url
 
-	scope: READABLE_STRING_32
+	scope: READABLE_STRING_8
 			-- consumer scope
 
-	api_key: READABLE_STRING_32
+	api_key: READABLE_STRING_8
 			-- consumer public key
 
-	api_secret: READABLE_STRING_32
+	api_secret: READABLE_STRING_8
 			-- consumer secret.
 
 	name: READABLE_STRING_32
@@ -64,8 +70,6 @@ feature -- Access
 
 	id: INTEGER_64
 			-- unique identifier.
-
-
 
 feature -- Element change
 

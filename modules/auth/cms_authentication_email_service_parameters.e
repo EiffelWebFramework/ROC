@@ -104,57 +104,48 @@ feature	-- Access
 	contact_subject_password: IMMUTABLE_STRING_8
 	contact_subject_oauth: IMMUTABLE_STRING_8
 
-
-
 	account_activation: STRING
 			-- Account activation template email message.
-		local
-			p: PATH
 		do
-			p := setup.environment.config_path.extended ("modules").extended ("login").extended("account_activation.html")
-			if attached read_template_file (p) as l_content then
-				Result := l_content
-			else
-				create Result.make_from_string (template_account_activation)
-			end
+			Result := template_string ("account_activation.html", default_template_account_activation)
 		end
 
 	account_re_activation: STRING
 			-- Account re_activation template email message.
-		local
-			p: PATH
 		do
-			p := setup.environment.config_path.extended ("modules").extended ("login").extended("accunt_re_activation.html")
-			if attached read_template_file (p) as l_content then
-				Result := l_content
-			else
-				create Result.make_from_string (template_account_re_activation)
-			end
+			Result := template_string ("accunt_re_activation.html", default_template_account_re_activation)
 		end
 
 	account_password: STRING
 			-- Account password template email message.
-		local
-			p: PATH
 		do
-			p := setup.environment.config_path.extended ("modules").extended ("login").extended("account_new_password.html")
-			if attached read_template_file (p) as l_content then
-				Result := l_content
-			else
-				create Result.make_from_string (template_account_new_password)
-			end
+			Result := template_string ("account_new_password.html", default_template_account_new_password)
 		end
 
 	account_welcome: STRING
 			-- Account welcome template email message.
+		do
+			Result := template_string ("account_welcome.html", default_template_account_welcome)
+		end
+
+feature {NONE} -- Implementation: Template		
+
+	template_path (a_name: READABLE_STRING_GENERAL): PATH
+			-- Location of template named `a_name'.
+		do
+			Result := setup.environment.config_path.extended ("modules").extended ("login").extended (a_name)
+		end
+
+	template_string (a_name: READABLE_STRING_GENERAL; a_default: STRING): STRING
+			-- Content of template named `a_name', or `a_default' if template is not found.
 		local
 			p: PATH
 		do
-			p := setup.environment.config_path.extended ("modules").extended ("login").extended("account_welcome.html")
+			p := template_path ("account_activation.html")
 			if attached read_template_file (p) as l_content then
 				Result := l_content
 			else
-				create Result.make_from_string (template_account_welcome)
+				create Result.make_from_string (a_default)
 			end
 		end
 
@@ -162,16 +153,17 @@ feature {NONE} -- Implementation
 
 	setup: CMS_SETUP
 
-
 	read_template_file (a_path: PATH): detachable STRING
 			-- Read the content of the file at path `a_path'.
 		local
 			l_file: FILE
+			n: INTEGER
 		do
 			create {PLAIN_TEXT_FILE} l_file.make_with_path (a_path)
 			if l_file.exists and then l_file.is_readable then
+				n := l_file.count
 				l_file.open_read
-				l_file.read_stream (l_file.count)
+				l_file.read_stream (n)
 				Result := l_file.last_string
 				l_file.close
 			else
@@ -182,7 +174,7 @@ feature {NONE} -- Implementation
 
 feature {NONE} -- Message email
 
-	template_account_activation: STRING= "[
+	default_template_account_activation: STRING = "[
 		<!doctype html>
 		<html lang="en">
 		<head>
@@ -195,7 +187,7 @@ feature {NONE} -- Message email
 		<body>
 			<p>Thank you for registering at <a href="...">ROC CMS</a></p>
 
-			<p>To complete your registration, please click on this link to activate your account:<p>
+			<p>To complete your registration, please click on the following link to activate your account:<p>
 
 			<p><a href="$link">$link</a></p>
 			<p>Thank you for joining us.</p>
@@ -204,7 +196,7 @@ feature {NONE} -- Message email
 	]"
 
 
-	template_account_re_activation: STRING= "[
+	default_template_account_re_activation: STRING = "[
 		<!doctype html>
 		<html lang="en">
 		<head>
@@ -215,9 +207,9 @@ feature {NONE} -- Message email
 		</head>
 
 		<body>
-			<p>You have request a new activation token at<a href="...">ROC CMS</a></p>
+			<p>You have requested a new activation token at <a href="...">ROC CMS</a></p>
 
-			<p>To complete your registration, please click on this link to activate your account:<p>
+			<p>To complete your registration, please click on the following link to activate your account:<p>
 
 			<p><a href="$link">$link</a></p>
 			<p>Thank you for joining us.</p>
@@ -227,7 +219,7 @@ feature {NONE} -- Message email
 
 
 
-	template_account_new_password: STRING= "[
+	default_template_account_new_password: STRING = "[
 		<!doctype html>
 		<html lang="en">
 		<head>
@@ -240,7 +232,7 @@ feature {NONE} -- Message email
 		<body>
 			<p>You have required a new password at <a href="...">ROC CMS</a></p>
 
-			<p>To complete your request, please click on this link to genereate a new password:<p>
+			<p>To complete your request, please click on this link to generate a new password:<p>
 
 			<p><a href="$link">$link</a></p>
 		</body>
@@ -248,7 +240,7 @@ feature {NONE} -- Message email
 	]"
 
 
-	template_account_welcome: STRING= "[
+	default_template_account_welcome: STRING = "[
 		<!doctype html>
 		<html lang="en">
 		<head>

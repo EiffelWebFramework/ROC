@@ -34,20 +34,20 @@ feature {CMS_MODULE} -- Access: User oauth storage.
 
 feature -- Access: User Oauth20
 
-	user_oauth2_by_id (a_uid: like {CMS_USER}.id; a_consumer: READABLE_STRING_32): detachable CMS_USER
-			-- Retrieve a user by id `a_uid' for the consumer `a_consumer', if aby.
+	user_oauth2_by_id (a_uid: like {CMS_USER}.id; a_consumer: READABLE_STRING_GENERAL): detachable CMS_USER
+			-- Retrieve a user by id `a_uid' for the consumer `a_consumer', if any.
 		do
 			Result := oauth_20_storage.user_oauth2_by_id (a_uid, a_consumer)
 		end
 
-	user_oauth2_by_token (a_token: READABLE_STRING_32; a_consumer: READABLE_STRING_32): detachable CMS_USER
+	user_oauth2_by_token (a_token: READABLE_STRING_GENERAL; a_consumer: READABLE_STRING_GENERAL): detachable CMS_USER
 			-- Retrieve a user by token `a_token' for the consumer `a_consumer'.
 		do
 			Result := oauth_20_storage.user_oauth2_by_token (a_token, a_consumer)
 		end
 
-	user_oauth2_without_consumer_by_token (a_token: READABLE_STRING_32 ): detachable CMS_USER
-			-- Retrieve a user by token `a_token' searching in all the registered consumers in the system.
+	user_oauth2_without_consumer_by_token (a_token: READABLE_STRING_GENERAL): detachable CMS_USER
+			-- Retrieve user by token `a_token' searching in all the registered consumers in the system.
 		do
 			Result := oauth_20_storage.user_oauth2_without_consumer_by_token (a_token)
 		end
@@ -75,7 +75,7 @@ feature -- Access: Consumers OAuth20
 feature	-- Change: User OAuth20
 
 
-	new_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer: READABLE_STRING_32)
+	new_user_oauth2 (a_token: READABLE_STRING_GENERAL; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer: READABLE_STRING_GENERAL)
 			-- Add a new user with oauth20 using the consumer `a_consumer'.
 		require
 			has_id: a_user.has_id
@@ -84,7 +84,7 @@ feature	-- Change: User OAuth20
 		end
 
 
-	update_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer_table: READABLE_STRING_32)
+	update_user_oauth2 (a_token: READABLE_STRING_GENERAL; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer_table: READABLE_STRING_GENERAL)
 			-- Updaate user `a_user' with oauth2 for the consumer `a_consumer'.
 		require
 			has_id: a_user.has_id

@@ -20,18 +20,18 @@ feature -- Error Handling
 
 feature -- Access: Users
 
-	user_oauth2_by_id (a_uid: like {CMS_USER}.id; a_consumer_table: READABLE_STRING_32): detachable CMS_USER
+	user_oauth2_by_id (a_uid: like {CMS_USER}.id; a_consumer_table: READABLE_STRING_GENERAL): detachable CMS_USER
 			-- Retrieve a user by id `a_uid' for the consumer `a_consumer', if aby.
 		deferred
 		end
 
-	user_oauth2_by_token (a_token: READABLE_STRING_32; a_consumer_table: READABLE_STRING_32): detachable CMS_USER
+	user_oauth2_by_token (a_token: READABLE_STRING_GENERAL; a_consumer_table: READABLE_STRING_GENERAL): detachable CMS_USER
 			-- Retrieve a user by token `a_token' for the consumer `a_consumer'.
 		deferred
 		end
 
-	user_oauth2_without_consumer_by_token (a_token: READABLE_STRING_32 ): detachable CMS_USER
-			-- Retrieve a user by token `a_token' searching in all the registered consumers in the system.
+	user_oauth2_without_consumer_by_token (a_token: READABLE_STRING_GENERAL): detachable CMS_USER
+			-- Retrieve user by token `a_token' searching in all the registered consumers in the system.
 		deferred
 		end
 
@@ -53,12 +53,12 @@ feature -- Access: Consumers
 
 feature -- Change: User Oauth2
 
-	new_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer_table: READABLE_STRING_32)
+	new_user_oauth2 (a_token: READABLE_STRING_GENERAL; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer_table: READABLE_STRING_GENERAL)
 			-- Add a new user with oauth2  authentication.
 		deferred
 		end
 
-	update_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer_table: READABLE_STRING_32 )
+	update_user_oauth2 (a_token: READABLE_STRING_GENERAL; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer_table: READABLE_STRING_GENERAL )
 			-- Update user `a_user' with oauth2 authentication.
 		deferred
 		end

@@ -9,5 +9,7 @@ class
 feature -- Access
 
 	oauth_session: STRING = "EWF_ROC_OAUTH_TOKEN_"
+			-- Name of Cookie used to keep the session info.
+			-- FIXME: make this configurable.
 
 end

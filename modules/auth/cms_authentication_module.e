@@ -50,8 +50,8 @@ feature {NONE} -- Initialization
 		do
 			name := "login"
 			version := "1.0"
-			description := "Eiffel login module"
-			package := "login"
+			description := "Authentication module"
+			package := "authentication"
 
 			create root_dir.make_current
 			cache_duration := 0
@@ -235,7 +235,7 @@ feature -- Hooks
 		local
 			l_string: STRING
 		do
-			Result := <<"login","register","reactivate","new_password", "reset_password">>
+			Result := <<"login", "register", "reactivate", "new_password", "reset_password">>
 			create l_string.make_empty
 			across Result as ic loop
 					l_string.append (ic.item)
@@ -248,27 +248,27 @@ feature -- Hooks
 		do
 			if
 				a_block_id.is_case_insensitive_equal_general ("login") and then
-				a_response.request.path_info.starts_with ("/account/roc-login")
+				a_response.location.starts_with ("account/roc-login")
 			then
 				get_block_view_login (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("register") and then
-				a_response.request.path_info.starts_with ("/account/roc-register")
+				a_response.location.starts_with ("account/roc-register")
 			then
 				get_block_view_register (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("reactivate") and then
-				a_response.request.path_info.starts_with ("/account/reactivate")
+				a_response.location.starts_with ("account/reactivate")
 			then
 				get_block_view_reactivate (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("new_password") and then
-				a_response.request.path_info.starts_with ("/account/new-password")
+				a_response.location.starts_with ("account/new-password")
 			then
 				get_block_view_new_password (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("reset_password") and then
-				a_response.request.path_info.starts_with ("/account/reset-password")
+				a_response.location.starts_with ("account/reset-password")
 			then
 				get_block_view_reset_password (a_block_id, a_response)
 			end
@@ -306,8 +306,7 @@ feature -- Hooks
 			else
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 				r.set_status_code ({HTTP_CONSTANTS}.found)
-				l_url := req.absolute_script_url ("")
-				l_url.append ("/basic_auth_logoff")
+				l_url := req.absolute_script_url ("/basic_auth_logoff")
 				r.set_redirection (l_url)
 				r.execute
 			end
@@ -321,7 +320,7 @@ feature -- Hooks
 			l_roles: LIST [CMS_USER_ROLE]
 			l_exist: BOOLEAN
 			es: CMS_AUTHENTICATON_EMAIL_SERVICE
-			l_link: STRING
+			l_url: STRING
 			l_token: STRING
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
@@ -359,15 +358,12 @@ feature -- Hooks
 							-- Create activation token
 						l_token := new_token
 						l_user_api.new_activation (l_token, u.id)
-						create l_link.make_from_string (req.server_url)
-						l_link.append ("/account/activate/")
-						l_link.append (l_token)
-
+						l_url := req.absolute_script_url ("/account/activate/" + l_token)
 
 							-- Send Email
 						create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
 						write_debug_log (generator + ".handle register: send_contact_email")
-						es.send_contact_email (l_email.value, l_link)
+						es.send_contact_email (l_email.value, l_url)
 
 					else
 						r.values.force (l_name.value, "name")
@@ -401,8 +397,7 @@ feature -- Hooks
 					-- the token does not exist, or it was already used.
 					r.set_status_code ({HTTP_CONSTANTS}.bad_request)
 					r.set_value ("Account not activated", "optional_content_type")
-					r.set_main_content ("<p>The token <i>"+ l_token.value +"</i> is not valid <a href=%"/account/reactivate%">Reactivate Account</a></p>"  )
-
+					r.set_main_content ("<p>The token <i>" + l_token.value +"</i> is not valid " + r.link ("Reactivate Account", "account/reactivate", Void) + "</p>")
 				end
 				r.execute
 			else
@@ -418,7 +413,7 @@ feature -- Hooks
 			es: CMS_AUTHENTICATON_EMAIL_SERVICE
 			l_user_api: CMS_USER_API
 			l_token: STRING
-			l_link: STRING
+			l_url: STRING
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			if req.is_post_request_method then
@@ -434,14 +429,12 @@ feature -- Hooks
 						else
 							l_token := new_token
 							l_user_api.new_activation (l_token, l_user.id)
-							create l_link.make_from_string (req.server_url)
-							l_link.append ("/account/activate/")
-							l_link.append (l_token)
+							l_url := req.absolute_script_url ("/account/activate/" + l_token)
 
 								-- Send Email
 							create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
 							write_debug_log (generator + ".handle register: send_contact_activation_email")
-							es.send_contact_activation_email (l_email.value, l_link)
+							es.send_contact_activation_email (l_email.value, l_url)
 						end
 					else
 						r.values.force ("The email does not exist or !", "error_email")
@@ -460,7 +453,7 @@ feature -- Hooks
 			es: CMS_AUTHENTICATON_EMAIL_SERVICE
 			l_user_api: CMS_USER_API
 			l_token: STRING
-			l_link: STRING
+			l_url: STRING
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			if req.is_post_request_method then
@@ -470,14 +463,12 @@ feature -- Hooks
 								-- User exist create a new token and send a new email.
 						l_token := new_token
 						l_user_api.new_password (l_token, l_user.id)
-						create l_link.make_from_string (req.server_url)
-						l_link.append ("/account/reset-password?token=")
-						l_link.append (l_token)
+						l_url := req.absolute_script_url ("/account/reset-password?token=" + l_token)
 
 								-- Send Email
 						create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
 						write_debug_log (generator + ".handle register: send_contact_password_email")
-						es.send_contact_password_email (l_email.value, l_link)
+						es.send_contact_password_email (l_email.value, l_url)
 					else
 						r.values.force ("The email does not exist !", "error_email")
 						r.values.force (l_email.value, "email")
@@ -499,7 +490,7 @@ feature -- Hooks
 			if	attached {WSF_STRING} req.query_parameter ("token") as l_token then
 				r.values.force (l_token.value, "token")
 				if l_user_api.user_by_password_token (l_token.value) = Void  then
-					r.values.force ("The token " + l_token.value + " is not valid, click <a href=%"/account/new-password%">here</a> to generate a new token.", "error_token")
+					r.values.force ("The token " + l_token.value + " is not valid, " + r.link ("click here" , "account/new-password", Void) + " to generate a new token.", "error_token")
 					r.set_status_code ({HTTP_CONSTANTS}.bad_request)
 				end
 			end
@@ -773,9 +764,9 @@ feature -- OAuth2 Login with google.
 					if
 						attached l_auth.user_email as l_email
 					then
-						if attached {CMS_USER} l_user_api.user_by_email (l_email) as p_user then
+						if attached l_user_api.user_by_email (l_email) as p_user then
 								-- User with email exist
-							if	attached {CMS_USER} a_user_oauth_api.user_oauth2_by_id (p_user.id, l_consumer.name)	then
+							if	attached a_user_oauth_api.user_oauth2_by_id (p_user.id, l_consumer.name)	then
 									-- Update oauth entry
 								a_user_oauth_api.update_user_oauth2 (l_access_token.token, l_user_profile, p_user, l_consumer.name )
 							else
@@ -788,7 +779,7 @@ feature -- OAuth2 Login with google.
 							res.add_cookie (l_cookie)
 						else
 
-							create {ARRAYED_LIST [CMS_USER_ROLE]}l_roles.make (1)
+							create {ARRAYED_LIST [CMS_USER_ROLE]} l_roles.make (1)
 							l_roles.force (l_user_api.authenticated_user_role)
 
 								-- Create a new user and oauth entry
@@ -813,9 +804,8 @@ feature -- OAuth2 Login with google.
 							write_debug_log (generator + ".handle register: send_contact_welcome_email")
 							es.send_contact_welcome_email (l_email, "")
 						end
-					else
 					end
-					r.set_redirection (req.absolute_script_url (""))
+					r.set_redirection (r.front_page_url)
 					r.execute
 				end
 
@@ -843,8 +833,6 @@ feature {NONE} -- Token Generation
 			end
 			Result := l_token
 		end
-
-
 
 feature {NONE} -- Implementation: date and time
 

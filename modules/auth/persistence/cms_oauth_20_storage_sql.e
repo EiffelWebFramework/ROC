@@ -22,10 +22,10 @@ create
 
 feature -- Access User Outh
 
-	user_oauth2_without_consumer_by_token (a_token: READABLE_STRING_32 ): detachable CMS_USER
-			-- Retrieve a user by token `a_token' searching in all the registered consumers in the system.
+	user_oauth2_without_consumer_by_token (a_token: READABLE_STRING_GENERAL): detachable CMS_USER
+			-- Retrieve user by token `a_token' searching in all the registered consumers in the system.
 		local
-			l_list: LIST[STRING]
+			l_list: LIST [STRING]
 		do
 			error_handler.reset
 			write_information_log (generator + ".user_oauth2_without_consumer_by_token")
@@ -33,16 +33,14 @@ feature -- Access User Outh
 			from
 				l_list.start
 			until
-				l_list.after or attached Result
+				l_list.after or Result /= Void
 			loop
-				if attached {CMS_USER} user_oauth2_by_token (a_token, l_list.item) as l_user then
-					Result := l_user
-				end
+				Result := user_oauth2_by_token (a_token, l_list.item)
 				l_list.forth
 			end
 		end
 
-	user_oauth2_by_id (a_uid: like {CMS_USER}.id; a_consumer: READABLE_STRING_32): detachable CMS_USER
+	user_oauth2_by_id (a_uid: like {CMS_USER}.id; a_consumer: READABLE_STRING_GENERAL): detachable CMS_USER
 			-- <Precursor>
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
@@ -53,7 +51,7 @@ feature -- Access User Outh
 			create l_parameters.make (1)
 			l_parameters.put (a_uid, "uid")
 			create l_string.make_from_string (select_user_oauth2_template_by_id)
-			l_string.replace_substring_all ("$table_name", sql_table_name (a_consumer))
+			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
 			sql_query (l_string, l_parameters)
 			if sql_rows_count = 1 then
 				Result := fetch_user
@@ -62,7 +60,7 @@ feature -- Access User Outh
 			end
 		end
 
-	user_oauth2_by_token (a_token: READABLE_STRING_32; a_consumer: READABLE_STRING_32): detachable CMS_USER
+	user_oauth2_by_token (a_token: READABLE_STRING_GENERAL; a_consumer: READABLE_STRING_GENERAL): detachable CMS_USER
 			-- <Precursor>
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
@@ -73,7 +71,7 @@ feature -- Access User Outh
 			create l_parameters.make (1)
 			l_parameters.put (a_token, "token")
 			create l_string.make_from_string (select_user_by_oauth2_template_token)
-			l_string.replace_substring_all ("$table_name", sql_table_name (a_consumer))
+			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
 			sql_query (l_string, l_parameters)
 			if sql_rows_count = 1 then
 				Result := fetch_user
@@ -85,11 +83,11 @@ feature -- Access User Outh
 
 feature --Access: Consumers	
 
-	oauth2_consumers: LIST[STRING]
+	oauth2_consumers: LIST [STRING]
 			-- Return a list of consumers, or empty
 		do
 			error_handler.reset
-			create {ARRAYED_LIST[STRING]}Result.make (0)
+			create {ARRAYED_LIST [STRING]} Result.make (0)
 			write_information_log (generator + ".user_by_oauth2_token")
 			sql_query (Sql_oauth_consumers, Void)
 			if not has_error then
@@ -142,7 +140,7 @@ feature --Access: Consumers
 
 feature -- Change: User OAuth
 
-	new_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer: READABLE_STRING_32)
+	new_user_oauth2 (a_token: READABLE_STRING_GENERAL; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer: READABLE_STRING_GENERAL)
 			-- Add a new user with oauth2  authentication.
 		-- <Precursor>.
 		local
@@ -160,12 +158,12 @@ feature -- Change: User OAuth
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "utc_date")
 
 			create l_string.make_from_string (sql_insert_oauth2_template)
-			l_string.replace_substring_all ("$table_name", sql_table_name (a_consumer))
+			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
 			sql_change (l_string, l_parameters)
 			sql_commit_transaction
 		end
 
-	update_user_oauth2 (a_token: READABLE_STRING_32; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer: READABLE_STRING_32 )
+	update_user_oauth2 (a_token: READABLE_STRING_GENERAL; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer: READABLE_STRING_GENERAL )
 			-- Update user `a_user' with oauth2 authentication.
 			-- <Precursor>
 		local
@@ -182,7 +180,7 @@ feature -- Change: User OAuth
 			l_parameters.put (a_user_profile, "profile")
 
 			create l_string.make_from_string (sql_update_oauth2_template)
-			l_string.replace_substring_all ("$table_name", sql_table_name (a_consumer))
+			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
 			sql_change (l_string, l_parameters)
 			sql_commit_transaction
 		end
@@ -192,39 +190,38 @@ feature {NONE} -- Implementation OAuth Consumer
 	fetch_consumer: detachable CMS_OAUTH_20_CONSUMER
 		do
 			if attached sql_read_integer_64 (1) as l_id then
-				create Result
-				Result.set_id (l_id)
-			end
-			if Result /= Void then
-				if attached sql_read_string_32 (2) as l_name then
+				create Result.make_with_id (l_id)
+
+				if attached sql_read_string (2) as l_name then
 					Result.set_name (l_name)
 				end
-				if attached sql_read_string_32 (3) as l_api_secret then
+				if attached sql_read_string (3) as l_api_secret then
 					Result.set_api_secret (l_api_secret)
 				end
-				if attached sql_read_string_32 (4) as l_api_key then
+				if attached sql_read_string (4) as l_api_key then
 					Result.set_api_key (l_api_key)
 				end
-				if attached sql_read_string_32 (5) as l_scope then
+				if attached sql_read_string (5) as l_scope then
 					Result.set_scope (l_scope)
 				end
-				if attached sql_read_string_32 (6) as l_resource_url then
+				if attached sql_read_string (6) as l_resource_url then
 					Result.set_protected_resource_url (l_resource_url)
 				end
-				if attached sql_read_string_32 (7) as l_callback_name then
+				if attached sql_read_string (7) as l_callback_name then
 					Result.set_callback_name (l_callback_name)
 				end
-				if attached sql_read_string_32 (8) as l_extractor then
+				if attached sql_read_string (8) as l_extractor then
 					Result.set_extractor (l_extractor)
 				end
-				if attached sql_read_string_32 (9) as l_authorize_url then
+				if attached sql_read_string (9) as l_authorize_url then
 					Result.set_authorize_url (l_authorize_url)
 				end
-				if attached sql_read_string_32 (10) as l_endpoint then
+				if attached sql_read_string (10) as l_endpoint then
 					Result.set_endpoint (l_endpoint)
 				end
 			end
 		end
+
 feature {NONE} -- Implementation: User
 
 	fetch_user: detachable CMS_USER
@@ -232,7 +229,7 @@ feature {NONE} -- Implementation: User
 			l_id: INTEGER_64
 			l_name: detachable READABLE_STRING_32
 		do
-			if attached sql_read_integer_32 (1) as i then
+			if attached sql_read_integer_64 (1) as i then
 				l_id := i
 			end
 			if attached sql_read_string_32 (2) as s and then not s.is_whitespace then
@@ -264,15 +261,36 @@ feature {NONE} -- Implementation: User
 			end
 		end
 
-feature -- {NONE} User OAuth2
+feature {NONE} -- User OAuth2
 
-	sql_table_name (a_consumer: READABLE_STRING_8): STRING_8
+	oauth2_sql_table_name (a_consumer: READABLE_STRING_GENERAL): STRING_8
+		local
+			i,n: INTEGER
 		do
-			Result := Sql_table_prefix.twin
-			Result.append (a_consumer)
+			create Result.make_from_string (Sql_oauth2_table_prefix)
+			if a_consumer.is_valid_as_string_8 then
+				Result.append (a_consumer.to_string_8)
+			else
+				check only_ascii: False end
+					-- Replace non ascii char by '-'
+				from
+					i := 1
+					n := a_consumer.count
+				until
+					i > n
+				loop
+					if a_consumer [i].is_character_8 then
+						Result.append_code (a_consumer.code (i))
+					else
+						Result.append_character ('-')
+					end
+					i := i + 1
+				end
+			end
 		end
 
 	Select_user_by_oauth2_template_token: STRING = "SELECT u.* FROM users as u JOIN $table_name as og ON og.uid = u.uid and og.access_token = :token;"
+			--| FIXME: replace the u.* by a list of field names, to avoid breaking `featch_user' if two fieds are swiped.
 
 	Select_user_oauth2_template_by_id: STRING = "SELECT u.* FROM users as u JOIN $table_name as og ON og.uid = u.uid and og.uid = :uid;"
 
@@ -282,12 +300,12 @@ feature -- {NONE} User OAuth2
 
 	Sql_oauth_consumers: STRING = "SELECT name FROM oauth2_consumers";
 
-	Sql_table_prefix: STRING = "oauth2_"
+	Sql_oauth2_table_prefix: STRING = "oauth2_"
 
-feature -- {NONE} Consumer
+feature {NONE} -- Consumer
 
-	Sql_oauth_consumer_callback: STRING ="SELECT * FROM oauth2_consumers where callback_name =:name;"
+	Sql_oauth_consumer_callback: STRING = "SELECT * FROM oauth2_consumers where callback_name =:name;"
 
-	Sql_oauth_consumer_name: STRING ="SELECT * FROM oauth2_consumers where name =:name;"
+	Sql_oauth_consumer_name: STRING = "SELECT * FROM oauth2_consumers where name =:name;"
 
 end
