@@ -529,7 +529,8 @@ feature {NONE} -- Helpers
 		do
 			create p.make_from_string ("templates")
 			p := p.extended ("block_").appended (a_block_id).appended_with_extension ("tpl")
-			p := a_response.module_resource_path (Current, p)
+
+			p := a_response.api.module_theme_resource_location (Current, p)
 			if p /= Void then
 				if attached p.entry as e then
 					create Result.make (a_block_id, Void, p.parent, e)

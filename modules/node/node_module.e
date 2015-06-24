@@ -149,26 +149,26 @@ feature -- Access: router
 				-- TODO: for now, focused only on web interface, add REST api later. [2015-April-29]
 			create l_node_handler.make (a_api, a_node_api)
 			create l_uri_mapping.make_trailing_slash_ignored ("/node", l_node_handler)
-			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get_post)
+			a_router.map (l_uri_mapping, a_router.methods_get_post)
 
-			a_router.handle_with_request_methods ("/node/add/{type}", l_node_handler, a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/node/{id}/edit", l_node_handler, a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/node/{id}/delete", l_node_handler, a_router.methods_get_post)
-			a_router.handle_with_request_methods ("/node/{id}/trash", l_node_handler, a_router.methods_get_post)
+			a_router.handle ("/node/add/{type}", l_node_handler, a_router.methods_get_post)
+			a_router.handle ("/node/{id}/edit", l_node_handler, a_router.methods_get_post)
+			a_router.handle ("/node/{id}/delete", l_node_handler, a_router.methods_get_post)
+			a_router.handle ("/node/{id}/trash", l_node_handler, a_router.methods_get_post)
 
-			a_router.handle_with_request_methods ("/node/{id}", l_node_handler, a_router.methods_get)
+			a_router.handle ("/node/{id}", l_node_handler, a_router.methods_get)
 				-- For now: no REST API handling... a_router.methods_get_put_delete + a_router.methods_get_post)
 
 				-- Nodes
 			create l_nodes_handler.make (a_api, a_node_api)
 			create l_uri_mapping.make_trailing_slash_ignored ("/nodes", l_nodes_handler)
-			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get)
+			a_router.map (l_uri_mapping, a_router.methods_get)
 
 				--Trash
 
 			create l_trash_handler.make (a_api, a_node_api)
 			create l_uri_mapping.make_trailing_slash_ignored ("/trash", l_trash_handler)
-			a_router.map_with_request_methods (l_uri_mapping, a_router.methods_get)
+			a_router.map (l_uri_mapping, a_router.methods_get)
 
 		end
 
