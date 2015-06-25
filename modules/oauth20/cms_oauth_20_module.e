@@ -48,10 +48,10 @@ feature {NONE} -- Initialization
 	make
 			-- Create current module
 		do
-			name := "login"
+			name := "oauth20"
 			version := "1.0"
-			description := "Authentication module"
-			package := "authentication"
+			description := "OAuth20 module"
+			package := "Oauth20"
 
 			create root_dir.make_current
 			cache_duration := 0
@@ -184,8 +184,8 @@ feature -- Router
 
 	configure_web (a_api: CMS_API; a_user_oauth_api: CMS_OAUTH_20_API; a_router: WSF_ROUTER)
 		do
-			a_router.handle ("/account/roc-login", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login (a_api, ?, ?)), a_router.methods_head_get)
-			a_router.handle ("/account/roc-logout", create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle ("/account/roc-oauth-login", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login (a_api, ?, ?)), a_router.methods_head_get)
+			a_router.handle ("/account/roc-oauth-logout", create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle ("/account/login-with-oauth/{callback}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_login_with_oauth (a_api,a_user_oauth_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle ("/account/{callback}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_callback_oauth (a_api, a_user_oauth_api, ?, ?)), a_router.methods_get_post)
 		end
@@ -216,14 +216,28 @@ feature -- Hooks
 			-- for related response `a_response'.
 		local
 			lnk: CMS_LOCAL_LINK
+			lnk2: detachable CMS_LINK
 		do
-			if attached a_response.current_user (a_response.request) as u then
-				create lnk.make (u.name +  " (Logout)", "account/roc-logout" )
-			else
-				create lnk.make ("Login", "account/roc-login")
+
+			if attached a_response.current_user (a_response.request) as u and then
+			   attached {WSF_STRING} a_response.request.cookie ({CMS_OAUTH_20_CONSTANTS}.oauth_session) as l_roc_auth_session_token
+			then
+				across a_menu_system.primary_menu.items as ic until lnk2 /= Void
+				loop
+					if ic.item.title.has_substring ("(Logout)") then
+						lnk2 := ic.item
+					end
+				end
+				if lnk2 /= Void then
+					a_menu_system.primary_menu.remove (lnk2)
+				end
+				create lnk.make (u.name +  " (Logout)", "account/roc-oauth-logout" )
+				a_menu_system.primary_menu.extend (lnk)
 			end
-			a_menu_system.primary_menu.extend (lnk)
-			lnk.set_weight (98)
+			if a_response.location.starts_with ("account/roc-login") then
+				create lnk.make ("OAuth", "account/roc-oauth-login")
+				a_response.add_to_primary_tabs (lnk)
+			end
 		end
 
 	block_list: ITERABLE [like {CMS_BLOCK}.name]
@@ -243,7 +257,7 @@ feature -- Hooks
 		do
 			if
 				a_block_id.is_case_insensitive_equal_general ("login") and then
-				a_response.location.starts_with ("account/roc-login")
+				a_response.location.starts_with ("account/roc-oauth-login")
 			then
 				get_block_view_login (a_block_id, a_response)
 			end

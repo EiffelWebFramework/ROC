@@ -80,6 +80,7 @@ feature -- Router
 	configure_web (a_api: CMS_API; a_router: WSF_ROUTER)
 		do
 			a_router.handle ("/account/roc-login", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login (a_api, ?, ?)), a_router.methods_head_get)
+			a_router.handle ("/account/roc-basic-auth", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login_basic_auth (a_api, ?, ?)), a_router.methods_head_get)
 			a_router.handle ("/account/roc-register", create {WSF_URI_AGENT_HANDLER}.make (agent handle_register (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle ("/account/activate/{token}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_activation (a_api, ?, ?)), a_router.methods_head_get)
 			a_router.handle ("/account/reactivate", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reactivation (a_api, ?, ?)), a_router.methods_get_post)
@@ -122,6 +123,11 @@ feature -- Hooks
 			end
 			a_menu_system.primary_menu.extend (lnk)
 			lnk.set_weight (98)
+			if a_response.location.starts_with ("account/roc-login") then
+				create lnk.make ("Basic Auth", "account/roc-basic-auth")
+				lnk.set_expandable (True)
+				a_response.add_to_primary_tabs (lnk)
+			end
 		end
 
 	block_list: ITERABLE [like {CMS_BLOCK}.name]
@@ -141,7 +147,7 @@ feature -- Hooks
 		do
 			if
 				a_block_id.is_case_insensitive_equal_general ("login") and then
-				a_response.location.starts_with ("account/roc-login")
+				a_response.location.starts_with ("account/roc-basic-auth")
 			then
 				get_block_view_login (a_block_id, a_response)
 			elseif
@@ -170,9 +176,20 @@ feature -- Hooks
 	handle_login (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
+			link: CMS_LINK
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			r.set_value ("Login", "optional_content_type")
+			r.execute
+		end
+
+	handle_login_basic_auth (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+		local
+			r: CMS_RESPONSE
+			link: CMS_LINK
+		do
+			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+			r.set_value ("Basic Auth", "optional_content_type")
 			r.execute
 		end
 
@@ -599,6 +616,7 @@ feature {NONE} -- Token Generation
 			end
 			Result := l_token
 		end
+
 
 feature {NONE} -- Implementation: date and time
 
