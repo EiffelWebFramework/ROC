@@ -74,7 +74,7 @@ CREATE TABLE blog_post_nodes(
   `tags` VARCHAR(255)
 );
 					]"
-					l_sql_storage.sql_execute_script (sql)
+					l_sql_storage.sql_execute_script (sql, Void)
 					if l_sql_storage.has_error then
 						api.logger.put_error ("Could not initialize database for blog module", generating_type)
 					end
