@@ -102,13 +102,13 @@ feature {CMS_API} -- Module management
 			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
 				if not l_sql_storage.sql_table_exists ("oauth2_consumers") then
 					--| Schema
-					l_sql_storage.sql_execute_file_script (l_setup.environment.path.extended ("scripts").extended ("oauth2_consumers.sql"))
+					l_sql_storage.sql_execute_file_script (api.modules_location.extended ("scripts").extended ("oauth2_consumers.sql"))
 
 					if l_sql_storage.has_error then
 						api.logger.put_error ("Could not initialize database for blog module", generating_type)
 					end
 						-- TODO workaround.
-					l_sql_storage.sql_execute_file_script (l_setup.environment.path.extended ("scripts").extended ("oauth2_consumers_initialize.sql"))
+					l_sql_storage.sql_execute_file_script (api.modules_location.extended ("scripts").extended ("oauth2_consumers_initialize.sql"))
 				end
 
 					-- TODO workaround, until we have an admin module
@@ -131,7 +131,7 @@ feature {CMS_API} -- Module management
 						if not l_sql_storage.sql_table_exists (ic.item) then
 							create l_params.make (1)
 							l_params.force (ic.item, "table_name")
-							l_sql_storage.sql_execute_file_script_with_params (l_setup.environment.path.extended ("scripts").extended ("oauth2_template.sql"), l_params)
+							l_sql_storage.sql_execute_file_script_with_params (api.modules_location.extended ("scripts").extended ("oauth2_template.sql"), l_params)
 						end
 					end
 				end
