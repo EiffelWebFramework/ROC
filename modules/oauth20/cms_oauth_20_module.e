@@ -47,7 +47,6 @@ feature {NONE} -- Initialization
 	make
 			-- Create current module
 		do
-			name := "oauth20"
 			version := "1.0"
 			description := "OAuth20 module"
 			package := "Oauth20"
@@ -55,6 +54,10 @@ feature {NONE} -- Initialization
 			create root_dir.make_current
 			cache_duration := 0
 		end
+
+feature -- Access
+
+	name: STRING = "oauth20"
 
 feature {CMS_API} -- Module Initialization			
 

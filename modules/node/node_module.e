@@ -29,7 +29,6 @@ feature {NONE} -- Initialization
 	make (a_setup: CMS_SETUP)
 			-- Create Current module, disabled by default.
 		do
-			name := "node"
 			version := "1.0"
 			description := "Service to manage content based on 'node'"
 			package := "core"
@@ -38,6 +37,10 @@ feature {NONE} -- Initialization
 
 	config: CMS_SETUP
 			-- Node configuration.
+
+feature -- Access
+
+	name: STRING = "node"
 
 feature {CMS_API} -- Module Initialization			
 
