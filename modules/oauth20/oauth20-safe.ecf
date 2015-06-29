@@ -11,11 +11,11 @@
 		</option>
 		<library name="apis" location="$ISE_LIBRARY\contrib\library\web\authentication\oauth\cypress\consumer\apis\apis.ecf" readonly="false"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
-		<library name="cms" location="$ISE_LIBRARY\unstable\library\web\cms\cms-safe.ecf" readonly="false"/>
+		<library name="cms" location="..\..\cms-safe.ecf" readonly="false"/>
 		<library name="cms_auth_module" location="..\auth\auth-safe.ecf" readonly="false"/>
-		<library name="cms_app_env" location="$ISE_LIBRARY\unstable\library\web\cms\library\app_env\app_env-safe.ecf" readonly="false"/>
-		<library name="cms_model" location="$ISE_LIBRARY\unstable\library\web\cms\library\model\cms_model-safe.ecf" readonly="false"/>
-		<library name="config" location="$ISE_LIBRARY\unstable\library\web\cms\library\configuration\config-safe.ecf"/>
+		<library name="cms_app_env" location="..\..\library\app_env\app_env-safe.ecf" readonly="false"/>
+		<library name="cms_model" location="..\..\library\model\cms_model-safe.ecf" readonly="false"/>
+		<library name="config" location="..\..\library\configuration\config-safe.ecf"/>
 		<library name="cypress_consumer" location="$ISE_LIBRARY\contrib\library\web\authentication\oauth\cypress\consumer-safe.ecf" readonly="false"/>
 		<library name="email_service" location="..\..\library\email\email-safe.ecf"/>
 		<library name="encoder" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\text\encoder\encoder-safe.ecf"/>

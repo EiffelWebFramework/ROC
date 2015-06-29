@@ -176,7 +176,6 @@ feature -- Hooks
 	handle_login (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			link: CMS_LINK
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			r.set_value ("Login", "optional_content_type")
@@ -186,7 +185,6 @@ feature -- Hooks
 	handle_login_basic_auth (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
-			link: CMS_LINK
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			r.set_value ("Basic Auth", "optional_content_type")
@@ -197,7 +195,6 @@ feature -- Hooks
 		local
 			r: CMS_RESPONSE
 			l_url: STRING
-			l_cookie: WSF_COOKIE
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			r.set_status_code ({HTTP_CONSTANTS}.found)
