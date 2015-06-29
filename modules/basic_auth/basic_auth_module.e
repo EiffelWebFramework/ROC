@@ -29,11 +29,14 @@ feature {NONE} -- Initialization
 
 	make
 		do
-			name := "basic auth"
 			version := "1.0"
 			description := "Service to manage basic authentication"
 			package := "core"
 		end
+
+feature -- Access
+
+	name: STRING = "basic_auth"
 
 feature -- Access: router
 

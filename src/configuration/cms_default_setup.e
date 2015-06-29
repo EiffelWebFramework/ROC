@@ -42,6 +42,8 @@ feature {NONE} -- Initialization
 		local
 			l_url: like site_url
 		do
+			site_location := environment.path
+
 				--| Site id, used to identified a site, this could be set to a uuid, or else
 			site_id := text_item_or_default ("site.id", "_EWF_CMS_NO_ID_")
 
@@ -169,4 +171,7 @@ feature -- Theme: Compute location
 			theme_location := themes_location.extended (theme_name)
 		end
 
+note
+	copyright: "2011-2015, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
