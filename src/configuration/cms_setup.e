@@ -113,6 +113,13 @@ feature -- Access: Theme
 	theme_name: READABLE_STRING_32
 			-- theme name.
 
+feature -- Access
+
+	mailer: NOTIFICATION_MAILER
+			-- Email processor.
+		deferred
+		end
+
 feature -- Access: storage
 
 	storage_drivers: STRING_TABLE [CMS_STORAGE_BUILDER]

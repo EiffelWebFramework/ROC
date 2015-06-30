@@ -147,9 +147,44 @@ feature -- Access
 		end
 
 	build_mailer
+		local
+			retried: BOOLEAN
+			f: FILE
 		do
-			to_implement ("Not implemented mailer")
+			if not retried then
+				if attached text_item ("mailer.smtp") as l_smtp then
+					create {NOTIFICATION_SMTP_MAILER} mailer.make (l_smtp)
+				elseif attached text_item ("mailer.sendmail") as l_sendmail then
+					create {NOTIFICATION_SENDMAIL_MAILER} mailer.make_with_location (l_sendmail)
+				elseif attached text_item ("mailer.output") as l_output then
+					if l_output.is_case_insensitive_equal ("@stderr") then
+						f := io.error
+					elseif l_output.is_case_insensitive_equal ("@stdout") then
+						f := io.output
+					else
+						create {PLAIN_TEXT_FILE} f.make_with_name (l_output)
+						if not f.exists then
+							f.create_read_write
+							f.close
+						end
+					end
+					create {NOTIFICATION_STORAGE_MAILER} mailer.make (create {NOTIFICATION_EMAIL_FILE_STORAGE}.make (f))
+				else
+					create {NOTIFICATION_STORAGE_MAILER} mailer.make (create {NOTIFICATION_EMAIL_FILE_STORAGE}.make (io.error))
+				end
+			else
+				check valid_mailer: False end
+					-- FIXME: should we report persistent error message? If yes, see how.
+				create {NOTIFICATION_NULL_MAILER} mailer
+			end
+		rescue
+			retried := True
+			retry
 		end
+
+feature -- Access
+
+	mailer: NOTIFICATION_MAILER
 
 feature -- Access: storage
 
