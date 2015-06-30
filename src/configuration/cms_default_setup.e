@@ -162,7 +162,7 @@ feature -- Access
 					elseif l_output.is_case_insensitive_equal ("@stdout") then
 						f := io.output
 					else
-						create {PLAIN_TEXT_FILE} f.make_with_name (l_output)
+						create {RAW_FILE} f.make_with_name (l_output)
 						if not f.exists then
 							f.create_read_write
 							f.close

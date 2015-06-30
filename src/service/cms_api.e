@@ -137,6 +137,28 @@ feature -- Logging
 			end
 		end
 
+feature -- Emails
+
+	process_email (e: CMS_EMAIL)
+			-- Process email `e'.
+		do
+			reset_error
+			setup.mailer.safe_process_email (e)
+			if setup.mailer.has_error then
+				error_handler.add_custom_error (0, "Mailer error", "Error occurred while processing email.")
+			end
+		end
+
+	process_emails (lst: ITERABLE [CMS_EMAIL])
+			-- Process collection of email `lst'.	
+		do
+			reset_error
+			setup.mailer.process_emails (lst)
+			if setup.mailer.has_error then
+				error_handler.add_custom_error (0, "Mailer error", "Error occurred while processing emails.")
+			end
+		end
+
 feature -- Permissions system
 
 	user_has_permission (a_user: detachable CMS_USER; a_permission: detachable READABLE_STRING_GENERAL): BOOLEAN
