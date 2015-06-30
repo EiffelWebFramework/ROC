@@ -179,7 +179,7 @@ feature -- Router
 			a_router.handle ("/account/roc-oauth-login", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login (a_api, ?, ?)), a_router.methods_head_get)
 			a_router.handle ("/account/roc-oauth-logout", create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout (a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle ("/account/login-with-oauth/{callback}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_login_with_oauth (a_api,a_user_oauth_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle ("/account/{callback}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_callback_oauth (a_api, a_user_oauth_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle ("/account/oauth-callback/{callback}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_callback_oauth (a_api, a_user_oauth_api, ?, ?)), a_router.methods_get_post)
 		end
 
 feature -- Hooks configuration
@@ -227,10 +227,11 @@ feature -- Hooks
 				end
 				create lnk.make (u.name +  " (Logout)", "account/roc-oauth-logout" )
 				a_menu_system.primary_menu.extend (lnk)
-			end
-			if a_response.location.starts_with ("account/roc-login") then
-				create lnk.make ("OAuth", "account/roc-oauth-login")
-				a_response.add_to_primary_tabs (lnk)
+			else
+				if a_response.location.starts_with ("account/") then
+					create lnk.make ("OAuth", "account/roc-oauth-login")
+					a_response.add_to_primary_tabs (lnk)
+				end
 			end
 		end
 
