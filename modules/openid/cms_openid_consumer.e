@@ -35,7 +35,7 @@ feature -- Access
 	endpoint: READABLE_STRING_8
 			-- 	Url to authorize the user.
 
-	name: READABLE_STRING_32
+	name: READABLE_STRING_8
 			-- consumer name.
 
 	id: INTEGER_64

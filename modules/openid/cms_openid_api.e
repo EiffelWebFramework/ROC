@@ -61,7 +61,7 @@ feature -- Access: Consumers OAuth20
 feature	-- Change: User Openid
 
 
-	new_user_openid (a_identity: READABLE_STRING_GENERAL; a_user: CMS_USER; )
+	new_user_openid (a_identity: READABLE_STRING_GENERAL; a_user: CMS_USER)
 			-- Add a new user with openid using the identity `a_identity'.
 		require
 			has_id: a_user.has_id

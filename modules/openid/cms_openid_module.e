@@ -90,8 +90,6 @@ feature {CMS_API} -- Module Initialization
 feature {CMS_API} -- Module management
 
 	install (api: CMS_API)
-		local
-			l_consumers: LIST [STRING]
 		do
 				-- Schema
 			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
@@ -126,8 +124,8 @@ feature -- Filters
 	filters (a_api: CMS_API): detachable LIST [WSF_FILTER]
 			-- Possibly list of Filter's module.
 		do
-			create {ARRAYED_LIST [WSF_FILTER]} Result.make (1)
 			if attached user_openid_api as l_user_openid_api then
+				create {ARRAYED_LIST [WSF_FILTER]} Result.make (1)
 				Result.extend (create {CMS_OPENID_FILTER}.make (a_api, l_user_openid_api))
 			end
 		end
@@ -263,7 +261,7 @@ feature -- Hooks
 					create o.make (req.absolute_script_url ("/account/login-with-openid"))
 					o.ask_email (True)
 					o.ask_all_info (False)
-					if attached o.auth_url (p_openid.as_readable_string_8) as l_url then
+					if attached o.auth_url (p_openid) as l_url then
 						r.set_redirection (l_url)
 					else
 						s.append (" Failure")

@@ -21,7 +21,7 @@ feature {NONE} -- Initialization
 			s: detachable READABLE_STRING_32
 			l_contact_email, l_subject_register, l_subject_activate, l_subject_password, l_subject_oauth: detachable READABLE_STRING_8
 		do
-			setup := a_cms_api.setup
+			cms_api := a_cms_api
 				-- Use global smtp setting if any, otherwise "localhost"
 			smtp_server := utf.escaped_utf_32_string_to_utf_8_string_8 (a_cms_api.setup.text_item_or_default ("smtp", "localhost"))
 			l_site_name := utf.escaped_utf_32_string_to_utf_8_string_8 (a_cms_api.setup.site_name)
@@ -71,23 +71,6 @@ feature {NONE} -- Initialization
 			else
 				contact_subject_register := "Thank you for registering with us."
 			end
-
-			if l_subject_activate /= Void then
-				contact_subject_activate := l_subject_activate
-			else
-				contact_subject_activate := "New account activation token."
-			end
-			if l_subject_password /= Void then
-				contact_subject_password := l_subject_password
-			else
-				contact_subject_password := "Password Recovery."
-			end
-			if l_subject_oauth /= Void then
-				contact_subject_oauth := l_subject_oauth
-			else
-				contact_subject_oauth := "Welcome."
-			end
-
 		end
 
 feature	-- Access
@@ -100,9 +83,6 @@ feature	-- Access
 			-- Contact email.
 
 	contact_subject_register: IMMUTABLE_STRING_8
-	contact_subject_activate: IMMUTABLE_STRING_8
-	contact_subject_password: IMMUTABLE_STRING_8
-	contact_subject_oauth: IMMUTABLE_STRING_8
 
 	account_activation: STRING
 			-- Account activation template email message.
@@ -133,7 +113,7 @@ feature {NONE} -- Implementation: Template
 	template_path (a_name: READABLE_STRING_GENERAL): PATH
 			-- Location of template named `a_name'.
 		do
-			Result := setup.environment.config_path.extended ("modules").extended ("login").extended (a_name)
+			Result := cms_api.module_location_by_name ({CMS_AUTHENTICATION_MODULE}.name).extended (a_name)
 		end
 
 	template_string (a_name: READABLE_STRING_GENERAL; a_default: STRING): STRING
@@ -151,7 +131,7 @@ feature {NONE} -- Implementation: Template
 
 feature {NONE} -- Implementation
 
-	setup: CMS_SETUP
+	cms_api: CMS_API
 
 	read_template_file (a_path: PATH): detachable STRING
 			-- Read the content of the file at path `a_path'.

@@ -56,7 +56,7 @@ feature -- Basic Operations
 		do
 			create l_message.make_from_string (parameters.account_welcome)
 			l_message.replace_substring_all ("$link", a_content)
-			send_message (contact_email, a_to, parameters.contact_subject_oauth, l_message)
+			send_message (contact_email, a_to, parameters.contact_subject_register, l_message)
 		end
 
 end
