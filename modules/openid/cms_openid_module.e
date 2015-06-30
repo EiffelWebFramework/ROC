@@ -106,7 +106,7 @@ feature {CMS_API} -- Module management
 
 					-- TODO workaround, until we have an admin module
 				if l_sql_storage.has_error then
-					api.logger.put_error ("Could not initialize database for differnent consumerns", generating_type)
+					api.logger.put_error ("Could not initialize database for different consumers", generating_type)
 				else
 					l_sql_storage.sql_execute_file_script (api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended ("openid_items.sql")),Void)
 				end
