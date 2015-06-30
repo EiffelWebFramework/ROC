@@ -71,23 +71,6 @@ feature {NONE} -- Initialization
 			else
 				contact_subject_register := "Thank you for registering with us."
 			end
-
-			if l_subject_activate /= Void then
-				contact_subject_activate := l_subject_activate
-			else
-				contact_subject_activate := "New account activation token."
-			end
-			if l_subject_password /= Void then
-				contact_subject_password := l_subject_password
-			else
-				contact_subject_password := "Password Recovery."
-			end
-			if l_subject_oauth /= Void then
-				contact_subject_oauth := l_subject_oauth
-			else
-				contact_subject_oauth := "Welcome."
-			end
-
 		end
 
 feature	-- Access
@@ -100,27 +83,6 @@ feature	-- Access
 			-- Contact email.
 
 	contact_subject_register: IMMUTABLE_STRING_8
-	contact_subject_activate: IMMUTABLE_STRING_8
-	contact_subject_password: IMMUTABLE_STRING_8
-	contact_subject_oauth: IMMUTABLE_STRING_8
-
-	account_activation: STRING
-			-- Account activation template email message.
-		do
-			Result := template_string ("account_activation.html", default_template_account_activation)
-		end
-
-	account_re_activation: STRING
-			-- Account re_activation template email message.
-		do
-			Result := template_string ("accunt_re_activation.html", default_template_account_re_activation)
-		end
-
-	account_password: STRING
-			-- Account password template email message.
-		do
-			Result := template_string ("account_new_password.html", default_template_account_new_password)
-		end
 
 	account_welcome: STRING
 			-- Account welcome template email message.
@@ -173,72 +135,6 @@ feature {NONE} -- Implementation
 
 
 feature {NONE} -- Message email
-
-	default_template_account_activation: STRING = "[
-		<!doctype html>
-		<html lang="en">
-		<head>
-		  <meta charset="utf-8">
-		  <title>Activation</title>
-		  <meta name="description" content="Activation">
-		  <meta name="author" content="ROC CMS">
-		</head>
-
-		<body>
-			<p>Thank you for registering at <a href="...">ROC CMS</a></p>
-
-			<p>To complete your registration, please click on the following link to activate your account:<p>
-
-			<p><a href="$link">$link</a></p>
-			<p>Thank you for joining us.</p>
-		</body>
-		</html>
-	]"
-
-
-	default_template_account_re_activation: STRING = "[
-		<!doctype html>
-		<html lang="en">
-		<head>
-		  <meta charset="utf-8">
-		  <title>New Activation</title>
-		  <meta name="description" content="New Activation token">
-		  <meta name="author" content="ROC CMS">
-		</head>
-
-		<body>
-			<p>You have requested a new activation token at <a href="...">ROC CMS</a></p>
-
-			<p>To complete your registration, please click on the following link to activate your account:<p>
-
-			<p><a href="$link">$link</a></p>
-			<p>Thank you for joining us.</p>
-		</body>
-		</html>
-	]"
-
-
-
-	default_template_account_new_password: STRING = "[
-		<!doctype html>
-		<html lang="en">
-		<head>
-		  <meta charset="utf-8">
-		  <title>New Password</title>
-		  <meta name="description" content="New Password">
-		  <meta name="author" content="ROC CMS">
-		</head>
-
-		<body>
-			<p>You have required a new password at <a href="...">ROC CMS</a></p>
-
-			<p>To complete your request, please click on this link to generate a new password:<p>
-
-			<p><a href="$link">$link</a></p>
-		</body>
-		</html>
-	]"
-
 
 	default_template_account_welcome: STRING = "[
 		<!doctype html>
