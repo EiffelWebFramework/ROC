@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-10-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-10-0 http://www.eiffel.com/developers/xml/configuration-1-10-0.xsd" name="all" uuid="1172C52C-6979-4293-8F01-80FADA5A2B69">
+	<description>Integration project including many lib</description>
+	<target name="all">
+		<root all_classes="true"/>
+		<file_rule>
+			<exclude>/.git$</exclude>
+			<exclude>/EIFGENs$</exclude>
+			<exclude>/.svn$</exclude>
+		</file_rule>
+		<option warning="true" full_class_checking="true" is_attached_by_default="true" void_safety="all" syntax="standard">
+		</option>
+
+		<library name="cms" location="..\cms-safe.ecf" readonly="false"/>
+		<library name="demo" location="..\examples\demo\demo-safe.ecf" readonly="false"/>
+		<library name="cms_blog_module" location="..\examples\demo\modules\blog\cms_blog_module-safe.ecf" readonly="false"/>
+		<library name="cms_demo_module" location="..\examples\demo\modules\demo\cms_demo_module-safe.ecf" readonly="false"/>
+		<library name="app_env" location="..\library\app_env\app_env-safe.ecf" readonly="false"/>
+		<library name="config" location="..\library\configuration\config-safe.ecf" readonly="false"/>
+		<library name="config_tests" location="..\library\configuration\tests\config_tests-safe.ecf" readonly="false"/>
+		<library name="email_service" location="..\library\email\email-safe.ecf" readonly="false"/>
+		<library name="cms_model" location="..\library\model\cms_model-safe.ecf" readonly="false"/>
+		<library name="store_mysql" location="..\library\persistence\store_mysql\store_mysql-safe.ecf" readonly="false"/>
+		<library name="persistence_store_odbc" location="..\library\persistence\store_odbc\store_odbc-safe.ecf" readonly="false"/>
+		<library name="tests_store_odbc" location="..\library\persistence\store_odbc\tests\tests-safe.ecf" readonly="false"/>
+		<library name="auth_module" location="..\modules\auth\auth-safe.ecf" readonly="false"/>
+		<library name="basic_auth" location="..\modules\basic_auth\basic_auth-safe.ecf" readonly="false"/>
+		<library name="node" location="..\modules\node\node-safe.ecf" readonly="false"/>
+		<library name="oauth_module" location="..\modules\oauth20\oauth20-safe.ecf" readonly="false"/>
+	</target>
+	<target name="all_windows" extends="all">
+		<description>Compiling as Windows , on other platforms than Windows</description>
+		<root all_classes="true"/>
+		<setting name="platform" value="windows"/>
+	</target>
+	<target name="all_unix" extends="all">
+		<description>Compiling as UNIX , on other platforms than Unix</description>
+		<root all_classes="true"/>
+		<setting name="platform" value="unix"/>
+	</target>
+</system>

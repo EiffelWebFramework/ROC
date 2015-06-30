@@ -26,8 +26,6 @@ feature {NONE} -- Initialization
 
 	initialize
 			-- Initialize service.
-		local
-			l_address_factory: INET_ADDRESS_FACTORY
 		do
 			admin_email := parameters.admin_email
 
