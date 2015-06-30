@@ -73,6 +73,10 @@ feature -- CMS setup
 			m.enable
 			a_setup.register_module (m)
 
+			create {CMS_OPENID_MODULE} m.make
+			m.enable
+			a_setup.register_module (m)
+
 			create {CMS_DEBUG_MODULE} m.make
 			m.enable
 			a_setup.register_module (m)

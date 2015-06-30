@@ -116,13 +116,13 @@ feature -- Hooks
 				create lnk.make (u.name +  " (Logout)", "account/roc-logout" )
 			else
 				create lnk.make ("Login", "account/roc-login")
-			end
-			a_menu_system.primary_menu.extend (lnk)
-			lnk.set_weight (98)
-			if a_response.location.starts_with ("account/roc-login") then
-				create lnk.make ("Basic Auth", "account/roc-basic-auth")
-				lnk.set_expandable (True)
-				a_response.add_to_primary_tabs (lnk)
+				a_menu_system.primary_menu.extend (lnk)
+				lnk.set_weight (98)
+				if a_response.location.starts_with ("account/") then
+					create lnk.make ("Basic Auth", "account/roc-basic-auth")
+					lnk.set_expandable (True)
+					a_response.add_to_primary_tabs (lnk)
+				end
 			end
 		end
 
