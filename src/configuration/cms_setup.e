@@ -95,6 +95,9 @@ feature -- Access: Theme
 	site_location: PATH
 			-- Path to CMS site root dir.
 
+	files_location: PATH
+			-- Path to public "files" dir.			
+
 	modules_location: PATH
 			-- Path to modules.	
 

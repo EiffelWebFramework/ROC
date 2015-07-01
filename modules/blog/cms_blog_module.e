@@ -20,6 +20,8 @@ inherit
 
 	CMS_HOOK_MENU_SYSTEM_ALTER
 
+	CMS_HOOK_RESPONSE_ALTER
+
 create
 	make
 
@@ -45,11 +47,11 @@ feature {CMS_API} -- Module Initialization
 		do
 			Precursor (api)
 
-			if attached {CMS_NODE_API} api.module_api ({NODE_MODULE}) as l_node_api then
+			if attached {CMS_NODE_API} api.module_api ({CMS_NODE_MODULE}) as l_node_api then
 				create blog_api.make (api, l_node_api)
 
 				node_api := l_node_api
-					-- Depends on {NODE_MODULE}
+					-- Depends on {CMS_NODE_MODULE}
 				create ct
 				l_node_api.add_content_type (ct)
 				l_node_api.add_content_type_webform_manager (create {CMS_BLOG_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
@@ -140,6 +142,12 @@ feature -- Hooks
 	register_hooks (a_response: CMS_RESPONSE)
 		do
 			a_response.subscribe_to_menu_system_alter_hook (Current)
+			a_response.subscribe_to_response_alter_hook (Current)
+		end
+
+	response_alter (a_response: CMS_RESPONSE)
+		do
+			a_response.add_style (a_response.url ("/module/" + name + "/files/css/blog.css", Void), Void)
 		end
 
 	menu_system_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)

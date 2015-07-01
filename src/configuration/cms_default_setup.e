@@ -63,6 +63,14 @@ feature {NONE} -- Initialization
 				-- Can be also used to precise the "From:" value for email.
 			site_email := text_item_or_default ("site.email", "webmaster")
 
+
+				-- Location for public files
+			if attached text_item ("files-dir") as s then
+				create files_location.make_from_string (s)
+			else
+				files_location := site_location.extended ("files")
+			end
+
 				-- Location for modules folders.
 			if attached text_item ("modules-dir") as s then
 				create modules_location.make_from_string (s)

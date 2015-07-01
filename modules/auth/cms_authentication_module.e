@@ -114,10 +114,12 @@ feature -- Hooks
 		do
 			if attached a_response.current_user (a_response.request) as u then
 				create lnk.make (u.name +  " (Logout)", "account/roc-logout" )
+				lnk.set_weight (98)
+				a_menu_system.primary_menu.extend (lnk)
 			else
 				create lnk.make ("Login", "account/roc-login")
-				a_menu_system.primary_menu.extend (lnk)
 				lnk.set_weight (98)
+				a_menu_system.primary_menu.extend (lnk)
 				if a_response.location.starts_with ("account/") then
 					create lnk.make ("Basic Auth", "account/roc-basic-auth")
 					lnk.set_expandable (True)
@@ -149,6 +151,7 @@ feature -- Hooks
 				a_block_id.is_case_insensitive_equal_general ("login") and then
 				a_response.location.starts_with ("account/roc-basic-auth")
 			then
+				a_response.add_javascript_url (a_response.url ("module/" + name + "/files/js/roc_auth.js", Void))
 				get_block_view_login (a_block_id, a_response)
 			elseif
 				a_block_id.is_case_insensitive_equal_general ("register") and then
@@ -177,9 +180,16 @@ feature -- Hooks
 		local
 			r: CMS_RESPONSE
 		do
-			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-			r.set_value ("Login", "optional_content_type")
-			r.execute
+			if attached api.module_by_name ("basic_auth") then
+					-- FIXME: find better solution to support a default login system.
+				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+				r.set_redirection (r.absolute_url ("/account/roc-basic-auth", Void))
+				r.execute
+			else
+				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+				r.set_value ("Login", "optional_content_type")
+				r.execute
+			end
 		end
 
 	handle_login_basic_auth (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)

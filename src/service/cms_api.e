@@ -347,6 +347,12 @@ feature -- Environment/ theme
 			Result := setup.site_location
 		end
 
+	files_location: PATH
+			-- CMS public files location.
+		do
+			Result := setup.files_location
+		end
+
 	theme_location: PATH
 			-- Active theme location.
 		do
