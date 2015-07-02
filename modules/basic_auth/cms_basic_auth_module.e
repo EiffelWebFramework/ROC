@@ -7,7 +7,7 @@ note
 	revision: "$Revision: 96596 $"
 
 class
-	BASIC_AUTH_MODULE
+	CMS_BASIC_AUTH_MODULE
 
 inherit
 	CMS_MODULE
@@ -60,15 +60,15 @@ feature -- Access: filter
 			-- Possibly list of Filter's module.
 		do
 			create {ARRAYED_LIST [WSF_FILTER]} Result.make (2)
-			Result.extend (create {CORS_FILTER})
-			Result.extend (create {BASIC_AUTH_FILTER}.make (a_api))
+			Result.extend (create {CMS_CORS_FILTER})
+			Result.extend (create {CMS_BASIC_AUTH_FILTER}.make (a_api))
 		end
 
 feature {NONE} -- Implementation: routes
 
 	configure_api_login (api: CMS_API; a_router: WSF_ROUTER)
 		local
-			l_bal_handler: BASIC_AUTH_LOGIN_HANDLER
+			l_bal_handler: CMS_BASIC_AUTH_LOGIN_HANDLER
 			l_methods: WSF_REQUEST_METHODS
 		do
 			create l_bal_handler.make (api)
@@ -79,7 +79,7 @@ feature {NONE} -- Implementation: routes
 
 	configure_api_logoff (api: CMS_API; a_router: WSF_ROUTER)
 		local
-			l_bal_handler: BASIC_AUTH_LOGOFF_HANDLER
+			l_bal_handler: CMS_BASIC_AUTH_LOGOFF_HANDLER
 			l_methods: WSF_REQUEST_METHODS
 		do
 			create l_bal_handler.make (api)
@@ -175,7 +175,7 @@ feature -- Hooks
 				a_block_id.is_case_insensitive_equal_general ("login") and then
 				a_response.location.starts_with ("account/roc-basic-auth")
 			then
-				a_response.add_javascript_url (a_response.url ("module/" + name + "/files/js/roc_auth.js", Void))
+				a_response.add_javascript_url (a_response.url ("module/" + name + "/files/js/roc_basic_auth.js", Void))
 				get_block_view_login (a_block_id, a_response)
 			end
 		end

@@ -6,7 +6,7 @@ note
 	revision: "$Revision: 96616 $"
 
 class
-	BASIC_AUTH_FILTER
+	CMS_BASIC_AUTH_FILTER
 
 inherit
 	WSF_URI_TEMPLATE_HANDLER

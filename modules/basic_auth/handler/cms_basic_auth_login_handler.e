@@ -1,10 +1,10 @@
 note
-	description: "Summary description for {BASIC_AUTH_LOGIN_HANDLER}."
+	description: "Summary description for {CMS_BASIC_AUTH_LOGIN_HANDLER}."
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
 class
-	BASIC_AUTH_LOGIN_HANDLER
+	CMS_BASIC_AUTH_LOGIN_HANDLER
 
 inherit
 	CMS_HANDLER
