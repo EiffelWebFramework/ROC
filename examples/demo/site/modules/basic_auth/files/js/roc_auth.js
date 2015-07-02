@@ -39,7 +39,7 @@ ROC_AUTH.login = function() {
              if (request.readyState == 4) {
                  if (request.status==200) {
                         delete form;
-                        window.location=origin;
+                        window.location=window.location.origin;
                 }
                 else{
                   if (navigator.userAgent.toLowerCase().indexOf("firefox") != -1){                       
