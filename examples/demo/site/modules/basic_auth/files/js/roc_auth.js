@@ -310,10 +310,12 @@ var password = document.getElementById("password")
   , confirm_password = document.getElementById("confirm_password");
 
 ROC_AUTH.validatePassword =function(){
-  if(password.value != confirm_password.value) {
-    confirm_password.setCustomValidity("Passwords Don't Match");
-  } else {
-    confirm_password.setCustomValidity('');
+  if ((password != null) && (confirm_password != null)){
+    if(password.value != confirm_password.value) {
+      confirm_password.setCustomValidity("Passwords Don't Match");
+    } else {
+      confirm_password.setCustomValidity('');
+    }
   }
 }
 
