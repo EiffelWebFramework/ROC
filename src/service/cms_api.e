@@ -139,6 +139,12 @@ feature -- Logging
 
 feature -- Emails
 
+	new_email (a_to_address: READABLE_STRING_8; a_subject: READABLE_STRING_8; a_content: READABLE_STRING_8): CMS_EMAIL
+			-- New email object.
+		do
+			create Result.make (setup.site_email, a_to_address, a_subject, a_content)
+		end
+
 	process_email (e: CMS_EMAIL)
 			-- Process email `e'.
 		do
@@ -383,8 +389,6 @@ feature -- Environment/ module
 			else
 				l_name := a_name
 			end
-			p := setup.environment.config_path
-
 			p := module_location_by_name (a_module_name).extended ("config").extended (l_name)
 
 			l_path := p.appended_with_extension ("json")
