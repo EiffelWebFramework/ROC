@@ -204,6 +204,22 @@ feature -- Element change
 	register_module (m: CMS_MODULE)
 			-- <Precursor>
 		do
+			debug ("roc")
+				if module_registered (m) or module_with_same_type_registered (m) then
+						-- FIXME: report error
+						-- The assertions specify this is bad,
+						-- but here we still handle the case
+						--| Ignored.
+					if attached (create {DEVELOPER_EXCEPTION}) as e then
+						if module_registered (m) then
+							e.set_description ("Module '" + m.name + "' is already registered.")
+						else
+							e.set_description ("A module of type '" + m.name + "' is already registered.")
+						end
+						e.raise
+					end
+				end
+			end
 			modules.extend (m)
 		end
 
