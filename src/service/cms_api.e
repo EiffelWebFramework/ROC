@@ -452,7 +452,7 @@ feature -- Environment/ module
 			end
 			if Result = Void and a_name /= Void then
 					-- Use sub config from default?
-				if attached {CONFIG_READER} module_configuration_in_location_by_name (a_module_name, a_dir, Void) as cfg then
+				if attached {CONFIG_READER} module_configuration_by_name_in_location (a_module_name, a_dir, Void) as cfg then
 					Result := cfg.sub_config (a_name)
 				end
 			end
