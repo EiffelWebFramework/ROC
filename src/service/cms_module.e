@@ -46,7 +46,8 @@ feature {CMS_API} -- Module Initialization
 			is_initialized: is_initialized
 		end
 
-	add_dependency (m: TYPE [CMS_MODULE])
+	add_dependency (a_type: TYPE [CMS_MODULE])
+			-- Add dependency using type of module `a_type'.
 		local
 			deps: like dependencies
 		do
@@ -55,7 +56,7 @@ feature {CMS_API} -- Module Initialization
 				create {ARRAYED_LIST [TYPE [CMS_MODULE]]} deps.make (1)
 				dependencies := deps
 			end
-			deps.force (m)
+			deps.force (a_type)
 		end
 
 feature -- Status		

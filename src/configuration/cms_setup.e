@@ -54,7 +54,7 @@ feature -- Access
 feature {CMS_MODULE, CMS_API} -- Restricted access
 
 	update_module_status_within (a_module: CMS_MODULE; a_collection: CMS_MODULE_COLLECTION)
-			-- Is `a_module' enabled, and also its dependencies within the collection `a_collection'?
+			-- Update status of module `a_module', taking into account its dependencies within the collection `a_collection'.
 		require
 			a_module_is_enabled: a_module.is_enabled
 		do
@@ -78,7 +78,7 @@ feature {CMS_MODULE, CMS_API} -- Restricted access
 		end
 
 	update_module_status_from_configuration (m: CMS_MODULE)
-			-- Is module `m' enabled?
+			-- Update status of module `m' according to configuration.
 		local
 			b: BOOLEAN
 			dft: BOOLEAN
