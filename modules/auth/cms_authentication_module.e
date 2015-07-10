@@ -77,6 +77,7 @@ feature -- Router
 
 	configure_web (a_api: CMS_API; a_router: WSF_ROUTER)
 		do
+			a_router.handle ("/account", create {WSF_URI_AGENT_HANDLER}.make (agent handle_account (a_api, ?, ?)), a_router.methods_head_get)
 			a_router.handle ("/account/roc-login", create {WSF_URI_AGENT_HANDLER}.make (agent handle_login (a_api, ?, ?)), a_router.methods_head_get)
 			a_router.handle ("/account/roc-logout", create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout (a_api, ?, ?)), a_router.methods_head_get)
 			a_router.handle ("/account/roc-register", create {WSF_URI_AGENT_HANDLER}.make (agent handle_register (a_api, ?, ?)), a_router.methods_get_post)
@@ -124,6 +125,29 @@ feature -- Hooks configuration
 		end
 
 feature -- Handler
+
+	handle_account (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+		local
+			r: CMS_RESPONSE
+		do
+			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+			r.set_value ("Account Info", "optional_content_type")
+
+			if attached template_block ("account_info", r) as l_tpl_block then
+				r.set_value (current_user (req), "user")
+				if attached current_user (req) as l_user  then
+					r.set_value (api.user_api.user_roles (l_user), "roles")
+				end
+				r.add_block (l_tpl_block, "content")
+			else
+				debug ("cms")
+					r.add_warning_message ("Error with block [resources_page]")
+				end
+			end
+			r.execute
+		end
+
+
 
 	handle_login (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
