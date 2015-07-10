@@ -238,7 +238,6 @@ feature -- Change: user
 				l_parameters.put (l_password_hash, "password")
 				l_parameters.put (l_password_salt, "salt")
 				l_parameters.put (l_email, "email")
-				l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
 				l_parameters.put (a_user.status, "status")
 
 				sql_change (sql_update_user, l_parameters)
