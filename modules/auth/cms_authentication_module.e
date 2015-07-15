@@ -104,7 +104,6 @@ feature -- Hooks configuration
 		do
 		end
 
-
 	menu_system_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
 			-- Hook execution on collection of menu contained by `a_menu_system'
 			-- for related response `a_response'.
@@ -145,8 +144,6 @@ feature -- Handler
 			r.execute
 		end
 
-
-
 	handle_login (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
@@ -171,8 +168,6 @@ feature -- Handler
 			r.set_redirection (r.absolute_url ("", Void))
 			r.execute
 		end
-
-
 
 	handle_register (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
@@ -489,7 +484,6 @@ feature -- Handler
 				get_block_view_reset_password (a_block_id, a_response)
 			end
 		end
-
 
 feature {NONE} -- Token Generation
 
