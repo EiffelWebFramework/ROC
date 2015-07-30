@@ -19,6 +19,8 @@ inherit
 
 	CMS_HOOK_BLOCK
 
+	CMS_REQUEST_UTIL
+
 create
 	make
 
@@ -120,8 +122,13 @@ feature -- Hooks
 		local
 			lnk: CMS_LOCAL_LINK
 		do
-			create lnk.make ("Admin", "admin")
-			a_menu_system.primary_menu.extend (lnk)
+			if
+				attached current_user (a_response.request) as l_user and then
+				a_response.api.user_api.is_admin_user (l_user)
+			then
+				create lnk.make ("Admin", "admin")
+				a_menu_system.primary_menu.extend (lnk)
+			end
 		end
 
 note

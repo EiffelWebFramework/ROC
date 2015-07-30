@@ -62,7 +62,8 @@ feature -- Process
 			create b.make_empty
 			uid := role_id_path_parameter (request)
 			if uid > 0 and then attached user_api.user_role_by_id (uid.to_integer) as l_role then
-				fixme ("refactor: process_edit, process_create process edit")
+				fixme ("Issues with  WSD_FORM_DATA.apply_to_associated_form")
+					-- if we have a WSF_FORM_CHECKBOK_INPUT, cheked inputs, are not preserverd in case of error.
 				if request.path_info.ends_with_general ("/edit") then
 					edit_form (l_role)
 				elseif request.path_info.ends_with_general ("/delete") then
