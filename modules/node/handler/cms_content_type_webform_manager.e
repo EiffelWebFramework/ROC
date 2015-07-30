@@ -12,6 +12,8 @@ deferred class
 inherit
 	CMS_API_ACCESS
 
+	CMS_REQUEST_UTIL
+
 feature {NONE} -- Initialization
 
 	make (a_type: like content_type)
