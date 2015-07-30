@@ -320,6 +320,7 @@ feature -- Form
 			fs: WSF_FORM_FIELD_SET
 			cb: WSF_FORM_CHECKBOX_INPUT
 			ts: WSF_FORM_SUBMIT_INPUT
+			tb: WSF_FORM_BUTTON_INPUT
 		do
 			if attached a_role as l_role then
 				create fs.make
@@ -344,9 +345,11 @@ feature -- Form
 						fs.extend (cb)
 					end
 				end
-				fs.extend_html_text ("<div class=%"input_fields_wrap%"><button class=%"add_field_button%">Add More Permissions</button></div>")
 				create ti.make ("cms_perm[]")
 				fs.extend (ti)
+				fs.extend_html_text ("<div class=%"input_fields_wrap%"></div>")
+				fs.extend_html_text ("<button class=%"add_field_button%">Add More Permissions</button>")
+
 
 				a_form.extend (fs)
 				add_javascript_content (script_add_remove_items)
@@ -464,26 +467,19 @@ feature -- Generation
 			end
 		end
 
-
 	script_add_remove_items: STRING = "[
 				$(document).ready(function() {
-			    var max_fields      = 10; //maximum input boxes allowed
 			    var wrapper         = $(".input_fields_wrap"); //Fields wrapper
 			    var add_button      = $(".add_field_button"); //Add button ID
-			    
-			    var x = 1; //initlal text box count
+
 			    $(add_button).click(function(e){ //on add input button click
 			        e.preventDefault();
-			        if(x < max_fields){ //max input box allowed
-			            x++; //text box increment
-			            $(wrapper).append('<div><input type="text" name="cms_perm[]"/><a href="#" class="remove_field">Remove</a></div>'); //add input box
-			        }
+			        $(wrapper).append('<div><input type="text" name="cms_perm[]"/><a href="#" class="remove_field">Remove</a></div>'); //add input box
 			    });
-			    
+
 			    $(wrapper).on("click",".remove_field", function(e){ //user click on remove text
 			        e.preventDefault(); $(this).parent('div').remove(); x--;
 			    })
 			});
 	]"
-
 end
