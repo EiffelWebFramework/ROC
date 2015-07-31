@@ -572,12 +572,16 @@ feature -- Change: roles and permissions
 							set_permission_for_role_id (p, a_user_role.id)
 						end
 					end
---						-- Remove other
---					across
---						l_permissions as ic
---					loop
---						unset_permission_for_role_id (ic.item, a_user_role.id)
---					end
+				else
+						-- The user role does not have permissions, unset permissions
+						-- if any in the storage.
+					if l_existing_role /= Void then
+						l_permissions := l_existing_role.permissions
+						across l_permissions as ic
+						loop
+							unset_permission_for_role_id (ic.item, a_user_role.id)
+						end
+					end
 				end
 			else
 				create l_parameters.make (1)
