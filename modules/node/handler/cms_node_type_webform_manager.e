@@ -227,12 +227,12 @@ feature -- Forms ...
 			end
 			l_node.set_author (response.user)
 
-			--Summary
+				--Summary
 			if attached fd.string_item ("summary") as l_summary then
 				s := l_summary
 			end
 
-			--Content
+				--Content
 			if attached fd.string_item ("body") as l_body then
 				b := l_body
 			end
@@ -267,9 +267,7 @@ feature -- Output
 			a_response.add_variable (a_node, "node")
 
 				-- Show tabs only if a user is authenticated.
-			if
-				attached current_user (a_response.request) as l_user
-			then
+			if attached a_response.user as l_user then
 				lnk := a_response.node_local_link (a_node, a_response.translation ("View", Void))
 				lnk.set_weight (1)
 				a_response.add_to_primary_tabs (lnk)
@@ -288,7 +286,7 @@ feature -- Output
 						a_node /= Void and then
 						a_node.id > 0 and then
 						attached node_api.node_type_for (a_node) as l_type and then
-						node_api.has_permission_for_action_on_node ("delete", a_node, a_response.current_user (a_response.request))
+						node_api.has_permission_for_action_on_node ("delete", a_node, l_user)
 					then
 						create lnk.make ("Delete", node_api.node_path (a_node) + "/delete")
 						lnk.set_weight (3)
