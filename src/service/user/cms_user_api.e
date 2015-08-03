@@ -47,6 +47,19 @@ feature -- Access
 			Result := storage.user_by_password_token (a_token)
 		end
 
+	users_count: INTEGER
+			-- Number of users.
+		do
+			Result := storage.users_count
+		end
+
+	recent_users (params: CMS_DATA_QUERY_PARAMETERS): ITERABLE [CMS_USER]
+			-- List of the `a_rows' most recent users starting from  `a_offset'.
+		do
+			Result := storage.recent_users (params.offset.to_integer_32, params.size.to_integer_32)
+		end
+
+
 feature -- Status report
 
 	is_valid_credential (a_auth_login, a_auth_password: READABLE_STRING_32): BOOLEAN
@@ -119,13 +132,27 @@ feature -- User roles.
 		end
 
 	user_role_by_id (a_id: like {CMS_USER_ROLE}.id): detachable CMS_USER_ROLE
+			-- Retrieve a `Role' represented by an id `a_id' if any.
 		do
 			Result := storage.user_role_by_id (a_id)
 		end
 
 	user_role_by_name (a_name: READABLE_STRING_GENERAL): detachable CMS_USER_ROLE
+			-- Retrieve a `Role' represented by a name `a_name' if any.
 		do
 			Result := storage.user_role_by_name (a_name)
+		end
+
+	roles: LIST [CMS_USER_ROLE]
+			-- List of possible roles.
+		do
+			Result := storage.user_roles
+		end
+
+	roles_count: INTEGER
+			-- Number of roles
+		do
+			Result := storage.user_roles.count
 		end
 
 feature -- Change User role		
@@ -134,6 +161,29 @@ feature -- Change User role
 		do
 			reset_error
 			storage.save_user_role (a_user_role)
+			error_handler.append (storage.error_handler)
+		end
+
+	unassign_role_from_user (a_role: CMS_USER_ROLE; a_user: CMS_USER; )
+			-- Unassign user_role `a_role' to user `a_user'.
+		do
+			reset_error
+			storage.unassign_role_from_user (a_role, a_user)
+			error_handler.append (storage.error_handler)
+		end
+
+	assign_role_to_user (a_role: CMS_USER_ROLE; a_user: CMS_USER; )
+			-- Assign user_role `a_role' to user `a_user'.
+		do
+			reset_error
+			storage.assign_role_to_user (a_role, a_user)
+			error_handler.append (storage.error_handler)
+		end
+
+	delete_role (a_role: CMS_USER_ROLE)
+		do
+			reset_error
+			storage.delete_role (a_role)
 			error_handler.append (storage.error_handler)
 		end
 
@@ -164,6 +214,16 @@ feature -- Change User
 		do
 			reset_error
 			storage.update_user (a_user)
+			error_handler.append (storage.error_handler)
+		end
+
+	delete_user (a_user: CMS_USER)
+			-- Delete user `a_user'.
+		require
+			has_id: a_user.has_id
+		do
+			reset_error
+			storage.delete_user (a_user)
 			error_handler.append (storage.error_handler)
 		end
 
