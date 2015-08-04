@@ -85,12 +85,12 @@ feature -- HTTP Methods
 		do
 			create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
 			if r.has_permission ("manage " + {CMS_ADMIN_MODULE}.name) then
-				if req.path_info.ends_with_general ("/edit") then
-					check valid_url: req.path_info.starts_with_general ("/admin/user/") end
+				if req.percent_encoded_path_info.ends_with_general ("/edit") then
+					check valid_url: req.percent_encoded_path_info.starts_with_general ("/admin/user/") end
 					create edit_response.make (req, res, api)
 					edit_response.execute
-				elseif req.path_info.ends_with_general ("/delete")  then
-					check valid_url: req.path_info.starts_with_general ("/admin/user/") end
+				elseif req.percent_encoded_path_info.ends_with_general ("/delete")  then
+					check valid_url: req.percent_encoded_path_info.starts_with_general ("/admin/user/") end
 					create edit_response.make (req, res, api)
 					edit_response.execute
 				else
@@ -123,17 +123,17 @@ feature -- HTTP Methods
 		do
 			create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
 			if r.has_permission ("manage " + {CMS_ADMIN_MODULE}.name) then
-				if req.path_info.ends_with_general ("/edit") then
+				if req.percent_encoded_path_info.ends_with_general ("/edit") then
 					create edit_response.make (req, res, api)
 					edit_response.execute
-				elseif req.path_info.ends_with_general ("/delete") then
+				elseif req.percent_encoded_path_info.ends_with_general ("/delete") then
 					if
 						attached {WSF_STRING} req.form_parameter ("op") as l_op and then
 						l_op.value.same_string ("Delete")
 					then
 						do_delete (req, res)
 					end
-				elseif req.path_info.ends_with_general ("/add/user") then
+				elseif req.percent_encoded_path_info.ends_with_general ("/add/user") then
 					create edit_response.make (req, res, api)
 					edit_response.execute
 				end
@@ -150,14 +150,14 @@ feature -- Error
 			l_page: CMS_RESPONSE
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
-			l_page.add_variable (req.absolute_script_url (req.path_info), "request")
+			l_page.set_value (req.absolute_script_url (req.percent_encoded_path_info), "request")
 			if a_id /= Void and then a_id.is_integer then
 					-- resource not found
-				l_page.add_variable ("404", "code")
+				l_page.set_value ("404", "code")
 				l_page.set_status_code (404)
 			else
 					-- bad request
-				l_page.add_variable ("400", "code")
+				l_page.set_value ("400", "code")
 				l_page.set_status_code (400)
 			end
 			l_page.execute
@@ -192,7 +192,7 @@ feature {NONE} -- New User
 		local
 			edit_response: CMS_USER_FORM_RESPONSE
 		do
-			if req.path_info.starts_with_general ("/admin/add/user") then
+			if req.percent_encoded_path_info.starts_with ("/admin/add/user") then
 				create edit_response.make (req, res, api)
 				edit_response.execute
 			else

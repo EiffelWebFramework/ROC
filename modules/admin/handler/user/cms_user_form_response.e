@@ -11,8 +11,7 @@ inherit
 	CMS_RESPONSE
 		redefine
 			make,
-			initialize,
-			custom_prepare
+			initialize
 		end
 
 create
@@ -66,10 +65,10 @@ feature -- Process
 				attached user_api.user_by_id (uid) as l_user
 			then
 				if
-					request.path_info.ends_with_general ("/edit")
+					location.ends_with_general ("/edit")
 				then
 					edit_form (l_user)
-				elseif	request.path_info.ends_with_general ("/delete")  then
+				elseif location.ends_with_general ("/delete")  then
 					delete_form (l_user)
 				end
 			else
@@ -86,7 +85,7 @@ feature -- Process Edit
 			fd: detachable WSF_FORM_DATA
 		do
 			create b.make_empty
-			f := new_edit_form (a_user, url (request.path_info, Void), "edit-user")
+			f := new_edit_form (a_user, url (location, Void), "edit-user")
 			invoke_form_alter (f, fd)
 			if request.is_post_request_method then
 				f.submit_actions.extend (agent edit_form_submit (?, a_user, b))
@@ -118,7 +117,7 @@ feature -- Process Delete
 			fd: detachable WSF_FORM_DATA
 		do
 			create b.make_empty
-			f := new_delete_form (a_user, url (request.path_info, Void), "edit-user")
+			f := new_delete_form (a_user, url (location, Void), "edit-user")
 			invoke_form_alter (f, fd)
 			if request.is_post_request_method then
 				f.process (Current)
@@ -151,7 +150,7 @@ feature -- Process New
 			l_user: detachable CMS_USER
 		do
 			create b.make_empty
-			f := new_edit_form (l_user, url (request.path_info, Void), "create-user")
+			f := new_edit_form (l_user, url (location, Void), "create-user")
 			invoke_form_alter (f, fd)
 			if request.is_post_request_method then
 				f.validation_actions.extend (agent new_form_validate (?, b))
@@ -202,7 +201,7 @@ feature -- Form
 				if a_user /= Void then
 					l_user := a_user
 					if l_user.has_id then
-						create {CMS_LOCAL_LINK}lnk.make (translation ("View", Void),"admin/user/" + l_user.id.out )
+						create {CMS_LOCAL_LINK} lnk.make (translation ("View", Void),"admin/user/" + l_user.id.out )
 						change_user (fd, a_user)
 						s := "modified"
 						set_redirection (lnk.location)
@@ -248,7 +247,7 @@ feature -- Form
 
 		end
 
-	new_edit_form (a_user: detachable CMS_USER; a_url: READABLE_STRING_8; a_name: STRING;): CMS_FORM
+	new_edit_form (a_user: detachable CMS_USER; a_url: READABLE_STRING_8; a_name: STRING): CMS_FORM
 			-- Create a web form named `a_name' for uSER `a_YSER' (if set), using form action url `a_url'.
 		local
 			f: CMS_FORM
@@ -279,25 +278,25 @@ feature -- Form
 						end
 					else
 						fd.report_invalid_field ("username", "missing username")
-									end
-									if attached fd.string_item ("email") as l_email then
-										if attached api.user_api.user_by_email (l_email) then
-											fd.report_invalid_field ("email", "Email address already associated with an existing account!")
-										end
-									else
-										fd.report_invalid_field ("email", "missing email address")
-									end
-								elseif f_op.is_case_insensitive_equal_general ("Update user") then
-									if attached fd.string_item ("username") as l_username then
-										if api.user_api.user_by_name (l_username) = Void then
-											fd.report_invalid_field ("username", "Username does not exist!")
-										end
-									else
-										fd.report_invalid_field ("username", "missing username")
-									end
-								end
-							end
+					end
+					if attached fd.string_item ("email") as l_email then
+						if attached api.user_api.user_by_email (l_email) then
+							fd.report_invalid_field ("email", "Email address already associated with an existing account!")
 						end
+					else
+						fd.report_invalid_field ("email", "missing email address")
+					end
+				elseif f_op.is_case_insensitive_equal_general ("Update user") then
+					if attached fd.string_item ("username") as l_username then
+						if api.user_api.user_by_name (l_username) = Void then
+							fd.report_invalid_field ("username", "Username does not exist!")
+						end
+					else
+						fd.report_invalid_field ("username", "missing username")
+					end
+				end
+			end
+		end
 
 	new_delete_form (a_user: detachable CMS_USER; a_url: READABLE_STRING_8; a_name: STRING;): CMS_FORM
 			-- Create a web form named `a_name' for node `a_user' (if set), using form action url `a_url'.
@@ -342,13 +341,14 @@ feature -- Form
 			fs: WSF_FORM_FIELD_SET
 			cb: WSF_FORM_CHECKBOX_INPUT
 			ts: WSF_FORM_SUBMIT_INPUT
+			l_user_roles: detachable LIST [CMS_USER_ROLE]
 		do
-			if attached a_user as l_user then
+			if a_user /= Void then
 				create fs.make
 				fs.set_legend ("Basic User Account Information")
 				fs.extend_html_text ("<div><string><label>User name </label></strong><br></div>")
-				fs.extend_html_text (l_user.name)
-				if attached l_user.email as l_email then
+				fs.extend_html_text (a_user.name)
+				if attached a_user.email as l_email then
 					create fe.make_with_text ("email", l_email)
 				else
 					create fe.make_with_text ("email", "")
@@ -367,30 +367,18 @@ feature -- Form
 				create fs.make
 				fs.set_legend ("User Roles")
 
-
-				if attached {LIST[CMS_USER_ROLE]} api.user_api.user_roles (l_user) as u_roles and then
-				   not u_roles.is_empty
-				then
-					u_roles.compare_objects
-					across api.user_api.roles as ic loop
-						if u_roles.has (ic.item) then
-							create cb.make_with_value ("cms_roles", ic.item.id.out)
-							cb.set_checked (True)
-							cb.set_label (ic.item.name)
-							fs.extend (cb)
-						else
-							create cb.make_with_value ("cms_roles", ic.item.id.out)
-							cb.set_label (ic.item.name)
-							fs.extend (cb)
-						end
-					end
-				else
-					across api.user_api.roles as ic loop
-						create cb.make_with_value ("cms_roles", ic.item.id.out)
-						cb.set_label (ic.item.name)
-						fs.extend (cb)
-					end
+				l_user_roles := api.user_api.user_roles (a_user)
+				if l_user_roles.is_empty then
+					l_user_roles := Void
 				end
+
+				across api.user_api.effective_roles as ic loop
+					create cb.make_with_value ("cms_roles", ic.item.id.out)
+					cb.set_checked (l_user_roles /= Void and then across l_user_roles as r_ic some r_ic.item.same_user_role (ic.item) end)
+					cb.set_title (ic.item.name)
+					fs.extend (cb)
+				end
+
 				a_form.extend (fs)
 				create ts.make ("op")
 				ts.set_default_value ("Update user role")
@@ -511,13 +499,6 @@ feature -- Form
 
 
 feature -- Generation
-
-	custom_prepare (page: CMS_HTML_PAGE)
-		do
-			if attached variables as l_variables then
-				across l_variables as c loop page.register_variable (c.item, c.key) end
-			end
-		end
 
 	new_random_password (u: CMS_USER): STRING
 			-- Generate a new token activation token

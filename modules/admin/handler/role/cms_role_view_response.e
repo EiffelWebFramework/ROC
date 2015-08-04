@@ -72,7 +72,7 @@ feature -- Execution
 			lnk: CMS_LOCAL_LINK
 			s: STRING
 		do
-			a_response.add_variable (a_role, "role")
+			a_response.set_value (a_role, "role")
 			create lnk.make (a_response.translation ("View", Void), "admin/role/" + a_role.id.out)
 			lnk.set_is_active (True)
 			lnk.set_weight (1)

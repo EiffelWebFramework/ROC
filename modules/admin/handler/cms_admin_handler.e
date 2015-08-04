@@ -3,7 +3,7 @@ note
 			handler for CMS admin in the CMS interface.
 
 			TODO: implement REST API.
-			]"	author: ""
+		]"	
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -11,7 +11,6 @@ class
 	CMS_ADMIN_HANDLER
 
 inherit
-
 	CMS_HANDLER
 
 	WSF_URI_HANDLER
@@ -58,7 +57,6 @@ feature -- execute
 		do
 			execute (req, res)
 		end
-
 
 feature -- HTTP Methods
 

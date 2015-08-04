@@ -171,6 +171,13 @@ feature -- Access: roles and permissions
 		deferred
 		end
 
+	role_permissions: LIST [READABLE_STRING_8]
+			-- Possible known role permissions.
+		deferred
+		ensure
+			object_comparison: Result.object_comparison
+		end
+
 feature -- Change: roles and permissions		
 
 	save_user_role (a_user_role: CMS_USER_ROLE)

@@ -99,6 +99,12 @@ feature -- Access: roles and permissions
 			create {ARRAYED_LIST [CMS_USER_ROLE]} Result.make (0)
 		end
 
+	role_permissions: LIST [READABLE_STRING_8]
+			-- Possible known permissions.
+		do
+			create {ARRAYED_LIST [READABLE_STRING_8]} Result.make (0)
+		end
+
 feature -- Change: roles and permissions		
 
 	save_user_role (a_user_role: CMS_USER_ROLE)

@@ -7,12 +7,10 @@ class
 	CMS_ROLE_FORM_RESPONSE
 
 inherit
-
 	CMS_RESPONSE
 		redefine
 			make,
-			initialize,
-			custom_prepare
+			initialize
 		end
 
 create
@@ -64,9 +62,9 @@ feature -- Process
 			if uid > 0 and then attached user_api.user_role_by_id (uid.to_integer) as l_role then
 				fixme ("Issues with  WSD_FORM_DATA.apply_to_associated_form")
 					-- if we have a WSF_FORM_CHECKBOK_INPUT, cheked inputs, are not preserverd in case of error.
-				if request.path_info.ends_with_general ("/edit") then
+				if location.ends_with_general ("/edit") then
 					edit_form (l_role)
-				elseif request.path_info.ends_with_general ("/delete") then
+				elseif location.ends_with_general ("/delete") then
 					delete_form (l_role)
 				end
 			else
@@ -83,7 +81,7 @@ feature -- Process Edit
 			fd: detachable WSF_FORM_DATA
 		do
 			create b.make_empty
-			f := new_edit_form (a_role, url (request.path_info, Void), "edit-user")
+			f := new_edit_form (a_role, url (request.percent_encoded_path_info, Void), "edit-user")
 			invoke_form_alter (f, fd)
 			if request.is_post_request_method then
 				f.validation_actions.extend (agent edit_form_validate(?,a_role, b))
@@ -116,7 +114,7 @@ feature -- Process Delete
 			fd: detachable WSF_FORM_DATA
 		do
 			create b.make_empty
-			f := new_delete_form (a_role, url (request.path_info, Void), "edit-user")
+			f := new_delete_form (a_role, url (request.percent_encoded_path_info, Void), "edit-user")
 			invoke_form_alter (f, fd)
 			if request.is_post_request_method then
 				f.process (Current)
@@ -148,7 +146,7 @@ feature -- Process New
 			l_role: detachable CMS_USER_ROLE
 		do
 			create b.make_empty
-			f := new_edit_form (l_role, url (request.path_info, Void), "create-role")
+			f := new_edit_form (l_role, url (request.percent_encoded_path_info, Void), "create-role")
 			invoke_form_alter (f, fd)
 			if request.is_post_request_method then
 				f.validation_actions.extend (agent new_form_validate(?, b))
@@ -177,9 +175,6 @@ feature -- Form
 		local
 			l_save_role: BOOLEAN
 			l_update_role: BOOLEAN
-			l_role: detachable CMS_USER_ROLE
-			s: STRING
-			lnk: CMS_LINK
 		do
 			l_save_role := attached {WSF_STRING} fd.item ("op") as l_op and then l_op.same_string ("Create role")
 			if l_save_role then
@@ -195,24 +190,25 @@ feature -- Form
 					end
 				end
 				create_role (fd)
-			end
-			l_update_role := attached {WSF_STRING} fd.item ("op") as l_op and then l_op.same_string ("Update role")
-			if l_update_role then
-				debug ("cms")
-					across
-						fd as c
-					loop
-						b.append ("<li>" + html_encoded (c.key) + "=")
-						if attached c.item as v then
-							b.append (html_encoded (v.string_representation))
+			else
+				l_update_role := attached {WSF_STRING} fd.item ("op") as l_op and then l_op.same_string ("Update role")
+				if l_update_role then
+					debug ("cms")
+						across
+							fd as c
+						loop
+							b.append ("<li>" + html_encoded (c.key) + "=")
+							if attached c.item as v then
+								b.append (html_encoded (v.string_representation))
+							end
+							b.append ("</li>")
 						end
-						b.append ("</li>")
 					end
-				end
-				if attached a_role as u_role then
-					update_role (fd, u_role)
-				else
-					fd.report_error ("Missing Role")
+					if a_role /= Void then
+						update_role (fd, a_role)
+					else
+						fd.report_error ("Missing Role")
+					end
 				end
 			end
 		end
@@ -233,19 +229,18 @@ feature -- Form
 							fd.report_invalid_field ("role", "missing role")
 						end
 					end
-					if attached {WSF_TABLE} fd.item ("cms_perm[]") as l_perm then
+					if attached {WSF_TABLE} fd.item ("new_cms_permissions[]") as l_perm then
 						a_role.permissions.compare_objects
-						from
-							l_perm.values.start
-						until
-							l_perm.values.after
+						across
+							l_perm.values as ic
 						loop
-							if attached {WSF_STRING} l_perm.value (l_perm.values.key_for_iteration) as l_value then
-								if a_role.permissions.has (l_value.value) then
-									fd.report_invalid_field ("cms_perm[]", "Permission " + l_value.value + " already taken!")
+							if attached {WSF_STRING} ic.item as p then
+								if not p.value.is_valid_as_string_8 then
+									fd.report_invalid_field ("new_cms_permissions[]", "Permission " + p.value + " should not have any unicode character!")
+								elseif across a_role.permissions as p_ic some p_ic.item.is_case_insensitive_equal_general (p.value) end then
+									fd.report_invalid_field ("new_cms_permissions[]", "Permission " + p.value + " already exists!")
 								end
 							end
-							l_perm.values.forth
 						end
 					end
 				end
@@ -286,7 +281,7 @@ feature -- Form
 		end
 
 	new_delete_form (a_role: detachable CMS_USER_ROLE; a_url: READABLE_STRING_8; a_name: STRING;): CMS_FORM
-			-- Create a web form named `a_name' for node `a_user' (if set), using form action url `a_url'.
+			-- Create a web form named `a_name' for role `a_role' (if set), using form action url `a_url'.
 		local
 			f: CMS_FORM
 			ts: WSF_FORM_SUBMIT_INPUT
@@ -317,11 +312,12 @@ feature -- Form
 			-- and apply this to content type `a_content_type'.
 		local
 			ti: WSF_FORM_TEXT_INPUT
-			fe: WSF_FORM_EMAIL_INPUT
+--			fe: WSF_FORM_EMAIL_INPUT
 			fs: WSF_FORM_FIELD_SET
 			cb: WSF_FORM_CHECKBOX_INPUT
 			ts: WSF_FORM_SUBMIT_INPUT
-			tb: WSF_FORM_BUTTON_INPUT
+--			tb: WSF_FORM_BUTTON_INPUT
+			l_role_permissions: detachable LIST [READABLE_STRING_8]
 		do
 			if attached a_role as l_role then
 				create fs.make
@@ -338,15 +334,19 @@ feature -- Form
 				create fs.make
 				fs.set_legend ("Permissions")
 
-				if not l_role.permissions.is_empty then
-					across l_role.permissions as ic loop
+				if
+					attached api.user_api.role_permissions as l_permissions
+				then
+					l_role_permissions := l_role.permissions
+					l_role_permissions.compare_objects
+					across l_permissions as ic loop
 						create cb.make_with_value ("cms_permissions", ic.item)
-						cb.set_checked (True)
-						cb.set_label (ic.item)
+						cb.set_checked (l_role_permissions.has (ic.item))
+						cb.set_title (ic.item)
 						fs.extend (cb)
 					end
 				end
-				create ti.make ("cms_perm[]")
+				create ti.make ("new_cms_permissions[]")
 				fs.extend (ti)
 				fs.extend_html_text ("<div class=%"input_fields_wrap%"></div>")
 				fs.extend_html_text ("<button class=%"add_field_button%">Add More Permissions</button>")
@@ -379,7 +379,7 @@ feature -- Form
 	update_role (a_form_data: WSF_FORM_DATA; a_role: CMS_USER_ROLE)
 			-- Update node `a_node' with form_data `a_form_data' for the given content type `a_content_type'.
 		local
-			l_permissions: LIST [READABLE_STRING_8]
+			l_perm: READABLE_STRING_8
 		do
 			if attached a_form_data.string_item ("op") as f_op then
 				if f_op.is_case_insensitive_equal_general ("Update role") then
@@ -388,45 +388,47 @@ feature -- Form
 						attached a_form_data.string_item ("role-id") as l_role_id
 						and then attached {CMS_USER_ROLE} api.user_api.user_role_by_id (l_role_id.to_integer) as l_role
 					then
-						l_permissions := a_role.permissions
-						l_permissions.compare_objects
 						if attached {WSF_STRING} a_form_data.item ("cms_permissions") as u_role then
 							a_role.permissions.wipe_out
 							a_role.add_permission (u_role.value)
 						elseif attached {WSF_MULTIPLE_STRING} a_form_data.item ("cms_permissions") as u_permissions then
+							a_role.permissions.wipe_out
+								-- Enable checked permissions.
 							across
 								u_permissions as ic
 							loop
-								if not l_permissions.has (ic.item.value) then
-									a_role.remove_permission (ic.item.value)
+								l_perm := ic.item.value.as_string_8
+								if not l_perm.is_whitespace then
+									a_role.add_permission (l_perm)
 								end
 							end
 						else
 							a_role.permissions.wipe_out
 						end
-						if attached {WSF_TABLE} a_form_data.item ("cms_perm[]") as l_perm then
-							a_role.permissions.compare_objects
-							from
-								l_perm.values.start
-							until
-								l_perm.values.after
+						if attached {WSF_TABLE} a_form_data.item ("new_cms_permissions[]") as l_cms_perms then
+								-- Add new permissions as checked.
+							across
+								l_cms_perms.values as ic
 							loop
-								if
-									attached {WSF_STRING} l_perm.value (l_perm.values.key_for_iteration) as l_value and then
-									not l_value.value.is_whitespace
-								then
-									a_role.add_permission (l_value.value)
+								if attached {WSF_STRING} ic.item as p then
+									l_perm := p.value.as_string_8
+									if not l_perm.is_whitespace then
+										a_role.add_permission (l_perm)
+									end
 								end
-								l_perm.values.forth
 							end
 						end
 
 						if not a_form_data.has_error then
 							a_role.set_name (l_role_name)
 							api.user_api.save_user_role (a_role)
-							add_success_message ("Permissions updated")
+							if not api.user_api.has_error then
+								add_success_message ("Permissions updated")
+								set_redirection (absolute_url ("admin/role/" + a_role.id.out, Void))
+							else
+								add_error_message ("Error during permissions update operation.")
+							end
 						end
-
 					else
 						a_form_data.report_error ("Missing Role")
 					end
@@ -457,17 +459,6 @@ feature -- Form
 
 feature -- Generation
 
-	custom_prepare (page: CMS_HTML_PAGE)
-		do
-			if attached variables as l_variables then
-				across
-					l_variables as c
-				loop
-					page.register_variable (c.item, c.key)
-				end
-			end
-		end
-
 	script_add_remove_items: STRING = "[
 				$(document).ready(function() {
 			    var wrapper         = $(".input_fields_wrap"); //Fields wrapper
@@ -475,7 +466,7 @@ feature -- Generation
 
 			    $(add_button).click(function(e){ //on add input button click
 			        e.preventDefault();
-			        $(wrapper).append('<div><input type="text" name="cms_perm[]"/><a href="#" class="remove_field">Remove</a></div>'); //add input box
+			        $(wrapper).append('<div><input type="text" name="new_cms_permissions[]"/><a href="#" class="remove_field">Remove</a></div>'); //add input box
 			    });
 
 			    $(wrapper).on("click",".remove_field", function(e){ //user click on remove text

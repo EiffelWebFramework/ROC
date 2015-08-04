@@ -83,7 +83,6 @@ feature -- HTTP Methods
 				l_response.set_title ("Listing " + l_count.out + " Role")
 			end
 
-
 			if attached user_api.roles as lst then
 				s.append ("<ul class=%"cms-roles%">%N")
 				across
@@ -92,7 +91,7 @@ feature -- HTTP Methods
 					u := ic.item
 					s.append ("<li class=%"cms_role%">")
 					s.append ("<a href=%"")
-					s.append (req.absolute_script_url ("/admin/role/"+u.id.out))
+					s.append (req.absolute_script_url ("/admin/role/" + u.id.out))
 					s.append ("%">")
 					s.append (u.name)
 					s.append ("</a>")

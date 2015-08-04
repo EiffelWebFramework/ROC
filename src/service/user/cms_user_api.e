@@ -1,6 +1,5 @@
 note
-	description: "Summary description for {CMS_USER_API}."
-	author: ""
+	description: "API providing user related features."
 	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
 	revision: "$Revision: 96616 $"
 
@@ -143,10 +142,50 @@ feature -- User roles.
 			Result := storage.user_role_by_name (a_name)
 		end
 
+	role_permissions: LIST [READABLE_STRING_8]
+			-- Possible known permissions.
+		local
+			perm: READABLE_STRING_8
+		do
+			Result := storage.role_permissions
+			across
+				cms_api.enabled_modules as ic
+			loop
+				across
+					ic.item.permissions as perms_ic
+				loop
+					perm := perms_ic.item
+					if not Result.has (perm) then
+						Result.force (perm)
+					end
+				end
+			end
+		end
+
 	roles: LIST [CMS_USER_ROLE]
 			-- List of possible roles.
 		do
 			Result := storage.user_roles
+		end
+
+	effective_roles: LIST [CMS_USER_ROLE]
+			-- List of possible roles, apart from anonymous and authenticated roles that are special.
+		local
+			l_roles: like roles
+			r: CMS_USER_ROLE
+		do
+			l_roles := storage.user_roles
+			create {ARRAYED_LIST [CMS_USER_ROLE]} Result.make (l_roles.count)
+			across
+				l_roles as ic
+			loop
+				r := ic.item
+				if r.same_user_role (anonymous_user_role) or r.same_user_role (authenticated_user_role) then
+					-- Ignore
+				else
+					Result.force (r)
+				end
+			end
 		end
 
 	roles_count: INTEGER

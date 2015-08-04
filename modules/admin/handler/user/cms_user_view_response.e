@@ -66,18 +66,19 @@ feature -- Execution
 			end
 		end
 
-
-	append_html_to_output (a_user: CMS_USER; a_response: CMS_RESPONSE )
+	append_html_to_output (a_user: CMS_USER; a_response: CMS_RESPONSE)
 		local
 			lnk: CMS_LOCAL_LINK
 			s: STRING
+			l_role: CMS_USER_ROLE
 		do
-			a_response.add_variable (a_user, "user")
+			a_response.set_value (a_user, "user")
 			create lnk.make (a_response.translation ("View", Void), "admin/user/" + a_user.id.out)
 			lnk.set_is_active (True)
 			lnk.set_weight (1)
 			a_response.add_to_primary_tabs (lnk)
 			create lnk.make (a_response.translation ("Edit", Void), "admin/user/" + a_user.id.out  + "/edit")
+			lnk.set_permission_arguments (<<"manage admin", "manage users", "manage own user">>)
 			lnk.set_weight (2)
 			a_response.add_to_primary_tabs (lnk)
 
@@ -87,32 +88,38 @@ feature -- Execution
 				a_response.add_to_primary_tabs (lnk)
 			end
 
+				-- FIXME: [04/aug/2015] use a CMS_FORM rather than hardcoded html.
+				-- So that other module may easily integrate them-selves to add information.
 			create s.make_empty
 			s.append ("<div class=%"info%"> ")
 			s.append ("<h4>Account Information</h4>")
-			s.append ("<p>UserName:")
+			s.append ("<p>Username: ")
 			s.append (a_user.name)
 			s.append ("</p>")
 			if attached a_user.email as l_email then
-				s.append ("<p>Email:")
+				s.append ("<p>Email: ")
 				s.append (l_email)
 				s.append ("</p>")
 			end
 
-			s.append ("<h4>User Role:</h4>")
-			if attached {LIST[CMS_USER_ROLE]} api.user_api.user_roles (a_user) as l_roles and then
-			   not l_roles.is_empty
+			if
+				attached {LIST [CMS_USER_ROLE]} api.user_api.user_roles (a_user) as l_roles and then
+			   	not l_roles.is_empty
 			then
+				s.append ("<h4>Role(s):</h4>")
 				across l_roles as ic loop
+					l_role := ic.item
 					s.append ("<i>")
-					s.append (ic.item.name)
+					s.append (link (l_role.name, "admin/role/" + l_role.id.out, Void))
 					s.append ("</i>")
-					s.append ("<h5>Permissions:</h5>")
-					s.append ("<ul class=%"cms-permissions%">%N")
-					across ic.item.permissions as c loop
-						s.append ("<li class=%"cms-permission%">"+ c.item + "</li>%N")
+					debug
+						s.append ("<h5>Permissions:</h5>")
+						s.append ("<ul class=%"cms-permissions%">%N")
+						across l_role.permissions as perms_ic loop
+							s.append ("<li class=%"cms-permission%">" + perms_ic.item + "</li>%N")
+						end
+						s.append ("</ul>%N")
 					end
-					s.append ("</ul>%N")
 				end
 			end
 

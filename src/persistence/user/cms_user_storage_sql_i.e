@@ -503,6 +503,27 @@ feature -- Access: roles and permissions
 			end
 		end
 
+	role_permissions: LIST [READABLE_STRING_8]
+			-- Possible known permissions.
+		do
+			error_handler.reset
+			write_information_log (generator + ".role_permissions")
+
+			create {ARRAYED_LIST [READABLE_STRING_8]} Result.make (0)
+			Result.compare_objects
+			from
+				sql_query (select_role_permissions, Void)
+				sql_start
+			until
+				sql_after
+			loop
+				if attached sql_read_string (1) as l_permission then
+					Result.force (l_permission)
+				end
+				sql_forth
+			end
+		end
+
 feature -- Change: roles and permissions		
 
 	save_user_role (a_user_role: CMS_USER_ROLE)
@@ -553,18 +574,7 @@ feature -- Change: roles and permissions
 						a_user_role.permissions as ic
 					loop
 						p := ic.item
-						from
-							l_found := False
-							l_permissions.start
-						until
-							l_found or l_permissions.after
-						loop
-							if p.is_case_insensitive_equal (l_permissions.item) then
-								l_found := True
-							else
-								l_permissions.forth
-							end
-						end
+						l_found := across l_permissions as p_ic some p.is_case_insensitive_equal_general (p_ic.item) end
 						if l_found then
 								-- Already there, skip							
 						else
@@ -914,6 +924,9 @@ feature {NONE} -- Sql Queries: USER ROLE
 
 	select_role_permissions_by_role_id: STRING = "SELECT permission, module FROM role_permissions WHERE rid=:rid;"
 			-- User role permissions for role id :rid;
+
+	select_role_permissions: STRING = "SELECT DISTINCT permission FROM role_permissions;"
+			-- Used user role permissions
 
 	sql_delete_role_permissions_by_role_id: STRING = "DELETE FROM role_permissions WHERE rid=:rid;"
 

@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {CMS_ADMIN_MODULE}."
+	description: "CMS module providing Administration support (back-end)."
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -7,7 +7,6 @@ class
 	CMS_ADMIN_MODULE
 
 inherit
-
 	CMS_MODULE
 		redefine
 			register_hooks
@@ -17,9 +16,7 @@ inherit
 
 	CMS_HOOK_RESPONSE_ALTER
 
-	CMS_HOOK_BLOCK
-
-	CMS_REQUEST_UTIL
+--	CMS_REQUEST_UTIL
 
 create
 	make
@@ -94,7 +91,6 @@ feature -- Hooks
 			-- <Precursor>
 		do
 			a_response.subscribe_to_menu_system_alter_hook (Current)
-			a_response.subscribe_to_block_hook (Current)
 			a_response.subscribe_to_response_alter_hook (Current)
 		end
 
@@ -104,29 +100,16 @@ feature -- Hooks
 			a_response.add_style (a_response.url ("/module/" + name + "/files/css/admin.css", Void), Void)
 		end
 
-	block_list: ITERABLE [like {CMS_BLOCK}.name]
-			-- <Precursor>
-		do
-			Result := <<"admin-info">>
-		end
-
-	get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
-		local
---			b: CMS_CONTENT_BLOCK
-		do
---			create b.make (a_block_id, "Block::node", "This is a block test", Void)
---			a_response.add_block (b, "sidebar_second")
-		end
-
 	menu_system_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
 		local
 			lnk: CMS_LOCAL_LINK
 		do
 			if
-				attached current_user (a_response.request) as l_user and then
-				a_response.api.user_api.is_admin_user (l_user)
+				a_response.has_permission ("manage " + {CMS_ADMIN_MODULE}.name) -- Note: admin user has all permissions enabled by default.
 			then
+					-- TODO: we should probably use more side menu and less primary_menu.
 				create lnk.make ("Admin", "admin")
+				lnk.set_permission_arguments (<<"manage " + {CMS_ADMIN_MODULE}.name>>)
 				a_menu_system.primary_menu.extend (lnk)
 			end
 		end
