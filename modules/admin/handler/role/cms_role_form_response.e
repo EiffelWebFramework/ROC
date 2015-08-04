@@ -448,7 +448,8 @@ feature -- Form
 						if api.user_api.has_error then
 								-- handle error
 						else
-							add_success_message ("Created Role")
+							add_success_message ("Created Role " + link (l_role, "admin/role/" + u.id.out, Void))
+							set_redirection (absolute_url ("admin/role/" + u.id.out, Void))
 						end
 					else
 						a_form_data.report_invalid_field ("username", "Missing role!")

@@ -16,24 +16,18 @@ inherit
 
 	CMS_HOOK_RESPONSE_ALTER
 
---	CMS_REQUEST_UTIL
-
 create
 	make
 
 feature {NONE} -- Initialization
 
-	make (a_setup: CMS_SETUP)
+	make
 			-- Create Current module, disabled by default.
 		do
 			version := "1.0"
 			description := "Service to Administrate CMS (users, modules, etc)"
 			package := "core"
-			config := a_setup
 		end
-
-	config: CMS_SETUP
-			-- Node configuration.
 
 feature -- Access
 
