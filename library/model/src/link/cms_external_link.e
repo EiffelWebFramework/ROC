@@ -41,6 +41,11 @@ feature -- Status report
 	has_children: BOOLEAN = False
 			-- <Precursor>
 
+feature -- Security		
+
+	is_forbidden: BOOLEAN = False
+			-- <Precursor>			
+
 feature -- Access			
 
 	children: detachable LIST [CMS_LINK]
@@ -48,6 +53,6 @@ feature -- Access
 
 invariant
 note
-	copyright: "2011-2014, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	copyright: "2011-2015, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
