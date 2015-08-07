@@ -6,7 +6,16 @@ note
 deferred class
 	CMS_NODE_STORAGE_EXTENSION [G -> CMS_NODE]
 
+feature -- Change
+
+	set_node_api (a_node_api: CMS_NODE_API)
+		do
+			node_api := a_node_api
+		end
+
 feature -- Access
+
+	node_api: CMS_NODE_API
 
 	content_type: READABLE_STRING_8
 		deferred
