@@ -41,6 +41,7 @@ feature -- Access
 feature -- Persistence
 
 	store (a_node: CMS_PAGE)
+			-- <Precursor>.	
 		local
 			l_parameters: STRING_TABLE [ANY]
 			l_new_parent_id, l_previous_parent_id: INTEGER_64
@@ -87,6 +88,7 @@ feature -- Persistence
 		end
 
 	load (a_node: CMS_PAGE)
+			-- <Precursor>.
 		local
 			ct: CMS_PAGE_NODE_TYPE
 			l_parent_id: INTEGER_64
@@ -110,7 +112,10 @@ feature -- Persistence
 			end
 		end
 
+feature {NONE} -- Implementation
+
 	node_data (a_node: CMS_NODE): detachable TUPLE [parent_id: INTEGER_64]
+			-- Node extension data for node `a_node' as tuple.
 		local
 			l_parameters: STRING_TABLE [ANY]
 			n: INTEGER

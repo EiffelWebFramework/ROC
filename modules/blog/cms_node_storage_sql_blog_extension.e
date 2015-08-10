@@ -41,6 +41,7 @@ feature -- Access
 feature -- Persistence
 
 	store (a_node: CMS_BLOG)
+			-- <Precursor>.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 			l_new_tags: detachable STRING_32
@@ -97,6 +98,7 @@ feature -- Persistence
 		end
 
 	load (a_node: CMS_BLOG)
+			-- <Precursor>.
 		local
 			l_tags: READABLE_STRING_32
 		do
@@ -106,7 +108,10 @@ feature -- Persistence
 			end
 		end
 
+feature {NONE} -- Implementation		
+
 	node_data (a_node: CMS_NODE): detachable TUPLE [revision: INTEGER_64; tags: READABLE_STRING_32]
+			-- Node extension data for node `a_node' as tuple.
 		local
 			l_parameters: STRING_TABLE [ANY]
 			l_rev: INTEGER_64

@@ -222,6 +222,7 @@ feature -- Access: Node
 		end
 
 	node_revisions (a_node: CMS_NODE): LIST [CMS_NODE]
+			-- List of revisions for node `a_node'.
 		do
 			Result := node_storage.node_revisions (a_node)
 			Result := full_nodes (Result)

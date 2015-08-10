@@ -52,10 +52,12 @@ feature -- Persistence
 feature {NONE} -- Persistence implementation
 
 	store (a_node: G)
+			-- Store extension data from node `a_node'.
 		deferred
 		end
 
 	load (a_node: G)
+			-- Load extension data into node `a_node'.	
 		deferred
 		end
 
