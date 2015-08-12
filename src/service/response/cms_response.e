@@ -483,7 +483,7 @@ feature -- Blocks
 				add_block (l_block, "sidebar_second")
 			end
 
-			invoke_block
+			hooks.invoke_block (Current)
 			debug ("cms")
 				add_block (create {CMS_CONTENT_BLOCK}.make ("made_with", Void, "Made with <a href=%"http://www.eiffel.com/%">EWF</a>", Void), "footer")
 			end
@@ -599,90 +599,6 @@ feature -- Hooks
 	hooks: CMS_HOOK_CORE_MANAGER
 			-- Manager handling hook subscriptions.
 
-feature -- Hook: value alter
-
---	subscribe_to_value_table_alter_hook (h: CMS_HOOK_VALUE_TABLE_ALTER)
---			-- Add `h' as subscriber of value table alter hooks CMS_HOOK_VALUE_TABLE_ALTER.		
---		do
---			hooks.subscribe_to_value_table_alter_hook (h)
---		end
-
-	invoke_value_table_alter (a_table: CMS_VALUE_TABLE)
-			-- Invoke value table alter hook for table `a_table'.		
-		do
-			hooks.invoke_value_table_alter (a_table, Current)
-		end
-
-feature -- Hook: response
-
---	subscribe_to_response_alter_hook (h: CMS_HOOK_RESPONSE_ALTER)
---			-- Add `h' as subscriber of response alter hooks CMS_HOOK_RESPONSE_ALTER.		
---		do
---			hooks.subscribe_to_response_alter_hook (h)
---		end
-
-	invoke_response_alter (a_response: CMS_RESPONSE)
-			-- Invoke response alter hook for response `a_response'.		
-		do
-			hooks.invoke_response_alter (a_response)
-		end
-
-feature -- Hook: menu_system_alter
-
---	subscribe_to_menu_system_alter_hook (h: CMS_HOOK_MENU_SYSTEM_ALTER)
---			-- Add `h' as subscriber of menu system alter hooks CMS_HOOK_MENU_SYSTEM_ALTER.	
---		do
---			hooks.subscribe_to_menu_system_alter_hook (h)
---		end
-
-	invoke_menu_system_alter (a_menu_system: CMS_MENU_SYSTEM)
-			-- Invoke menu system alter hook for menu `a_menu_system'.	
-		do
-			hooks.invoke_menu_system_alter (menu_system, Current)
-		end
-
-feature -- Hook: menu_alter
-
---	subscribe_to_menu_alter_hook (h: CMS_HOOK_MENU_ALTER)
---			-- Add `h' as subscriber of menu alter hooks CMS_HOOK_MENU_ALTER.
---		do
---			hooks.subscribe_to_menu_alter_hook (h)
---		end
-
-	invoke_menu_alter (a_menu: CMS_MENU)
-			-- Invoke menu alter hook for menu `a_menu'.
-		do
-			hooks.invoke_menu_alter (a_menu, Current)
-		end
-
-feature -- Hook: form_alter
-
---	subscribe_to_form_alter_hook (h: CMS_HOOK_FORM_ALTER)
---			-- Add `h' as subscriber of form alter hooks CMS_HOOK_FORM_ALTER.
---		do
---			hooks.subscribe_to_form_alter_hook (h)
---		end
-
-	invoke_form_alter (a_form: CMS_FORM; a_form_data: detachable WSF_FORM_DATA)
-			-- Invoke form alter hook for form `a_form' and associated data `a_form_data'
-		do
-			hooks.invoke_form_alter (a_form, a_form_data, Current)
-		end
-
-feature -- Hook: block		
-
-	subscribe_to_block_hook (h: CMS_HOOK_BLOCK)
-			-- Add `h' as subscriber of hooks CMS_HOOK_BLOCK.
-		do
-			hooks.subscribe_to_hook (h, {CMS_HOOK_BLOCK})
-		end
-
-	invoke_block
-			-- Invoke block hook in order to get block from modules.
-		do
-			hooks.invoke_block (Current)
-		end
-
 feature -- Menu: change
 
 	add_to_main_menu (lnk: CMS_LINK)
@@ -704,9 +620,6 @@ feature -- Menu: change
 
 	add_to_menu (lnk: CMS_LINK; m: CMS_MENU)
 		do
---			if attached {CMS_LOCAL_LINK} lnk as l_local then
---				l_local.get_is_active (request)
---			end
 			m.extend (lnk)
 		end
 
@@ -821,7 +734,7 @@ feature -- Generation
 			create {CMS_LOCAL_LINK} lnk.make ("Home", "")
 			lnk.set_weight (-10)
 			add_to_primary_menu (lnk)
-			invoke_menu_system_alter (menu_system)
+			hooks.invoke_menu_system_alter (menu_system, Current)
 
 			if api.enabled_modules.count = 0 then
 				add_to_primary_menu (create {CMS_LOCAL_LINK}.make ("Install", "admin/install"))
@@ -864,10 +777,10 @@ feature -- Generation
 			custom_prepare (page)
 
 				-- Cms response
-			invoke_response_alter (Current)
+			hooks.invoke_response_alter (Current)
 
 				-- Cms values
-			invoke_value_table_alter (values)
+			hooks.invoke_value_table_alter (values, Current)
 
 				-- Predefined values
 			page.register_variable (page, "page") -- DO NOT REMOVE
