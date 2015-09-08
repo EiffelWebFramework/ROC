@@ -48,80 +48,26 @@ feature -- Execution
 				attached node_api.node (nid) as l_node
 			then
 				if attached node_api.node_type_for (l_node) as l_type then
- 					fixme ("refactor: process_edit, process_create process edit")
  					if
 						location.ends_with_general ("/edit") and then
 						node_api.has_permission_for_action_on_node ("edit", l_node, user)
 					then
-						f := new_edit_form (l_node, url (location, Void), "edit-" + l_type.name, l_type)
-						hooks.invoke_form_alter (f, fd, Current)
-						if request.is_post_request_method then
-							f.validation_actions.extend (agent edit_form_validate (?, b))
-							f.submit_actions.extend (agent edit_form_submit (?, l_node, l_type, b))
-							f.process (Current)
-							fd := f.last_data
-						end
-						if l_node.has_id then
-							add_to_menu (node_local_link (l_node, translation ("View", Void)), primary_tabs)
-							add_to_menu (create {CMS_LOCAL_LINK}.make (translation ("Edit", Void), node_api.node_path (l_node) + "/edit"), primary_tabs)
-							add_to_menu (create {CMS_LOCAL_LINK}.make ("Delete", node_api.node_path (l_node) + "/delete"), primary_tabs)
-						end
-
-						if attached redirection as l_location then
-								-- FIXME: Hack for now
-							set_title (l_node.title)
-							b.append (html_encoded (l_type.title) + " saved")
-						else
-							set_title (formatted_string (translation ("Edit $1 #$2", Void), [l_type.title, l_node.id]))
-							f.append_to_html (wsf_theme, b)
-						end
+						edit_node (l_node, l_type, b)
 					elseif
 						location.ends_with_general ("/delete") and then
 						node_api.has_permission_for_action_on_node ("delete", l_node, user)
 					then
-						f := new_delete_form (l_node, url (location, Void), "delete-" + l_type.name, l_type)
-						hooks.invoke_form_alter (f, fd, Current)
-						if request.is_post_request_method then
-							f.process (Current)
-							fd := f.last_data
-						end
-						if l_node.has_id then
-							add_to_menu (node_local_link (l_node, translation ("View", Void)), primary_tabs)
-							add_to_menu (create {CMS_LOCAL_LINK}.make (translation ("Edit", Void), node_api.node_path (l_node) + "/edit"), primary_tabs)
-							add_to_menu (create {CMS_LOCAL_LINK}.make ("Delete", node_api.node_path (l_node) + "/delete"), primary_tabs)
-						end
-
-						if attached redirection as l_location then
-								-- FIXME: Hack for now
-							set_title (l_node.title)
-							b.append (html_encoded (l_type.title) + " deleted")
-						else
-							set_title (formatted_string (translation ("Delete $1 #$2", Void), [l_type.title, l_node.id]))
-							f.append_to_html (wsf_theme, b)
-						end
+						delete_node (l_node, l_type, b)
 					elseif
 						location.ends_with_general ("/trash") and then
 						node_api.has_permission_for_action_on_node ("trash", l_node, user)
 					then
-						f := new_trash_form (l_node, url (location, Void), "trash-" + l_type.name, l_type)
-						hooks.invoke_form_alter (f, fd, Current)
-						if request.is_post_request_method then
-							f.process (Current)
-							fd := f.last_data
-						end
-						if l_node.has_id then
-							add_to_menu (node_local_link (l_node, translation ("View", Void)), primary_tabs)
-							add_to_menu (create {CMS_LOCAL_LINK}.make ("Trash", node_api.node_path (l_node) + "/Trash"), primary_tabs)
-						end
-
-						if attached redirection as l_location then
-								-- FIXME: Hack for now
-							set_title (l_node.title)
-							b.append (html_encoded (l_type.title) + " trashed")
-						else
-							set_title (formatted_string (translation ("Trash $1 #$2", Void), [l_type.title, l_node.id]))
-							f.append_to_html (wsf_theme, b)
-						end
+						trash_node (l_node, l_type, b)
+					elseif
+						location.ends_with_general ("/add_child/page") and then
+						has_permissions (<<"create any", "create " + l_type.name>>)
+					then
+						create_new_node (l_type, b)
 					else
 						b.append ("<h1>")
 						b.append (translation ("Access denied", Void))
@@ -135,29 +81,8 @@ feature -- Execution
 				attached node_api.node_type (p_type.value) as l_type
 			then
 				if has_permissions (<<"create any", "create " +  l_type.name>>) then
-					if attached l_type.new_node (Void) as l_node then
-						f := new_edit_form (l_node, url (location, Void), "edit-" + l_type.name, l_type)
-						hooks.invoke_form_alter (f, fd, Current)
-						if request.is_post_request_method then
-							f.validation_actions.extend (agent edit_form_validate (?, b))
-							f.submit_actions.extend (agent edit_form_submit (?, l_node, l_type, b))
-							f.process (Current)
-							fd := f.last_data
-						end
-
-						set_title ("Edit " + html_encoded (l_type.title) + " #" + l_node.id.out)
-
-						if l_node.has_id then
-							add_to_menu (node_local_link (l_node, translation ("View", Void)), primary_tabs)
-							add_to_menu (create {CMS_LOCAL_LINK}.make (translation ("Edit", Void), node_api.node_path (l_node) + "/edit"), primary_tabs)
-						end
-
-						f.append_to_html (wsf_theme, b)
-					else
-						b.append ("<h1>")
-						b.append (translation ("Server error", Void))
-						b.append ("</h1>")
-					end
+						-- create new node
+					create_new_node (l_type, b)
 				else
 					b.append ("<h1>")
 					b.append (translation ("Access denied", Void))
@@ -184,6 +109,123 @@ feature -- Execution
 			end
 			set_main_content (b)
 		end
+
+
+feature {NONE} -- Create a new node
+
+	create_new_node (a_type: CMS_NODE_TYPE [CMS_NODE]; b: STRING_8)
+		local
+			f: like new_edit_form
+			fd: detachable WSF_FORM_DATA
+		do
+			if attached a_type.new_node (Void) as l_node then
+					-- create new node
+				f := new_edit_form (l_node, url (location, Void), "edit-" + a_type.name, a_type)
+				hooks.invoke_form_alter (f, fd, Current)
+				if request.is_post_request_method then
+					f.validation_actions.extend (agent edit_form_validate (?, b))
+					f.submit_actions.extend (agent edit_form_submit (?, l_node, a_type, b))
+					f.process (Current)
+					fd := f.last_data
+				end
+				set_title ("Edit " + html_encoded (a_type.title) + " #" + l_node.id.out)
+				if l_node.has_id then
+					add_to_menu (node_local_link (l_node, translation ("View", Void)), primary_tabs)
+					add_to_menu (create {CMS_LOCAL_LINK}.make (translation ("Edit", Void), node_api.node_path (l_node) + "/edit"), primary_tabs)
+				end
+				f.append_to_html (wsf_theme, b)
+			else
+				b.append ("<h1>")
+				b.append (translation ("Server error", Void))
+				b.append ("</h1>")
+			end
+		end
+
+
+	edit_node (a_node: CMS_NODE; a_type: CMS_NODE_TYPE [CMS_NODE]; b: STRING_8)
+		local
+			f: like new_edit_form
+			fd: detachable WSF_FORM_DATA
+		do
+			f := new_edit_form (A_node, url (location, Void), "edit-" + a_type.name, a_type)
+			hooks.invoke_form_alter (f, fd, Current)
+			if request.is_post_request_method then
+				f.validation_actions.extend (agent edit_form_validate (?, b))
+				f.submit_actions.extend (agent edit_form_submit (?, a_node, a_type, b))
+				f.process (Current)
+				fd := f.last_data
+			end
+			if a_node.has_id then
+				add_to_menu (node_local_link (a_node, translation ("View", Void)), primary_tabs)
+				add_to_menu (create {CMS_LOCAL_LINK}.make (translation ("Edit", Void), node_api.node_path (a_node) + "/edit"), primary_tabs)
+				add_to_menu (create {CMS_LOCAL_LINK}.make ("Delete", node_api.node_path (a_node) + "/delete"), primary_tabs)
+			end
+
+			if attached redirection as l_location then
+					-- FIXME: Hack for now
+				set_title (a_node.title)
+				b.append (html_encoded (a_type.title) + " saved")
+			else
+				set_title (formatted_string (translation ("Edit $1 #$2", Void), [a_type.title, a_node.id]))
+				f.append_to_html (wsf_theme, b)
+			end
+		end
+
+
+	delete_node (a_node: CMS_NODE; a_type: CMS_NODE_TYPE [CMS_NODE]; b: STRING_8)
+		local
+			f: like new_edit_form
+			fd: detachable WSF_FORM_DATA
+		do
+			f := new_delete_form (a_node, url (location, Void), "delete-" + a_type.name, a_type)
+			hooks.invoke_form_alter (f, fd, Current)
+			if request.is_post_request_method then
+				f.process (Current)
+				fd := f.last_data
+			end
+			if a_node.has_id then
+				add_to_menu (node_local_link (a_node, translation ("View", Void)), primary_tabs)
+				add_to_menu (create {CMS_LOCAL_LINK}.make (translation ("Edit", Void), node_api.node_path (a_node) + "/edit"), primary_tabs)
+				add_to_menu (create {CMS_LOCAL_LINK}.make ("Delete", node_api.node_path (a_node) + "/delete"), primary_tabs)
+			end
+
+			if attached redirection as l_location then
+					-- FIXME: Hack for now
+				set_title (a_node.title)
+				b.append (html_encoded (a_type.title) + " deleted")
+			else
+				set_title (formatted_string (translation ("Delete $1 #$2", Void), [a_type.title, a_node.id]))
+				f.append_to_html (wsf_theme, b)
+			end
+		end
+
+
+	trash_node (a_node: CMS_NODE; a_type: CMS_NODE_TYPE [CMS_NODE]; b: STRING_8)
+		local
+			f: like new_edit_form
+			fd: detachable WSF_FORM_DATA
+		do
+			f := new_trash_form (a_node, url (location, Void), "trash-" + a_type.name, a_type)
+			hooks.invoke_form_alter (f, fd, Current)
+			if request.is_post_request_method then
+				f.process (Current)
+				fd := f.last_data
+			end
+			if a_node.has_id then
+				add_to_menu (node_local_link (a_node, translation ("View", Void)), primary_tabs)
+				add_to_menu (create {CMS_LOCAL_LINK}.make ("Trash", node_api.node_path (a_node) + "/Trash"), primary_tabs)
+			end
+
+			if attached redirection as l_location then
+					-- FIXME: Hack for now
+				set_title (a_node.title)
+				b.append (html_encoded (a_type.title) + " trashed")
+			else
+				set_title (formatted_string (translation ("Trash $1 #$2", Void), [a_type.title, a_node.id]))
+				f.append_to_html (wsf_theme, b)
+			end
+		end
+
 
 feature -- Form	
 
@@ -220,6 +262,7 @@ feature -- Form
 			l_node: detachable CMS_NODE
 			s: STRING
 			l_path_alias: detachable READABLE_STRING_8
+			nid: INTEGER_64
 		do
 			l_preview := attached {WSF_STRING} fd.item ("op") as l_op and then l_op.same_string ("Preview")
 			if not l_preview then
@@ -250,6 +293,16 @@ feature -- Form
 
 				fixme ("for now, publishing is not implemented, so let's assume any node saved is published.") -- FIXME
 				l_node.mark_published
+
+					-- Save Child Page
+				nid := node_id_path_parameter (request)
+				if  location.ends_with_general ("/add_child/page") and then
+					nid > 0 and then attached {CMS_PAGE} l_node as l_new_page and then
+					attached {CMS_PAGE} node_api.node (nid) as l_page
+				then
+					l_new_page.set_parent (l_page)
+				end
+
 				node_api.save_node (l_node)
 				if attached user as u then
 					api.log ("node",
@@ -288,8 +341,12 @@ feature -- Form
 			f: CMS_FORM
 			ts: WSF_FORM_SUBMIT_INPUT
 			th: WSF_FORM_HIDDEN_INPUT
+			tl: WSF_FORM_SELECT
+			to: WSF_FORM_SELECT_OPTION
 		do
 			create f.make (a_url, a_name)
+
+
 
 			create th.make ("node-id")
 			if a_node /= Void then
@@ -302,6 +359,45 @@ feature -- Form
 			populate_form (a_node_type, f, a_node)
 			f.extend_html_text ("<br/>")
 
+				-- Select for nodes
+			create tl.make ("select_parent_node")
+			create to.make ("0", "NONE")
+			tl.add_option (to)
+
+			if attached {CMS_PAGE} a_node as l_node_page then
+				if attached l_node_page.parent as l_parent_node then
+					f.extend_html_text ("<div><strong>Parent page is </strong> ")
+					f.extend_html_text (node_html_link (l_parent_node,  l_parent_node.title + "(#" + l_parent_node.id.out + ")"))
+					f.extend_html_text ("<br/>")
+					f.extend_html_text ("Change parent to?")
+					if a_node /= Void then
+						across node_api.available_parents_for_node (a_node) as ic loop
+							create to.make (ic.item.id.out, node_html_link (ic.item,  ic.item.title + "(#" + ic.item.id.out + ")"))
+							if l_parent_node.id = ic.item.id then
+								to.set_is_selected (True)
+							end
+							tl.add_option (to)
+						end
+					end
+					f.extend (tl)
+					f.extend_html_text ("</div>")
+				else
+					f.extend_html_text ("<div><strong>Not has parent page</strong> ")
+					f.extend_html_text ("<br/>")
+					f.extend_html_text ("Add parent to?")
+					if a_node /= Void then
+						across node_api.available_parents_for_node (a_node) as ic loop
+							create to.make (ic.item.id.out, node_html_link (ic.item,  ic.item.title + "(#" + ic.item.id.out + ")"))
+							tl.add_option (to)
+						end
+						f.extend (tl)
+						f.extend_html_text ("</div>")
+					end
+				end
+			end
+
+
+			f.extend_html_text ("<br/>")
 			create ts.make ("op")
 			ts.set_default_value ("Save")
 			f.extend (ts)

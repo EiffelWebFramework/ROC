@@ -10,7 +10,8 @@ inherit
 	CMS_NODE_TYPE_WEBFORM_MANAGER [CMS_PAGE]
 		redefine
 			content_type,
-			append_html_output_to
+			append_html_output_to,
+			update_node
 		end
 
 create
@@ -21,8 +22,23 @@ feature -- Access
 	content_type: CMS_PAGE_NODE_TYPE
 			-- Associated content type.	
 
-feature -- Forms ...		
+feature -- Forms ...
 
+
+	update_node	(a_response: NODE_RESPONSE; fd: WSF_FORM_DATA; a_node: CMS_NODE)
+			-- <Precursor>
+		do
+			Precursor (a_response, fd, a_node)
+			if
+				attached {CMS_PAGE} a_node as l_node_page and then
+				attached fd.integer_item ("select_parent_node") as i_parent_node and then
+				i_parent_node > 0 and then
+				attached {CMS_PAGE} a_response.node_api.node (i_parent_node) as l_parent_page
+			then
+				l_node_page.set_parent (l_parent_page)
+			end
+
+		end
 --	fill_edit_form (response: NODE_RESPONSE; f: CMS_FORM; a_node: detachable CMS_NODE)
 --		local
 --			ti: WSF_FORM_TEXT_INPUT

@@ -138,7 +138,7 @@ feature {NONE} -- Implementation
 
 feature -- SQL
 
-	sql_select_node_data: STRING = "SELECT nid, revision, parent FROM page_nodes WHERE nid =:nid AND revision<=:revision ORDER BY revision DESC LIMIT 1;"
+	sql_select_node_data: STRING = "SELECT nid, revision, parent FROM page_nodes WHERE nid =:nid AND revision =:revision ORDER BY revision DESC LIMIT 1;"
 	sql_insert_node_data: STRING = "INSERT INTO page_nodes (nid, revision, parent) VALUES (:nid, :revision, :parent);"
 	sql_update_node_data: STRING = "UPDATE page_nodes SET nid=:nid, revision=:revision, parent=:parent WHERE nid=:nid AND revision=:revision;"
 

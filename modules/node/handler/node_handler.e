@@ -99,6 +99,15 @@ feature -- HTTP Methods
 				edit_response.execute
 			elseif req.percent_encoded_path_info.ends_with ("/revision") then
 				do_revisions (req, res)
+			elseif req.percent_encoded_path_info.ends_with ("/add_child/page") then
+					-- Add child node
+				l_nid := node_id_path_parameter (req)
+				if l_nid > 0 then
+						-- create a new child node with node id l_id as parent.
+					create_new_node (req, res)
+				else
+					send_not_found (req, res)
+				end
 			else
 					-- Display existing node
 				l_nid := node_id_path_parameter (req)
@@ -124,7 +133,16 @@ feature -- HTTP Methods
 						view_response.set_node (l_node)
 						view_response.set_revision (l_rev)
 						view_response.execute
+					elseif
+						attached current_user (req) as l_user and then
+						l_node /= Void and then ( node_api.is_author_of_node (l_user, l_node) or else api.user_api.is_admin_user (l_user))
+					then
+						create view_response.make (req, res, api, node_api)
+						view_response.set_node (l_node)
+						view_response.set_revision (l_rev)
+						view_response.execute
 					else
+
 						send_not_found (req, res)
 					end
 				else
@@ -164,6 +182,9 @@ feature -- HTTP Methods
 					do_restore (req, res)
 				end
 			elseif req.percent_encoded_path_info.starts_with ("/node/add/") then
+				create edit_response.make (req, res, api, node_api)
+				edit_response.execute
+			elseif req.percent_encoded_path_info.ends_with ("/add_child/page") then
 				create edit_response.make (req, res, api, node_api)
 				edit_response.execute
 			else
@@ -355,5 +376,4 @@ feature {NONE} -- Node
 				send_bad_request (req, res)
 			end
 		end
-
 end

@@ -327,6 +327,13 @@ feature -- Access: Node
 			end
 		end
 
+
+	available_parents_for_node (a_node: CMS_NODE): LIST [CMS_NODE]
+			-- Given the node `a_node', return the list of possible parent nodes
+		do
+			Result := node_storage.available_parents_for_node(a_node)
+		end
+
 feature -- Permission Scope: Node
 
 	has_permission_for_action_on_node (a_action: READABLE_STRING_8; a_node: CMS_NODE; a_user: detachable CMS_USER; ): BOOLEAN

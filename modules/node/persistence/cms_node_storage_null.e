@@ -86,6 +86,12 @@ feature -- Access: node
 			create {ARRAYED_LIST [CMS_USER]} Result.make (0)
 		end
 
+	available_parents_for_node (a_node: CMS_NODE): LIST [CMS_NODE]
+			-- <Precursor>
+		do
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+		end
+
 feature -- Node
 
 	new_node (a_node: CMS_NODE)

@@ -117,6 +117,11 @@ feature -- Access
 		deferred
 		end
 
+	available_parents_for_node (a_node: CMS_NODE): LIST [CMS_NODE]
+			-- Given the node `a_node', return the list of possible parent nodes id
+		deferred
+		end
+
 feature -- Change: Node
 
 	save_node (a_node: CMS_NODE)

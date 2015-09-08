@@ -255,6 +255,32 @@ feature -- Access
 --			end
 		end
 
+
+	available_parents_for_node (a_node: CMS_NODE): LIST [CMS_NODE]
+			-- <Precursor>
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+
+			error_handler.reset
+			write_information_log (generator + ".available_parents_for_node")
+
+			from
+				create l_parameters.make (1)
+				l_parameters.put (a_node.id, "nid")
+				sql_query (sql_select_available_parents_for_node, l_parameters)
+				sql_start
+			until
+				sql_after
+			loop
+				if attached fetch_node as l_node then
+					Result.force (l_node)
+				end
+				sql_forth
+			end
+		end
+
 feature -- Change: Node
 
 	new_node (a_node: CMS_NODE)
@@ -455,6 +481,8 @@ feature {NONE} -- Queries
 
 	Sql_last_insert_node_revision: STRING = "SELECT MAX(revision) FROM node_revisions;"
 	Sql_last_insert_node_revision_for_nid: STRING = "SELECT MAX(revision) FROM node_revisions WHERE nid=:nid;"
+
+	sql_select_available_parents_for_node : STRING = "SELECT pn_1.nid, pn_1.revision, pn_1.type, title, summary, content, format, author, publish, created, changed, status FROM nodes pn_1 LEFT JOIN page_nodes pn_2 ON pn_1.nid = pn_2.nid AND pn_1.nid != :nid WHERE  pn_2.parent != :nid AND pn_1.status != -1;"
 
 feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 
