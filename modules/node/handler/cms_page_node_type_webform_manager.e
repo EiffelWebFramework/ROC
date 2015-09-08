@@ -36,6 +36,12 @@ feature -- Forms ...
 				attached {CMS_PAGE} a_response.node_api.node (i_parent_node) as l_parent_page
 			then
 				l_node_page.set_parent (l_parent_page)
+			elseif attached {CMS_PAGE} a_node as l_node_page and then
+				attached fd.integer_item ("select_parent_node") as i_parent_node and then
+				i_parent_node = -1
+			then
+					-- Set parent to Void
+				l_node_page.set_parent (Void)
 			end
 
 		end

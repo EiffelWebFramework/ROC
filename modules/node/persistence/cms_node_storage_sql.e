@@ -482,7 +482,7 @@ feature {NONE} -- Queries
 	Sql_last_insert_node_revision: STRING = "SELECT MAX(revision) FROM node_revisions;"
 	Sql_last_insert_node_revision_for_nid: STRING = "SELECT MAX(revision) FROM node_revisions WHERE nid=:nid;"
 
-	sql_select_available_parents_for_node : STRING = "SELECT pn_1.nid, pn_1.revision, pn_1.type, title, summary, content, format, author, publish, created, changed, status FROM nodes pn_1 LEFT JOIN page_nodes pn_2 ON pn_1.nid = pn_2.nid AND pn_1.nid != :nid WHERE  pn_2.parent != :nid AND pn_1.status != -1;"
+	sql_select_available_parents_for_node : STRING = "SELECT pn_1.nid, pn_1.revision, pn_1.type, title, summary, content, format, author, publish, created, changed, status FROM nodes pn_1 LEFT JOIN page_nodes pn_2 ON pn_1.nid = pn_2.nid AND pn_1.nid != :nid WHERE  pn_2.parent != :nid AND pn_1.status != -1 GROUP BY pn_1.nid, pn_1.revision;"
 
 feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 

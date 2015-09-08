@@ -329,9 +329,58 @@ feature -- Access: Node
 
 
 	available_parents_for_node (a_node: CMS_NODE): LIST [CMS_NODE]
-			-- Given the node `a_node', return the list of possible parent nodes
+			-- List of possible parents nodes for node `a_node'.
+			-- Ensure the list of possible parent nodes does not allow a potential cycle.
 		do
-			Result := node_storage.available_parents_for_node(a_node)
+			create {ARRAYED_LIST[CMS_NODE]}Result.make (0)
+			across node_storage.available_parents_for_node(a_node) as ic loop
+				if not has_cycle (a_node, ic.item) then
+					Result.force (ic.item)
+				end
+			end
+
+		ensure
+			not_cycle: Result.for_all (agent not_cycle (a_node, ?))
+		end
+
+feature {NONE} -- Implementation
+
+	not_cycle (a_node: CMS_NODE; a_parent: CMS_NODE): BOOLEAN
+		do
+			Result := not has_cycle (a_node, a_parent)
+		end
+
+	has_cycle (a_node: CMS_NODE; a_parent: CMS_NODE): BOOLEAN
+			-- Check if adding the node `a_parent' as parent of node `a_node' form a cycle.
+		local
+			l_flag: BOOLEAN
+			l_item: detachable CMS_PAGE
+		do
+			Result := False
+			if
+			   attached {CMS_PAGE} a_node as l_page  and then
+			   attached {CMS_PAGE} full_node (a_parent) as l_page_parent
+			then
+			   l_page.set_parent (l_page_parent)
+			   from
+			   		l_item := l_page_parent
+			   until
+					l_flag or else Result
+			   loop
+			   		if attached l_item and then attached {CMS_PAGE} node (l_item.id) as l_parent then
+						if l_parent.id = l_page.id then
+							Result := True
+						else
+							l_item := l_parent.parent
+						end
+			   		else
+						l_flag := True
+			   		end
+			   end
+			   		-- Set parent to void.
+			   l_page.set_parent (Void)
+			end
+
 		end
 
 feature -- Permission Scope: Node

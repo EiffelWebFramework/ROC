@@ -103,7 +103,7 @@ feature -- HTTP Methods
 					-- Add child node
 				l_nid := node_id_path_parameter (req)
 				if l_nid > 0 then
-						-- create a new child node with node id l_id as parent.
+						-- create a new child node with node id `l_id' as parent.
 					create_new_node (req, res)
 				else
 					send_not_found (req, res)

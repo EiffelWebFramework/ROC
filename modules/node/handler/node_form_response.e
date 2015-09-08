@@ -233,6 +233,7 @@ feature -- Form
 		local
 			l_preview: BOOLEAN
 			l_format: detachable CONTENT_FORMAT
+			l_selected: BOOLEAN
 		do
 			l_preview := attached {WSF_STRING} fd.item ("op") as l_op and then l_op.same_string ("Preview")
 			if l_preview then
@@ -254,6 +255,32 @@ feature -- Form
 				end
 				b.append ("</div>")
 			end
+
+			if
+				attached fd.integer_item ("select_parent_node") as s_parent_node and then
+				s_parent_node.to_integer_64 > 0 and then
+				attached node_api.node (s_parent_node) as l_parent_node and then
+				attached node_api.node (node_id_path_parameter (request)) as l_node
+			then
+				across node_api.available_parents_for_node (l_node) as ic until l_selected  loop
+					if l_parent_node.same_node (ic.item) then
+						l_selected := True
+					end
+				end
+				if not l_selected then
+					fd.report_invalid_field ("select_parent_node", "Invalid node id " +  s_parent_node.out)
+				end
+			elseif
+				attached fd.integer_item ("select_parent_node") as s_parent_node and then
+				(s_parent_node = -1 or else  s_parent_node = 0)
+			then
+					-- -1 is Used to unassing a parent node
+					-- 0 is not taken into account, any other input value is considered invalid.
+			else
+				fd.report_invalid_field ("select_parent_node", "Invalid node id")
+			end
+
+
 		end
 
 	edit_form_submit (fd: WSF_FORM_DATA; a_node: detachable CMS_NODE; a_type: CMS_NODE_TYPE [CMS_NODE]; b: STRING)
@@ -264,6 +291,7 @@ feature -- Form
 			l_path_alias: detachable READABLE_STRING_8
 			nid: INTEGER_64
 		do
+			fixme ("Refactor code per operacion: Preview, Save")
 			l_preview := attached {WSF_STRING} fd.item ("op") as l_op and then l_op.same_string ("Preview")
 			if not l_preview then
 				debug ("cms")
@@ -294,7 +322,7 @@ feature -- Form
 				fixme ("for now, publishing is not implemented, so let's assume any node saved is published.") -- FIXME
 				l_node.mark_published
 
-					-- Save Child Page
+					-- Save parent id in current node.
 				nid := node_id_path_parameter (request)
 				if  location.ends_with_general ("/add_child/page") and then
 					nid > 0 and then attached {CMS_PAGE} l_node as l_new_page and then
@@ -341,13 +369,10 @@ feature -- Form
 			f: CMS_FORM
 			ts: WSF_FORM_SUBMIT_INPUT
 			th: WSF_FORM_HIDDEN_INPUT
-			tl: WSF_FORM_SELECT
-			to: WSF_FORM_SELECT_OPTION
+			ti: WSF_FORM_NUMBER_INPUT
+			l_item: CMS_NODE
 		do
 			create f.make (a_url, a_name)
-
-
-
 			create th.make ("node-id")
 			if a_node /= Void then
 				th.set_text_value (a_node.id.out)
@@ -359,40 +384,24 @@ feature -- Form
 			populate_form (a_node_type, f, a_node)
 			f.extend_html_text ("<br/>")
 
-				-- Select for nodes
-			create tl.make ("select_parent_node")
-			create to.make ("0", "NONE")
-			tl.add_option (to)
-
 			if attached {CMS_PAGE} a_node as l_node_page then
 				if attached l_node_page.parent as l_parent_node then
 					f.extend_html_text ("<div><strong>Parent page is </strong> ")
 					f.extend_html_text (node_html_link (l_parent_node,  l_parent_node.title + "(#" + l_parent_node.id.out + ")"))
 					f.extend_html_text ("<br/>")
 					f.extend_html_text ("Change parent to?")
-					if a_node /= Void then
-						across node_api.available_parents_for_node (a_node) as ic loop
-							create to.make (ic.item.id.out, node_html_link (ic.item,  ic.item.title + "(#" + ic.item.id.out + ")"))
-							if l_parent_node.id = ic.item.id then
-								to.set_is_selected (True)
-							end
-							tl.add_option (to)
-						end
-					end
-					f.extend (tl)
+					create ti.make ("select_parent_node")
+					ti.set_label ("Parent Node")
+					f.extend (ti)
 					f.extend_html_text ("</div>")
 				else
 					f.extend_html_text ("<div><strong>Not has parent page</strong> ")
 					f.extend_html_text ("<br/>")
 					f.extend_html_text ("Add parent to?")
-					if a_node /= Void then
-						across node_api.available_parents_for_node (a_node) as ic loop
-							create to.make (ic.item.id.out, node_html_link (ic.item,  ic.item.title + "(#" + ic.item.id.out + ")"))
-							tl.add_option (to)
-						end
-						f.extend (tl)
-						f.extend_html_text ("</div>")
-					end
+					create ti.make ("select_parent_node")
+					ti.set_label ("Parent Node")
+					f.extend (ti)
+					f.extend_html_text ("</div>")
 				end
 			end
 
@@ -432,7 +441,7 @@ feature -- Form
 					ts.set_default_value (translation ("Delete"))
 					]")
 				f.extend (ts)
-				fixme ("wsf_html: add support for HTML5 input attributes!!! ")
+				to_implement ("Refactor code to use the new wsf_html HTML5 support")
 				f.extend_html_text("<input type='submit' value='Cancel' formmethod='GET', formaction='/node/"+a_node.id.out+"'>" )
 			end
 
