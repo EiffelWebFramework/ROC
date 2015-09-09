@@ -39,6 +39,9 @@ feature -- Status report
 		deferred
 		end
 
+	conditions: detachable LIST [CMS_BLOCK_CONDITION]
+			-- Optional block condition to be enabled.
+
 feature -- Element change
 
 	add_css_class (a_class: READABLE_STRING_8)
