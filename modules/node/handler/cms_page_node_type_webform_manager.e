@@ -29,30 +29,35 @@ feature -- Forms ...
 	populate_form (response: NODE_RESPONSE; f: CMS_FORM; a_node: detachable CMS_NODE)
 		local
 			ti: WSF_FORM_NUMBER_INPUT
+			fs: WSF_FORM_FIELD_SET
 			l_parent_id, nid: INTEGER_64
 		do
 			Precursor (response, f, a_node)
 
 			if attached {CMS_PAGE} a_node as l_page then
+				create fs.make
+				fs.set_legend ("Pages structure")
+				fs.set_collapsible (True)
+				f.extend (fs)
 				create ti.make ("select_parent_node")
-
+				ti.set_label ("Parent page")
+				ti.set_description ("The parent page is the book structure.")
 				if attached l_page.parent as l_parent_node then
 					l_parent_id := l_parent_node.id
-					f.extend_html_text ("<div><strong>Currently, the parent page is </strong> ")
-					f.extend_html_text (response.node_html_link (l_parent_node,  l_parent_node.title))
-					f.extend_html_text ("</div>")
-					ti.set_label ("Change parent")
-					ti.set_description ("Select a new parent ...")
-				else
-					ti.set_label ("Select parent")
-					ti.set_description ("Select a parent ...")
+					fs.extend_html_text ("<div><strong>Currently, the parent page is </strong> ")
+					fs.extend_html_text (response.node_html_link (l_parent_node,  l_parent_node.title))
+					fs.extend_html_text ("</div>")
 				end
 				ti.set_validation_action (agent parent_validation (response, ?))
-				f.extend (ti)
+				fs.extend (ti)
 
-				if response.location.ends_with_general ("/add_child/page") then
-					nid := response.node_id_path_parameter (response.request)
-					l_parent_id := nid
+				-- FIXME: add notion of "weight"
+
+				if
+					attached {WSF_STRING} response.request.query_parameter ("parent") as p_parent and then
+					p_parent.is_integer
+				then
+					l_parent_id := p_parent.integer_value.to_integer_64
 				end
 				if l_parent_id > 0 then
 					ti.set_default_value (l_parent_id.out)
@@ -100,6 +105,8 @@ feature -- Forms ...
 			l_selected: BOOLEAN
 			node_api: CMS_NODE_API
 			l_parent_id: INTEGER_64
+			nid: INTEGER_64
+			l_parent_node: detachable CMS_NODE
 		do
 			node_api := a_response.node_api
 			if attached fd.integer_item ("select_parent_node") as s_parent_node then
@@ -107,22 +114,18 @@ feature -- Forms ...
 			else
 				l_parent_id := 0
 			end
-			if
-				l_parent_id > 0 and then
-				attached node_api.node (a_response.node_id_path_parameter (a_response.request)) as l_node
-			then
-				if not a_response.location.ends_with_general ("/add_child/page") then
-					across
-						node_api.available_parents_for_node (l_node) as ic
-					until
-						l_selected
-					loop
-						if ic.item.id = l_parent_id then
-							l_selected := True
-						end
-					end
-					if not l_selected then
-						fd.report_invalid_field ("select_parent_node", "Invalid node id " +  l_parent_id.out)
+			if l_parent_id > 0 then
+				l_parent_node := node_api.node (l_parent_id)
+				if l_parent_node = Void then
+					fd.report_invalid_field ("select_parent_node", "Invalid parent, not found id #" + l_parent_id.out)
+				else
+					nid := a_response.node_id_path_parameter
+					if
+						nid > 0 and then
+						attached node_api.node (nid) as l_node and then
+						node_api.is_node_a_parent_of (l_node, l_parent_node)
+					then
+						fd.report_invalid_field ("select_parent_node", "Invalid parent due to cycle (node #" + nid.out + " is already a parent of node #" + l_parent_id.out)
 					end
 				end
 			elseif l_parent_id = -1 or else l_parent_id = 0 then
@@ -147,7 +150,7 @@ feature -- Output
 
 			if a_node.has_id and then not a_node.is_trashed then
 				if node_api.has_permission_for_action_on_node ("create", a_node, a_response.user) then
-					create lnk.make ("Add Child", node_api.node_path (a_node) + "/add_child/page")
+					create lnk.make ("Add Child", "node/add/page?parent=" + a_node.id.out)
 					lnk.set_weight (3)
 					a_response.add_to_primary_tabs (lnk)
 				end

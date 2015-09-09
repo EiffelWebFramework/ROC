@@ -207,10 +207,6 @@ feature -- Access: router
 			a_router.handle ("/node/{id}/delete", l_node_handler, a_router.methods_get_post)
 			a_router.handle ("/node/{id}/trash", l_node_handler, a_router.methods_get_post)
 
-				-- Add child
-			a_router.handle ("/node/{id}/add_child/{type}", l_node_handler, a_router.methods_get_post)
-
-
 			a_router.handle ("/node/{id}", l_node_handler, a_router.methods_get)
 				-- For now: no REST API handling... a_router.methods_get_put_delete + a_router.methods_get_post)
 

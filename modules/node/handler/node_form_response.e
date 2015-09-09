@@ -40,7 +40,7 @@ feature -- Execution
 			nid: INTEGER_64
 		do
 			create b.make_empty
-			nid := node_id_path_parameter (request)
+			nid := node_id_path_parameter
 			if
 				nid > 0 and then
 				attached node_api.node (nid) as l_node
@@ -61,12 +61,6 @@ feature -- Execution
 						node_api.has_permission_for_action_on_node ("trash", l_node, user)
 					then
 						trash_node (l_node, l_type, b)
-					elseif
-						location.ends_with_general ("/add_child/page") and then
-						has_permissions (<<"create any", "create " + l_type.name>>)
-					then
-							-- FIXME: remove page dep from node module.
-						create_new_node (l_type, b)
 					else
 						b.append ("<h1>")
 						b.append (translation ("Access denied", Void))
@@ -264,7 +258,6 @@ feature -- Form
 			l_node: detachable CMS_NODE
 			s: STRING
 			l_path_alias: detachable READABLE_STRING_8
-			nid: INTEGER_64
 		do
 			fixme ("Refactor code per operacion: Preview, Save")
 			l_preview := attached {WSF_STRING} fd.item ("op") as l_op and then l_op.same_string ("Preview")

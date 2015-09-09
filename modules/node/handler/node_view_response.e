@@ -61,7 +61,7 @@ feature -- Execution
 		do
 			l_node := node
 			if l_node = Void then
-				nid := node_id_path_parameter (request)
+				nid := node_id_path_parameter
 				if nid > 0 then
 					l_node := node_api.node (nid)
 				end

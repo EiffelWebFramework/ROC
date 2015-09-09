@@ -354,8 +354,6 @@ feature -- Access: page/book outline
 			no_cycle: across Result as c all not is_node_a_parent_of (a_node, c.item) end
 		end
 
-feature {NONE} -- Implementation
-
 	is_node_a_parent_of (a_node: CMS_NODE; a_child: CMS_NODE): BOOLEAN
 			-- Is `a_node' a direct or indirect parent of node `a_child'?
 		require
@@ -365,7 +363,7 @@ feature {NONE} -- Implementation
 				attached {CMS_PAGE} full_node (a_child) as l_child_page and then
 				attached l_child_page.parent as l_parent
 			then
-				if l_parent.same_node (l_child_page) then
+				if l_parent.same_node (a_node) then
 					Result := True
 				else
 					Result := is_node_a_parent_of (a_node, l_parent)

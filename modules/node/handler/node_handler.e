@@ -99,15 +99,15 @@ feature -- HTTP Methods
 				edit_response.execute
 			elseif req.percent_encoded_path_info.ends_with ("/revision") then
 				do_revisions (req, res)
-			elseif req.percent_encoded_path_info.ends_with ("/add_child/page") then
-					-- Add child node
-				l_nid := node_id_path_parameter (req)
-				if l_nid > 0 then
-						-- create a new child node with node id `l_id' as parent.
-					create_new_node (req, res)
-				else
-					send_not_found (req, res)
-				end
+--			elseif req.percent_encoded_path_info.ends_with ("/add_child/page") then
+--					-- Add child node
+--				l_nid := node_id_path_parameter (req)
+--				if l_nid > 0 then
+--						-- create a new child node with node id `l_id' as parent.
+--					create_new_node (req, res)
+--				else
+--					send_not_found (req, res)
+--				end
 			else
 					-- Display existing node
 				l_nid := node_id_path_parameter (req)
