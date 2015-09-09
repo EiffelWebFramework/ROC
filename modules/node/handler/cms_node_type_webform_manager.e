@@ -293,7 +293,7 @@ feature -- Output
 					if
 						node_api.has_permission_for_action_on_node ("trash", a_node, l_user)
 					then
-						create lnk.make ("Trash", node_api.node_path (a_node) + "/trash")
+						create lnk.make ("Move to trash", node_api.node_path (a_node) + "/trash")
 						lnk.set_weight (3)
 						a_response.add_to_primary_tabs (lnk)
 					end
