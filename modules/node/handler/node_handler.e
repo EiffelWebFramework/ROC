@@ -205,8 +205,8 @@ feature -- HTTP Methods
 			send_not_implemented ("REST API not yet implemented", req, res)
 		end
 
-	do_delete (req: WSF_REQUEST; res: WSF_RESPONSE)
-			-- <Precursor>
+	do_trash (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- Trash a node, soft delete.
 		do
 			if attached current_user (req) as l_user then
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
@@ -214,8 +214,8 @@ feature -- HTTP Methods
 						l_id.is_integer and then
 						attached node_api.node (l_id.integer_value) as l_node
 					then
-						if node_api.has_permission_for_action_on_node ("delete", l_node, current_user (req)) then
-							node_api.delete_node (l_node)
+						if node_api.has_permission_for_action_on_node ("trash", l_node, current_user (req)) then
+							node_api.trash_node (l_node)
 							res.send (create {CMS_REDIRECTION_RESPONSE_MESSAGE}.make (req.absolute_script_url ("")))
 						else
 							send_access_denied (req, res)
@@ -240,8 +240,8 @@ feature -- HTTP Methods
 
 feature {NONE} -- Trash:Restore
 
-	do_trash (req: WSF_REQUEST; res: WSF_RESPONSE)
-			-- Trash a node from the database.
+	do_delete (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- Delete a node from the database.
 		do
 			if attached current_user (req) as l_user then
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
@@ -249,8 +249,8 @@ feature {NONE} -- Trash:Restore
 						l_id.is_integer and then
 						attached node_api.node (l_id.integer_value) as l_node
 					then
-						if node_api.has_permission_for_action_on_node ("trash", l_node, current_user (req)) then
-							node_api.trash_node (l_node)
+						if node_api.has_permission_for_action_on_node ("delete", l_node, current_user (req)) then
+							node_api.delete_node (l_node)
 							res.send (create {CMS_REDIRECTION_RESPONSE_MESSAGE}.make (req.absolute_script_url ("")))
 						else
 							send_access_denied (req, res)

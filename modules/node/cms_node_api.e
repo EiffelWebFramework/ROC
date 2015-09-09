@@ -411,6 +411,7 @@ feature -- Change: Node
 
 	delete_node (a_node: CMS_NODE)
 			-- Delete `a_node'.
+			--! remove the node from the storage.
 		do
 			reset_error
 			if a_node.has_id then
@@ -429,7 +430,7 @@ feature -- Change: Node
 
 	trash_node (a_node: CMS_NODE)
 			-- Trash node `a_node'.
-			--! remove the node from the storage.
+			-- Soft delete
 		do
 			reset_error
 			node_storage.trash_node (a_node)
