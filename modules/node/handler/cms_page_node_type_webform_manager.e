@@ -11,6 +11,8 @@ inherit
 		redefine
 			content_type,
 			append_html_output_to,
+			populate_form,
+			new_node,
 			update_node
 		end
 
@@ -24,159 +26,112 @@ feature -- Access
 
 feature -- Forms ...
 
+	populate_form (response: NODE_RESPONSE; f: CMS_FORM; a_node: detachable CMS_NODE)
+		local
+			ti: WSF_FORM_NUMBER_INPUT
+			l_parent_id, nid: INTEGER_64
+		do
+			Precursor (response, f, a_node)
+
+			if attached {CMS_PAGE} a_node as l_page then
+				create ti.make ("select_parent_node")
+
+				if attached l_page.parent as l_parent_node then
+					l_parent_id := l_parent_node.id
+					f.extend_html_text ("<div><strong>Currently, the parent page is </strong> ")
+					f.extend_html_text (response.node_html_link (l_parent_node,  l_parent_node.title))
+					f.extend_html_text ("</div>")
+					ti.set_label ("Change parent")
+					ti.set_description ("Select a new parent ...")
+				else
+					ti.set_label ("Select parent")
+					ti.set_description ("Select a parent ...")
+				end
+				ti.set_validation_action (agent parent_validation (response, ?))
+				f.extend (ti)
+
+				if response.location.ends_with_general ("/add_child/page") then
+					nid := response.node_id_path_parameter (response.request)
+					l_parent_id := nid
+				end
+				if l_parent_id > 0 then
+					ti.set_default_value (l_parent_id.out)
+				end
+			end
+		end
 
 	update_node	(a_response: NODE_RESPONSE; fd: WSF_FORM_DATA; a_node: CMS_NODE)
 			-- <Precursor>
+		local
+			l_parent_id: INTEGER_64
 		do
 			Precursor (a_response, fd, a_node)
-			if
-				attached {CMS_PAGE} a_node as l_node_page and then
-				attached fd.integer_item ("select_parent_node") as i_parent_node and then
-				i_parent_node > 0 and then
-				attached {CMS_PAGE} a_response.node_api.node (i_parent_node) as l_parent_page
-			then
-				l_node_page.set_parent (l_parent_page)
-			elseif attached {CMS_PAGE} a_node as l_node_page and then
-				attached fd.integer_item ("select_parent_node") as i_parent_node and then
-				i_parent_node = -1
-			then
-					-- Set parent to Void
-				l_node_page.set_parent (Void)
+			if attached {CMS_PAGE} a_node as l_page then
+				if attached fd.integer_item ("select_parent_node") as i_parent_node then
+					l_parent_id := i_parent_node.to_integer_64
+				end
+				if
+					l_parent_id > 0 and then
+					attached {CMS_PAGE} a_response.node_api.node (l_parent_id) as l_parent_page
+				then
+					l_page.set_parent (l_parent_page)
+				elseif l_parent_id = -1	then
+						-- Set parent to Void
+					l_page.set_parent (Void)
+				end
 			end
-
 		end
---	fill_edit_form (response: NODE_RESPONSE; f: CMS_FORM; a_node: detachable CMS_NODE)
---		local
---			ti: WSF_FORM_TEXT_INPUT
---			fset: WSF_FORM_FIELD_SET
---			ta: WSF_FORM_TEXTAREA
---			tselect: WSF_FORM_SELECT
---			opt: WSF_FORM_SELECT_OPTION
---		do
---			create ti.make ("title")
---			ti.set_label ("Title")
---			ti.set_size (70)
---			if a_node /= Void then
---				ti.set_text_value (a_node.title)
---			end
---			ti.set_is_required (True)
---			f.extend (ti)
 
---			f.extend_html_text ("<br/>")
+	new_node (response: NODE_RESPONSE; fd: WSF_FORM_DATA; a_node: detachable like new_node): like content_type.new_node
+			-- <Precursor>
+		do
+			Result := Precursor (response, fd, a_node)
+			if attached fd.integer_item ("select_parent_node") as l_parent_id then
+				if l_parent_id = -1 then
+					Result.set_parent (Void)
+				elseif attached {CMS_PAGE} response.node_api.node (l_parent_id) as l_parent then
+					Result.set_parent (l_parent)
+				end
+			end
+		end
 
---			create ta.make ("body")
---			ta.set_rows (10)
---			ta.set_cols (70)
---			if a_node /= Void then
---				ta.set_text_value (a_node.content)
---			end
-----			ta.set_label ("Body")
---			ta.set_description ("This is the main content")
---			ta.set_is_required (False)
-
---			create fset.make
---			fset.set_legend ("Body")
---			fset.extend (ta)
-
---			fset.extend_html_text ("<br/>")
-
---			create tselect.make ("format")
---			tselect.set_label ("Body's format")
---			tselect.set_is_required (True)
---			across
---				 content_type.available_formats as c
---			loop
---				create opt.make (c.item.name, c.item.title)
---				if attached c.item.html_help as f_help then
---					opt.set_description ("<ul>" + f_help + "</ul>")
---				end
---				tselect.add_option (opt)
---			end
---			if a_node /= Void and then attached a_node.format as l_format then
---				tselect.set_text_by_value (l_format)
---			end
-
---			fset.extend (tselect)
-
---			f.extend (fset)
-
---		end
-
---	change_node	(response: NODE_RESPONSE; fd: WSF_FORM_DATA; a_node: like new_node)
---		local
---			b: detachable READABLE_STRING_8
---			f: detachable CONTENT_FORMAT
---		do
---			if attached fd.integer_item ("id") as l_id and then l_id > 0 then
---				check a_node.id = l_id end
---			end
---			if attached fd.string_item ("title") as l_title then
---				a_node.set_title (l_title)
---			end
-
---			if attached fd.string_item ("body") as l_body then
---				b := l_body
---			end
---			if attached fd.string_item ("format") as s_format and then attached response.api.format (s_format) as f_format then
---				f := f_format
---			elseif a_node /= Void and then attached a_node.format as s_format and then attached response.api.format (s_format) as f_format then
---				f := f_format
---			else
---				f := response.api.formats.default_format
---			end
---			if b /= Void then
---				a_node.set_content (b, Void, f.name) -- FIXME: summary
---			end
---		end
-
---	new_node (response: NODE_RESPONSE; fd: WSF_FORM_DATA; a_node: detachable like new_node): CMS_PAGE
---			-- <Precursor>
---		local
---			b: detachable READABLE_STRING_8
---			f: detachable CONTENT_FORMAT
---			l_node: detachable like new_node
---		do
---			l_node := a_node
---			if attached fd.integer_item ("id") as l_id and then l_id > 0 then
---				if l_node /= Void then
---					check l_node.id = l_id end
---				else
---					if attached {like new_node} response.node_api.node (l_id) as n then
---						l_node := n
---					else
---						-- FIXME: Error
---					end
---				end
---			end
---			if attached fd.string_item ("title") as l_title then
---				if l_node = Void then
---					l_node := content_type.new_node (Void)
---					l_node.set_title (l_title)
---				else
---					l_node.set_title (l_title)
---				end
---			else
---				if l_node = Void then
---					l_node := content_type.new_node_with_title ("...", Void)
---				end
---			end
---			l_node.set_author (response.user)
-
---			if attached fd.string_item ("body") as l_body then
---				b := l_body
---			end
---			if attached fd.string_item ("format") as s_format and then attached response.api.format (s_format) as f_format then
---				f := f_format
---			elseif a_node /= Void and then attached a_node.format as s_format and then attached response.api.format (s_format) as f_format then
---				f := f_format
---			else
---				f := response.api.formats.default_format
---			end
---			if b /= Void then
---				l_node.set_content (b, Void, f.name)
---			end
---			Result := l_node
---		end
+	parent_validation (a_response: NODE_RESPONSE; fd: WSF_FORM_DATA)
+		local
+			l_selected: BOOLEAN
+			node_api: CMS_NODE_API
+			l_parent_id: INTEGER_64
+		do
+			node_api := a_response.node_api
+			if attached fd.integer_item ("select_parent_node") as s_parent_node then
+				l_parent_id := s_parent_node.to_integer_64
+			else
+				l_parent_id := 0
+			end
+			if
+				l_parent_id > 0 and then
+				attached node_api.node (a_response.node_id_path_parameter (a_response.request)) as l_node
+			then
+				if not a_response.location.ends_with_general ("/add_child/page") then
+					across
+						node_api.available_parents_for_node (l_node) as ic
+					until
+						l_selected
+					loop
+						if ic.item.id = l_parent_id then
+							l_selected := True
+						end
+					end
+					if not l_selected then
+						fd.report_invalid_field ("select_parent_node", "Invalid node id " +  l_parent_id.out)
+					end
+				end
+			elseif l_parent_id = -1 or else l_parent_id = 0 then
+					-- -1 is Used to unassign a parent node
+					-- 0 is not taken into account, any other input value is considered invalid.
+			else
+				fd.report_invalid_field ("select_parent_node", "Invalid node id")
+			end
+		end
 
 feature -- Output
 
@@ -184,8 +139,20 @@ feature -- Output
 			-- <Precursor>
 		local
 			s: STRING
+			node_api: CMS_NODE_API
+			lnk: CMS_LOCAL_LINK
 		do
+			node_api := a_response.node_api
 			Precursor (a_node, a_response)
+
+			if a_node.has_id and then not a_node.is_trashed then
+				if node_api.has_permission_for_action_on_node ("create", a_node, a_response.user) then
+					create lnk.make ("Add Child", node_api.node_path (a_node) + "/add_child/page")
+					lnk.set_weight (3)
+					a_response.add_to_primary_tabs (lnk)
+				end
+			end
+
 			if attached a_response.main_content as l_main_content then
 				s := l_main_content
 			else
@@ -193,11 +160,22 @@ feature -- Output
 			end
 
 			if attached {CMS_PAGE} a_node as l_node_page then
+				s.append ("<ul class=%"page-navigation%">")
 				if attached l_node_page.parent as l_parent_node then
-					s.append ("<div>Parent page is ")
-					s.append (a_response.link (l_parent_node.title + " (#" + l_parent_node.id.out + ")", a_response.node_api.node_path (l_parent_node), Void))
-					s.append ("</div>")
+					s.append ("<li class=%"page-parent%">Go to parent page ")
+					s.append (a_response.link (l_parent_node.title, a_response.node_api.node_path (l_parent_node), Void))
+					s.append ("</li>")
 				end
+				if attached node_api.children (a_node) as l_children then
+					across
+						l_children as ic
+					loop
+						s.append ("<li>")
+						s.append (a_response.link (ic.item.title, a_response.node_api.node_path (ic.item), Void))
+						s.append ("</li>")
+					end
+				end
+				s.append ("</ul>")
 			end
 
 			a_response.set_main_content (s)

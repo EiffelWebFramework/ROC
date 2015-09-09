@@ -126,24 +126,29 @@ feature -- HTTP Methods
 					then
 						l_node := node_api.revision_node (l_nid, l_rev)
 					end
-					if
-						l_node /= Void and then (l_rev > 0 or else l_node.is_published)
-					then
-						create view_response.make (req, res, api, node_api)
-						view_response.set_node (l_node)
-						view_response.set_revision (l_rev)
-						view_response.execute
-					elseif
-						attached current_user (req) as l_user and then
-						l_node /= Void and then ( node_api.is_author_of_node (l_user, l_node) or else api.user_api.is_admin_user (l_user))
-					then
-						create view_response.make (req, res, api, node_api)
-						view_response.set_node (l_node)
-						view_response.set_revision (l_rev)
-						view_response.execute
-					else
-
+					if l_node = Void then
 						send_not_found (req, res)
+					else
+						if
+							l_rev > 0 or else l_node.is_published
+						then
+							create view_response.make (req, res, api, node_api)
+							view_response.set_node (l_node)
+							view_response.set_revision (l_rev)
+							view_response.execute
+						elseif
+							attached current_user (req) as l_user and then
+							(	node_api.is_author_of_node (l_user, l_node)
+								or else api.user_api.user_has_permission (l_user, "view unpublished " + l_node.content_type)
+							)
+						then
+							create view_response.make (req, res, api, node_api)
+							view_response.set_node (l_node)
+							view_response.set_revision (l_rev)
+							view_response.execute
+						else
+							send_access_denied (req, res)
+						end
 					end
 				else
 --					redirect_to (req.absolute_script_url ("/node/"), res) -- New node.

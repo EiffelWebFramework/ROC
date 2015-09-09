@@ -277,7 +277,7 @@ feature -- Output
 					create lnk.make ("Trash", node_api.node_path (a_node) + "/trash")
 					lnk.set_weight (2)
 					a_response.add_to_primary_tabs (lnk)
-				elseif a_node /= Void and then a_node.has_id then
+				elseif a_node.has_id then
 						-- Node in {{CMS_NODE_API}.published} or {CMS_NODE_API}.not_published} status.
 					create lnk.make ("Edit", node_api.node_path (a_node) + "/edit")
 					lnk.set_weight (2)

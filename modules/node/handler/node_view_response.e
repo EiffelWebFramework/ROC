@@ -72,7 +72,6 @@ feature -- Execution
 					attached node_api.node_type_webform_manager (l_content_type) as l_manager
 				then
 					l_manager.append_html_output_to (l_node, Current)
-					add_to_primary_tabs (create {CMS_LOCAL_LINK}.make ("Add Child", node_api.node_path (l_node) + "/add_child/page"))
 				end
 			elseif revision > 0 then
 				set_main_content ("Missing revision node!")

@@ -37,8 +37,6 @@ feature -- Execution
 			-- Computed response message.
 		local
 			b: STRING_8
-			f: like new_edit_form
-			fd: detachable WSF_FORM_DATA
 			nid: INTEGER_64
 		do
 			create b.make_empty
@@ -67,6 +65,7 @@ feature -- Execution
 						location.ends_with_general ("/add_child/page") and then
 						has_permissions (<<"create any", "create " + l_type.name>>)
 					then
+							-- FIXME: remove page dep from node module.
 						create_new_node (l_type, b)
 					else
 						b.append ("<h1>")
@@ -128,10 +127,13 @@ feature {NONE} -- Create a new node
 					f.process (Current)
 					fd := f.last_data
 				end
-				set_title ("Edit " + html_encoded (a_type.title) + " #" + l_node.id.out)
+
 				if l_node.has_id then
+					set_title ("Edit " + html_encoded (a_type.title) + " #" + l_node.id.out)
 					add_to_menu (node_local_link (l_node, translation ("View", Void)), primary_tabs)
 					add_to_menu (create {CMS_LOCAL_LINK}.make (translation ("Edit", Void), node_api.node_path (l_node) + "/edit"), primary_tabs)
+				else
+					set_title ("New " + html_encoded (a_type.title))
 				end
 				f.append_to_html (wsf_theme, b)
 			else
@@ -233,7 +235,6 @@ feature -- Form
 		local
 			l_preview: BOOLEAN
 			l_format: detachable CONTENT_FORMAT
-			l_selected: BOOLEAN
 		do
 			l_preview := attached {WSF_STRING} fd.item ("op") as l_op and then l_op.same_string ("Preview")
 			if l_preview then
@@ -255,32 +256,6 @@ feature -- Form
 				end
 				b.append ("</div>")
 			end
-
-			if
-				attached fd.integer_item ("select_parent_node") as s_parent_node and then
-				s_parent_node.to_integer_64 > 0 and then
-				attached node_api.node (s_parent_node) as l_parent_node and then
-				attached node_api.node (node_id_path_parameter (request)) as l_node
-			then
-				across node_api.available_parents_for_node (l_node) as ic until l_selected  loop
-					if l_parent_node.same_node (ic.item) then
-						l_selected := True
-					end
-				end
-				if not l_selected then
-					fd.report_invalid_field ("select_parent_node", "Invalid node id " +  s_parent_node.out)
-				end
-			elseif
-				attached fd.integer_item ("select_parent_node") as s_parent_node and then
-				(s_parent_node = -1 or else  s_parent_node = 0)
-			then
-					-- -1 is Used to unassing a parent node
-					-- 0 is not taken into account, any other input value is considered invalid.
-			else
-				fd.report_invalid_field ("select_parent_node", "Invalid node id")
-			end
-
-
 		end
 
 	edit_form_submit (fd: WSF_FORM_DATA; a_node: detachable CMS_NODE; a_type: CMS_NODE_TYPE [CMS_NODE]; b: STRING)
@@ -322,15 +297,6 @@ feature -- Form
 				fixme ("for now, publishing is not implemented, so let's assume any node saved is published.") -- FIXME
 				l_node.mark_published
 
-					-- Save parent id in current node.
-				nid := node_id_path_parameter (request)
-				if  location.ends_with_general ("/add_child/page") and then
-					nid > 0 and then attached {CMS_PAGE} l_node as l_new_page and then
-					attached {CMS_PAGE} node_api.node (nid) as l_page
-				then
-					l_new_page.set_parent (l_page)
-				end
-
 				node_api.save_node (l_node)
 				if attached user as u then
 					api.log ("node",
@@ -369,8 +335,6 @@ feature -- Form
 			f: CMS_FORM
 			ts: WSF_FORM_SUBMIT_INPUT
 			th: WSF_FORM_HIDDEN_INPUT
-			ti: WSF_FORM_NUMBER_INPUT
-			l_item: CMS_NODE
 		do
 			create f.make (a_url, a_name)
 			create th.make ("node-id")
@@ -382,29 +346,6 @@ feature -- Form
 			f.extend (th)
 
 			populate_form (a_node_type, f, a_node)
-			f.extend_html_text ("<br/>")
-
-			if attached {CMS_PAGE} a_node as l_node_page then
-				if attached l_node_page.parent as l_parent_node then
-					f.extend_html_text ("<div><strong>Parent page is </strong> ")
-					f.extend_html_text (node_html_link (l_parent_node,  l_parent_node.title + "(#" + l_parent_node.id.out + ")"))
-					f.extend_html_text ("<br/>")
-					f.extend_html_text ("Change parent to?")
-					create ti.make ("select_parent_node")
-					ti.set_label ("Parent Node")
-					f.extend (ti)
-					f.extend_html_text ("</div>")
-				else
-					f.extend_html_text ("<div><strong>Not has parent page</strong> ")
-					f.extend_html_text ("<br/>")
-					f.extend_html_text ("Add parent to?")
-					create ti.make ("select_parent_node")
-					ti.set_label ("Parent Node")
-					f.extend (ti)
-					f.extend_html_text ("</div>")
-				end
-			end
-
 
 			f.extend_html_text ("<br/>")
 			create ts.make ("op")

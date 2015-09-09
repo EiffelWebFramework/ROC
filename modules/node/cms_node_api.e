@@ -281,14 +281,17 @@ feature -- Access: Node
 				else
 					Result := l_partial_node
 				end
+					-- Update link with aliasing.
+				if Result /= Void and then Result.has_id then
+					Result.set_link (node_link (Result))
+				end
 			else
 				Result := a_node
+				if Result.has_id and Result.link = Void then
+					Result.set_link (node_link (Result))
+				end
 			end
-
-				-- Update link with aliasing.
-			if a_node /= Void and then a_node.has_id then
-				a_node.set_link (node_link (a_node))
-			end
+			check has_link: Result.has_id implies attached Result.link as lnk and then lnk.location.same_string (node_link (Result).location) end
 
 				-- Update partial user if needed.
 			if
@@ -327,60 +330,47 @@ feature -- Access: Node
 			end
 		end
 
+feature -- Access: page/book outline
+
+	children (a_node: CMS_NODE): detachable LIST [CMS_NODE]
+			-- Children of node `a_node'.
+			-- note: this is the partial version of the nodes.
+		do
+			Result := node_storage.children (a_node)
+		end
 
 	available_parents_for_node (a_node: CMS_NODE): LIST [CMS_NODE]
-			-- List of possible parents nodes for node `a_node'.
-			-- Ensure the list of possible parent nodes does not allow a potential cycle.
+			-- Potential parent nodes for node `a_node'.
+			-- Ensure no cycle exists.
 		do
-			create {ARRAYED_LIST[CMS_NODE]}Result.make (0)
-			across node_storage.available_parents_for_node(a_node) as ic loop
-				if not has_cycle (a_node, ic.item) then
+			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
+			across node_storage.available_parents_for_node (a_node) as ic loop
+				check distinct: not a_node.same_node (ic.item) end
+				if not is_node_a_parent_of (a_node, ic.item) then
 					Result.force (ic.item)
 				end
 			end
-
 		ensure
-			not_cycle: Result.for_all (agent not_cycle (a_node, ?))
+			no_cycle: across Result as c all not is_node_a_parent_of (a_node, c.item) end
 		end
 
 feature {NONE} -- Implementation
 
-	not_cycle (a_node: CMS_NODE; a_parent: CMS_NODE): BOOLEAN
+	is_node_a_parent_of (a_node: CMS_NODE; a_child: CMS_NODE): BOOLEAN
+			-- Is `a_node' a direct or indirect parent of node `a_child'?
+		require
+			distinct_nodes: not a_node.same_node (a_child)
 		do
-			Result := not has_cycle (a_node, a_parent)
-		end
-
-	has_cycle (a_node: CMS_NODE; a_parent: CMS_NODE): BOOLEAN
-			-- Check if adding the node `a_parent' as parent of node `a_node' form a cycle.
-		local
-			l_flag: BOOLEAN
-			l_item: detachable CMS_PAGE
-		do
-			Result := False
 			if
-			   attached {CMS_PAGE} a_node as l_page  and then
-			   attached {CMS_PAGE} full_node (a_parent) as l_page_parent
+				attached {CMS_PAGE} full_node (a_child) as l_child_page and then
+				attached l_child_page.parent as l_parent
 			then
-			   l_page.set_parent (l_page_parent)
-			   from
-			   		l_item := l_page_parent
-			   until
-					l_flag or else Result
-			   loop
-			   		if attached l_item and then attached {CMS_PAGE} node (l_item.id) as l_parent then
-						if l_parent.id = l_page.id then
-							Result := True
-						else
-							l_item := l_parent.parent
-						end
-			   		else
-						l_flag := True
-			   		end
-			   end
-			   		-- Set parent to void.
-			   l_page.set_parent (Void)
+				if l_parent.same_node (l_child_page) then
+					Result := True
+				else
+					Result := is_node_a_parent_of (a_node, l_parent)
+				end
 			end
-
 		end
 
 feature -- Permission Scope: Node
