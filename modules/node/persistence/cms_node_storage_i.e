@@ -67,7 +67,7 @@ feature {NONE} -- Implementation
 			not error_handler.has_error
 		do
 			if attached node_storage_extension (a_node) as ext then
-				ext.delete_by_id (a_node.id)
+				ext.delete_node (a_node)
 			end
 		end
 
@@ -182,17 +182,14 @@ feature -- Change: Node
 				-- node_revisions
 				-- and extensions (PAGE, BLOG, etc).
 			if a_node.has_id then
-				delete_node_by_id (a_node.id)
-				if not error_handler.has_error then
-					extended_delete (a_node)
-				end
+				delete_node_base (a_node)
 			end
 		end
 
-	delete_node_by_id (a_id: INTEGER_64)
-			-- Remove node by id `a_id'.
+	delete_node_base (a_node: CMS_NODE)
+			-- Remove node `a_node'.
 		require
-			valid_node_id: a_id > 0
+			valid_node_id: a_node.has_id
 		deferred
 		end
 

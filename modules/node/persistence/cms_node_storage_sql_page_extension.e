@@ -113,14 +113,16 @@ feature -- Persistence
 		end
 
 
-	delete_by_id (a_nid: INTEGER_64)
-			-- remove node extensions by id `a_nid'.
+	delete_node (a_node: CMS_PAGE)
+			-- <Precursor>
 		local
 			l_parameters: STRING_TABLE [ANY]
 		do
-			create l_parameters.make (1)
-			l_parameters.put (a_nid, "nid")
-			sql_change (sql_delete_node_data, l_parameters)
+			if a_node.has_id then
+				create l_parameters.make (1)
+				l_parameters.put (a_node.id, "nid")
+				sql_change (sql_delete_node_data, l_parameters)
+			end
 		end
 
 feature {NONE} -- Implementation

@@ -49,10 +49,10 @@ feature -- Persistence
 			end
 		end
 
-	delete_by_id (a_nid: INTEGER_64)
-			-- remove node extensions by id `a_nid'.
+	delete_node (a_node: CMS_NODE)
+			-- remove node extensions.
 		require
-			valid_id: a_nid > 0
+			a_node_accepted: is_accepted (a_node)
 		deferred
 		end
 
