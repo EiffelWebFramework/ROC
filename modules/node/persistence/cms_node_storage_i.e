@@ -61,6 +61,18 @@ feature {NONE} -- Implementation
 			end
 		end
 
+
+	extended_delete (a_node: CMS_NODE)
+			-- Delete extended data related to node `a_id'.
+		require
+			not error_handler.has_error
+		do
+			if attached node_storage_extension (a_node) as ext then
+				ext.delete_by_id (a_node.id)
+			end
+		end
+
+
 feature -- Access		
 
 	nodes_count: NATURAL_64
@@ -166,8 +178,16 @@ feature -- Change: Node
 	delete_node (a_node: CMS_NODE)
 			-- Delete `a_node'.
 		do
+				-- TODO
+				-- Check if we need to use a transaction
+				-- we delete a node
+				-- node_revisions
+				-- and extensions (PAGE, BLOG, etc)
 			if a_node.has_id then
 				delete_node_by_id (a_node.id)
+				if not error_handler.has_error then
+					extended_delete (a_node)
+				end
 			end
 		end
 

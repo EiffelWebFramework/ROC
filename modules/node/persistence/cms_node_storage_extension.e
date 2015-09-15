@@ -49,6 +49,13 @@ feature -- Persistence
 			end
 		end
 
+	delete_by_id (a_nid: INTEGER_64)
+			-- remove node extensions by id `a_nid'.
+		require
+			valid_id: a_nid > 0
+		deferred
+		end
+
 feature {NONE} -- Persistence implementation
 
 	store (a_node: G)

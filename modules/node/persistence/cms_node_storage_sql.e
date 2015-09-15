@@ -349,6 +349,9 @@ feature -- Change: Node
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "nid")
 			sql_change (sql_delete_node, l_parameters)
+
+				-- we remove node_revisions and pages.
+			sql_change (sql_delete_node_revisions, l_parameters)
 		end
 
 	restore_node_by_id (a_id: INTEGER_64)
@@ -519,6 +522,8 @@ feature {NONE} -- Queries
 			FROM nodes node LEFT JOIN page_nodes pn ON node.nid = pn.nid
 			WHERE pn.parent = :nid AND node.status != -1 GROUP BY node.nid, node.revision;
 		]"
+
+	sql_delete_node_revisions: STRING = "DELETE FROM node_revisions WHERE nid=:nid;"
 
 feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 
