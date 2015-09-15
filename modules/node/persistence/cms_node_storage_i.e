@@ -175,21 +175,19 @@ feature -- Change: Node
 
 	delete_node (a_node: CMS_NODE)
 			-- Delete `a_node'.
+		require
+				valid_node_id: a_node.has_id
 		do
 				-- TODO
 				-- Check if we need to use a transaction
 				-- we delete a node
 				-- node_revisions
 				-- and extensions (PAGE, BLOG, etc).
-			if a_node.has_id then
-				delete_node_base (a_node)
-			end
+			delete_node_base (a_node)
 		end
 
 	delete_node_base (a_node: CMS_NODE)
 			-- Remove node `a_node'.
-		require
-			valid_node_id: a_node.has_id
 		deferred
 		end
 
