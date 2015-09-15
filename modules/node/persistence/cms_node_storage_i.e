@@ -44,7 +44,7 @@ feature {NONE} -- Implementation
 	extended_store (a_node: CMS_NODE)
 			-- Store extended data from `a_node'.
 		require
-			not error_handler.has_error
+			not_has_error: not error_handler.has_error
 		do
 			if attached node_storage_extension (a_node) as ext then
 				ext.store_node (a_node)
@@ -54,7 +54,7 @@ feature {NONE} -- Implementation
 	extended_load (a_node: CMS_NODE)
 			-- Load extended data into `a_node'.
 		require
-			not error_handler.has_error
+			not_has_error: not error_handler.has_error
 		do
 			if attached node_storage_extension (a_node) as ext then
 				ext.load_node (a_node)
@@ -64,7 +64,7 @@ feature {NONE} -- Implementation
 	extended_delete (a_node: CMS_NODE)
 			-- Delete extended data related to node `a_node'.
 		require
-			not error_handler.has_error
+			not_has_error: not error_handler.has_error
 		do
 			if attached node_storage_extension (a_node) as ext then
 				ext.delete_node (a_node)
