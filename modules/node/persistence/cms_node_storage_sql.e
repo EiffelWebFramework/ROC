@@ -351,6 +351,7 @@ feature -- Change: Node
 			sql_change (sql_delete_node, l_parameters)
 
 				-- we remove node_revisions and pages.
+				-- Check: maybe we need a transaction.
 			sql_change (sql_delete_node_revisions, l_parameters)
 		end
 
