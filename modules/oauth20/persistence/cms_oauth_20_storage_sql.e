@@ -53,11 +53,15 @@ feature -- Access User Outh
 			create l_string.make_from_string (select_user_oauth2_template_by_id)
 			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
 			sql_query (l_string, l_parameters)
-			if sql_rows_count = 1 then
+			if not has_error and not sql_after then
 				Result := fetch_user
-			else
-				check no_more_than_one: sql_rows_count = 0 end
+				sql_forth
+				if not sql_after then
+					check no_more_than_one: False end
+					Result := Void
+				end
 			end
+			sql_finalize
 		end
 
 	user_oauth2_by_email (a_email: like {CMS_USER}.email; a_consumer: READABLE_STRING_GENERAL): detachable CMS_USER
@@ -73,11 +77,15 @@ feature -- Access User Outh
 			create l_string.make_from_string (select_user_oauth2_template_by_email)
 			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
 			sql_query (l_string, l_parameters)
-			if sql_rows_count = 1 then
+			if not has_error and not sql_after then
 				Result := fetch_user
-			else
-				check no_more_than_one: sql_rows_count = 0 end
+				sql_forth
+				if not sql_after then
+					check no_more_than_one: False end
+					Result := Void
+				end
 			end
+			sql_finalize
 		end
 
 	user_oauth2_by_token (a_token: READABLE_STRING_GENERAL; a_consumer: READABLE_STRING_GENERAL): detachable CMS_USER
@@ -93,11 +101,15 @@ feature -- Access User Outh
 			create l_string.make_from_string (select_user_by_oauth2_template_token)
 			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
 			sql_query (l_string, l_parameters)
-			if sql_rows_count = 1 then
+			if not has_error and not sql_after then
 				Result := fetch_user
-			else
-				check no_more_than_one: sql_rows_count = 0 end
+				sql_forth
+				if not sql_after then
+					check no_more_than_one: False end
+					Result := Void
+				end
 			end
+			sql_finalize
 		end
 
 
@@ -134,11 +146,15 @@ feature --Access: Consumers
 			create l_parameters.make (1)
 			l_parameters.put (a_name, "name")
 			sql_query (sql_oauth_consumer_name, l_parameters)
-			if sql_rows_count = 1 then
+			if not has_error and not sql_after then
 				Result := fetch_consumer
-			else
-				check no_more_than_one: sql_rows_count = 0 end
+				sql_forth
+				if not sql_after then
+					check no_more_than_one: False end
+					Result := Void
+				end
 			end
+			sql_finalize
 		end
 
 	oauth_consumer_by_callback  (a_callback: READABLE_STRING_8): detachable CMS_OAUTH_20_CONSUMER
@@ -151,11 +167,15 @@ feature --Access: Consumers
 			create l_parameters.make (1)
 			l_parameters.put (a_callback, "name")
 			sql_query (sql_oauth_consumer_callback, l_parameters)
-			if sql_rows_count = 1 then
+			if not has_error and not sql_after then
 				Result := fetch_consumer
-			else
-				check no_more_than_one: sql_rows_count = 0 end
+				sql_forth
+				if not sql_after then
+					check no_more_than_one: False end
+					Result := Void
+				end
 			end
+			sql_finalize
 		end
 
 feature -- Change: User OAuth
@@ -181,7 +201,7 @@ feature -- Change: User OAuth
 
 			create l_string.make_from_string (sql_insert_oauth2_template)
 			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
-			sql_change (l_string, l_parameters)
+			sql_insert (l_string, l_parameters)
 			sql_commit_transaction
 		end
 
@@ -202,7 +222,7 @@ feature -- Change: User OAuth
 
 			create l_string.make_from_string (sql_update_oauth2_template)
 			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
-			sql_change (l_string, l_parameters)
+			sql_modify (l_string, l_parameters)
 			sql_commit_transaction
 		end
 
@@ -221,7 +241,7 @@ feature -- Change: User OAuth
 
 			create l_string.make_from_string (sql_remove_oauth2_template)
 			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
-			sql_change (l_string, l_parameters)
+			sql_modify (l_string, l_parameters)
 			sql_commit_transaction
 		end
 
@@ -342,7 +362,7 @@ feature {NONE} -- User OAuth2
 
 	Sql_remove_oauth2_template: STRING = "DELETE FROM $table_name WHERE uid =:uid;"
 
-	Sql_oauth_consumers: STRING = "SELECT name FROM oauth2_consumers";
+	Sql_oauth_consumers: STRING = "SELECT name FROM oauth2_consumers;"
 
 	Sql_oauth2_table_prefix: STRING = "oauth2_"
 
