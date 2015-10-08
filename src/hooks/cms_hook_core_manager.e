@@ -138,6 +138,9 @@ feature -- Hook: block
 
 	invoke_block (a_response: CMS_RESPONSE)
 			-- Invoke block hook for response `a_response' in order to get block from modules.
+		local
+			bl: READABLE_STRING_8
+			bl_optional: BOOLEAN
 		do
 			if attached subscribers ({CMS_HOOK_BLOCK}) as lst then
 				across
@@ -147,7 +150,16 @@ feature -- Hook: block
 						across
 							h.block_list as blst
 						loop
-							h.get_block_view (blst.item, a_response)
+							bl := blst.item
+							bl_optional := bl.count > 0 and bl[1] = '?'
+							if bl_optional then
+								bl := bl.substring (2, bl.count)
+								if a_response.is_block_included (bl, False) then
+									h.get_block_view (bl, a_response)
+								end
+							else
+								h.get_block_view (bl, a_response)
+							end
 						end
 					end
 				end

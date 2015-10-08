@@ -21,6 +21,8 @@ inherit
 
 	CMS_HOOK_RESPONSE_ALTER
 
+	CMS_HOOK_MENU_SYSTEM_ALTER
+
 create
 	make
 
@@ -63,8 +65,112 @@ feature -- Access: router
 
 	setup_router (a_router: WSF_ROUTER; a_api: CMS_API)
 			-- <Precursor>
+		local
+			h: WSF_URI_TEMPLATE_HANDLER
 		do
---			a_router.handle ("/admin/feed_aggregator/", create {WSF_URI_AGENT_HANDLER}.make (agent handle_feed_aggregator_admin (a_api, ?, ?)), a_router.methods_head_get_post)
+			a_router.handle ("/admin/feed_aggregator/", create {WSF_URI_AGENT_HANDLER}.make (agent handle_feed_aggregator_admin (a_api, ?, ?)), a_router.methods_head_get_post)
+			create {WSF_URI_TEMPLATE_AGENT_HANDLER} h.make (agent handle_feed_aggregation (a_api, ?, ?))
+			a_router.handle ("/feed_aggregation/", h, a_router.methods_head_get)
+			a_router.handle ("/feed_aggregation/{feed_id}", h, a_router.methods_head_get)
+		end
+
+feature -- Handle
+
+	handle_feed_aggregator_admin (a_api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+		local
+			nyi: NOT_IMPLEMENTED_ERROR_CMS_RESPONSE
+		do
+			create nyi.make (req, res, a_api)
+			nyi.execute
+		end
+
+	handle_feed_aggregation	(a_api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
+		local
+			r: CMS_RESPONSE
+			s: STRING
+			nb: INTEGER
+		do
+			if attached {WSF_STRING} req.query_parameter ("size") as p_size and then p_size.is_integer then
+				nb := p_size.integer_value
+			else
+				nb := -1
+			end
+			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_api)
+			if attached {WSF_STRING} req.path_parameter ("feed_id") as p_feed_id then
+				if attached feed_aggregation (p_feed_id.value) as l_agg then
+					create s.make_empty
+					s.append ("<h1>")
+					s.append (r.html_encoded (l_agg.name))
+					s.append ("</h1>")
+					if attached l_agg.included_categories as l_categories then
+						s.append ("<span class=%"category%">")
+						across
+							l_categories as cats_ic
+						loop
+							s.append (" [")
+							s.append (r.html_encoded (cats_ic.item))
+							s.append ("]")
+						end
+						s.append ("</span>")
+					end
+					if attached l_agg.description as l_desc and then l_desc.is_valid_as_string_8 then
+						s.append ("<div class=%"description%">")
+						s.append (l_desc.as_string_8)
+						s.append ("</div>")
+					end
+					s.append ("<ul>")
+					across
+						l_agg.locations as ic
+					loop
+						s.append ("<li><a href=%"")
+						s.append (ic.item)
+						s.append ("%">")
+						s.append (ic.item)
+						s.append ("</a></li>")
+					end
+					s.append ("</ul>")
+
+					if attached feed_to_html (p_feed_id.value, nb, True, r) as l_html then
+						s.append (l_html)
+					end
+					r.set_main_content (s)
+				else
+					create {NOT_FOUND_ERROR_CMS_RESPONSE} r.make (req, res, a_api)
+				end
+			else
+				if attached feed_aggregator_api as l_feed_agg_api then
+					create s.make_empty
+					across
+						l_feed_agg_api.aggregations as ic
+					loop
+						s.append ("<li>")
+						s.append (r.link (ic.key, "feed_aggregation/" + r.url_encoded (ic.key), Void))
+						if attached ic.item.included_categories as l_categories then
+							s.append ("<span class=%"category%">")
+							across
+								l_categories as cats_ic
+							loop
+								s.append (" [")
+								s.append (r.html_encoded (cats_ic.item))
+								s.append ("]")
+							end
+							s.append ("</span>")
+						end
+						if attached ic.item.description as l_desc then
+							if l_desc.is_valid_as_string_8 then
+								s.append ("<div class=%"description%">")
+								s.append (l_desc.as_string_8)
+								s.append ("</div>")
+							end
+						end
+						s.append ("</li>")
+					end
+					r.set_main_content (s)
+				else
+					create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, a_api)
+				end
+			end
+			r.execute
 		end
 
 feature -- Hooks configuration
@@ -74,6 +180,7 @@ feature -- Hooks configuration
 		do
 			a_response.hooks.subscribe_to_block_hook (Current)
 			a_response.hooks.subscribe_to_response_alter_hook (Current)
+			a_response.hooks.subscribe_to_menu_system_alter_hook (Current)
 		end
 
 feature -- Hook
@@ -82,14 +189,18 @@ feature -- Hook
 			-- List of block names, managed by current object.
 		local
 			res: ARRAYED_LIST [like {CMS_BLOCK}.name]
+			l_aggs: HASH_TABLE [FEED_AGGREGATION, STRING_8]
 		do
-			create res.make (5)
 			if attached feed_aggregator_api as l_feed_api then
+				l_aggs := l_feed_api.aggregations
+				create res.make (l_aggs.count)
 				across
-					l_feed_api.aggregations as ic
+					l_aggs as ic
 				loop
-					res.force ("feed__" + ic.key)
+					res.force ("?feed." + ic.key)
 				end
+			else
+				create res.make (0)
 			end
 			Result := res
 		end
@@ -97,35 +208,160 @@ feature -- Hook
 	get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
 			-- Get block object identified by `a_block_id' and associate with `a_response'.
 		local
-			i: INTEGER
 			s: READABLE_STRING_8
 			b: CMS_CONTENT_BLOCK
-			l_content: STRING
 			pref: STRING
 		do
 			if attached feed_aggregator_api as l_feed_api then
-				pref := "feed__"
+				pref := "feed."
 				if a_block_id.starts_with (pref) then
 					s := a_block_id.substring (pref.count + 1, a_block_id.count)
 				else
 					s := a_block_id
 				end
-				if attached l_feed_api.aggregation (s) as l_agg then
-					create l_content.make_empty
-					if attached l_agg.description as l_desc then
-						l_content.append_string_general (l_desc)
-						l_content.append_character ('%N')
-						l_content.append_character ('%N')
-					end
-					across
-						l_agg.locations as ic
-					loop
-						l_content.append ("%T-" + ic.item)
-						l_content.append_character ('%N')
-					end
-					create b.make (a_block_id, l_agg.name, l_content, Void)
-					a_response.add_block (b, Void)
+				if attached feed_to_html (s, 5, True, a_response) as l_content then
+					create b.make (a_block_id, Void, l_content, Void)
+					b.set_is_raw (True)
+					a_response.add_block (b, "feed_" + s)
 				end
+			end
+		end
+
+	feed_aggregation (a_feed_id: READABLE_STRING_GENERAL): detachable FEED_AGGREGATION
+		do
+			if attached feed_aggregator_api as l_feed_api then
+				Result := l_feed_api.aggregation (a_feed_id)
+			end
+		end
+
+	feed_to_html (a_feed_id: READABLE_STRING_GENERAL; a_count: INTEGER; with_feed_info: BOOLEAN; a_response: CMS_RESPONSE): detachable STRING
+		local
+			nb: INTEGER
+			i: INTEGER
+			e: FEED_ITEM
+			l_cache: CMS_FILE_STRING_8_CACHE
+			lnk: detachable FEED_LINK
+			l_today: DATE
+		do
+			if attached feed_aggregator_api as l_feed_api then
+				if attached l_feed_api.aggregation (a_feed_id) as l_agg then
+					create l_cache.make (a_response.api.files_location.extended (".cache").extended (name).extended ("feed__" + a_feed_id + "__" + a_count.out + "_" + with_feed_info.out))
+					Result := l_cache.item
+					if Result = Void or l_cache.expired (Void, l_agg.expiration) then
+						create l_today.make_now_utc
+						create Result.make_from_string ("<div class=%"feed%">")
+						Result.append ("<!-- ")
+						Result.append ("Updated: " + l_cache.cache_date_time.out)
+						Result.append (" -->")
+						if with_feed_info then
+							if attached l_agg.description as l_desc then
+								Result.append ("<div class=%"description%">")
+								Result.append_string_general (l_desc)
+								Result.append ("</div>")
+							end
+						end
+						Result.append ("<ul>")
+						if attached l_feed_api.aggregation_feed (l_agg) as l_feed then
+							nb := a_count
+							across
+								l_feed as f_ic
+							until
+								nb = 0 -- If `a_count' < 0 , no limit.
+							loop
+								e := f_ic.item
+								if l_agg.is_included (e) then
+									nb := nb - 1
+									Result.append ("<li>")
+									lnk := e.link
+									if attached e.date as l_date then
+										Result.append ("<div class=%"date%">")
+										append_date_time_to (l_date, l_today, Result)
+										Result.append ("</div>")
+									end
+									if lnk /= Void then
+										Result.append ("<a href=%"" + lnk.href + "%">")
+									else
+										check has_link: False end
+										Result.append ("<a href=%"#%">")
+									end
+									Result.append (a_response.html_encoded (e.title))
+									Result.append ("</a>")
+									debug
+										if attached e.categories as l_categories and then not l_categories.is_empty then
+											Result.append ("<div class=%"category%">")
+											across
+												l_categories as cats_ic
+											loop
+												Result.append (a_response.html_encoded (cats_ic.item))
+												Result.append (" ")
+											end
+											Result.append ("</div>")
+										end
+									end
+									if
+										l_agg.description_enabled and then
+										attached e.description as l_entry_desc
+									then
+										if l_entry_desc.is_valid_as_string_8 then
+											Result.append ("<div class=%"description%">")
+											Result.append (l_entry_desc.as_string_8)
+											Result.append ("</div>")
+										else
+											check is_html: False end
+										end
+									end
+									Result.append ("</li>")
+								end
+							end
+						end
+						Result.append_string ("<liv class=%"nav%">")
+						Result.append_string (a_response.link ("more ...", "feed_aggregation/" + a_response.url_encoded (a_feed_id), Void))
+						Result.append_string ("</li>")
+
+						Result.append ("</ul>")
+
+
+						Result.append ("</div> <!-- End of Feed -->%N")
+						l_cache.put (Result)
+					end
+				end
+			end
+		end
+
+	append_date_time_to (dt: DATE_TIME; a_today: DATE; a_output: STRING_GENERAL)
+		do
+			if dt.year /= a_today.year then
+				a_output.append (dt.year.out)
+				a_output.append (",")
+			end
+			a_output.append (" ")
+			append_month_mmm_to (dt.month, a_output)
+			a_output.append (" ")
+			if dt.day < 10 then
+				a_output.append ("0")
+			end
+			a_output.append (dt.day.out)
+		end
+
+	append_month_mmm_to (m: INTEGER; s: STRING_GENERAL)
+		require
+			1 <= m and m <= 12
+		do
+			inspect m
+			when 1 then s.append ("Jan")
+			when 2 then s.append ("Feb")
+			when 3 then s.append ("Mar")
+			when 4 then s.append ("Apr")
+			when 5 then s.append ("May")
+			when 6 then s.append ("Jun")
+			when 7 then s.append ("Jul")
+			when 8 then s.append ("Aug")
+			when 9 then s.append ("Sep")
+			when 10 then s.append ("Oct")
+			when 11 then s.append ("Nov")
+			when 12 then s.append ("Dec")
+			else
+				-- Error				
 			end
 		end
 
@@ -133,14 +369,17 @@ feature -- Hook
 
 	response_alter (a_response: CMS_RESPONSE)
 		do
---			a_response.add_additional_head_line ("[
---					<style>
---						table.recent-changes th { padding: 3px; }
---						table.recent-changes td { padding: 3px; border: dotted 1px #ddd; }
---						table.recent-changes td.date { padding-left: 15px; }
---						table.recent-changes td.title { font-weight: bold; }
---						</style>
---				]", True)
+			a_response.add_style (a_response.url ("/module/" + name + "/files/css/feed_aggregator.css", Void), Void)
+		end
+
+	menu_system_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
+			-- Hook execution on collection of menu contained by `a_menu_system'
+			-- for related response `a_response'.
+		do
+			a_menu_system.navigation_menu.extend (create {CMS_LOCAL_LINK}.make ("Feeds", "feed_aggregation/"))
+			if a_response.has_permission ("manage feed aggregator") then
+				a_menu_system.management_menu.extend (create {CMS_LOCAL_LINK}.make ("Feeds (admin)", "admin/feed_aggregator/"))
+			end
 		end
 
 end

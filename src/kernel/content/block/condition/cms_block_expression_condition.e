@@ -6,11 +6,12 @@ note
 class
 	CMS_BLOCK_EXPRESSION_CONDITION
 
-inherit	
+inherit
 	CMS_BLOCK_CONDITION
 
 create
-	make
+	make,
+	make_none
 
 feature {NONE} -- Initialization
 
@@ -19,9 +20,14 @@ feature {NONE} -- Initialization
 			expression := a_exp
 		end
 
+	make_none
+		do
+			make ("<none>")
+		end
+
 feature -- Access
 
-	description: READABLE_STRING_32
+	description: STRING_32
 		do
 			create Result.make_from_string_general ("Expression: %"")
 			Result.append_string_general (expression)
@@ -33,10 +39,18 @@ feature -- Access
 feature -- Evaluation
 
 	satisfied_for_response (res: CMS_RESPONSE): BOOLEAN
+		local
+			exp: like expression
 		do
-			if expression.same_string ("is_front") then
+			exp := expression
+			if exp.same_string ("is_front") then
 				Result := res.is_front
-			elseif expression.starts_with ("path=") then
+			elseif exp.same_string ("*") then
+				Result := True
+			elseif exp.same_string ("<none>") then
+				Result := False
+			elseif exp.starts_with ("path:") then
+				Result := res.location.same_string (exp.substring (6, exp.count))
 			end
 		end
 

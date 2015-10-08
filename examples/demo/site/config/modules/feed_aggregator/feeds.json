@@ -1,0 +1,25 @@
+{
+	"ids": ["eiffel", "forum", "stackoverflow"],
+	"feeds": { 
+			"eiffel": {
+				"title": "Eiffel related posts.", 
+				"expiration": "21600",
+				"locations": [
+						"https://bertrandmeyer.com/feed/",
+						"https://room.eiffel.com/blog/feed"
+						]
+				, "categories": ["Eiffel"]
+				,"option_description": "disabled"
+				},
+			"forum": {
+				"title": "Eiffel Users Group",
+				"expiration": "43200",
+				"location": "https://groups.google.com/forum/feed/eiffel-users/msgs/atom.xml?num=15"		
+			},
+			"stackoverflow": {
+				"title": "Test",
+				"expiration": "3600",
+				"location": "http://stackoverflow.com/feeds/tag?tagnames=eiffel&sort=newest"
+			}
+	}
+}

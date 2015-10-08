@@ -423,6 +423,36 @@ feature -- Blocks initialization
 			Result := setup.text_item_or_default ("blocks." + a_block_id + ".region", a_default_region)
 		end
 
+	block_conditions (a_block_id: READABLE_STRING_8): detachable ARRAYED_LIST [CMS_BLOCK_EXPRESSION_CONDITION]
+				-- Condition associated with `a_block_id' in configuration, if any.
+		do
+			if attached setup.text_item ("blocks." + a_block_id + ".condition") as s then
+				create Result.make (1)
+				Result.force (create {CMS_BLOCK_EXPRESSION_CONDITION}.make (s))
+			end
+			if attached setup.text_list_item ("blocks." + a_block_id + ".conditions") as lst then
+				if Result = Void then
+					create Result.make (lst.count)
+					across
+						lst as ic
+					loop
+						Result.force (create {CMS_BLOCK_EXPRESSION_CONDITION}.make (ic.item))
+					end
+				end
+			end
+		end
+
+	is_block_included (a_block_id: READABLE_STRING_8; dft: BOOLEAN): BOOLEAN
+			-- Is block `a_block_id' included in current response?
+			-- If no preference, return `dft'.
+		do
+			if attached block_conditions (a_block_id) as l_conditions then
+				Result := across l_conditions as ic some ic.item.satisfied_for_response (Current) end
+			else
+				Result := dft
+			end
+		end
+
 feature -- Blocks regions
 
 	regions: STRING_TABLE [CMS_BLOCK_REGION]
@@ -457,10 +487,25 @@ feature -- Blocks regions
 			end
 		end
 
-feature -- Blocks 		
+feature -- Blocks
+
+	put_block (b: CMS_BLOCK; a_default_region: detachable READABLE_STRING_8; is_block_included_by_default: BOOLEAN)
+			-- Add block `b' to associated region or `a_default_region' if provided
+			-- and check optional associated condition.
+			-- If no condition then use `is_block_included_by_default' to
+			-- decide if block is included or not.
+		local
+			l_region: detachable like block_region
+		do
+			if is_block_included (b.name, is_block_included_by_default) then
+				l_region := block_region (b, a_default_region)
+				l_region.extend (b)
+			end
+		end
 
 	add_block (b: CMS_BLOCK; a_default_region: detachable READABLE_STRING_8)
 			-- Add block `b' to associated region or `a_default_region' if provided.
+			-- WARNING: ignore any block condition! USE WITH CARE!
 		local
 			l_region: detachable like block_region
 		do
@@ -473,29 +518,29 @@ feature -- Blocks
 			debug ("refactor_fixme")
 				fixme ("find a way to have this in configuration or database, and allow different order")
 			end
-			add_block (top_header_block, "top")
-			add_block (header_block, "header")
+			put_block (top_header_block, "top", True)
+			put_block (header_block, "header", True)
 			if attached message_block as m then
-				add_block (m, "content")
+				put_block (m, "content", True)
 			end
 			if attached primary_tabs_block as m then
-				add_block (m, "content")
+				put_block (m, "content", True)
 			end
-			add_block (content_block, "content")
+			add_block (content_block, "content") -- Can not be disabled!
 
 			if attached management_menu_block as l_block then
-				add_block (l_block, "sidebar_first")
+				put_block (l_block, "sidebar_first", True)
 			end
 			if attached navigation_menu_block as l_block then
-				add_block (l_block, "sidebar_first")
+				put_block (l_block, "sidebar_first", True)
 			end
 			if attached user_menu_block as l_block then
-				add_block (l_block, "sidebar_second")
+				put_block (l_block, "sidebar_second", True)
 			end
 
 			hooks.invoke_block (Current)
 			debug ("cms")
-				add_block (create {CMS_CONTENT_BLOCK}.make ("made_with", Void, "Made with <a href=%"http://www.eiffel.com/%">EWF</a>", Void), "footer")
+				put_block (create {CMS_CONTENT_BLOCK}.make ("made_with", Void, "Made with <a href=%"https://www.eiffel.org/%">EWF</a>", Void), "footer", True)
 			end
 		end
 
