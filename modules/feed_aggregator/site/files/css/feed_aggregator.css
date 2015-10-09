@@ -1,11 +1,14 @@
 div.feed ul {
   list-style: none;
   position: relative;
+  padding: 0;
+  margin: 0;
   width: 99%;
 }
 div.feed li {
   /* border-top: solid 1px #ddd; */
-  margin-bottom: 5px;
+  padding: 0;
+  margin: 0 0 5px 0;
 }
 div.feed li a {
   font-weight: bold;
@@ -32,6 +35,7 @@ div.feed li:hover {
   margin-bottom: 23px;
 }
 div.feed li:hover .description {
+  padding: 5px;
   position: absolute;
   height: auto;
   overflow-y: scroll;

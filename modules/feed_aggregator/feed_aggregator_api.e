@@ -56,6 +56,11 @@ feature -- Access
 										agg.set_expiration (l_expiration.to_integer)
 									end
 								end
+								if attached cfg.text_item ({STRING_32} "feeds." + l_feed_id + ".size") as l_size then
+									if l_size.is_integer then
+										agg.set_size (l_size.to_integer)
+									end
+								end
 								if attached cfg.text_item ({STRING_32} "feeds." + l_feed_id + ".option_description") as l_description_opt then
 										agg.set_description_enabled (not l_description_opt.is_case_insensitive_equal_general ("disabled"))
 								end

@@ -219,7 +219,7 @@ feature -- Hook
 				else
 					s := a_block_id
 				end
-				if attached feed_to_html (s, 5, True, a_response) as l_content then
+				if attached feed_to_html (s, 0, True, a_response) as l_content then
 					create b.make (a_block_id, Void, l_content, Void)
 					b.set_is_raw (True)
 					a_response.add_block (b, "feed_" + s)
@@ -241,127 +241,50 @@ feature -- Hook
 			e: FEED_ITEM
 			l_cache: CMS_FILE_STRING_8_CACHE
 			lnk: detachable FEED_LINK
-			l_today: DATE
+			vis: FEED_TO_XHTML_VISITOR
+			s: STRING
 		do
 			if attached feed_aggregator_api as l_feed_api then
 				if attached l_feed_api.aggregation (a_feed_id) as l_agg then
 					create l_cache.make (a_response.api.files_location.extended (".cache").extended (name).extended ("feed__" + a_feed_id + "__" + a_count.out + "_" + with_feed_info.out))
 					Result := l_cache.item
 					if Result = Void or l_cache.expired (Void, l_agg.expiration) then
-						create l_today.make_now_utc
-						create Result.make_from_string ("<div class=%"feed%">")
+
+						create Result.make (1024)
 						Result.append ("<!-- ")
 						Result.append ("Updated: " + l_cache.cache_date_time.out)
 						Result.append (" -->")
-						if with_feed_info then
-							if attached l_agg.description as l_desc then
-								Result.append ("<div class=%"description%">")
-								Result.append_string_general (l_desc)
-								Result.append ("</div>")
-							end
-						end
-						Result.append ("<ul>")
-						if attached l_feed_api.aggregation_feed (l_agg) as l_feed then
+
+						create vis.make (Result)
+						if a_count = 0 then
+							nb := l_agg.size
+						else
 							nb := a_count
-							across
-								l_feed as f_ic
-							until
-								nb = 0 -- If `a_count' < 0 , no limit.
-							loop
-								e := f_ic.item
-								if l_agg.is_included (e) then
-									nb := nb - 1
-									Result.append ("<li>")
-									lnk := e.link
-									if attached e.date as l_date then
-										Result.append ("<div class=%"date%">")
-										append_date_time_to (l_date, l_today, Result)
-										Result.append ("</div>")
-									end
-									if lnk /= Void then
-										Result.append ("<a href=%"" + lnk.href + "%">")
-									else
-										check has_link: False end
-										Result.append ("<a href=%"#%">")
-									end
-									Result.append (a_response.html_encoded (e.title))
-									Result.append ("</a>")
-									debug
-										if attached e.categories as l_categories and then not l_categories.is_empty then
-											Result.append ("<div class=%"category%">")
-											across
-												l_categories as cats_ic
-											loop
-												Result.append (a_response.html_encoded (cats_ic.item))
-												Result.append (" ")
-											end
-											Result.append ("</div>")
-										end
-									end
-									if
-										l_agg.description_enabled and then
-										attached e.description as l_entry_desc
-									then
-										if l_entry_desc.is_valid_as_string_8 then
-											Result.append ("<div class=%"description%">")
-											Result.append (l_entry_desc.as_string_8)
-											Result.append ("</div>")
-										else
-											check is_html: False end
-										end
-									end
-									Result.append ("</li>")
-								end
-							end
 						end
-						Result.append_string ("<liv class=%"nav%">")
-						Result.append_string (a_response.link ("more ...", "feed_aggregation/" + a_response.url_encoded (a_feed_id), Void))
-						Result.append_string ("</li>")
+						vis.set_limit (nb)
+						vis.set_description_enabled (l_agg.description_enabled)
 
-						Result.append ("</ul>")
+						if with_feed_info then
+							create s.make_empty
+							if attached l_agg.description as l_desc then
+								s.append ("<div class=%"description%">")
+								s.append_string_general (l_desc)
+								s.append ("</div>")
+							end
+							vis.set_header (s)
+						end
+						create s.make_empty
+						s.append_string ("<liv class=%"nav%">")
+						s.append_string (a_response.link ("See more ...", "feed_aggregation/" + a_response.url_encoded (a_feed_id), Void))
+						s.append_string ("</li>")
+						vis.set_footer (s)
 
-
-						Result.append ("</div> <!-- End of Feed -->%N")
+						if attached l_feed_api.aggregation_feed (l_agg) as l_feed then
+							l_feed.accept (vis)
+						end
 						l_cache.put (Result)
 					end
 				end
-			end
-		end
-
-	append_date_time_to (dt: DATE_TIME; a_today: DATE; a_output: STRING_GENERAL)
-		do
-			if dt.year /= a_today.year then
-				a_output.append (dt.year.out)
-				a_output.append (",")
-			end
-			a_output.append (" ")
-			append_month_mmm_to (dt.month, a_output)
-			a_output.append (" ")
-			if dt.day < 10 then
-				a_output.append ("0")
-			end
-			a_output.append (dt.day.out)
-		end
-
-	append_month_mmm_to (m: INTEGER; s: STRING_GENERAL)
-		require
-			1 <= m and m <= 12
-		do
-			inspect m
-			when 1 then s.append ("Jan")
-			when 2 then s.append ("Feb")
-			when 3 then s.append ("Mar")
-			when 4 then s.append ("Apr")
-			when 5 then s.append ("May")
-			when 6 then s.append ("Jun")
-			when 7 then s.append ("Jul")
-			when 8 then s.append ("Aug")
-			when 9 then s.append ("Sep")
-			when 10 then s.append ("Oct")
-			when 11 then s.append ("Nov")
-			when 12 then s.append ("Dec")
-			else
-				-- Error				
 			end
 		end
 

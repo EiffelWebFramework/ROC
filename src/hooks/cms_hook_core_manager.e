@@ -141,6 +141,8 @@ feature -- Hook: block
 		local
 			bl: READABLE_STRING_8
 			bl_optional: BOOLEAN
+			l_ok: BOOLEAN
+			l_block_cache: detachable TUPLE [block: CMS_CACHE_BLOCK; region: READABLE_STRING_8; expired: BOOLEAN]
 		do
 			if attached subscribers ({CMS_HOOK_BLOCK}) as lst then
 				across
@@ -150,15 +152,24 @@ feature -- Hook: block
 						across
 							h.block_list as blst
 						loop
+							l_ok := False
 							bl := blst.item
 							bl_optional := bl.count > 0 and bl[1] = '?'
 							if bl_optional then
 								bl := bl.substring (2, bl.count)
 								if a_response.is_block_included (bl, False) then
-									h.get_block_view (bl, a_response)
+									l_ok := True
 								end
 							else
-								h.get_block_view (bl, a_response)
+								l_ok := True
+							end
+							if l_ok then
+								l_block_cache := a_response.block_cache (bl)
+								if l_block_cache /= Void and then not l_block_cache.expired then
+									a_response.add_block (l_block_cache.block, l_block_cache.region)
+								else
+									h.get_block_view (bl, a_response)
+								end
 							end
 						end
 					end

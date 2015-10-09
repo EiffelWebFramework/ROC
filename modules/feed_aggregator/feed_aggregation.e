@@ -17,6 +17,7 @@ feature {NONE} -- Initialization
 			create {ARRAYED_LIST [READABLE_STRING_8]} locations.make (0)
 			expiration := 60*60
 			description_enabled := True
+			size := 10
 		end
 
 feature -- Access
@@ -27,6 +28,9 @@ feature -- Access
 	expiration: INTEGER
 			-- Suggested expiration time in seconds (default: 1 hour).
 			-- If negative then never expires.
+
+	size: INTEGER
+			-- Number of entries to display per page.
 
 	description: detachable IMMUTABLE_STRING_32
 			-- Optional description.
@@ -56,6 +60,12 @@ feature -- Element change
 			-- Set `expiration' to `nb_seconds'.
 		do
 			expiration := nb_seconds
+		end
+
+	set_size (nb: INTEGER)
+			-- Set `size' to `nb'.
+		do
+			size := nb
 		end
 
 	set_description_enabled (b: BOOLEAN)

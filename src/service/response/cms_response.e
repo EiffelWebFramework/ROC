@@ -453,6 +453,29 @@ feature -- Blocks initialization
 			end
 		end
 
+	block_cache (a_block_id: READABLE_STRING_8): detachable TUPLE [block: CMS_CACHE_BLOCK; region: READABLE_STRING_8; expired: BOOLEAN]
+			-- Cached version of block `a_block_id'.
+		local
+			l_cache: CMS_FILE_STRING_8_CACHE
+		do
+			if
+				attached setup.text_item ("blocks." + a_block_id + ".expiration") as nb_secs and then
+				nb_secs.is_integer
+			then
+				if attached block_region_preference (a_block_id, "none") as l_region and then not l_region.same_string_general ("none") then
+					create l_cache.make (api.files_location.extended (".cache").extended ("blocks").extended (a_block_id).appended_with_extension ("html"))
+					if
+						l_cache.exists and then
+						not l_cache.expired (Void, nb_secs.to_integer)
+					then
+						Result := [create {CMS_CACHE_BLOCK} .make (a_block_id, l_cache), l_region, False]
+					else
+						Result := [create {CMS_CACHE_BLOCK} .make (a_block_id, l_cache), l_region, True]
+					end
+				end
+			end
+		end
+
 feature -- Blocks regions
 
 	regions: STRING_TABLE [CMS_BLOCK_REGION]
@@ -786,6 +809,7 @@ feature -- Generation
 			l_region: CMS_BLOCK_REGION
 			l_menu_list_prepared: ARRAYED_LIST [CMS_LINK_COMPOSITE]
 			l_empty_blocks: detachable ARRAYED_LIST [CMS_BLOCK]
+			l_block_html: STRING
 		do
 				-- Menu
 			create {CMS_LOCAL_LINK} lnk.make ("Home", "")
@@ -884,7 +908,13 @@ feature -- Generation
 							end
 						end
 					end
-					page.add_to_region (theme.block_html (ic.item), reg_ic.item.name)
+					l_block_html := theme.block_html (ic.item)
+					if attached {CMS_CACHE_BLOCK} ic.item then
+
+					elseif attached block_cache (ic.item.name) as l_cache_block then
+						l_cache_block.block.cache.put (l_block_html)
+					end
+					page.add_to_region (l_block_html, reg_ic.item.name)
 				end
 			end
 
