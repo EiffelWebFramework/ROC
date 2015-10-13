@@ -37,6 +37,17 @@
       {/if}
     </div> 
     
+    	<! -- Page search -->
+     <div class="row">
+        <div class="col-md-2 col-md-offset-9">
+            <form action="{$site_url/}gcse" class="search-form">
+                <div class="form-group has-feedback">
+            		<input type="search" class="form-control" name="q" id="gcse_search" placeholder="search">
+              		<span class="glyphicon glyphicon-search form-control-feedback"></span>
+            	</div>
+            </form>
+        </div>
+    </div>
     <!-- General Page Content -->
     <div id='content' class='row-fluid'>
 		<!-- Left Sidebar sidebar_first -->
