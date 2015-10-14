@@ -8,7 +8,7 @@ class
 
 inherit
 
-	SHARED_HTML_ENCODER
+	DEBUG_OUTPUT
 
 feature -- Access
 
@@ -26,9 +26,6 @@ feature -- Access
 
 	snippet: detachable STRING_8
 			-- Snippet of this result
-
-	snippet_2: detachable STRING_8
-			-- Snippet of this result		
 
 	display_link: detachable STRING_8
 			-- Display link of this result
@@ -79,7 +76,6 @@ feature -- Element change
 			-- Assign `html_snippet' with `a_html_snippet'.
 		do
 			html_snippet := a_html_snippet
-			snippet_2 := html_encoded (a_html_snippet)
 		ensure
 			html_snippet_assigned: html_snippet = a_html_snippet
 		end
@@ -143,7 +139,8 @@ feature -- Element change
 
 feature -- Output
 
-		to_string: STRING_8
+		debug_output: STRING_8
+				-- <Precursor>
 			do
 				create Result.make_from_string ("%NPage Item details%N")
 				if attached title as l_title then
@@ -199,14 +196,6 @@ feature -- Output
 
 			end
 
-	html_encoded (s: detachable READABLE_STRING_GENERAL): STRING_8
-		do
-			if s /= Void then
-				Result := html_encoder.general_encoded_string (s)
-			else
-				create Result.make_empty
-			end
-		end
 note
 	copyright: "2011-2015 Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"

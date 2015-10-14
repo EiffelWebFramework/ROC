@@ -6,6 +6,10 @@ note
 class
 	GCSE_PAGE
 
+inherit
+
+	DEBUG_OUTPUT
+
 feature -- Access
 
 	search_terms: detachable STRING_8
@@ -67,9 +71,10 @@ feature -- Change element
 			start_index_set: start_index = a_start_index
 		end
 
-feature -- Output
+feature -- Status report
 
-		to_string: STRING_8
+		debug_output: STRING_8
+				-- <Precursor>
 			do
 				create Result.make_from_string ("%NPage details%N")
 				if attached title as l_title then

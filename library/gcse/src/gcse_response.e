@@ -18,7 +18,6 @@ class
 
 feature -- Access
 
-
 	current_page: detachable GCSE_PAGE
 		-- Metadata describing the query for the current set of results.
 		--		This role is always present in the response.	
@@ -75,6 +74,34 @@ feature -- Change Element
 			end
 			l_items.force (a_item)
 		end
+
+
+feature -- Acess: HTTP Response
+
+	status: INTEGER
+		-- HTTP status code.
+
+	status_message: detachable READABLE_STRING_8
+		--  associated textual phrase for the response status.
+
+feature -- Change Element: HTTP Response
+
+	set_status (a_status: like status)
+			-- Set `status' with `a_status'.
+		do
+			status := a_status
+		ensure
+			status_set: status = a_status
+		end
+
+	set_status_nessage (a_message: like status_message)
+			-- Set `status_message' with `a_message'.
+		do
+			status_message := a_message
+		ensure
+			status_message_set: status_message = a_message
+		end
+
 ;note
 	copyright: "2011-2015 Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"

@@ -1,5 +1,21 @@
 note
-	description: "Represent a google page map"
+	description: "[
+		Represent a google page map
+			"pagemap": {
+		    "cse_image": [
+		     {
+		      "src": "https://www.eiffel.org/portal/files/userpictures/picture-40.jpg"
+		     }
+		    ],
+		    "cse_thumbnail": [
+		     {
+		      "width": "81",
+		      "height": "61",
+		      "src": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcRnC-RKzps6BFItx_MLYBVskFI7U6u0y3VJBInomPYEF5sO6gkip94mLw"
+		     }
+		    ]
+		   }		
+	]"
 	date: "$Date: 2015-10-09 08:11:07 -0300 (vi., 09 oct. 2015) $"
 	revision: "$Revision: 97973 $"
 	EIS: "name=PageMaps", "src=https://developers.google.com/custom-search/docs/structured_data#pagemaps", "protocol=url"
@@ -9,20 +25,7 @@ class
 
 feature -- Access
 
---	"pagemap": {
---    "cse_image": [
---     {
---      "src": "https://www.eiffel.org/portal/files/userpictures/picture-40.jpg"
---     }
---    ],
---    "cse_thumbnail": [
---     {
---      "width": "81",
---      "height": "61",
---      "src": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcRnC-RKzps6BFItx_MLYBVskFI7U6u0y3VJBInomPYEF5sO6gkip94mLw"
---     }
---    ]
---   }
+
 
 
 note
