@@ -423,7 +423,18 @@ feature -- Blocks initialization
 			Result := setup.text_item_or_default ("blocks." + a_block_id + ".region", a_default_region)
 		end
 
-feature -- Block management		
+feature -- Block management
+
+	update_block (a_block: CMS_BLOCK)
+			-- Update parameters for block `a_block' according to configuration.
+		do
+			if
+				attached setup.text_item ("blocks." + a_block.name + ".weight") as w and then
+				w.is_integer
+			then
+				a_block.set_weight (w.to_integer)
+			end
+		end
 
 	block_conditions (a_block_id: READABLE_STRING_8): detachable ARRAYED_LIST [CMS_BLOCK_EXPRESSION_CONDITION]
 				-- Condition associated with `a_block_id' in configuration, if any.
@@ -567,6 +578,9 @@ feature -- Blocks
 		end
 
 	get_blocks
+			-- Get block from CMS core, and from modules.
+		local
+			l_region: CMS_BLOCK_REGION
 		do
 			debug ("refactor_fixme")
 				fixme ("find a way to have this in configuration or database, and allow different order")
@@ -592,6 +606,19 @@ feature -- Blocks
 			end
 
 			hooks.invoke_block (Current)
+
+			across
+				regions as reg_ic
+			loop
+				l_region := reg_ic.item
+				across
+					l_region.blocks as ic
+				loop
+					update_block (ic.item)
+				end
+				l_region.sort
+			end
+
 			debug ("cms")
 				put_block (create {CMS_CONTENT_BLOCK}.make ("made_with", Void, "Made with <a href=%"https://www.eiffel.org/%">EWF</a>", Void), "footer", True)
 			end
@@ -641,6 +668,7 @@ feature -- Blocks
 		do
 			create s.make_empty
 			create Result.make ("page_top", Void, s, Void)
+			Result.set_weight (-5)
 			Result.set_is_raw (True)
 		end
 
@@ -652,6 +680,7 @@ feature -- Blocks
 			create s.make_from_string (theme.menu_html (primary_menu, True, Void))
 			create l_hb.make_empty
 			create Result.make ("header", Void, l_hb, Void)
+			Result.set_weight (-4)
 			Result.set_is_raw (True)
 		end
 
@@ -683,6 +712,7 @@ feature -- Blocks
 			if attached message as m and then not m.is_empty then
 				create Result.make ("message", Void, "<div id=%"message%">" + m + "</div>", Void)
 				Result.set_is_raw (True)
+				Result.set_weight (-2)
 			end
 		end
 
@@ -699,6 +729,7 @@ feature -- Blocks
 				end
 			end
 			create Result.make ("content", Void, s, Void)
+			Result.set_weight (-1)
 			Result.set_is_raw (True)
 		end
 
@@ -922,8 +953,10 @@ feature -- Generation
 			across
 				regions as reg_ic
 			loop
+				l_region := reg_ic.item
+					-- region blocks Already sorted.
 				across
-					reg_ic.item.blocks as ic
+					l_region.blocks as ic
 				loop
 					if attached {CMS_SMARTY_TEMPLATE_BLOCK} ic.item as l_tpl_block then
 							-- Apply page variables to smarty block.

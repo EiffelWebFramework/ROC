@@ -15,9 +15,12 @@ inherit
 		select
 			out
 		end
+
 	SHARED_TEMPLATE_CONTEXT
 		rename
 			out as tpl_out
+		undefine
+			is_equal
 		end
 
 create

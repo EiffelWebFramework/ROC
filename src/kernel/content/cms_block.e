@@ -6,7 +6,12 @@ deferred class
 	CMS_BLOCK
 
 inherit
+	COMPARABLE
+
 	DEBUG_OUTPUT
+		undefine
+			is_equal
+		end
 
 feature -- Access
 
@@ -22,6 +27,10 @@ feature -- Access
 
 	html_options: detachable CMS_HTML_OPTIONS
 			-- Optional addition html options.
+
+	weight: INTEGER
+			-- Weight used to order blocks.
+			-- Default: 0;
 
 feature -- Status report
 
@@ -41,6 +50,14 @@ feature -- Status report
 
 	conditions: detachable LIST [CMS_BLOCK_CONDITION]
 			-- Optional block condition to be enabled.
+
+feature -- Comparison
+
+	is_less alias "<" (other: like Current): BOOLEAN
+			-- <Precursor>.
+		do
+			Result := weight < other.weight
+		end
 
 feature -- Element change
 
@@ -81,6 +98,12 @@ feature -- Element change
 				conditions := l_conditions
 			end
 			l_conditions.force (a_condition)
+		end
+
+	set_weight (w: like weight)
+			-- Set `weight' to `w'.
+		do
+			weight := w
 		end
 
 feature -- Conversion
