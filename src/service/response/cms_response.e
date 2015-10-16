@@ -465,6 +465,14 @@ feature -- Block management
 			end
 		end
 
+	block_options (a_block_id: READABLE_STRING_8): detachable STRING_TABLE [READABLE_STRING_32]
+			-- Options associated with `a_block_id' in configuration, if any.
+		do
+			if attached setup.text_table_item ("blocks." + a_block_id + ".options") as tb then
+				Result := tb
+			end
+		end
+
 	is_block_included (a_block_id: READABLE_STRING_8; dft: BOOLEAN): BOOLEAN
 			-- Is block `a_block_id' included in current response?
 			-- If no preference, return `dft'.
