@@ -58,9 +58,6 @@ feature -- Access
 	name: READABLE_STRING_8
 			-- <Precursor>
 
-	title: detachable READABLE_STRING_32
-			-- <Precursor>
-
 	location: PATH
 			-- Location of template file.
 
@@ -92,12 +89,6 @@ feature -- Element change
 			not n.is_whitespace
 		do
 			name := n
-		end
-
-	set_title (a_title: like title)
-			-- Set `title' to `a_title'.
-		do
-			title := a_title
 		end
 
 	set_value (v: detachable ANY; k: READABLE_STRING_GENERAL)
