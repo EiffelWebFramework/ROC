@@ -275,6 +275,7 @@ feature -- Change: user
 				l_parameters.put (a_user.status, "status")
 
 				sql_modify (sql_update_user, l_parameters)
+				sql_finalize
 				if not error_handler.has_error then
 					update_user_roles (a_user)
 				end
@@ -402,9 +403,8 @@ feature -- Access: roles and permissions
 				if Result /= Void and not has_error then
 					fill_user_role (Result)
 				end
-			else
-				sql_finalize
 			end
+			sql_finalize
 		end
 
 	user_role_by_name (a_name: READABLE_STRING_GENERAL): detachable CMS_USER_ROLE
@@ -425,9 +425,8 @@ feature -- Access: roles and permissions
 				if Result /= Void and not has_error then
 					fill_user_role (Result)
 				end
-			else
-				sql_finalize
 			end
+			sql_finalize
 		end
 
 	user_roles_for (a_user: CMS_USER): LIST [CMS_USER_ROLE]
@@ -575,6 +574,7 @@ feature -- Change: roles and permissions
 					l_parameters.put (a_user_role.id, "rid")
 					l_parameters.put (a_user_role.name, "name")
 					sql_modify (sql_update_user_role, l_parameters)
+					sql_finalize
 				end
 				if not a_user_role.permissions.is_empty then
 					-- FIXME: check if this is non set permissions,or none ...
@@ -621,16 +621,14 @@ feature -- Change: roles and permissions
 				create l_parameters.make (1)
 				l_parameters.put (a_user_role.name, "name")
 				sql_insert (sql_insert_user_role, l_parameters)
+				sql_finalize
 				if not error_handler.has_error then
 					a_user_role.set_id (last_inserted_user_role_id)
-					sql_finalize
 					across
 						a_user_role.permissions as ic
 					loop
 						set_permission_for_role_id (ic.item, a_user_role.id)
 					end
-				else
-					sql_finalize
 				end
 			end
 		end
@@ -691,6 +689,7 @@ feature -- Change: roles and permissions
 			create l_parameters.make (1)
 			l_parameters.put (a_role.id, "rid")
 			sql_modify (sql_delete_role_permissions_by_role_id, l_parameters)
+			sql_finalize
 			sql_modify (sql_delete_role_by_id, l_parameters)
 			sql_commit_transaction
 			sql_finalize

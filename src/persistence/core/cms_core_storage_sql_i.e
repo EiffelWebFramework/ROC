@@ -38,6 +38,7 @@ feature -- URL aliases
 				end
 			else
 				sql_insert (sql_insert_path_alias, l_parameters)
+				sql_finalize
 			end
 		end
 
@@ -64,6 +65,7 @@ feature -- URL aliases
 				l_parameters.put (a_alias, "alias")
 
 				sql_modify (sql_update_path_alias, l_parameters)
+				sql_finalize
 			end
 		end
 
@@ -80,6 +82,7 @@ feature -- URL aliases
 					create l_parameters.make (1)
 					l_parameters.put (a_alias, "alias")
 					sql_modify (sql_delete_path_alias, l_parameters)
+					sql_finalize
 				else
 					error_handler.add_custom_error (0, "alias mismatch", "Path alias %"" + a_alias + "%" is not related to source %"" + a_source + "%"!")
 				end
@@ -171,6 +174,7 @@ feature -- Logs
 			end
 			l_parameters.put (now, "date")
 			sql_insert (sql_insert_log, l_parameters)
+			sql_finalize
 		end
 
 	sql_insert_log: STRING = "INSERT INTO logs (category, level, uid, message, info, link, date) VALUES (:category, :level, :uid, :message, :info, :link, :date);"
@@ -198,9 +202,11 @@ feature -- Misc
 						-- already up to date
 				else
 					sql_modify (sql_update_custom_value, l_parameters)
+					sql_finalize
 				end
 			else
 				sql_insert (sql_insert_custom_value, l_parameters)
+				sql_finalize
 			end
 		end
 
@@ -219,6 +225,7 @@ feature -- Misc
 			end
 			l_parameters.put (a_name, "name")
 			sql_modify (sql_delete_custom_value, l_parameters)
+			sql_finalize
 		end
 
 	custom_value (a_name: READABLE_STRING_GENERAL; a_type: detachable READABLE_STRING_8): detachable READABLE_STRING_32

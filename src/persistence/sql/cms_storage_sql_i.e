@@ -207,6 +207,7 @@ feature -- Helper
 			else
 				sql_commit_transaction
 			end
+			sql_finalize
 		end
 
 	sql_table_exists (a_table_name: READABLE_STRING_8): BOOLEAN
@@ -216,6 +217,7 @@ feature -- Helper
 			sql_query ("SELECT count(*) FROM " + a_table_name + " ;", Void)
 			Result := not has_error
 				-- FIXME: find better solution
+			sql_finalize
 			reset_error
 		end
 
@@ -227,6 +229,7 @@ feature -- Helper
 			if not has_error then
 				Result := sql_read_integer_64 (1)
 			end
+			sql_finalize
 		end
 
 feature -- Access		

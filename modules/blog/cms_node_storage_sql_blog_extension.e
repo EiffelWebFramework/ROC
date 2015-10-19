@@ -94,6 +94,7 @@ feature -- Persistence
 --						sql_change (sql_insert_node_data, l_parameters)
 					end
 				end
+				sql_finalize
 			end
 		end
 
@@ -117,6 +118,7 @@ feature -- Persistence
 				create l_parameters.make (1)
 				l_parameters.put (a_node.id, "nid")
 				sql_modify (sql_delete_node_data, l_parameters)
+				sql_finalize
 			end
 		end
 

@@ -84,6 +84,7 @@ feature -- Persistence
 						sql_insert (sql_insert_node_data, l_parameters)
 					end
 				end
+				sql_finalize
 			end
 		end
 
@@ -122,6 +123,7 @@ feature -- Persistence
 				create l_parameters.make (1)
 				l_parameters.put (a_node.id, "nid")
 				sql_modify (sql_delete_node_data, l_parameters)
+				sql_finalize
 			end
 		end
 
@@ -151,6 +153,7 @@ feature {NONE} -- Implementation
 					check unique_data: n = 0 end
 				end
 			end
+			sql_finalize
 		ensure
 			accepted_revision: Result /= Void implies Result.revision <= a_node.revision
 		end

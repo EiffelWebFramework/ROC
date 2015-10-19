@@ -64,6 +64,7 @@ feature -- Access
 				end
 				sql_forth
 			end
+			sql_finalize
 		end
 
 	blogs_limited (a_limit: NATURAL_32; a_offset: NATURAL_32): LIST [CMS_NODE]
@@ -90,6 +91,7 @@ feature -- Access
 				end
 				sql_forth
 			end
+			sql_finalize
 		end
 
 	blogs_from_user_limited (a_user: CMS_USER; a_limit: NATURAL_32; a_offset: NATURAL_32): LIST [CMS_NODE]
@@ -117,6 +119,7 @@ feature -- Access
 				end
 				sql_forth
 			end
+			sql_finalize
 		end
 
 feature {NONE} -- Queries

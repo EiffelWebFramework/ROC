@@ -134,6 +134,7 @@ feature --Access: Consumers
 					sql_forth
 				end
 			end
+			sql_finalize
 		end
 
 	oauth_consumer_by_name (a_name: READABLE_STRING_8): detachable CMS_OAUTH_20_CONSUMER
@@ -203,6 +204,7 @@ feature -- Change: User OAuth
 			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
 			sql_insert (l_string, l_parameters)
 			sql_commit_transaction
+			sql_finalize
 		end
 
 	update_user_oauth2 (a_token: READABLE_STRING_GENERAL; a_user_profile: READABLE_STRING_32; a_user: CMS_USER; a_consumer: READABLE_STRING_GENERAL )
@@ -224,6 +226,7 @@ feature -- Change: User OAuth
 			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
 			sql_modify (l_string, l_parameters)
 			sql_commit_transaction
+			sql_finalize
 		end
 
 	remove_user_oauth2 (a_user: CMS_USER; a_consumer: READABLE_STRING_GENERAL)
@@ -243,6 +246,7 @@ feature -- Change: User OAuth
 			l_string.replace_substring_all ("$table_name", oauth2_sql_table_name (a_consumer))
 			sql_modify (l_string, l_parameters)
 			sql_commit_transaction
+			sql_finalize
 		end
 
 feature {NONE} -- Implementation OAuth Consumer

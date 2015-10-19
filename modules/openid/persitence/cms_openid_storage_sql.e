@@ -64,8 +64,8 @@ feature -- Access User Outh
 			else
 				check no_more_than_one: False end
 			end
+			sql_finalize
 		end
-
 
 feature --Access: Consumers	
 
@@ -88,6 +88,7 @@ feature --Access: Consumers
 					sql_forth
 				end
 			end
+			sql_finalize
 		end
 
 	openid_consumer_by_name (a_name: READABLE_STRING_8): detachable CMS_OPENID_CONSUMER
@@ -128,6 +129,7 @@ feature -- Change: User OAuth
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "utc_date")
 			sql_insert (Sql_insert_openid, l_parameters)
 			sql_commit_transaction
+			sql_finalize
 		end
 
 feature {NONE} -- Implementation OAuth Consumer
