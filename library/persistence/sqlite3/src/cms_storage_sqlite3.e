@@ -75,6 +75,9 @@ feature -- Execution
 				sqlite.begin_transaction (False)
 			end
 			transaction_depth := transaction_depth + 1
+			debug ("roc_storage")
+				print ("# sql_begin_transaction (depth="+ transaction_depth.out +").%N")
+			end
 		end
 
 	sql_rollback_transaction
@@ -84,6 +87,9 @@ feature -- Execution
 				sqlite.rollback
 			end
 			transaction_depth := transaction_depth - 1
+			debug ("roc_storage")
+				print ("# sql_rollback_transaction (depth="+ transaction_depth.out +").%N")
+			end
 		end
 
 	sql_commit_transaction
@@ -93,12 +99,18 @@ feature -- Execution
 				sqlite.commit
 			end
 			transaction_depth := transaction_depth - 1
+			debug ("roc_storage")
+				print ("# sql_commit_transaction (depth="+ transaction_depth.out +").%N")
+			end
 		end
 
 	sql_post_execution
 			-- Post database execution.
 			-- note: execute after each `sql_query' and `sql_change'.
 		do
+			debug ("roc_storage")
+				print ("# sql_post_execution.%N")
+			end
 			-- FIXME
 			if sqlite.has_error then
 				write_critical_log (generator + ".post_execution Error occurred!")
@@ -116,6 +128,9 @@ feature -- Operation
 		local
 			st: SQLITE_QUERY_STATEMENT
 		do
+			debug ("roc_storage")
+				print ("> sql_query (" +a_sql_statement + ").%N")
+			end
 			last_sqlite_result_cursor := Void
 			create st.make (a_sql_statement, sqlite)
 			last_statement := st
@@ -129,16 +144,31 @@ feature -- Operation
 			else
 				error_handler.add_custom_error (1, "invalid query", "query compilation failed!")
 			end
+			debug ("roc_storage")
+				print ("< sql_query (" +a_sql_statement + ").%N")
+			end
 		end
 
 	sql_finalize
 			-- Finalize sql query (i.e destroy previous query statement.
 		do
-			if attached last_statement as st then
-				st.dispose
+			debug ("roc_storage")
+				print ("> sql_finalize.%N")
 			end
-			last_sqlite_result_cursor := Void
+			if attached last_statement as st then
+				st.cleanup
+			end
+			if attached last_sqlite_result_cursor as cur then
+				if cur.statement /= last_statement then
+					check should_not_occurs: False end
+					cur.statement.cleanup
+				end
+				last_sqlite_result_cursor := Void
+			end
 			last_statement := Void
+			debug ("roc_storage")
+				print ("< sql_finalize.%N")
+			end
 		end
 
 	sql_insert (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
@@ -146,6 +176,9 @@ feature -- Operation
 		local
 			st: SQLITE_INSERT_STATEMENT
 		do
+			debug ("roc_storage")
+				print ("> sql_insert (" +a_sql_statement + ").%N")
+			end
 			last_sqlite_result_cursor := Void
 			create st.make (a_sql_statement, sqlite)
 			last_statement := st
@@ -158,6 +191,9 @@ feature -- Operation
 				end
 			else
 				error_handler.add_custom_error (1, "invalid query", "query compilation failed!")
+			end
+			debug ("roc_storage")
+				print ("< sql_insert (" +a_sql_statement + ").%N")
 			end
 		end
 
@@ -166,6 +202,9 @@ feature -- Operation
 		local
 			st: SQLITE_MODIFY_STATEMENT
 		do
+			debug ("roc_storage")
+				print ("> sql_modify (" +a_sql_statement + ").%N")
+			end
 			last_sqlite_result_cursor := Void
 			create st.make (a_sql_statement, sqlite)
 			last_statement := st
@@ -178,6 +217,9 @@ feature -- Operation
 				end
 			else
 				error_handler.add_custom_error (1, "invalid query", "query compilation failed!")
+			end
+			debug ("roc_storage")
+				print ("< sql_modify (" +a_sql_statement + ").%N")
 			end
 		end
 
@@ -279,32 +321,14 @@ feature -- Operation
 
 feature -- Access		
 
---	sql_rows_count: INTEGER
---			-- Number of rows for last sql execution.	
---		do
---			if attached last_sqlite_result_cursor as l_cursor then
---					-- FIXME: find better solution!
---				from
---					Result := 1
---				until
---					not l_cursor.after
---				loop
---					Result := Result + 1
---				end
---			end
---		end
-
 	sql_start
-			-- Set the cursor on first element.
+			-- <Precursor>.
 		do
-			-- Already at first position if any ?
-			if attached last_sqlite_result_cursor as l_cursor then
---				l_cursor.start
-			end
+			-- sqlite cursor `last_sqlite_result_cursor', already at first position if any.
 		end
 
 	sql_after: BOOLEAN
-			-- Are there no more items to iterate over?	
+			-- <Precursor>.
 		do
 			if attached last_sqlite_result_cursor as l_cursor then
 				Result := l_cursor.after
@@ -312,7 +336,7 @@ feature -- Access
 		end
 
 	sql_forth
-			-- Fetch next row from last sql execution, if any.
+			-- <Precursor>.
 		do
 			if attached last_sqlite_result_cursor as l_cursor then
 				l_cursor.forth

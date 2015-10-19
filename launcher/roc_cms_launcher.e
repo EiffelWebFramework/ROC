@@ -1,12 +1,12 @@
 note
 	description: "[
-				application service
+				Reusable ROC CMS launcher.
 			]"
 	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
 	revision: "$Revision: 96596 $"
 
 class
-	EWF_ROC_SERVER
+	ROC_CMS_LAUNCHER [G -> CMS_EXECUTION create make end]
 
 inherit
 	WSF_LAUNCHABLE_SERVICE
@@ -37,16 +37,27 @@ feature {NONE} -- Initialization
 			-- Initialize current service.
 		local
 			env: CMS_ENVIRONMENT
+			l_app_name: detachable READABLE_STRING_32
 		do
 			Precursor
-			create {WSF_SERVICE_LAUNCHER_OPTIONS_FROM_INI} service_options.make_from_file ("demo.ini")
 			create env.make_default
+			l_app_name := optional_application_name
+			if l_app_name = Void then
+				l_app_name := env.name
+			end
+			create {WSF_SERVICE_LAUNCHER_OPTIONS_FROM_INI} service_options.make_from_file (l_app_name + ".ini")
 			initialize_logger (env)
+		end
+
+	optional_application_name: detachable READABLE_STRING_32
+			-- Optional application name.
+			--| Redefine if needed.
+		do
 		end
 
 feature {NONE} -- Launch operation
 
-	launcher: APPLICATION_LAUNCHER [EWF_ROC_SERVER_EXECUTION]
+	launcher: APPLICATION_LAUNCHER [G]
 
 	launch (opts: detachable WSF_SERVICE_LAUNCHER_OPTIONS)
 		local
@@ -70,7 +81,7 @@ feature {NONE} -- Launch operation
 						l_message.append ("%N%N")
 					end
 				else
-					l_message.append ("The application crash without available information")
+					l_message.append ("The application crashed without information.")
 					l_message.append ("%N%N")
 				end
 				-- send email shutdown
