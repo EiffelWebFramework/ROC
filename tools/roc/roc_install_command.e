@@ -170,6 +170,8 @@ feature -- Execution
 						print ("%NCheck the module elements at ")
 						print (l_dest_dir.path.name)
 						print (".%N")
+						print ("Copied " + directories_count.out + " directories.%N")
+						print ("Copied " + files_count.out + " files.%N")
 					else
 						print ({STRING_32} "The CMS Application located at " + l_cms_path.name + "does not have the site or modules folders.%N")
 					end
@@ -202,8 +204,16 @@ feature -- Execution
 			if not l_dest_dir.exists then
 				l_dest_dir.create_dir
 			end
+			files_count := 0
+			directories_count := -1
 			copy_directory (l_src_dir, l_dest_dir, True)
 		end
+
+	files_count: INTEGER
+			-- Number of copied files during installation.
+
+	directories_count: INTEGER
+			-- Number of copied directories during installation.
 
 feature {NONE} -- System/copy files
 
@@ -217,6 +227,7 @@ feature {NONE} -- System/copy files
 			l_file: FILE
 			ut: FILE_UTILITIES
 		do
+			directories_count := directories_count + 1
 			across
 				a_src.entries as ic
 			loop
@@ -259,6 +270,7 @@ feature {NONE} -- System/copy files
 						a_file.copy_to (l_dest)
 						a_file.close
 						l_dest.close
+						files_count := files_count + 1
 					end
 				end
 			end

@@ -1,30 +1,20 @@
 note
-	description: "Summary description for {EWF_ROC_SERVER_EXECUTION}."
+	description: "[
+			CMS Execution for the demo server.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	EWF_ROC_SERVER_EXECUTION
+	DEMO_CMS_EXECUTION
 
 inherit
 	CMS_EXECUTION
-		redefine
-			initialize
-		end
-
-	REFACTORING_HELPER
-
-	SHARED_LOGGER
 
 create
 	make
 
 feature {NONE} -- Initialization
-
-	initialize
-		do
-			Precursor
-		end
 
 	initial_cms_setup: CMS_DEFAULT_SETUP
 			-- CMS setup.
@@ -39,16 +29,16 @@ feature {NONE} -- Initialization
 			create Result.make (l_env)
 		end
 
-feature -- CMS setup
+feature -- CMS storage
 
 	setup_storage (a_setup: CMS_SETUP)
 		do
-			debug ("refactor_fixme")
-				to_implement ("To implement custom storage")
-			end
+			a_setup.storage_drivers.force (create {CMS_STORAGE_SQLITE3_BUILDER}.make, "sqlite3")
 --			a_setup.storage_drivers.force (create {CMS_STORAGE_STORE_MYSQL_BUILDER}.make, "mysql")
 			a_setup.storage_drivers.force (create {CMS_STORAGE_STORE_ODBC_BUILDER}.make, "odbc")
 		end
+
+feature -- CMS modules
 
 	setup_modules (a_setup: CMS_SETUP)
 			-- Setup additional modules.
