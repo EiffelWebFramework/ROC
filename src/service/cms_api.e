@@ -24,6 +24,7 @@ feature {NONE} -- Initialize
 			setup := a_setup
 			create error_handler.make
 			create {CMS_ENV_LOGGER} logger.make
+			create hooks.make
 			initialize
 		ensure
 			setup_set: setup = a_setup
@@ -50,6 +51,7 @@ feature {NONE} -- Initialize
 				-- Keep enable modules list.
 			l_enabled_modules := setup.enabled_modules
 			enabled_modules := l_enabled_modules
+
 
 				-- Complete storage setup.
 			storage.set_api (Current)
@@ -82,6 +84,9 @@ feature {NONE} -- Initialize
 					l_enabled_modules.remove (ic.item)
 				end
 			end
+			
+				-- Initialize hooks system
+			setup_hooks
 		end
 
 	initialize_formats
@@ -299,6 +304,32 @@ feature -- Query: module
 		do
 			if attached module_by_name (a_name) as mod then
 				Result := mod.module_api
+			end
+		end
+
+feature -- Hooks
+
+	hooks: CMS_HOOK_CORE_MANAGER
+			-- Manager handling hook subscriptions.
+
+feature {NONE} -- Hooks
+
+	setup_hooks
+		local
+			l_module: CMS_MODULE
+			l_enabled_modules: CMS_MODULE_COLLECTION
+			l_hooks: like hooks
+		do
+			l_hooks := hooks
+			l_enabled_modules := enabled_modules
+			across
+				l_enabled_modules as ic
+			loop
+				l_module := ic.item
+				if attached {CMS_HOOK_AUTO_REGISTER} l_module as l_auto then
+					l_auto.auto_subscribe_to_hooks (l_hooks)
+				end
+				l_module.setup_hooks (l_hooks)
 			end
 		end
 

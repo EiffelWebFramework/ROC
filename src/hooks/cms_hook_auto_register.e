@@ -16,11 +16,11 @@ inherit
 
 feature -- Hook
 
-	auto_subscribe_to_hooks (a_response: CMS_RESPONSE)
+	auto_subscribe_to_hooks (a_hooks: CMS_HOOK_CORE_MANAGER)
 		local
 			l_manager: CMS_HOOK_CORE_MANAGER
 		do
-			l_manager := a_response.hooks
+			l_manager := a_hooks
 			if attached {CMS_HOOK_MENU_SYSTEM_ALTER} Current as h_menu_system_alter then
 				l_manager.subscribe_to_menu_system_alter_hook (h_menu_system_alter)
 			end

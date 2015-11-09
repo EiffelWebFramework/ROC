@@ -129,7 +129,7 @@ feature -- Router
 
 feature -- Hooks configuration
 
-	register_hooks (a_response: CMS_RESPONSE)
+	setup_hooks (a_hooks: CMS_HOOK_CORE_MANAGER)
 			-- Module hooks configuration.
 		require
 			is_enabled: is_enabled

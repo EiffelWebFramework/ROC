@@ -11,7 +11,7 @@ inherit
 		rename
 			module_api as recent_changes_api
 		redefine
-			register_hooks,
+			setup_hooks,
 			permissions
 		end
 
@@ -397,12 +397,12 @@ feature -- Handler
 
 feature -- Hooks configuration
 
-	register_hooks (a_response: CMS_RESPONSE)
+	setup_hooks (a_hooks: CMS_HOOK_CORE_MANAGER)
 			-- Module hooks configuration.
 		do
-			a_response.hooks.subscribe_to_menu_system_alter_hook (Current)
-			a_response.hooks.subscribe_to_response_alter_hook (Current)
-			a_response.hooks.subscribe_to_block_hook (Current)
+			a_hooks.subscribe_to_menu_system_alter_hook (Current)
+			a_hooks.subscribe_to_response_alter_hook (Current)
+			a_hooks.subscribe_to_block_hook (Current)
 		end
 
 feature -- Hook

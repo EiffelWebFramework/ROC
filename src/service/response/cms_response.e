@@ -33,8 +33,6 @@ feature {NONE} -- Initialization
 			get_theme
 			create menu_system.make
 			initialize_block_region_settings
-			create hooks.make
-			register_hooks
 		end
 
 	initialize_site_url
@@ -64,23 +62,6 @@ feature {NONE} -- Initialization
 		ensure
 			site_url_set: site_url /= Void
 			site_url_ends_with_slash: site_url.ends_with_general ("/")
-		end
-
-	register_hooks
-		local
-			l_module: CMS_MODULE
-			l_enabled_modules: CMS_MODULE_COLLECTION
-		do
-			l_enabled_modules := api.enabled_modules
-			across
-				l_enabled_modules as ic
-			loop
-				l_module := ic.item
-				if attached {CMS_HOOK_AUTO_REGISTER} l_module as l_auto then
-					l_auto.auto_subscribe_to_hooks (Current)
-				end
-				l_module.register_hooks (Current)
-			end
 		end
 
 feature -- Access
@@ -868,6 +849,9 @@ feature -- Hooks
 
 	hooks: CMS_HOOK_CORE_MANAGER
 			-- Manager handling hook subscriptions.
+		do
+			Result := api.hooks
+		end
 
 feature -- Menu: change
 

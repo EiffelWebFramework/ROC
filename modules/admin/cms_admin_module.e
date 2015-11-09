@@ -9,7 +9,7 @@ class
 inherit
 	CMS_MODULE
 		redefine
-			register_hooks,
+			setup_hooks,
 			permissions
 		end
 
@@ -54,6 +54,7 @@ feature -- Access: router
 			l_role_handler:	CMS_ROLE_HANDLER
 
 			l_admin_cache_handler: CMS_ADMIN_CACHE_HANDLER
+			l_admin_export_handler: CMS_ADMIN_EXPORT_HANDLER
 
 			l_uri_mapping: WSF_URI_MAPPING
 		do
@@ -73,6 +74,10 @@ feature -- Access: router
 			create l_uri_mapping.make_trailing_slash_ignored ("/admin/cache", l_admin_cache_handler)
 			a_router.map (l_uri_mapping, a_router.methods_get_post)
 
+			create l_admin_export_handler.make (a_api)
+			create l_uri_mapping.make_trailing_slash_ignored ("/admin/export", l_admin_export_handler)
+			a_router.map (l_uri_mapping, a_router.methods_get_post)
+
 			create l_user_handler.make (a_api)
 			a_router.handle ("/admin/add/user", l_user_handler, a_router.methods_get_post)
 			a_router.handle ("/admin/user/{id}", l_user_handler, a_router.methods_get)
@@ -84,8 +89,6 @@ feature -- Access: router
 			a_router.handle ("/admin/role/{id}", l_role_handler, a_router.methods_get)
 			a_router.handle ("/admin/role/{id}/edit", l_role_handler, a_router.methods_get_post)
 			a_router.handle ("/admin/role/{id}/delete", l_role_handler, a_router.methods_get_post)
-
-
 		end
 
 feature -- Security
@@ -101,15 +104,16 @@ feature -- Security
 			Result.force ("install modules")
 			Result.force ("admin core caches")
 			Result.force ("clear blocks cache")
+			Result.force ("admin export")
 		end
 
 feature -- Hooks
 
-	register_hooks (a_response: CMS_RESPONSE)
+	setup_hooks (a_hooks: CMS_HOOK_CORE_MANAGER)
 			-- <Precursor>
 		do
-			a_response.hooks.subscribe_to_menu_system_alter_hook (Current)
-			a_response.hooks.subscribe_to_response_alter_hook (Current)
+			a_hooks.subscribe_to_menu_system_alter_hook (Current)
+			a_hooks.subscribe_to_response_alter_hook (Current)
 		end
 
 	response_alter (a_response: CMS_RESPONSE)
@@ -132,6 +136,10 @@ feature -- Hooks
 			end
 				-- Per module cache permission!
 			create lnk.make ("Cache", "admin/cache")
+			a_menu_system.management_menu.extend (lnk)
+
+				-- Per module export permission!
+			create lnk.make ("Export", "admin/export")
 			a_menu_system.management_menu.extend (lnk)
 		end
 
