@@ -604,7 +604,6 @@ feature -- Hook
 			jobj,jo,j: JSON_OBJECT
 			f: PLAIN_TEXT_FILE
 			u: CMS_USER
-			s: STRING_32
 		do
 			if attached a_response.has_permissions (<<"admin export", "export core">>) then
 				if a_export_id_list = Void then -- Include everything

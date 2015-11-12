@@ -284,7 +284,6 @@ feature -- Misc
 			-- Values as list of [name, type, value].
 		local
 			l_type, l_name: READABLE_STRING_8
-			l_value: READABLE_STRING_32
 		do
 			error_handler.reset
 			create {ARRAYED_LIST [TUPLE [name: READABLE_STRING_GENERAL; type: detachable READABLE_STRING_8; value: detachable READABLE_STRING_32]]} Result.make (5)
