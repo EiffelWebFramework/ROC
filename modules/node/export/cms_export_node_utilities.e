@@ -7,12 +7,12 @@ note
 
 class
 	CMS_EXPORT_NODE_UTILITIES
-	
+
 inherit
 	CMS_EXPORT_JSON_UTILITIES
-	
+
 feature -- Access
-	
+
 	node_to_json (n: CMS_NODE): JSON_OBJECT
 		local
 			jo,j_author: JSON_OBJECT

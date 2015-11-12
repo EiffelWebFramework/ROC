@@ -188,7 +188,10 @@ feature -- Hooks
 				a_export_id_list = Void
 				or else across a_export_id_list as ic some ic.item.same_string ("blog") end
 			then
-				if attached blog_api as l_blog_api then
+				if
+					a_response.has_permissions (<<"export any node", "export blog">>) and then
+					attached blog_api as l_blog_api
+				then
 					lst := l_blog_api.blogs_order_created_desc
 					a_export_parameters.log ("Exporting " + lst.count.out + " blogs")
 					across
@@ -206,6 +209,30 @@ feature -- Hooks
 							f.open_write
 							f.put_string (json_to_string (blog_node_to_json (n)))
 							f.close
+						end
+							-- Revisions.
+						if
+							attached node_api as l_node_api and then
+							attached l_node_api.node_revisions (n) as l_revisions and then l_revisions.count > 1
+						then
+							a_export_parameters.log (n.content_type + " " + l_revisions.count.out + " revisions.")
+							p := a_export_parameters.location.extended ("nodes").extended (n.content_type).extended (n.id.out)
+							create d.make_with_path (p)
+							if not d.exists then
+								d.recursive_create_dir
+							end
+							across
+								l_revisions as revs_ic
+							loop
+								if attached {CMS_BLOG} revs_ic.item as l_blog then
+									create f.make_with_path (p.extended ("rev-" + n.revision.out).appended_with_extension ("json"))
+									if not f.exists or else f.is_access_writable then
+										f.open_write
+										f.put_string (json_to_string (blog_node_to_json (l_blog)))
+									end
+									f.close
+								end
+							end
 						end
 					end
 				end

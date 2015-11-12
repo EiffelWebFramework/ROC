@@ -151,6 +151,7 @@ feature -- Access
 		do
 			Result := Precursor
 			Result.force ("create any node")
+			Result.force ("export any node")
 
 			if attached node_api as l_node_api then
 				across
@@ -177,6 +178,8 @@ feature -- Access
 						Result.force ("view unpublished " + l_type_name)
 
 						Result.force ("view revisions own " + l_type_name)
+
+						Result.force ("export " + l_type_name)
 					end
 				end
 				Result.force ("view trash")
@@ -375,6 +378,7 @@ feature -- Hooks
 				loop
 					l_node_type := types_ic.item
 					if
+						a_response.has_permissions (<<"export any node", "export " + l_node_type.name>>) and then
 						l_node_type.name.same_string_general ("page") and then
 						(	a_export_id_list = Void
 							or else across a_export_id_list as ic some ic.item.same_string (l_node_type.name) end
@@ -384,17 +388,17 @@ feature -- Hooks
 							-- For now, handle only page from this node module.
 						lst := l_node_api.nodes_of_type (l_node_type)
 						a_export_parameters.log ("Exporting " + lst.count.out + " nodes of type " + l_node_type.name)
+						p := a_export_parameters.location.extended ("nodes").extended (l_node_type.name)
+						create d.make_with_path (p)
+						if not d.exists then
+							d.recursive_create_dir
+						end
 						across
 							lst as ic
 						loop
 							n := l_node_api.full_node (ic.item)
-							a_export_parameters.log (l_node_type.name + " #" + n.id.out)
-							p := a_export_parameters.location.extended ("nodes").extended (l_node_type.name).extended (n.id.out)
-							create d.make_with_path (p.parent)
-							if not d.exists then
-								d.recursive_create_dir
-							end
-							create f.make_with_path (p)
+							a_export_parameters.log (l_node_type.name + " #" + n.id.out + " rev=" + n.revision.out)
+							create f.make_with_path (p.extended (n.id.out).appended_with_extension ("json"))
 							if not f.exists or else f.is_access_writable then
 								f.open_write
 								if attached {CMS_PAGE} n as l_page then
@@ -403,6 +407,30 @@ feature -- Hooks
 									f.put_string (json_to_string (node_to_json (n)))
 								end
 								f.close
+							end
+								-- Revisions.
+							if attached l_node_api.node_revisions (n) as l_revisions and then l_revisions.count > 1 then
+								a_export_parameters.log (l_node_type.name + " " + l_revisions.count.out + " revisions.")
+								p := a_export_parameters.location.extended ("nodes").extended (l_node_type.name).extended (n.id.out)
+								create d.make_with_path (p)
+								if not d.exists then
+									d.recursive_create_dir
+								end
+								across
+									l_revisions as revs_ic
+								loop
+									n := revs_ic.item
+									create f.make_with_path (p.extended ("rev-" + n.revision.out).appended_with_extension ("json"))
+									if not f.exists or else f.is_access_writable then
+										f.open_write
+										if attached {CMS_PAGE} n as l_page then
+											f.put_string (json_to_string (page_node_to_json (l_page)))
+										else
+											f.put_string (json_to_string (node_to_json (n)))
+										end
+										f.close
+									end
+								end
 							end
 						end
 					end

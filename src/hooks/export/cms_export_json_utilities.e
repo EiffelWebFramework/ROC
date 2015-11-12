@@ -10,6 +10,13 @@ class
 
 feature -- Access
 
+	put_string_into_json (st: detachable READABLE_STRING_GENERAL; a_key: JSON_STRING; j: JSON_OBJECT)
+		do
+			if st /= Void then
+				j.put_string (st, a_key)
+			end
+		end
+
 	put_date_into_json (dt: detachable DATE_TIME; a_key: JSON_STRING; j: JSON_OBJECT)
 		local
 			hd: HTTP_DATE
@@ -20,7 +27,7 @@ feature -- Access
 			end
 		end
 
-	json_to_string (j: JSON_OBJECT): STRING
+	json_to_string (j: JSON_VALUE): STRING
 		local
 			pp: JSON_PRETTY_STRING_VISITOR
 		do

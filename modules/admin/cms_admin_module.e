@@ -105,6 +105,7 @@ feature -- Security
 			Result.force ("admin core caches")
 			Result.force ("clear blocks cache")
 			Result.force ("admin export")
+			Result.force ("export core")
 		end
 
 feature -- Hooks

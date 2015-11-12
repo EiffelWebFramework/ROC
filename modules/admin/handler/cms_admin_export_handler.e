@@ -64,7 +64,12 @@ feature -- Execution
 				fd.is_valid
 			then
 				if attached fd.string_item ("op") as l_op and then l_op.same_string (text_export_all_data) then
-					create l_exportation_parameters.make (api.site_location.extended ("export").extended ((create {DATE_TIME}.make_now_utc).formatted_out ("yyyy-[0]mm-[0]dd_hh12-[0]mi-[0]ss")))
+					if attached fd.string_item ("folder") as l_folder then
+						create l_exportation_parameters.make (api.site_location.extended ("export").extended (l_folder))
+					else
+						create l_exportation_parameters.make (api.site_location.extended ("export").extended ((create {DATE_TIME}.make_now_utc).formatted_out ("yyyy-[0]mm-[0]dd---hh24-[0]mi-[0]ss")))
+					end
+
 					l_response.hooks.invoke_export_to (Void, l_exportation_parameters, l_response)
 					l_response.add_notice_message ("All data exported (if allowed)!")
 					create s.make_empty
@@ -90,9 +95,16 @@ feature -- Widget
 
 	exportation_web_form (a_response: CMS_RESPONSE): CMS_FORM
 		local
+			f_name: WSF_FORM_TEXT_INPUT
 			but: WSF_FORM_SUBMIT_INPUT
 		do
 			create Result.make (a_response.url (a_response.location, Void), "export_all_data")
+			Result.extend_raw_text ("Export CMS data to ")
+			create f_name.make_with_text ("folder", (create {DATE_TIME}.make_now_utc).formatted_out ("yyyy-[0]mm-[0]dd---hh24-[0]mi-[0]ss"))
+			f_name.set_label ("Export folder name")
+			f_name.set_description ("Folder name under 'exports' folder.")
+			f_name.set_is_required (True)
+			Result.extend (f_name)
 			create but.make_with_text ("op", text_export_all_data)
 			Result.extend (but)
 		end
