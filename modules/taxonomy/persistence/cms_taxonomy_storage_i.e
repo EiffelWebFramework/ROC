@@ -27,7 +27,7 @@ feature -- Access
 		deferred
 		end
 
-	vocabulary (a_id: INTEGER): detachable CMS_VOCABULARY
+	vocabulary (a_id: INTEGER_64): detachable CMS_VOCABULARY
 			-- Vocabulary by id `a_id'.
 		require
 			valid_id: a_id > 0
@@ -39,7 +39,7 @@ feature -- Access
 		deferred
 		end
 
-	term_by_id (tid: INTEGER): detachable CMS_TERM
+	term_by_id (tid: INTEGER_64): detachable CMS_TERM
 			-- Term associated with id `tid'.
 		deferred
 		ensure
@@ -60,5 +60,13 @@ feature -- Access
 		deferred
 		end
 
+feature -- Store
+
+	save_term (t: CMS_TERM)
+			-- Insert or update term `t'.
+		deferred
+		ensure
+			not error_handler.has_error implies t.has_id and then term_by_id (t.id) /= Void
+		end
 
 end

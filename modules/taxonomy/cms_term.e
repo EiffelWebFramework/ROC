@@ -16,7 +16,7 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_id: INTEGER; a_text: READABLE_STRING_GENERAL)
+	make (a_id: INTEGER_64; a_text: READABLE_STRING_GENERAL)
 		do
 			id := a_id
 			set_text (a_text)
@@ -24,7 +24,7 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
-	id: INTEGER
+	id: INTEGER_64
 			-- Associated term id.
 
 	text: IMMUTABLE_STRING_32
@@ -32,9 +32,6 @@ feature -- Access
 
 	description: detachable IMMUTABLE_STRING_32
 			-- Optional description.
-
-	parent_id: INTEGER
-			-- Optional parent term id.
 
 	weight: INTEGER
 			-- Associated weight for ordering.
@@ -65,7 +62,7 @@ feature -- Comparison
 
 feature -- Element change
 
-	set_id (a_id: INTEGER)
+	set_id (a_id: INTEGER_64)
 		do
 			id := a_id
 		end
@@ -83,16 +80,6 @@ feature -- Element change
 	set_description (a_description: READABLE_STRING_GENERAL)
 		do
 			create description.make_from_string_general (a_description)
-		end
-
-	set_parent (a_parent: CMS_TERM)
-		do
-			parent_id := a_parent.id
-		end
-
-	set_parent_id (a_parent_id: INTEGER)
-		do
-			parent_id := a_parent_id
 		end
 
 end

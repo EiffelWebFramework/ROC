@@ -53,30 +53,12 @@ feature {CMS_API} -- Module Initialization
 feature {CMS_API} -- Module management
 
 	install (api: CMS_API)
-		local
-			sql: STRING
 		do
 				-- Schema
 			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
-				if not l_sql_storage.sql_table_exists ("taxonomy_term") then
-					sql := "[
-CREATE TABLE taxonomy_term (
-  `tid`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
-  `text` VARCHAR(255) NOT NULL,
-  `weight` INTEGER,
-  `description` TEXT,  
-  `langcode` VARCHAR(12)
-);
-CREATE TABLE taxonomy_hierarchy (
-  `tid`	INTEGER NOT NULL,
-  `parent` INTEGER,
-  CONSTRAINT PK_tid_parent PRIMARY KEY (tid,parent)
-);
-					]"
-					l_sql_storage.sql_execute_script (sql, Void)
-					if l_sql_storage.has_error then
-						api.logger.put_error ("Could not initialize database for taxonomy module", generating_type)
-					end
+				l_sql_storage.sql_execute_file_script (api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended ("install").appended_with_extension ("sql")), Void)
+				if l_sql_storage.has_error then
+					api.logger.put_error ("Could not install database for taxonomy module", generating_type)
 				end
 				Precursor (api)
 			end
@@ -84,15 +66,9 @@ CREATE TABLE taxonomy_hierarchy (
 
 	uninstall (api: CMS_API)
 			-- (export status {CMS_API})
-		local
-			sql: STRING
 		do
 			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
-				sql := "[
-DROP TABLE IF EXISTS taxonomy_term;
-DROP TABLE IF EXISTS taxonomy_hierarchy;
-					]"
-				l_sql_storage.sql_execute_script (sql, Void)
+				l_sql_storage.sql_execute_file_script (api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended ("uninstall").appended_with_extension ("sql")), Void)
 				if l_sql_storage.has_error then
 					api.logger.put_error ("Could not remove database for taxonomy module", generating_type)
 				end

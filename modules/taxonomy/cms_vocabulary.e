@@ -14,7 +14,7 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_tid: INTEGER; a_name: READABLE_STRING_GENERAL)
+	make (a_tid: INTEGER_64; a_name: READABLE_STRING_GENERAL)
 		do
 			id := a_tid
 			set_name (a_name)
@@ -29,7 +29,7 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
-	id: INTEGER
+	id: INTEGER_64
 
 	name: IMMUTABLE_STRING_32
 

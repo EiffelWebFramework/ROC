@@ -35,7 +35,7 @@ feature -- Access
 			create {ARRAYED_LIST [CMS_VOCABULARY]} Result.make (0)
 		end
 
-	vocabulary (a_tid: INTEGER): detachable CMS_VOCABULARY
+	vocabulary (a_tid: INTEGER_64): detachable CMS_VOCABULARY
 			-- Vocabulary by id `a_tid'.
 		do
 			if attached term_by_id (a_tid) as t then
@@ -93,7 +93,7 @@ feature -- Access
 			sql_finalize
 		end
 
-	term_by_id (a_tid: INTEGER): detachable CMS_TERM
+	term_by_id (a_tid: INTEGER_64): detachable CMS_TERM
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
@@ -112,122 +112,51 @@ feature -- Access
 feature -- Store
 
 	save_term (t: CMS_TERM)
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
 		do
+			error_handler.reset
+
+			create l_parameters.make (5)
+			l_parameters.put (t.text, "text")
+			l_parameters.put (t.description, "description")
+			l_parameters.put (t.weight, "weight")
+
+			sql_begin_transaction
+			if t.has_id then
+				l_parameters.put (t.id, "tid")
+				sql_modify (sql_update_term, l_parameters)
+			else
+				sql_insert (sql_insert_term, l_parameters)
+				t.set_id (last_inserted_term_id)
+			end
+			if has_error then
+				sql_rollback_transaction
+			else
+				sql_commit_transaction
+			end
+			sql_finalize
 		end
-
---	blogs_count: INTEGER_64
---			-- <Precursor>
---		do
---			error_handler.reset
---			write_information_log (generator + ".blogs_count")
---			sql_query (sql_select_blog_count, Void)
---			if not has_error and not sql_after then
---				Result := sql_read_integer_64 (1)
---			end
---			sql_finalize
---		end
-
---	blogs_count_from_user (a_user: CMS_USER) : INTEGER_64
---			-- <Precursor>
---		local
---			l_parameters: STRING_TABLE [detachable ANY]
---		do
---			error_handler.reset
---			write_information_log (generator + ".blogs_count_from_user")
---			create l_parameters.make (2)
---			l_parameters.put (a_user.id, "user")
---			sql_query (sql_select_blog_count_from_user, l_parameters)
---			if not has_error and not sql_after then
---				Result := sql_read_integer_64 (1)
---			end
---			sql_finalize
---		end
-
---	blogs: LIST [CMS_NODE]
---			-- <Precursor>
---		do
---			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
-
---			error_handler.reset
---			write_information_log (generator + ".blogs")
-
---			from
---				sql_query (sql_select_blogs_order_created_desc, Void)
---				sql_start
---			until
---				sql_after
---			loop
---				if attached fetch_node as l_node then
---					Result.force (l_node)
---				end
---				sql_forth
---			end
---			sql_finalize
---		end
-
---	blogs_limited (a_limit: NATURAL_32; a_offset: NATURAL_32): LIST [CMS_NODE]
---			-- <Precursor>
---		local
---			l_parameters: STRING_TABLE [detachable ANY]
---		do
---			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
-
---			error_handler.reset
---			write_information_log (generator + ".blogs_limited")
-
---			from
---				create l_parameters.make (2)
---				l_parameters.put (a_limit, "limit")
---				l_parameters.put (a_offset, "offset")
---				sql_query (sql_blogs_limited, l_parameters)
---				sql_start
---			until
---				sql_after
---			loop
---				if attached fetch_node as l_node then
---					Result.force (l_node)
---				end
---				sql_forth
---			end
---			sql_finalize
---		end
-
---	blogs_from_user_limited (a_user: CMS_USER; a_limit: NATURAL_32; a_offset: NATURAL_32): LIST [CMS_NODE]
---			-- <Precursor>
---		local
---			l_parameters: STRING_TABLE [detachable ANY]
---		do
---			create {ARRAYED_LIST [CMS_NODE]} Result.make (0)
-
---			error_handler.reset
---			write_information_log (generator + ".blogs_from_user_limited")
-
---			from
---				create l_parameters.make (2)
---				l_parameters.put (a_limit, "limit")
---				l_parameters.put (a_offset, "offset")
---				l_parameters.put (a_user.id, "user")
---				sql_query (sql_blogs_from_user_limited, l_parameters)
---				sql_start
---			until
---				sql_after
---			loop
---				if attached fetch_node as l_node then
---					Result.force (l_node)
---				end
---				sql_forth
---			end
---			sql_finalize
---		end
 
 feature {NONE} -- Queries
 
+	last_inserted_term_id: INTEGER_64
+			-- Last insert term id.
+		do
+			error_handler.reset
+			sql_query (Sql_last_inserted_term_id, Void)
+			if not has_error and not sql_after then
+				Result := sql_read_integer_64 (1)
+			end
+			sql_finalize
+		end
+
 	fetch_term: detachable CMS_TERM
 		local
-			tid: INTEGER
+			tid: INTEGER_64
 			l_text: detachable READABLE_STRING_32
 		do
-			tid := sql_read_integer_32 (1)
+			tid := sql_read_integer_64 (1)
 			l_text := sql_read_string_32 (2)
 			if tid > 0 and l_text /= Void then
 				create Result.make (tid, l_text)
@@ -256,18 +185,18 @@ feature {NONE} -- Queries
 	sql_select_term: STRING = "SELECT tid, text, weight, description FROM taxonomy_term WHERE tid = :tid;"
 			-- Term with tid :tid .
 
---	sql_select_blog_count_from_user: STRING = "SELECT count(*) FROM nodes WHERE status != -1 AND type = %"blog%" AND author = :user ;"
---			-- Nodes count (Published and not Published)
---			--| note: {CMS_NODE_API}.trashed = -1
+	Sql_last_inserted_term_id: STRING = "SELECT MAX(tid) FROM taxonomy_term;"
 
---	sql_select_blogs_order_created_desc: STRING = "SELECT * FROM nodes WHERE status != -1 AND type = %"blog%" ORDER BY created DESC;"
---			-- SQL Query to retrieve all nodes that are from the type "blog" ordered by descending creation date.
+	sql_insert_term: STRING = "[
+				INSERT INTO taxonomy_terms (tid, text, weight, description, langcode) 
+				VALUES (:tid, :text, :weight, :description, null);
+			]"
 
---	sql_blogs_limited: STRING = "SELECT * FROM nodes WHERE status != -1 AND type = %"blog%" ORDER BY created DESC LIMIT :limit OFFSET :offset ;"
---			--- SQL Query to retrieve all node of type "blog" limited by limit and starting at offset
-
---	sql_blogs_from_user_limited: STRING = "SELECT * FROM nodes WHERE status != -1 AND type = %"blog%" AND author = :user ORDER BY created DESC LIMIT :limit OFFSET :offset ;"
---			--- SQL Query to retrieve all node of type "blog" from author with id limited by limit + offset
-
+	sql_update_term: STRING = "[
+				UPDATE taxonomy_terms 
+				SET tid=:tid, text=:text, weight=:weight, description=:description, langcode=null
+				WHERE tid=:tid;
+			]"
+	
 
 end

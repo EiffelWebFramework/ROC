@@ -43,7 +43,7 @@ feature -- Access
 			create {ARRAYED_LIST [CMS_VOCABULARY]} Result.make (0)
 		end
 
-	vocabulary (a_id: INTEGER): detachable CMS_VOCABULARY
+	vocabulary (a_id: INTEGER_64): detachable CMS_VOCABULARY
 			-- Vocabulary by id `a_id'.
 		do
 		end
@@ -53,7 +53,7 @@ feature -- Access
 		do
 		end
 
-	term_by_id (tid: INTEGER): detachable CMS_TERM
+	term_by_id (tid: INTEGER_64): detachable CMS_TERM
 			-- Term associated with id `tid'.
 		do
 		end
@@ -62,6 +62,14 @@ feature -- Access
 			-- List of terms from vocabulary `a_vocab' ordered by weight from offset to offset + limit.
 		do
 			create {ARRAYED_LIST [CMS_TERM]} Result.make (0)
+		end
+
+feature -- Store
+
+	save_term (t: CMS_TERM)
+			-- Insert or update term `t'.
+		do
+			error_handler.add_custom_error (-1, "not implemented", "")
 		end
 
 end
