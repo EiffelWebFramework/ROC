@@ -27,7 +27,7 @@ feature {NONE} -- Initialization
 			Precursor
 
 				-- Create the node storage for type blog
-			if attached {CMS_STORAGE_SQL_I} storage as l_storage_sql then
+			if attached storage.as_sql_storage as l_storage_sql then
 				create {CMS_TAXONOMY_STORAGE_SQL} taxonomy_storage.make (l_storage_sql)
 			else
 				create {CMS_TAXONOMY_STORAGE_NULL} taxonomy_storage.make

@@ -83,7 +83,7 @@ feature {CMS_API} -- Module management
 			sql: STRING
 		do
 				-- Schema
-			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
+			if attached api.storage.as_sql_storage as l_sql_storage then
 				if not l_sql_storage.sql_table_exists ("blog_post_nodes") then
 					sql := "[
 CREATE TABLE blog_post_nodes(

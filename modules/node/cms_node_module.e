@@ -63,7 +63,7 @@ feature {CMS_API} -- Module Initialization
 			Precursor (a_api)
 
 				-- Storage initialization
-			if attached {CMS_STORAGE_SQL_I} a_api.storage as l_storage_sql then
+			if attached a_api.storage.as_sql_storage as l_storage_sql then
 				create {CMS_NODE_STORAGE_SQL} l_node_storage.make (l_storage_sql)
 			else
 				-- FIXME: in case of NULL storage, should Current be disabled?
@@ -111,7 +111,7 @@ feature {CMS_API} -- Module management
 			-- Is Current module installed?
 		do
 			Result := Precursor (a_api)
-			if Result and attached {CMS_STORAGE_SQL_I} a_api.storage as l_sql_storage then
+			if Result and attached a_api.storage.as_sql_storage as l_sql_storage then
 				Result := l_sql_storage.sql_table_exists ("nodes") and
 					l_sql_storage.sql_table_exists ("page_nodes")
 			end
@@ -120,7 +120,7 @@ feature {CMS_API} -- Module management
 	install (a_api: CMS_API)
 		do
 				-- Schema
-			if attached {CMS_STORAGE_SQL_I} a_api.storage as l_sql_storage then
+			if attached a_api.storage.as_sql_storage as l_sql_storage then
 				l_sql_storage.sql_execute_file_script (a_api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended (name).appended_with_extension ("sql")), Void)
 			end
 			Precursor {CMS_MODULE}(a_api)
