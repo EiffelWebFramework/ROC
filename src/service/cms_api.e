@@ -107,7 +107,7 @@ feature {NONE} -- Initialize
 
 feature {CMS_ACCESS} -- Installation		
 
-	install
+	install_all_modules
 			-- Install CMS or uninstalled module which are enabled.
 		local
 			l_module: CMS_MODULE
@@ -121,12 +121,28 @@ feature {CMS_ACCESS} -- Installation
 					-- and leave the responsability to the module to know
 					-- if this is installed or not...
 				if not l_module.is_installed (Current) then
-					l_module.install (Current)
-					if l_module.is_enabled then
-						l_module.initialize (Current)
-					end
+					install_module (l_module)
 				end
 			end
+		end
+
+	install_module (m: CMS_MODULE)
+			-- Install module `m'.
+		require
+			module_not_installed: not is_module_installed (m)
+		do
+			m.install (Current)
+			if m.is_enabled then
+				m.initialize (Current)
+			end
+		end
+
+	uninstall_module (m: CMS_MODULE)
+			-- Uninstall module `m'.
+		require
+			module_installed: is_module_installed (m)
+		do
+			m.uninstall (Current)
 		end
 
 feature -- Access
