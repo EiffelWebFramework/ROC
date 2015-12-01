@@ -378,7 +378,21 @@ feature -- Form
 				to_implement ("Refactor code to use the new wsf_html HTML5 support")
 				f.extend_html_text("<input type='submit' value='Cancel' formmethod='GET', formaction='/node/"+a_node.id.out+"'>" )
 			end
-
+			f.extend_html_text ("<br/>")
+			f.extend_html_text ("<legend>Do you want to restore the current node?</legend>")
+			if
+				a_node /= Void and then
+				a_node.id > 0
+			then
+				create ts.make ("op")
+				ts.set_default_value ("Restore")
+				ts.set_formaction ("/node/"+a_node.id.out+"/delete")
+				ts.set_formmethod ("POST")
+				fixme ("[
+					ts.set_default_value (translation ("Restore"))
+					]")
+				f.extend (ts)
+			end
 			Result := f
 		end
 
@@ -401,19 +415,6 @@ feature -- Form
 				ts.set_default_value ("Trash")
 				fixme ("[
 					ts.set_default_value (translation ("Trash"))
-					]")
-				f.extend (ts)
-			end
-			f.extend_html_text ("<br/>")
-			f.extend_html_text ("<legend>Do you want to restore the current node?</legend>")
-			if
-				a_node /= Void and then
-				a_node.id > 0
-			then
-				create ts.make ("op")
-				ts.set_default_value ("Restore")
-				fixme ("[
-					ts.set_default_value (translation ("Restore"))
 					]")
 				f.extend (ts)
 			end

@@ -383,6 +383,7 @@ feature -- Change: Node
 		local
 			l_parameters: STRING_TABLE [ANY]
 			l_time: DATE_TIME
+			l_sql_delete_node_aliases: STRING
 		do
 			create l_time.make_now_utc
 			write_information_log (generator + ".delete_node_base {" + a_node.id.out + "}")
@@ -396,6 +397,13 @@ feature -- Change: Node
 				-- we remove node_revisions and pages.
 				-- Check: maybe we need a transaction.
 			sql_modify (sql_delete_node_revisions, l_parameters)
+			sql_finalize
+
+				-- we remove node_aliases
+				-- Check: maybe we need a transaction.
+			create l_sql_delete_node_aliases.make_from_string (sql_delete_node_aliases)
+			l_sql_delete_node_aliases.replace_substring_all ("$nodeid", "node/" + a_node.id.out)
+			sql_modify (l_sql_delete_node_aliases, void)
 			sql_finalize
 
 			if not error_handler.has_error then
@@ -415,7 +423,7 @@ feature -- Change: Node
 			error_handler.reset
 			create l_parameters.make (1)
 			l_parameters.put (l_time, "changed")
-			l_parameters.put ({CMS_NODE_API}.not_published, "status")
+			l_parameters.put ({CMS_NODE_API}.published, "status")
 			l_parameters.put (a_id, "nid")
 			sql_modify (sql_restore_node, l_parameters)
 			sql_finalize
@@ -561,7 +569,7 @@ feature {NONE} -- Queries
 			-- Physical deletion with free metadata.		
 
 	sql_restore_node: STRING = "UPDATE nodes SET changed=:changed, status =:status WHERE nid=:nid"
-			-- Restore node to  {CMS_NODE_API}.not_publised.
+			-- Restore node to  {CMS_NODE_API}.published
 
 	sql_last_insert_node_id: STRING = "SELECT MAX(nid) FROM nodes;"
 
@@ -583,6 +591,8 @@ feature {NONE} -- Queries
 		]"
 
 	sql_delete_node_revisions: STRING = "DELETE FROM node_revisions WHERE nid=:nid;"
+
+	sql_delete_node_aliases: STRING = "DELETE FROM path_aliases WHERE source='$nodeid';"
 
 feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 

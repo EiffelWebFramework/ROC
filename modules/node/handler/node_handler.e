@@ -173,6 +173,11 @@ feature -- HTTP Methods
 					l_op.value.same_string ("Delete")
 				then
 					do_delete (req, res)
+				elseif
+					attached {WSF_STRING} req.form_parameter ("op") as l_op and then
+					l_op.value.same_string ("Restore")
+				then
+					do_restore (req, res)
 				end
 			elseif req.percent_encoded_path_info.ends_with ("/trash") then
 				if
@@ -180,11 +185,6 @@ feature -- HTTP Methods
 					l_op.value.same_string ("Trash")
 				then
 					do_trash (req, res)
-				elseif
-					attached {WSF_STRING} req.form_parameter ("op") as l_op and then
-					l_op.value.same_string ("Restore")
-				then
-					do_restore (req, res)
 				end
 			elseif req.percent_encoded_path_info.starts_with ("/node/add/") then
 				create edit_response.make (req, res, api, node_api)
