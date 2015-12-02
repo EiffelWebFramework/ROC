@@ -385,6 +385,7 @@ feature -- Change: Node
 			l_time: DATE_TIME
 			l_sql_delete_node_aliases: STRING
 		do
+			sql_begin_transaction
 			create l_time.make_now_utc
 			write_information_log (generator + ".delete_node_base {" + a_node.id.out + "}")
 
@@ -408,6 +409,9 @@ feature -- Change: Node
 
 			if not error_handler.has_error then
 				extended_delete (a_node)
+				sql_commit_transaction
+			else
+				sql_rollback_transaction
 			end
 		end
 
