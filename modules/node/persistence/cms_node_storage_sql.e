@@ -400,13 +400,6 @@ feature -- Change: Node
 			sql_modify (sql_delete_node_revisions, l_parameters)
 			sql_finalize
 
-				-- we remove node_aliases
-				-- Check: maybe we need a transaction.
-			create l_sql_delete_node_aliases.make_from_string (sql_delete_node_aliases)
-			l_sql_delete_node_aliases.replace_substring_all ("$nodeid", "node/" + a_node.id.out)
-			sql_modify (l_sql_delete_node_aliases, void)
-			sql_finalize
-
 			if not error_handler.has_error then
 				extended_delete (a_node)
 				sql_commit_transaction
@@ -429,7 +422,7 @@ feature -- Change: Node
 			l_parameters.put (l_time, "changed")
 			l_parameters.put ({CMS_NODE_API}.published, "status")
 			l_parameters.put (a_id, "nid")
-			sql_modify (sql_restore_node, l_parameters)
+			sql_modify (sql_update_node_status, l_parameters)
 			sql_finalize
 		end
 
@@ -572,7 +565,7 @@ feature {NONE} -- Queries
 	sql_delete_node: STRING = "DELETE FROM nodes WHERE nid=:nid"
 			-- Physical deletion with free metadata.		
 
-	sql_restore_node: STRING = "UPDATE nodes SET changed=:changed, status =:status WHERE nid=:nid"
+	sql_update_node_status: STRING = "UPDATE nodes SET changed=:changed, status =:status WHERE nid=:nid"
 			-- Restore node to  {CMS_NODE_API}.published
 
 	sql_last_insert_node_id: STRING = "SELECT MAX(nid) FROM nodes;"
@@ -596,7 +589,6 @@ feature {NONE} -- Queries
 
 	sql_delete_node_revisions: STRING = "DELETE FROM node_revisions WHERE nid=:nid;"
 
-	sql_delete_node_aliases: STRING = "DELETE FROM path_aliases WHERE source='$nodeid';"
 
 feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 
