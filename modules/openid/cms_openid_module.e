@@ -74,7 +74,7 @@ feature {CMS_API} -- Module Initialization
 			Precursor (a_api)
 
 				-- Storage initialization
-			if attached {CMS_STORAGE_SQL_I} a_api.storage as l_storage_sql then
+			if attached a_api.storage.as_sql_storage as l_storage_sql then
 				create {CMS_OPENID_STORAGE_SQL} l_openid_storage.make (l_storage_sql)
 			else
 				-- FIXME: in case of NULL storage, should Current be disabled?
@@ -93,7 +93,7 @@ feature {CMS_API} -- Module management
 	install (api: CMS_API)
 		do
 				-- Schema
-			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
+			if attached api.storage.as_sql_storage as l_sql_storage then
 				if not l_sql_storage.sql_table_exists ("openid_consumers") then
 					--| Schema
 					l_sql_storage.sql_execute_file_script (api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended ("openid_consumers.sql")), Void)

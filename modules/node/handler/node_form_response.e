@@ -117,7 +117,7 @@ feature {NONE} -- Create a new node
 				hooks.invoke_form_alter (f, fd, Current)
 				if request.is_post_request_method then
 					f.validation_actions.extend (agent edit_form_validate (?, b))
-					f.submit_actions.extend (agent edit_form_submit (?, l_node, a_type, b))
+					f.submit_actions.put_front (agent edit_form_submit (?, l_node, a_type, b))
 					f.process (Current)
 					fd := f.last_data
 				end
@@ -147,7 +147,7 @@ feature {NONE} -- Create a new node
 			hooks.invoke_form_alter (f, fd, Current)
 			if request.is_post_request_method then
 				f.validation_actions.extend (agent edit_form_validate (?, b))
-				f.submit_actions.extend (agent edit_form_submit (?, a_node, a_type, b))
+				f.submit_actions.put_front (agent edit_form_submit (?, a_node, a_type, b))
 				f.process (Current)
 				fd := f.last_data
 			end
