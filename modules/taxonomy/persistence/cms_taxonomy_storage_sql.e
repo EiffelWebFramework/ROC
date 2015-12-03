@@ -198,6 +198,38 @@ feature -- Access
 			end
 		end
 
+	entities_associated_with_term (a_term: CMS_TERM): detachable LIST [TUPLE [entity: READABLE_STRING_32; type: detachable READABLE_STRING_32]]
+			-- Entities and related typename associated with `a_term'.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+			l_typename: detachable READABLE_STRING_32
+		do
+			error_handler.reset
+
+			create l_parameters.make (3)
+			l_parameters.put (a_term.id, "tid")
+			sql_query (sql_select_entity_and_type_by_term, l_parameters)
+
+			if not has_error then
+				create {ARRAYED_LIST [TUPLE [entity: READABLE_STRING_32; type: detachable READABLE_STRING_32]]} Result.make (0)
+				from
+					sql_start
+				until
+					sql_after or has_error
+				loop
+					if attached sql_read_string_32 (1) as l_entity then
+						l_typename := sql_read_string_32 (2)
+						if l_typename /= Void and then l_typename.is_whitespace then
+							l_typename := Void
+						end
+						Result.force ([l_entity, l_typename])
+					end
+					sql_forth
+				end
+			end
+			sql_finalize
+		end
+
 feature -- Store
 
 	save_vocabulary (voc: CMS_VOCABULARY)
@@ -475,6 +507,12 @@ feature {NONE} -- Queries
 
 	sql_select_terms_of_entity: STRING = "[
 			SELECT tid FROM taxonomy_index WHERE type=:type AND entity=:entity;
+		]"
+
+	sql_select_entity_and_type_by_term: STRING = "[
+			SELECT entity, type FROM taxonomy_index WHERE tid=:tid AND entity > 0
+			ORDER BY type ASC, entity ASC
+			;
 		]"
 
 	sql_select_vocabulary_terms_of_entity: STRING = "[

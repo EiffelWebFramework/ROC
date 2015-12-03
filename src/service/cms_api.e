@@ -43,6 +43,8 @@ feature {NONE} -- Initialize
 		do
 				-- Initialize formats.
 			initialize_formats
+				-- Initialize contents.
+			initialize_content_types
 
 				-- Initialize storage.
 			if attached setup.storage (error_handler) as l_storage then
@@ -86,6 +88,12 @@ feature {NONE} -- Initialize
 					l_enabled_modules.remove (ic.item)
 				end
 			end
+		end
+
+	initialize_content_types
+			-- Initialize content types.
+		do
+			create content_types.make (1)
 		end
 
 	initialize_formats
@@ -155,6 +163,32 @@ feature -- Access
 
 	storage: CMS_STORAGE
 			-- Default persistence storage.	
+
+feature -- Content
+
+	content_types: ARRAYED_LIST [CMS_CONTENT_TYPE]
+			-- Available content types	
+
+	add_content_type (a_type: CMS_CONTENT_TYPE)
+			-- Register content type `a_type'.
+		do
+			content_types.force (a_type)
+		end
+
+	content_type (a_name: READABLE_STRING_GENERAL): detachable CMS_CONTENT_TYPE
+			-- Content type named `a_named' if any.
+		do
+			across
+				content_types as ic
+			until
+				Result /= Void
+			loop
+				Result := ic.item
+				if not a_name.is_case_insensitive_equal (Result.name) then
+					Result := Void
+				end
+			end
+		end
 
 feature -- Formats
 

@@ -35,7 +35,7 @@ feature {NONE} -- Initialization
 			version := "1.0"
 			description := "Taxonomy solution"
 			package := "core"
---			add_dependency ({CMS_NODE_MODULE})
+--			put_dependency ({CMS_NODE_MODULE}, False)
 		end
 
 feature -- Access
@@ -120,19 +120,9 @@ feature -- Access: router
 			-- Configure router mapping for web interface.
 		local
 			l_taxonomy_handler: TAXONOMY_HANDLER
-			l_uri_mapping: WSF_URI_MAPPING
 		do
 			create l_taxonomy_handler.make (a_api, a_taxonomy_api)
-				-- Let the class BLOG_HANDLER handle the requests on "/taxonomys"
-			create l_uri_mapping.make_trailing_slash_ignored ("/taxonomy", l_taxonomy_handler)
-			a_router.map (l_uri_mapping, a_router.methods_get)
-
-				-- We can add a page number after /taxonomys/ to get older posts
-			a_router.handle ("/taxonomy/{vocabulary}", l_taxonomy_handler, a_router.methods_get)
-
-				-- If a user id is given route with taxonomy user handler
-				--| FIXME: maybe /user/{user}/taxonomys/  would be better.
-			a_router.handle ("/taxonomy/{vocabulary}/{termid}", l_taxonomy_handler, a_router.methods_get)
+			a_router.handle ("/taxonomy/term/{termid}", l_taxonomy_handler, a_router.methods_get)
 		end
 
 feature -- Hooks

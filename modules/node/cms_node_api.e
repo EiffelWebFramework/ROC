@@ -40,8 +40,7 @@ feature {NONE} -- Initialization
 		local
 			ct: CMS_PAGE_NODE_TYPE
 		do
-				-- Initialize content types.			
-			create content_types.make (1)
+				-- Initialize node content types.			
 			create content_type_webform_managers.make (1)
 			create ct
 				--| For now, add all available formats to content type `ct'.
@@ -50,7 +49,7 @@ feature {NONE} -- Initialization
 			loop
 				ct.extend_format (ic.item)
 			end
-			add_content_type (ct)
+			add_node_type (ct)
 			add_content_type_webform_manager (create {CMS_PAGE_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
 		end
 
@@ -60,39 +59,21 @@ feature {CMS_MODULE} -- Access nodes storage.
 
 feature -- Content type
 
-	content_types: ARRAYED_LIST [CMS_CONTENT_TYPE]
-			-- Available content types
+	add_node_type (a_type: CMS_NODE_TYPE [CMS_NODE])
+			-- Register node content type `a_type'.
+		do
+			cms_api.add_content_type (a_type)
+		end
 
 	node_types: ARRAYED_LIST [attached like node_type]
 			-- Node content types.
 		do
-			create Result.make (content_types.count)
+			create Result.make (cms_api.content_types.count)
 			across
-				content_types as ic
+				cms_api.content_types as ic
 			loop
 				if attached {like node_type} ic.item as l_node_type then
 					Result.extend (l_node_type)
-				end
-			end
-		end
-
-	add_content_type (a_type: CMS_CONTENT_TYPE)
-			-- Register content type `a_type'.
-		do
-			content_types.force (a_type)
-		end
-
-	content_type (a_name: READABLE_STRING_GENERAL): detachable CMS_CONTENT_TYPE
-			-- Content type named `a_named' if any.
-		do
-			across
-				content_types as ic
-			until
-				Result /= Void
-			loop
-				Result := ic.item
-				if not a_name.is_case_insensitive_equal (Result.name) then
-					Result := Void
 				end
 			end
 		end
@@ -101,7 +82,7 @@ feature -- Content type
 			-- Content type named `a_named' if any.
 		do
 			across
-				content_types as ic
+				cms_api.content_types as ic
 			until
 				Result /= Void
 			loop

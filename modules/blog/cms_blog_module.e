@@ -65,7 +65,7 @@ feature {CMS_API} -- Module Initialization
 				loop
 					ct.extend_format (ic.item)
 				end
-				l_node_api.add_content_type (ct)
+				l_node_api.add_node_type (ct)
 				l_node_api.add_content_type_webform_manager (create {CMS_BLOG_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
 
 					-- Add support for CMS_BLOG, which requires a storage extension to store the optional "tags" value

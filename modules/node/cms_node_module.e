@@ -158,7 +158,7 @@ feature -- Access
 
 			if attached node_api as l_node_api then
 				across
-					l_node_api.content_types as ic
+					l_node_api.node_types as ic
 				loop
 					l_type_name := ic.item.name
 					if not l_type_name.is_whitespace then
@@ -285,7 +285,7 @@ feature -- Hooks
 				create perms.make (2)
 				perms.force ("create any node")
 				across
-					l_node_api.content_types as ic
+					l_node_api.node_types as ic
 				loop
 					perms.force ("create " + ic.item.name)
 				end
@@ -300,7 +300,7 @@ feature -- Hooks
 		do
 			if
 				attached node_api as l_node_api and then
-				attached l_node_api.content_types as l_types and then
+				attached l_node_api.node_types as l_types and then
 				not l_types.is_empty
 			then
 				create lst.make (l_types.count)

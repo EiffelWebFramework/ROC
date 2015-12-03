@@ -80,6 +80,13 @@ feature -- Access
 		deferred
 		end
 
+	entities_associated_with_term (a_term: CMS_TERM): detachable LIST [TUPLE [entity: READABLE_STRING_32; type: detachable READABLE_STRING_32]]
+			-- Entities and related typename associated with `a_term'.
+		require
+			a_term_exists: a_term.has_id
+		deferred
+		end
+
 feature -- Store
 
 	save_vocabulary (a_voc: CMS_VOCABULARY)

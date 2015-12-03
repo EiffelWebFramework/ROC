@@ -103,7 +103,7 @@ feature -- Access node
 			Result := taxonomy_storage.terms (a_vocab, a_limit, a_offset)
 		end
 
-	term_by_id (a_tid: INTEGER): detachable CMS_TERM
+	term_by_id (a_tid: INTEGER_64): detachable CMS_TERM
 		do
 			Result := taxonomy_storage.term_by_id (a_tid)
 		end
@@ -112,6 +112,14 @@ feature -- Access node
 			-- Term with text `a_term_text', included in vocabulary `a_vocabulary' if provided.
 		do
 			Result := taxonomy_storage.term_by_text (a_term_text, a_vocabulary)
+		end
+
+	entities_associated_with_term (a_term: CMS_TERM): detachable LIST [TUPLE [entity: READABLE_STRING_32; type: detachable READABLE_STRING_32]]
+			-- Entities and related typename associated with `a_term'.
+		require
+			a_term_exists: a_term.has_id
+		do
+			Result := taxonomy_storage.entities_associated_with_term (a_term)
 		end
 
 feature -- Write
