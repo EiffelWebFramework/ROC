@@ -37,14 +37,19 @@ feature -- Access
 		do
 		end
 
-	vocabularies (limit: NATURAL_32; offset: NATURAL_32): LIST [CMS_VOCABULARY]
-			-- List of vocabularies ordered by weight from offset to offset + limit.
+	vocabularies (a_limit: NATURAL_32; a_offset: NATURAL_32): CMS_VOCABULARY_COLLECTION
+			-- List of vocabularies ordered by weight from `a_offset' to `a_offset + a_limit'.
 		do
-			create {ARRAYED_LIST [CMS_VOCABULARY]} Result.make (0)
+			create Result.make (0)
 		end
 
 	vocabulary (a_id: INTEGER_64): detachable CMS_VOCABULARY
 			-- Vocabulary by id `a_id'.
+		do
+		end
+
+	vocabularies_for_type (a_type_name: READABLE_STRING_GENERAL): detachable CMS_VOCABULARY_COLLECTION
+			-- <Precursor>
 		do
 		end
 
@@ -58,18 +63,55 @@ feature -- Access
 		do
 		end
 
-	terms (a_vocab: CMS_VOCABULARY; limit: NATURAL_32; offset: NATURAL_32): LIST [CMS_TERM]
-			-- List of terms from vocabulary `a_vocab' ordered by weight from offset to offset + limit.
+	term_by_text (a_term_text: READABLE_STRING_GENERAL; a_vocabulary: detachable CMS_VOCABULARY): detachable CMS_TERM
 		do
-			create {ARRAYED_LIST [CMS_TERM]} Result.make (0)
+		end
+
+	terms (a_vocab: CMS_VOCABULARY; a_limit: NATURAL_32; a_offset: NATURAL_32): CMS_TERM_COLLECTION
+			-- List of terms from vocabulary `a_vocab' ordered by weight from `a_offset' to `a_offset + a_limit'.
+		do
+			create Result.make (0)
+		end
+
+	terms_of_entity (a_type_name: READABLE_STRING_GENERAL; a_entity: READABLE_STRING_GENERAL; a_vocabulary: detachable CMS_VOCABULARY): detachable CMS_TERM_COLLECTION
+			-- Terms related to `(a_type_name,a_entity)'.
+		do
 		end
 
 feature -- Store
 
-	save_term (t: CMS_TERM)
-			-- Insert or update term `t'.
+	save_vocabulary (a_voc: CMS_VOCABULARY)
+			-- Insert or update vocabulary `a_voc'.
 		do
-			error_handler.add_custom_error (-1, "not implemented", "")
+			error_handler.add_custom_error (-1, "not implemented", "save_vocabulary")
+		end
+
+	save_term (t: CMS_TERM; voc: CMS_VOCABULARY)
+			-- <Precursor>
+		do
+			error_handler.add_custom_error (-1, "not implemented", "save_term")
+		end
+
+	associate_term_with_entity (a_term: CMS_TERM; a_type_name: READABLE_STRING_GENERAL; a_entity: READABLE_STRING_GENERAL)
+		do
+			error_handler.add_custom_error (-1, "not implemented", "associate_term_with_entity")
+		end
+
+	unassociate_term_from_entity (a_term: CMS_TERM; a_type_name: READABLE_STRING_GENERAL; a_entity: READABLE_STRING_GENERAL)
+		do
+			error_handler.add_custom_error (-1, "not implemented", "unassociate_term_from_entity")
+		end
+
+	associate_vocabulary_with_type (a_voc: CMS_VOCABULARY; a_type_name: READABLE_STRING_GENERAL)
+			-- Associate vocabulary `a_voc' with type `a_type_name'.
+		do
+			error_handler.add_custom_error (-1, "not implemented", "associate_vocabulary_with_type")
+		end
+
+	unassociate_vocabulary_with_type (a_voc: CMS_VOCABULARY; a_type_name: READABLE_STRING_GENERAL)
+			-- Un-associate vocabulary `a_voc' from type `a_type_name'.
+		do
+			error_handler.add_custom_error (-1, "not implemented", "unassociate_vocabulary_with_type")
 		end
 
 end

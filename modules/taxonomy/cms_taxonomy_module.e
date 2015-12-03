@@ -17,7 +17,8 @@ inherit
 			initialize,
 			install,
 			uninstall,
-			taxonomy_api
+			taxonomy_api,
+			permissions
 		end
 
 	CMS_HOOK_MENU_SYSTEM_ALTER
@@ -41,6 +42,16 @@ feature -- Access
 
 	name: STRING = "taxonomy"
 
+	permissions: LIST [READABLE_STRING_8]
+			-- List of permission ids, used by this module, and declared.
+		do
+			Result := Precursor
+			Result.force ("admin taxonomy")
+			Result.force ("update any taxonomy")
+			Result.force ("update page taxonomy") -- related to node module
+			Result.force ("update blog taxonomy") -- related to blog module
+		end
+
 feature {CMS_API} -- Module Initialization			
 
 	initialize (api: CMS_API)
@@ -53,6 +64,9 @@ feature {CMS_API} -- Module Initialization
 feature {CMS_API} -- Module management
 
 	install (api: CMS_API)
+		local
+			voc: CMS_VOCABULARY
+			l_taxonomy_api: like taxonomy_api
 		do
 				-- Schema
 			if attached {CMS_STORAGE_SQL_I} api.storage as l_sql_storage then
@@ -61,6 +75,13 @@ feature {CMS_API} -- Module management
 					api.logger.put_error ("Could not install database for taxonomy module", generating_type)
 				end
 				Precursor (api)
+
+				create l_taxonomy_api.make (api)
+				create voc.make ("Tags")
+				voc.set_description ("Enter comma separated tags.")
+				l_taxonomy_api.save_vocabulary (voc)
+				voc.set_is_tags (True)
+				l_taxonomy_api.associate_vocabulary_with_type (voc, "page")
 			end
 		end
 

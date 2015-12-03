@@ -11,14 +11,25 @@ class
 inherit
 	COMPARABLE
 
+	DEBUG_OUTPUT
+		undefine
+			is_equal
+		end
+
 create
-	make
+	make,
+	make_with_id
 
 feature {NONE} -- Initialization
 
-	make (a_id: INTEGER_64; a_text: READABLE_STRING_GENERAL)
+	make_with_id (a_id: INTEGER_64; a_text: READABLE_STRING_GENERAL)
 		do
 			id := a_id
+			make (a_text)
+		end
+
+	make (a_text: READABLE_STRING_GENERAL)
+		do
 			set_text (a_text)
 		end
 
@@ -42,6 +53,19 @@ feature -- Status report
 			-- Has valid id?
 		do
 			Result := id > 0
+		end
+
+	debug_output: STRING_32
+			-- String that should be displayed in debugger to represent `Current'.
+		do
+			create Result.make_empty
+			Result.append_character ('#')
+			Result.append (id.out)
+			Result.append_character (' ')
+			Result.append (text)
+			Result.append_character (' ')
+			Result.append ("weight=")
+			Result.append_integer (weight)
 		end
 
 feature -- Comparison

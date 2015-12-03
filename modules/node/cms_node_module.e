@@ -41,6 +41,9 @@ feature {NONE} -- Initialization
 			description := "Service to manage content based on 'node'"
 			package := "core"
 			config := a_setup
+				-- Optional dependencies, mainly for information.
+			put_dependency ({CMS_RECENT_CHANGES_MODULE}, False)
+			put_dependency ({CMS_TAXONOMY_MODULE}, False)
 		end
 
 	config: CMS_SETUP
