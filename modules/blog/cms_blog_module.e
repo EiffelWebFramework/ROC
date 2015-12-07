@@ -12,7 +12,7 @@ inherit
 		rename
 			module_api as blog_api
 		redefine
-			register_hooks,
+			setup_hooks,
 			initialize,
 			install,
 			blog_api
@@ -66,7 +66,7 @@ feature {CMS_API} -- Module Initialization
 					ct.extend_format (ic.item)
 				end
 				l_node_api.add_node_type (ct)
-				l_node_api.add_content_type_webform_manager (create {CMS_BLOG_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
+				l_node_api.add_node_type_webform_manager (create {CMS_BLOG_NODE_TYPE_WEBFORM_MANAGER}.make (ct, l_node_api))
 
 					-- Add support for CMS_BLOG, which requires a storage extension to store the optional "tags" value
 					-- For now, we only have extension based on SQL statement.
@@ -153,11 +153,11 @@ feature -- Access: router
 
 feature -- Hooks
 
-	register_hooks (a_response: CMS_RESPONSE)
+	setup_hooks (a_hooks: CMS_HOOK_CORE_MANAGER)
 		do
-			a_response.hooks.subscribe_to_menu_system_alter_hook (Current)
-			a_response.hooks.subscribe_to_response_alter_hook (Current)
-			a_response.hooks.subscribe_to_export_hook (Current)
+			a_hooks.subscribe_to_menu_system_alter_hook (Current)
+			a_hooks.subscribe_to_response_alter_hook (Current)
+			a_hooks.subscribe_to_export_hook (Current)
 		end
 
 	response_alter (a_response: CMS_RESPONSE)

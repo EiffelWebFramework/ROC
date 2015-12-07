@@ -28,6 +28,7 @@ feature {NONE} -- Initialize
 			setup := a_setup
 			create error_handler.make
 			create {CMS_ENV_LOGGER} logger.make
+			create hooks.make
 			initialize
 		ensure
 			setup_set: setup = a_setup
@@ -88,12 +89,15 @@ feature {NONE} -- Initialize
 					l_enabled_modules.remove (ic.item)
 				end
 			end
+				-- Initialize hooks system
+			setup_hooks
 		end
 
 	initialize_content_types
 			-- Initialize content types.
 		do
 			create content_types.make (1)
+			create content_type_webform_managers.make (1)
 		end
 
 	initialize_formats
@@ -185,6 +189,38 @@ feature -- Content
 			loop
 				Result := ic.item
 				if not a_name.is_case_insensitive_equal (Result.name) then
+					Result := Void
+				end
+			end
+		end
+
+feature -- Content type webform
+
+	content_type_webform_managers: ARRAYED_LIST [CMS_CONTENT_TYPE_WEBFORM_MANAGER [CMS_CONTENT]]
+			-- Available content types
+
+	add_content_type_webform_manager (a_manager: CMS_CONTENT_TYPE_WEBFORM_MANAGER [CMS_CONTENT])
+			-- Register webform manager `a_manager'.
+		do
+			content_type_webform_managers.force (a_manager)
+		end
+
+	content_type_webform_manager (a_content_type: CMS_CONTENT_TYPE): detachable CMS_CONTENT_TYPE_WEBFORM_MANAGER [CMS_CONTENT]
+			-- Web form manager for content type `a_content_type' if any.
+		do
+			Result := content_type_webform_manager_by_name (a_content_type.name)
+		end
+
+	content_type_webform_manager_by_name (a_content_type_name: READABLE_STRING_GENERAL): detachable CMS_CONTENT_TYPE_WEBFORM_MANAGER [CMS_CONTENT]
+			-- Web form manager for content type named `a_content_type_name' if any.
+		do
+			across
+				content_type_webform_managers as ic
+			until
+				Result /= Void
+			loop
+				Result := ic.item
+				if not a_content_type_name.is_case_insensitive_equal (Result.name) then
 					Result := Void
 				end
 			end
@@ -356,9 +392,37 @@ feature -- Query: module
 			end
 		end
 
+feature -- Hooks
+
+	hooks: CMS_HOOK_CORE_MANAGER
+			-- Manager handling hook subscriptions.
+
+feature {NONE} -- Hooks
+
+	setup_hooks
+			-- Set up CMS hooks.
+			--| Each module has to opportunity to subscribe to various hooks.
+		local
+			l_module: CMS_MODULE
+			l_hooks: like hooks
+		do
+			l_hooks := hooks
+			register_hooks (l_hooks)
+			across
+				enabled_modules as ic
+			loop
+				l_module := ic.item
+				if attached {CMS_HOOK_AUTO_REGISTER} l_module as l_auto then
+					l_auto.auto_subscribe_to_hooks (l_hooks)
+				end
+				l_module.setup_hooks (l_hooks)
+			end
+		end
+
 feature -- Query: API
 
 	user_api: CMS_USER_API
+			-- API to access user related data.
 		local
 			l_api: like internal_user_api
 		do

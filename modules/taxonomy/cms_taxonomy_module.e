@@ -13,7 +13,7 @@ inherit
 		rename
 			module_api as taxonomy_api
 		redefine
-			register_hooks,
+			setup_hooks,
 			initialize,
 			install,
 			uninstall,
@@ -127,10 +127,10 @@ feature -- Access: router
 
 feature -- Hooks
 
-	register_hooks (a_response: CMS_RESPONSE)
+	setup_hooks (a_hooks: CMS_HOOK_CORE_MANAGER)
 		do
-			a_response.hooks.subscribe_to_menu_system_alter_hook (Current)
-			a_response.hooks.subscribe_to_response_alter_hook (Current)
+			a_hooks.subscribe_to_menu_system_alter_hook (Current)
+			a_hooks.subscribe_to_response_alter_hook (Current)
 		end
 
 	response_alter (a_response: CMS_RESPONSE)

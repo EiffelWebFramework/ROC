@@ -68,9 +68,10 @@ feature -- HTTP Methods
 		local
 			l_page: CMS_RESPONSE
 			tid: INTEGER_64
-			l_typename: detachable READABLE_STRING_8
 			l_entity: detachable READABLE_STRING_32
 			s: STRING
+			l_contents: CMS_TAXONOMY_ENTITY_CONTAINER
+			ct: CMS_CONTENT
 		do
 			if
 				attached {WSF_STRING} req.path_parameter ("termid") as p_termid and then
@@ -83,38 +84,58 @@ feature -- HTTP Methods
 				if attached taxonomy_api.term_by_id (tid) as t then
 						-- Responding with `main_content_html (l_page)'.
 					create {GENERIC_VIEW_CMS_RESPONSE} l_page.make (req, res, api)
+					l_page.set_title (t.text)
 					create s.make_empty
-					l_page.set_page_title ("Entities associated with term %"" + l_page.html_encoded (t.text) + "%":")
-
 					if
 						attached taxonomy_api.entities_associated_with_term (t) as l_entity_type_lst and then
 						not l_entity_type_lst.is_empty
 					then
-						s.append ("<ul class=%"taxonomy-entities%">")
-						across
-							l_entity_type_lst as ic
-						loop
-								-- FIXME: for now basic implementation .. to be replaced by specific hook !
-							if attached ic.item.entity as e and then e.is_valid_as_string_8 then
-								l_entity := e.to_string_8
-								if attached ic.item.type as l_type and then l_type.is_valid_as_string_8 then
-									l_typename := l_type.to_string_8
-								else
-									l_typename := Void
-								end
-								if l_typename /= Void then
-									s.append ("<li class=%""+ l_typename +"%">")
-									if
-										l_typename.is_case_insensitive_equal_general ("page")
-										or l_typename.is_case_insensitive_equal_general ("blog")
-									then
-										s.append (l_page.link ({STRING_32} "" + l_typename + "/" + l_entity, "node/" + l_entity.to_string_8, Void))
-									end
-									s.append ("</li>%N")
+						create l_contents.make (l_entity_type_lst, 25, create {DATE_TIME}.make_now_utc, Void)
+						if attached api.hooks.subscribers ({CMS_TAXONOMY_HOOK}) as lst then
+							across
+								lst as ic
+							loop
+								if attached {CMS_TAXONOMY_HOOK} ic.item as h then
+									h.populate_content_associated_with_term (t, l_contents)
 								end
 							end
+							l_contents.sort
+							s.append ("<ul class=%"taxonomy-entities%">")
+							across
+								l_contents as ic
+							loop
+								ct := ic.item.content
+								s.append ("<li class=%""+ ct.content_type +"%">")
+								if attached ct.link as lnk then
+									l_page.append_link_to_html (lnk.title, lnk.location, Void, s)
+								end
+								if attached api.content_type_webform_manager_by_name (ct.content_type) as l_wfm then
+									l_wfm.append_content_as_html_to (ct, True, s, l_page)
+								end
+								s.append ("</li>%N")
+							end
+							s.append ("</ul>%N")
 						end
-						s.append ("</ul>%N")
+						if not l_contents.taxonomy_info.is_empty then
+							check all_taxo_handled: False end
+							s.append ("<ul class=%"error%">Item(s) with unknown content type!")
+							across
+								l_contents.taxonomy_info as ic
+							loop
+									-- FIXME: for now basic implementation .. to be replaced by specific hook !
+								if attached ic.item.entity as e and then e.is_valid_as_string_8 then
+									l_entity := e
+									s.append ("<li>Entity %"")
+									s.append (api.html_encoded (e))
+									s.append ("%"")
+									if attached ic.item.typename as l_type and then l_type.is_valid_as_string_8 then
+										s.append (" {" + api.html_encoded (l_type) + "}")
+									end
+									s.append ("</li>")
+								end
+							end
+							s.append ("</ul>%N")
+						end
 					else
 						s.append ("No entity found.")
 					end

@@ -14,7 +14,7 @@ inherit
 			module_api as user_openid_api
 		redefine
 			filters,
-			register_hooks,
+			setup_hooks,
 			initialize,
 			install,
 			user_openid_api
@@ -166,12 +166,12 @@ feature -- Router
 
 feature -- Hooks configuration
 
-	register_hooks (a_response: CMS_RESPONSE)
+	setup_hooks (a_hooks: CMS_HOOK_CORE_MANAGER)
 			-- Module hooks configuration.
 		do
-			auto_subscribe_to_hooks (a_response)
-			a_response.hooks.subscribe_to_block_hook (Current)
-			a_response.hooks.subscribe_to_value_table_alter_hook (Current)
+			auto_subscribe_to_hooks (a_hooks)
+			a_hooks.subscribe_to_block_hook (Current)
+			a_hooks.subscribe_to_value_table_alter_hook (Current)
 		end
 
 feature -- Hooks

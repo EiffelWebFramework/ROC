@@ -78,7 +78,7 @@ feature -- Access
 		do
 		end
 
-	entities_associated_with_term (a_term: CMS_TERM): detachable LIST [TUPLE [entity: READABLE_STRING_32; type: detachable READABLE_STRING_32]]
+	entities_associated_with_term (a_term: CMS_TERM): detachable LIST [TUPLE [entity: READABLE_STRING_32; typename: detachable READABLE_STRING_32]]
 			-- Entities and related typename associated with `a_term'.
 		do
 		end

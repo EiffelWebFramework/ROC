@@ -198,7 +198,7 @@ feature -- Access
 			end
 		end
 
-	entities_associated_with_term (a_term: CMS_TERM): detachable LIST [TUPLE [entity: READABLE_STRING_32; type: detachable READABLE_STRING_32]]
+	entities_associated_with_term (a_term: CMS_TERM): detachable LIST [TUPLE [entity: READABLE_STRING_32; typename: detachable READABLE_STRING_32]]
 			-- Entities and related typename associated with `a_term'.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
@@ -211,7 +211,7 @@ feature -- Access
 			sql_query (sql_select_entity_and_type_by_term, l_parameters)
 
 			if not has_error then
-				create {ARRAYED_LIST [TUPLE [entity: READABLE_STRING_32; type: detachable READABLE_STRING_32]]} Result.make (0)
+				create {ARRAYED_LIST [TUPLE [entity: READABLE_STRING_32; typename: detachable READABLE_STRING_32]]} Result.make (0)
 				from
 					sql_start
 				until

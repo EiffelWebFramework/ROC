@@ -41,7 +41,6 @@ feature {NONE} -- Initialization
 			ct: CMS_PAGE_NODE_TYPE
 		do
 				-- Initialize node content types.			
-			create content_type_webform_managers.make (1)
 			create ct
 				--| For now, add all available formats to content type `ct'.
 			across
@@ -50,7 +49,7 @@ feature {NONE} -- Initialization
 				ct.extend_format (ic.item)
 			end
 			add_node_type (ct)
-			add_content_type_webform_manager (create {CMS_PAGE_NODE_TYPE_WEBFORM_MANAGER}.make (ct))
+			add_node_type_webform_manager (create {CMS_PAGE_NODE_TYPE_WEBFORM_MANAGER}.make (ct, Current))
 		end
 
 feature {CMS_MODULE} -- Access nodes storage.
@@ -106,31 +105,16 @@ feature -- Content type
 
 feature -- Content type webform
 
-	content_type_webform_managers: ARRAYED_LIST [CMS_CONTENT_TYPE_WEBFORM_MANAGER]
+	content_type_webform_managers: ARRAYED_LIST [CMS_CONTENT_TYPE_WEBFORM_MANAGER [CMS_CONTENT]]
 			-- Available content types
-
-	add_content_type_webform_manager (a_manager: CMS_CONTENT_TYPE_WEBFORM_MANAGER)
-			-- Register webform manager `a_manager'.
 		do
-			content_type_webform_managers.force (a_manager)
+			Result := cms_api.content_type_webform_managers
 		end
 
-	content_type_webform_manager (a_content_type: CMS_CONTENT_TYPE): detachable CMS_CONTENT_TYPE_WEBFORM_MANAGER
-			-- Web form manager for content type `a_content_type' if any.
-		local
-			l_type_name: READABLE_STRING_GENERAL
+	add_node_type_webform_manager (a_manager: CMS_NODE_TYPE_WEBFORM_MANAGER [CMS_NODE])
+			-- Register webform manager `a_manager'.
 		do
-			l_type_name := a_content_type.name
-			across
-				content_type_webform_managers as ic
-			until
-				Result /= Void
-			loop
-				Result := ic.item
-				if not l_type_name.is_case_insensitive_equal (Result.name) then
-					Result := Void
-				end
-			end
+			cms_api.add_content_type_webform_manager (a_manager)
 		end
 
 	node_type_webform_manager (a_node_type: CMS_CONTENT_TYPE): detachable CMS_NODE_TYPE_WEBFORM_MANAGER_I [CMS_NODE]
