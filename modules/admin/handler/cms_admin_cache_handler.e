@@ -63,7 +63,7 @@ feature -- Execution
 				fd.is_valid
 			then
 				if attached fd.string_item ("op") as l_op and then l_op.same_string (text_clear_all_caches) then
-					l_response.hooks.invoke_clear_cache (Void, l_response)
+					api.hooks.invoke_clear_cache (Void, l_response)
 					l_response.add_notice_message ("Caches cleared (if allowed)!")
 				else
 					fd.report_error ("Invalid form data!")
