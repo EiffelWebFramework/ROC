@@ -91,7 +91,7 @@ feature {CMS_API} -- Module management
 					l_sql_storage.sql_execute_file_script (api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended ("session_auth_table.sql")), Void)
 
 					if l_sql_storage.has_error then
-						api.logger.put_error ("Could not initialize database for blog module", generating_type)
+						api.logger.put_error ("Could not initialize database for session auth module", generating_type)
 					end
 				end
 				l_sql_storage.sql_finalize
@@ -141,11 +141,11 @@ feature {NONE} -- Implementation: routes
 			l_cookie: WSF_COOKIE
 		do
 			if
-				attached {WSF_STRING} req.cookie ({CMS_SESSION_CONSTANT}.session_auth_token) as l_cookie_token and then
+				attached {WSF_STRING} req.cookie ({CMS_SESSION_CONSTANTS}.session_auth_token) as l_cookie_token and then
 				attached {CMS_USER} current_user (req) as l_user
 			then
 					-- Logout Session
-				create l_cookie.make ({CMS_SESSION_CONSTANT}.session_auth_token, l_cookie_token.value)
+				create l_cookie.make ({CMS_SESSION_CONSTANTS}.session_auth_token, l_cookie_token.value)
 				l_cookie.set_path ("/")
 				l_cookie.set_max_age (-1)
 				res.add_cookie (l_cookie)
@@ -181,8 +181,8 @@ feature {NONE} -- Implementation: routes
 				else
 					l_session_api.new_user_session_auth (l_token, l_user)
 				end
-				create l_cookie.make ({CMS_SESSION_CONSTANT}.session_auth_token, l_token)
-				l_cookie.set_max_age (60*60*24*360)
+				create l_cookie.make ({CMS_SESSION_CONSTANTS}.session_auth_token, l_token)
+				l_cookie.set_max_age ({CMS_SESSION_CONSTANTS}.session_max_age)
 				l_cookie.set_path ("/")
 				res.add_cookie (l_cookie)
 				set_current_user (req, l_user)
@@ -219,7 +219,7 @@ feature -- Hooks
 		do
 			if
 				attached a_response.user as u and then
-				attached {WSF_STRING} a_response.request.cookie ({CMS_SESSION_CONSTANT}.session_auth_token)
+				attached {WSF_STRING} a_response.request.cookie ({CMS_SESSION_CONSTANTS}.session_auth_token)
 			then
 				a_value.force ("account/roc-session-logout", "auth_login_strategy")
 			end
@@ -235,7 +235,7 @@ feature -- Hooks
 		do
 			if
 				attached a_response.user as u and then
-				attached {WSF_STRING} a_response.request.cookie ({CMS_SESSION_CONSTANT}.session_auth_token)
+				attached {WSF_STRING} a_response.request.cookie ({CMS_SESSION_CONSTANTS}.session_auth_token)
 			then
 				across
 					a_menu_system.primary_menu.items as ic
