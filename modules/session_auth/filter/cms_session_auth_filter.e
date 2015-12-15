@@ -39,7 +39,7 @@ feature -- Basic operations
 			api.logger.put_debug (generator + ".execute ", Void)
 				-- A valid user
 			if
-				attached {WSF_STRING} req.cookie ({CMS_SESSION_CONSTANT}.session_auth_token) as l_roc_auth_session_token
+				attached {WSF_STRING} req.cookie ({CMS_SESSION_CONSTANTS}.session_auth_token) as l_roc_auth_session_token
 			then
 				if attached session_oauth_api.user_by_session_token (l_roc_auth_session_token.value) as l_user then
 					set_current_user (req, l_user)
