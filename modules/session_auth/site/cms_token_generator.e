@@ -58,7 +58,7 @@ feature {NONE} -- Implementation
 				l_array.force (c.item.as_integer_8, i)
 				i := i + 1
 			end
-			Result := encode_base_64 (l_array)
+			Result := base_64 (l_array)
 		end
 
 	sha1_string (a_str: STRING): STRING
@@ -71,14 +71,14 @@ feature {NONE} -- Implementation
 
 	sha1: SHA1
 			-- Create a SHA1 object.
-		once
+		do
 			create Result.make
 		end
 
 feature -- Encoding
 
 
-	encode_base_64 (bytes: SPECIAL [INTEGER_8]): STRING_8
+	base_64 (bytes: SPECIAL [INTEGER_8]): STRING_8
 			-- Encodes a byte array into a STRING doing base64 encoding.
 		local
 			l_output: SPECIAL [INTEGER_8]
@@ -130,7 +130,7 @@ feature -- Encoding
 				l_output [ptr] := char.code.as_integer_8
 				ptr := ptr + 1
 			end
-			Result := ""
+			create Result.make_empty
 			across
 				l_output as elem
 			loop
