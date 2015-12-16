@@ -488,6 +488,37 @@ feature -- Web forms
 			end
 		end
 
+	append_taxonomy_to_xhtml (a_content: CMS_CONTENT; a_response: CMS_RESPONSE; a_output: STRING)
+			-- Append taxonomy related to `a_content' to xhtml string `a_output',
+			-- using `a_response' helper routines.
+		do
+			if
+				attached vocabularies_for_type (a_content.content_type) as vocs and then not vocs.is_empty
+			then
+				vocs.sort
+				across
+					vocs as ic
+				loop
+					if
+						attached terms_of_content (a_content, ic.item) as l_terms and then
+						not l_terms.is_empty
+					then
+						a_output.append ("<ul class=%"taxonomy term-" + ic.item.id.out + "%">")
+						a_output.append (cms_api.html_encoded (ic.item.name))
+						a_output.append (": ")
+						across
+							l_terms as t_ic
+						loop
+							a_output.append ("<li>")
+							a_response.append_link_to_html (t_ic.item.text, "taxonomy/term/" + t_ic.item.id.out, Void, a_output)
+							a_output.append ("</li>")
+						end
+						a_output.append ("</ul>%N")
+					end
+				end
+			end
+		end
+
 feature -- Helpers
 
 	splitted_string (s: READABLE_STRING_32; sep: CHARACTER): LIST [READABLE_STRING_32]

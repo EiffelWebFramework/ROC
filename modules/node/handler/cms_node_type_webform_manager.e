@@ -334,30 +334,9 @@ feature -- Output
 
 			if
 				a_response /= Void and then
-				attached {CMS_TAXONOMY_API} cms_api.module_api ({CMS_TAXONOMY_MODULE}) as l_taxonomy_api and then
-				attached l_taxonomy_api.vocabularies_for_type (content_type.name) as vocs and then not vocs.is_empty
+				attached {CMS_TAXONOMY_API} cms_api.module_api ({CMS_TAXONOMY_MODULE}) as l_taxonomy_api
 			then
-				vocs.sort
-				across
-					vocs as ic
-				loop
-					if
-						attached l_taxonomy_api.terms_of_content (a_node, ic.item) as l_terms and then
-						not l_terms.is_empty
-					then
-						a_output.append ("<ul class=%"taxonomy term-" + ic.item.id.out + "%">")
-						a_output.append (l_node_api.html_encoded (ic.item.name))
-						a_output.append (": ")
-						across
-							l_terms as t_ic
-						loop
-							a_output.append ("<li>")
-							a_response.append_link_to_html (t_ic.item.text, "taxonomy/term/" + t_ic.item.id.out, Void, a_output)
-							a_output.append ("</li>")
-						end
-						a_output.append ("</ul>%N")
-					end
-				end
+				l_taxonomy_api.append_taxonomy_to_xhtml (a_node, a_response, a_output)
 			end
 
 			-- We don't show the summary on the detail page, since its just a short view of the full content. Otherwise we would write the same thing twice.
