@@ -88,6 +88,11 @@ feature {NONE} -- Initialization
 				contact_subject_oauth := "Welcome."
 			end
 
+			contact_subject_account_evaluation := "New register, account evalution"
+
+			contact_subject_rejected := "Your account was rejected"
+
+			contact_subject_activated := "Your account was activated"
 		end
 
 feature	-- Access
@@ -101,10 +106,20 @@ feature	-- Access
 	contact_email: IMMUTABLE_STRING_8
 			-- Contact email.
 
+	contact_subject_account_evaluation: IMMUTABLE_STRING_8
 	contact_subject_register: IMMUTABLE_STRING_8
 	contact_subject_activate: IMMUTABLE_STRING_8
 	contact_subject_password: IMMUTABLE_STRING_8
 	contact_subject_oauth: IMMUTABLE_STRING_8
+	contact_subject_rejected: IMMUTABLE_STRING_8
+	contact_subject_activated: IMMUTABLE_STRING_8
+
+
+	account_evaluation: STRING
+			-- Account evaluation template email message.
+		do
+			Result := template_string ("account_evaluation.html", default_template_account_evaluation)
+		end
 
 	account_activation: STRING
 			-- Account activation template email message.
@@ -112,10 +127,22 @@ feature	-- Access
 			Result := template_string ("account_activation.html", default_template_account_activation)
 		end
 
+	account_activation_confirmation: STRING
+			-- Account activation confirmation template email message.
+		do
+			Result := template_string ("account_activation_confirmation.html", default_template_account_activation_confirmation)
+		end
+
 	account_re_activation: STRING
 			-- Account re_activation template email message.
 		do
 			Result := template_string ("accunt_re_activation.html", default_template_account_re_activation)
+		end
+
+	account_rejected: STRING
+			-- Account rejected template email message.
+		do
+			Result := template_string ("accunt_rejected.html", default_template_account_rejected)
 		end
 
 	account_password: STRING
@@ -146,7 +173,7 @@ feature {NONE} -- Implementation: Template
 		local
 			p: PATH
 		do
-			p := template_path ("account_activation.html")
+			p := template_path (a_name)
 			if attached read_template_file (p) as l_content then
 				Result := l_content
 			else
@@ -177,6 +204,36 @@ feature {NONE} -- Implementation
 
 feature {NONE} -- Message email
 
+	default_template_account_evaluation: STRING = "[
+		<!doctype html>
+		<html lang="en">
+		<head>
+		  <meta charset="utf-8">
+		  <title>Account Evaluation</title>
+		  <meta name="description" content="Account Evaluation">
+		  <meta name="author" content="ROC CMS">
+		</head>
+
+		<body>
+		    <h2> Account Evaluation </h2>
+			<p>The user $user ($email) wants to register to the site</p>
+
+			<blockquote><p>This is his/her application.</p>
+  				<p>$application</p>
+			</blockquote>
+
+			<p>To complete the registration, please click on the following link to activate the user account:<p>
+
+			<p><a href="$activate">$activate</a></p>
+
+			<p>To reject the registration, please click on the following link <p>
+
+			<p><a href="$reject">$reject</a></p>
+		</body>
+		</html>
+	]"
+
+
 	default_template_account_activation: STRING = "[
 		<!doctype html>
 		<html lang="en">
@@ -188,16 +245,48 @@ feature {NONE} -- Message email
 		</head>
 
 		<body>
-			<p>Thank you for registering at <a href="...">ROC CMS</a></p>
+			<p>Thank you for applying to  <a href="...">ROC CMS</a> $user</p>
 
-			<p>To complete your registration, please click on the following link to activate your account:<p>
-
-			<p><a href="$link">$link</a></p>
+			<p>We will review your application and send you an email<p>
 			<p>Thank you for joining us.</p>
 		</body>
 		</html>
 	]"
 
+
+	default_template_account_activation_confirmation: STRING = "[
+		<!doctype html>
+		<html lang="en">
+		<head>
+		  <meta charset="utf-8">
+		  <title>Activation</title>
+		  <meta name="description" content="Activation Confirmation">
+		  <meta name="author" content="ROC CMS">
+		</head>
+
+		<body>
+			<p>Your account has been confirmed  <a href="...">ROC CMS</a> $email</p>
+
+			<p>Thank you for joining us.</p>
+		</body>
+		</html>
+	]"
+
+	default_template_account_rejected:  STRING = "[
+		<!doctype html>
+		<html lang="en">
+		<head>
+		  <meta charset="utf-8">
+		  <title>New Activation</title>
+		  <meta name="description" content="Application Rejected">
+		  <meta name="author" content="ROC CMS">
+		</head>
+
+		<body>
+			<p>You requested has been rejected, your application does not conform our rules <a href="...">ROC CMS</a></p>
+		</body>
+		</html>
+	]"
 
 	default_template_account_re_activation: STRING = "[
 		<!doctype html>

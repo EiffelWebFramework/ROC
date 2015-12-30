@@ -20,8 +20,19 @@
                     <span><i>{$error_email/}</i></span> <br>
                 {/if}
             </div>
-            
-            
+            <div>
+               <textarea rows="4" cols="50" name="application" id="application" required>
+			   				{$application/}
+			   </textarea>
+			   <label for="application">Application Sentence</label>
+                {if isset="$error_application"}
+                    <span><i>{$error_application/}</i></span> <br>
+                {/if}
+            </div>
+            {unless isempty="$recaptcha_site_key"}
+        		<div class="g-recaptcha" data-sitekey="{$recaptcha_site_key/}"></div>
+        	<br/>
+			{/unless}
             <button type="submit">Register</button>
         </fieldset>    
     </form>
