@@ -80,6 +80,11 @@ feature -- Access
 			--			active
 			--			trashed
 
+	application: detachable STRING_32
+			-- User application
+
+	salt: detachable STRING_32
+			-- User's password salt.		
 
 feature -- Access: helper
 
@@ -220,6 +225,24 @@ feature -- Change element
 			set_last_login_date (create {DATE_TIME}.make_now_utc)
 		end
 
+	feature -- Element change
+
+	set_application (an_application: like application)
+			-- Assign `application' with `an_application'.
+		do
+			application := an_application
+		ensure
+			application_assigned: application = an_application
+		end
+
+	set_salt (a_salt: like salt)
+			-- Assign `salt' with `a_salt'.
+		do
+			salt := a_salt
+		ensure
+			salt_assigned: salt = a_salt
+		end
+
 feature -- Element change: roles
 
 	set_roles (lst: like roles)
@@ -302,6 +325,6 @@ invariant
 	id_or_name_set: id > 0 or else not name.is_whitespace
 
 note
-	copyright: "2011-2015, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	copyright: "2011-2016, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

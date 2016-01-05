@@ -1,7 +1,7 @@
  <div>
     <form action="{$site_url/}account/roc-register" method="post">
         <fieldset>
-            <legend>Register Form</legend>
+            <legend>Registration</legend>
             <div>
                 <input type="text" id="name" name="name"  value="{$name/}" required  autofocus />
                 <label for="name">Name</label>
@@ -24,7 +24,7 @@
                <textarea rows="4" cols="50" name="application" id="application" required>
 			   				{$application/}
 			   </textarea>
-			   <label for="application">Application Sentence</label>
+			   <label for="application">Tell us why you want to register an account</label>
                 {if isset="$error_application"}
                     <span><i>{$error_application/}</i></span> <br>
                 {/if}

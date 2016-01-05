@@ -58,14 +58,14 @@ feature -- New Temp User
 		deferred
 		end
 
-	new_temp_user (a_user: CMS_TEMPORAL_USER)
+	new_temp_user (a_user: CMS_USER)
 			-- New temp user `a_user'.
 		require
 			no_id: not a_user.has_id
 		deferred
 		end
 
-	delete_user (a_user: CMS_TEMPORAL_USER)
+	delete_user (a_user: CMS_USER)
 			-- Delete user `a_user'.
 		require
 			has_id: a_user.has_id

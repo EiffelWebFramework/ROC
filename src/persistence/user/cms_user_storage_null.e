@@ -65,6 +65,11 @@ feature -- Change: user
 			a_user.set_id (1)
 		end
 
+	new_user_from_temporal_user (a_user: CMS_USER)
+		do
+			a_user.set_id (1)
+		end
+		
 	update_user (a_user: CMS_USER)
 			-- Update user `a_user'.
 		do
@@ -149,6 +154,6 @@ feature -- Change: User password recovery
 		end
 
 note
-	copyright: "2011-2015, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2016, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

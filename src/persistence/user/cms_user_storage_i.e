@@ -104,6 +104,12 @@ feature -- Change: user
 		deferred
 		end
 
+	new_user_from_temporal_user (a_user: CMS_USER)
+		require
+			no_id: not a_user.has_id
+		deferred
+		end
+
 	update_user (a_user: CMS_USER)
 			-- Save user `a_user'.
 		require
@@ -234,6 +240,6 @@ feature -- Change: User password recovery
 		end
 
 note
-	copyright: "2011-2015, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2016, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

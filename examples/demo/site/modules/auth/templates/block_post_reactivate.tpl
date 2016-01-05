@@ -1,3 +1,3 @@
 <div>
-    <p>We have send you a new activation code, check your email to activate your account.</p>
+    <p>We have send an email to the administrator, with a new activation code to activate the user account.</p>
 </div>

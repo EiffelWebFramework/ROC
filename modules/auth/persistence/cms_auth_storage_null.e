@@ -48,12 +48,12 @@ feature -- Temp Users
 		do
 		end
 
-	new_temp_user (a_user: CMS_TEMPORAL_USER)
+	new_temp_user (a_user: CMS_USER)
 			-- <Precursor>
 		do
 		end
 
-	delete_user (a_user: CMS_TEMPORAL_USER)
+	delete_user (a_user: CMS_USER)
 			-- <Precursor>
 		do
 		end

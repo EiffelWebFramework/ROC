@@ -101,7 +101,7 @@ feature -- Basic Operations
 		do
 			create l_message.make_from_string (parameters.account_rejected)
 			l_message.replace_substring_all ("$link", a_content)
-			send_message (contact_email, a_to, parameters.contact_subject_activate, l_message)
+			send_message (contact_email, a_to, parameters.contact_subject_rejected, l_message)
 		end
 
 

@@ -101,7 +101,7 @@ feature -- Access User Outh
 
 feature {NONE} -- Implementation: User
 
-	fetch_user: detachable CMS_TEMPORAL_USER
+	fetch_user: detachable CMS_USER
 		local
 			l_id: INTEGER_64
 			l_name: detachable READABLE_STRING_32
@@ -125,7 +125,10 @@ feature {NONE} -- Implementation: User
 			if Result /= Void then
 				if attached sql_read_string (3) as l_password then
 						-- FIXME: should we return the password here ???
-					Result.set_password (l_password)
+					Result.set_hashed_password (l_password)
+				end
+				if attached sql_read_string (4) as l_salt then
+					Result.set_email (l_salt)
 				end
 				if attached sql_read_string (5) as l_email then
 					Result.set_email (l_email)
@@ -141,7 +144,7 @@ feature {NONE} -- Implementation: User
 
 feature -- New Temp User	
 
-	new_temp_user (a_user: CMS_TEMPORAL_USER)
+	new_temp_user (a_user: CMS_USER)
 			-- Add a new temp_user `a_user'.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
@@ -200,7 +203,7 @@ feature -- Remove Activation
 			sql_finalize
 		end
 
-	delete_user (a_user: CMS_TEMPORAL_USER)
+	delete_user (a_user: CMS_USER)
 			-- Delete user `a_user'.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]

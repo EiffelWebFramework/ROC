@@ -251,7 +251,26 @@ feature -- Change User
 		do
 			reset_error
 			if
-				attached a_user.password as l_password and then
+				attached a_user.email as l_email
+			then
+				storage.new_user (a_user)
+				error_handler.append (storage.error_handler)
+			else
+				error_handler.add_custom_error (0, "bad new user request", "Missing password or email to create new user!")
+			end
+		end
+
+	new_user_from_temporal_user (a_user: CMS_USER)
+			-- Add a new user `a_user'.
+		require
+			no_id: not a_user.has_id
+			has_hashed_password: a_user.hashed_password /= Void
+			has_sal: a_user.salt /= Void
+		do
+			reset_error
+			if
+				attached a_user.hashed_password as l_password and then
+				attached a_user.salt as l_salt and then
 				attached a_user.email as l_email
 			then
 				storage.new_user (a_user)
@@ -321,6 +340,6 @@ feature -- User status
 			-- The user is trashed (soft delete), ready to be deleted/destroyed from storage.
 
 note
-	copyright: "2011-2015, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2016, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -49,7 +49,7 @@ feature -- Access
 
 feature -- Temp User
 
-	new_temp_user (a_user: CMS_TEMPORAL_USER)
+	new_temp_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.
 		require
 			no_id: not a_user.has_id
@@ -73,7 +73,7 @@ feature -- Temp User
 			auth_storage.remove_activation (a_token)
 		end
 
-	delete_user (a_user: CMS_TEMPORAL_USER)
+	delete_user (a_user: CMS_USER)
 			-- Delete user `a_user'.
 		require
 			has_id: a_user.has_id
