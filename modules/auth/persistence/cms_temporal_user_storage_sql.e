@@ -1,13 +1,13 @@
 note
-	description: "Summary description for {CMS_AUTH_STORAGE_SQL}."
+	description: "Summary description for {CMS_TEMPORAL_USER_STORAGE_SQL}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_AUTH_STORAGE_SQL
+	CMS_TEMPORAL_USER_STORAGE_SQL
 
 inherit
-	CMS_AUTH_STORAGE_I
+	CMS_TEMPORAL_USER_STORAGE_I
 
 	CMS_PROXY_STORAGE_SQL
 
@@ -18,7 +18,22 @@ inherit
 create
 	make
 
-feature -- Access User Outh
+feature -- Access User
+
+	users_count: INTEGER
+			-- Number of items users.
+		do
+			error_handler.reset
+			write_information_log (generator + ".user_count")
+
+			sql_query (select_temporal_users_count, Void)
+			if not has_error and then not sql_after then
+				Result := sql_read_integer_64 (1).to_integer_32
+				sql_forth
+				check one_row: sql_after end
+			end
+			sql_finalize
+		end
 
 
 	user_temp_by_id (a_uid: like {CMS_USER}.id; a_consumer: READABLE_STRING_GENERAL): detachable CMS_USER
@@ -98,10 +113,56 @@ feature -- Access User Outh
 			sql_finalize
 		end
 
+	recent_users (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_TEMPORAL_USER]
+			-- <Precursor>
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			create {ARRAYED_LIST [CMS_TEMPORAL_USER]} Result.make (0)
+
+			error_handler.reset
+			write_information_log (generator + ".recent_users")
+
+			from
+				create l_parameters.make (2)
+				l_parameters.put (a_count, "rows")
+				l_parameters.put (a_lower, "offset")
+				sql_query (sql_select_recent_users, l_parameters)
+				sql_start
+			until
+				sql_after
+			loop
+				if attached fetch_user as l_user then
+					Result.force (l_user)
+				end
+				sql_forth
+			end
+			sql_finalize
+		end
+
+	token_by_user_id (a_id: like {CMS_USER}.id): detachable STRING
+			-- Number of items users.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+		do
+			error_handler.reset
+			write_information_log (generator + ".token_by_user_id")
+			create l_parameters.make (1)
+			l_parameters.put (a_id, "uid")
+
+
+			sql_query (select_token_activation_by_user_id, l_parameters)
+			if not has_error and then not sql_after then
+				Result := sql_read_string (1)
+				sql_forth
+				check one_row: sql_after end
+			end
+			sql_finalize
+		end
 
 feature {NONE} -- Implementation: User
 
-	fetch_user: detachable CMS_USER
+	fetch_user: detachable CMS_TEMPORAL_USER
 		local
 			l_id: INTEGER_64
 			l_name: detachable READABLE_STRING_32
@@ -124,17 +185,16 @@ feature {NONE} -- Implementation: User
 
 			if Result /= Void then
 				if attached sql_read_string (3) as l_password then
-						-- FIXME: should we return the password here ???
 					Result.set_hashed_password (l_password)
 				end
 				if attached sql_read_string (4) as l_salt then
-					Result.set_email (l_salt)
+					Result.set_salt (l_salt)
 				end
 				if attached sql_read_string (5) as l_email then
 					Result.set_email (l_email)
 				end
 				if attached sql_read_string (6) as l_application then
-					Result.set_application (l_application)
+					Result.set_personal_information (l_application)
 				end
 			else
 				check expected_valid_user: False end
@@ -142,9 +202,47 @@ feature {NONE} -- Implementation: User
 		end
 
 
-feature -- New Temp User	
+feature -- New Temp User
 
-	new_temp_user (a_user: CMS_USER)
+	new_user_from_temporal_user (a_user: CMS_TEMPORAL_USER)
+			-- <Precursor>
+  		local
+  			l_parameters: STRING_TABLE [detachable ANY]
+  		do
+  			error_handler.reset
+  			if
+  				attached a_user.hashed_password as l_password_hash and then
+  				attached a_user.email as l_email and then
+  				attached a_user.salt as l_password_salt
+  			then
+  				sql_begin_transaction
+
+  				write_information_log (generator  + ".new_user")
+  				create l_parameters.make (4)
+  				l_parameters.put (a_user.name, "name")
+  				l_parameters.put (l_password_hash, "password")
+  				l_parameters.put (l_password_salt, "salt")
+  				l_parameters.put (l_email, "email")
+  				l_parameters.put (create {DATE_TIME}.make_now_utc, "created")
+  				l_parameters.put (a_user.status, "status")
+
+  				sql_insert (sql_insert_user, l_parameters)
+  				if not error_handler.has_error then
+  					a_user.set_id (last_inserted_user_id)
+  				end
+  				if not error_handler.has_error then
+  					sql_commit_transaction
+  				else
+  					sql_rollback_transaction
+  				end
+  				sql_finalize
+  			else
+  				-- set error
+  				error_handler.add_custom_error (-1, "bad request" , "Missing password or email")
+  			end
+  		end
+
+	new_temp_user (a_user: CMS_TEMPORAL_USER)
 			-- Add a new temp_user `a_user'.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
@@ -155,7 +253,7 @@ feature -- New Temp User
 			if
 				attached a_user.password as l_password and then
 				attached a_user.email as l_email and then
-				attached a_user.application as l_application
+				attached a_user.personal_information as l_personal_information
 			then
 
 				create l_security
@@ -168,12 +266,12 @@ feature -- New Temp User
 				l_parameters.put (l_password_hash, "password")
 				l_parameters.put (l_password_salt, "salt")
 				l_parameters.put (l_email, "email")
-				l_parameters.put (l_application, "application")
+				l_parameters.put (l_personal_information, "application")
 
 				sql_begin_transaction
-				sql_insert (sql_insert_user, l_parameters)
+				sql_insert (sql_insert_temp_user, l_parameters)
 				if not error_handler.has_error then
-					a_user.set_id (last_inserted_user_id)
+					a_user.set_id (last_inserted_temp_user_id)
 					sql_commit_transaction
 				else
 					sql_rollback_transaction
@@ -213,18 +311,32 @@ feature -- Remove Activation
 			write_information_log (generator + ".delete_user")
 			create l_parameters.make (1)
 			l_parameters.put (a_user.id, "uid")
-			sql_modify (sql_delete_user, l_parameters)
+			sql_modify (sql_delete_temp_user, l_parameters)
 			sql_commit_transaction
 			sql_finalize
 		end
 feature  {NONE} -- Implementation
+
+	last_inserted_temp_user_id: INTEGER_64
+			-- Last insert user id.
+		do
+			error_handler.reset
+			write_information_log (generator + ".last_inserted_temp_user_id")
+			sql_query (sql_last_insert_temp_user_id, Void)
+			if not sql_after then
+				Result := sql_read_integer_64 (1)
+				sql_forth
+				check one_row: sql_after end
+			end
+			sql_finalize
+		end
 
 	last_inserted_user_id: INTEGER_64
 			-- Last insert user id.
 		do
 			error_handler.reset
 			write_information_log (generator + ".last_inserted_user_id")
-			sql_query (Sql_last_insert_user_id, Void)
+			sql_query (sql_last_insert_user_id, Void)
 			if not sql_after then
 				Result := sql_read_integer_64 (1)
 				sql_forth
@@ -235,25 +347,42 @@ feature  {NONE} -- Implementation
 
 feature {NONE} -- SQL select
 
-	Sql_last_insert_user_id: STRING = "SELECT MAX(uid) FROM auth_temp_user;"
-
-	Select_user_auth_temp_by_id: STRING = "SELECT uid, name, password, salt, email, application FROM auth_temp_user as u where uid=:uid;"
+	sql_last_insert_temp_user_id: STRING = "SELECT MAX(uid) FROM auth_temp_users;"
 
 
-	sql_insert_user: STRING = "INSERT INTO auth_temp_user (name, password, salt, email, application) VALUES (:name, :password, :salt, :email, :application);"
+	Select_user_auth_temp_by_id: STRING = "SELECT uid, name, password, salt, email, application FROM auth_temp_users as u where uid=:uid;"
+
+
+	sql_insert_temp_user: STRING = "INSERT INTO auth_temp_users (name, password, salt, email, application) VALUES (:name, :password, :salt, :email, :application);"
 			-- SQL Insert to add a new user.
 
-	Select_user_by_name: STRING = "SELECT uid, name, password, salt, email, application FROM auth_temp_user WHERE name =:name;"
+	Select_user_by_name: STRING = "SELECT uid, name, password, salt, email, application FROM auth_temp_users WHERE name =:name;"
 			-- Retrieve user by name if exists.
 
-	Select_user_by_email: STRING = "SELECT uid, name, password, salt, email, application FROM auth_temp_user WHERE email =:email;"
+	Select_user_by_email: STRING = "SELECT uid, name, password, salt, email, application FROM auth_temp_users WHERE email =:email;"
 			-- Retrieve user by email if exists.
 
-	Select_user_by_activation_token: STRING = "SELECT u.uid, u.name, u.password, u.salt, u.email, u.application FROM auth_temp_user as u JOIN users_activations as ua ON ua.uid = u.uid and ua.token = :token;"
+	Select_user_by_activation_token: STRING = "SELECT u.uid, u.name, u.password, u.salt, u.email, u.application FROM auth_temp_users as u JOIN users_activations as ua ON ua.uid = u.uid and ua.token = :token;"
 			-- Retrieve user by activation token if exist.
 
 	Sql_remove_activation: STRING = "DELETE FROM users_activations WHERE token = :token;"
 			-- Remove activation token.		
 
-	Sql_delete_user: STRING = "DELETE FROM auth_temp_user WHERE uid=:uid;"
+	sql_delete_temp_user: STRING = "DELETE FROM auth_temp_users WHERE uid=:uid;"
+
+
+	Sql_last_insert_user_id: STRING = "SELECT MAX(uid) FROM users;"
+
+	sql_insert_user: STRING = "INSERT INTO users (name, password, salt, email, created, status) VALUES (:name, :password, :salt, :email, :created, :status);"
+			-- SQL Insert to add a new user.		
+
+
+	Select_temporal_users_count: STRING = "SELECT count(*) FROM auth_temp_users;"
+			-- Number of temporal users.			
+
+	Sql_select_recent_users: STRING = "SELECT uid, name, password, salt, email, application FROM auth_temp_users ORDER BY uid DESC LIMIT :rows OFFSET :offset ;"
+			-- Retrieve recent users
+
+	select_token_activation_by_user_id: STRING = "SELECT token FROM users_activations WHERE uid = :uid;"
+
 end

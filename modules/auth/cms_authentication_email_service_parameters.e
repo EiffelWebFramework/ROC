@@ -17,18 +17,17 @@ feature {NONE} -- Initialization
 	make (a_cms_api: CMS_API)
 		local
 			utf: UTF_CONVERTER
-			l_site_name: READABLE_STRING_8
 			s: detachable READABLE_STRING_32
 			l_contact_email, l_subject_register, l_subject_activate, l_subject_password, l_subject_oauth: detachable READABLE_STRING_8
 		do
 			cms_api := a_cms_api
 				-- Use global smtp setting if any, otherwise "localhost"
 			smtp_server := utf.escaped_utf_32_string_to_utf_8_string_8 (a_cms_api.setup.text_item_or_default ("smtp", "localhost"))
-			l_site_name := utf.escaped_utf_32_string_to_utf_8_string_8 (a_cms_api.setup.site_name)
+			site_name := utf.escaped_utf_32_string_to_utf_8_string_8 (a_cms_api.setup.site_name)
 			admin_email := a_cms_api.setup.site_email
 
 			if not admin_email.has ('<') then
-				admin_email := l_site_name + " <" + admin_email +">"
+				admin_email := site_name + " <" + admin_email +">"
 			end
 
 			if attached {CONFIG_READER} a_cms_api.module_configuration_by_name ({CMS_AUTHENTICATION_MODULE}.name, Void) as cfg then
@@ -60,7 +59,7 @@ feature {NONE} -- Initialization
 			end
 			if l_contact_email /= Void then
 				if not l_contact_email.has ('<') then
-					l_contact_email := l_site_name + " <" + l_contact_email + ">"
+					l_contact_email := site_name + " <" + l_contact_email + ">"
 				end
 				contact_email := l_contact_email
 			else
@@ -95,6 +94,8 @@ feature {NONE} -- Initialization
 			contact_subject_activated := "Your account was activated"
 		end
 
+
+
 feature	-- Access
 
 	cms_api: CMS_API
@@ -105,6 +106,9 @@ feature	-- Access
 
 	contact_email: IMMUTABLE_STRING_8
 			-- Contact email.
+
+	site_name: IMMUTABLE_STRING_8
+			-- Site name.
 
 	contact_subject_account_evaluation: IMMUTABLE_STRING_8
 	contact_subject_register: IMMUTABLE_STRING_8
@@ -118,7 +122,7 @@ feature	-- Access
 	account_evaluation: STRING
 			-- Account evaluation template email message.
 		do
-			Result := template_string ("account_evaluation.html", default_template_account_evaluation)
+			Result := template_string ("admin_account_evaluation.html", default_template_account_evaluation)
 		end
 
 	account_activation: STRING
@@ -211,12 +215,12 @@ feature {NONE} -- Message email
 		  <meta charset="utf-8">
 		  <title>Account Evaluation</title>
 		  <meta name="description" content="Account Evaluation">
-		  <meta name="author" content="ROC CMS">
+		  <meta name="author" content="$sitename">
 		</head>
 
 		<body>
 		    <h2> Account Evaluation </h2>
-			<p>The user $user ($email) wants to register to the site</p>
+			<p>The user $user ($email) wants to register to the site  <a href="$host">$sitename</a></p>
 
 			<blockquote><p>This is his/her application.</p>
   				<p>$application</p>
@@ -224,11 +228,11 @@ feature {NONE} -- Message email
 
 			<p>To complete the registration, please click on the following link to activate the user account:<p>
 
-			<p><a href="$activate">$activate</a></p>
+			<p><a href="$activation_url">$activation_url</a></p>
 
 			<p>To reject the registration, please click on the following link <p>
 
-			<p><a href="$reject">$reject</a></p>
+			<p><a href="$rejection_url">$rejection_url</a></p>
 		</body>
 		</html>
 	]"
@@ -241,11 +245,11 @@ feature {NONE} -- Message email
 		  <meta charset="utf-8">
 		  <title>Activation</title>
 		  <meta name="description" content="Activation">
-		  <meta name="author" content="ROC CMS">
+		  <meta name="author" content="$sitename">
 		</head>
 
 		<body>
-			<p>Thank you for applying to  <a href="...">ROC CMS</a> $user</p>
+			<p>Thank you for applying to  <a href="$host">$sitename</a> $user</p>
 
 			<p>We will review your application and send you an email<p>
 			<p>Thank you for joining us.</p>
@@ -261,11 +265,11 @@ feature {NONE} -- Message email
 		  <meta charset="utf-8">
 		  <title>Activation</title>
 		  <meta name="description" content="Activation Confirmation">
-		  <meta name="author" content="ROC CMS">
+		  <meta name="author" content="$sitename">
 		</head>
 
 		<body>
-			<p>Your account has been confirmed  <a href="...">ROC CMS</a> $email</p>
+			<p>Your account has been confirmed  <a href="$host">$sitename</a> $email</p>
 
 			<p>Thank you for joining us.</p>
 		</body>
@@ -277,13 +281,13 @@ feature {NONE} -- Message email
 		<html lang="en">
 		<head>
 		  <meta charset="utf-8">
-		  <title>New Activation</title>
+		  <title>Application Rejected</title>
 		  <meta name="description" content="Application Rejected">
-		  <meta name="author" content="ROC CMS">
+		  <meta name="author" content="$sitename">
 		</head>
 
 		<body>
-			<p>You requested has been rejected, your application does not conform our rules <a href="...">ROC CMS</a></p>
+			<p>You requested has been rejected, your application does not conform our rules <a href="$host">$sitename</a></p>
 		</body>
 		</html>
 	]"
@@ -295,11 +299,11 @@ feature {NONE} -- Message email
 		  <meta charset="utf-8">
 		  <title>New Activation</title>
 		  <meta name="description" content="New Activation token">
-		  <meta name="author" content="ROC CMS">
+		  <meta name="author" content="$sitename">
 		</head>
 
 		<body>
-			<p>You have requested a new activation token at <a href="...">ROC CMS</a></p>
+			<p>You have requested a new activation token at <a href="$host">$sitename</a></p>
 
 			<p>To complete your registration, please click on the following link to activate your account:<p>
 
@@ -318,11 +322,11 @@ feature {NONE} -- Message email
 		  <meta charset="utf-8">
 		  <title>New Password</title>
 		  <meta name="description" content="New Password">
-		  <meta name="author" content="ROC CMS">
+		  <meta name="author" content="$sitename">
 		</head>
 
 		<body>
-			<p>You have required a new password at <a href="...">ROC CMS</a></p>
+			<p>You have required a new password at <a href="$host">$sitename</a></p>
 
 			<p>To complete your request, please click on this link to generate a new password:<p>
 
@@ -339,11 +343,11 @@ feature {NONE} -- Message email
 		  <meta charset="utf-8">
 		  <title>Welcome</title>
 		  <meta name="description" content="Welcome">
-		  <meta name="author" content="ROC CMS">
+		  <meta name="author" content="$sitename">
 		</head>
 
 		<body>
-			<p>Welcome to<a href="...">ROC CMS</a></p>
+			<p>Welcome to<a href="...">$sitename</a></p>
 			<p>Thank you for joining us.</p>
 		</body>
 		</html>

@@ -1,14 +1,14 @@
 note
-	description: "Summary description for {CMS_AUTH_STORAGE_NULL}."
+	description: "Summary description for {CMS_TEMPORAL_USER_STORAGE_NULL}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_AUTH_STORAGE_NULL
+	CMS_TEMPORAL_USER_STORAGE_NULL
 
 inherit
 
-	CMS_AUTH_STORAGE_I
+	CMS_TEMPORAL_USER_STORAGE_I
 
 
 feature -- Error handler
@@ -20,6 +20,11 @@ feature -- Error handler
 		end
 
 feature -- Access: Users
+
+	users_count: INTEGER
+			-- <Precursor>
+		do
+		end
 
 	user_temp_by_id (a_uid: like {CMS_USER}.id; a_consumer_table: READABLE_STRING_GENERAL): detachable CMS_USER
 			-- <Precursor>
@@ -41,14 +46,31 @@ feature -- Access: Users
 		do
 		end
 
+	recent_users (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_TEMPORAL_USER]
+			-- List of recent `a_count' temporal users with an offset of `lower'.
+		do
+			create {ARRAYED_LIST[CMS_TEMPORAL_USER]} Result.make (0)
+		end
+
+	token_by_user_id (a_id: like {CMS_USER}.id): detachable STRING
+			-- <Precursor>
+		do
+		end
+
 feature -- Temp Users
+
+	new_user_from_temporal_user (a_user: CMS_TEMPORAL_USER)
+			-- <Precursor>
+		do
+  		end
+
 
 	remove_activation (a_token: READABLE_STRING_32)
 			-- <Precursor>.
 		do
 		end
 
-	new_temp_user (a_user: CMS_USER)
+	new_temp_user (a_user: CMS_TEMPORAL_USER)
 			-- <Precursor>
 		do
 		end

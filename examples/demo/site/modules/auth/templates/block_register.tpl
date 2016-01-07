@@ -21,10 +21,10 @@
                 {/if}
             </div>
             <div>
-               <textarea rows="4" cols="50" name="application" id="application" required>
-			   				{$application/}
+               <textarea rows="4" cols="50" name="personal_information" id="personal_information" required>
+			   				{$personal_information/}
 			   </textarea>
-			   <label for="application">Tell us why you want to register an account</label>
+			   <label for="personal_information">Tell us why you want to register an account</label>
                 {if isset="$error_application"}
                     <span><i>{$error_application/}</i></span> <br>
                 {/if}

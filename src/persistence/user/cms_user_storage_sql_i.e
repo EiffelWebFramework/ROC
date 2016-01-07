@@ -198,45 +198,6 @@ feature -- Access: user
 		end
 feature -- Change: user
 
-	new_user_from_temporal_user (a_user: CMS_USER)
-			-- Add a new user `a_user'.
-		local
-			l_parameters: STRING_TABLE [detachable ANY]
-		do
-			error_handler.reset
-			if
-				attached a_user.hashed_password as l_password_hash and then
-				attached a_user.email as l_email and then
-				attached a_user.salt as l_password_salt
-			then
-				sql_begin_transaction
-
-				write_information_log (generator + ".new_user")
-				create l_parameters.make (4)
-				l_parameters.put (a_user.name, "name")
-				l_parameters.put (l_password_hash, "password")
-				l_parameters.put (l_password_salt, "salt")
-				l_parameters.put (l_email, "email")
-				l_parameters.put (create {DATE_TIME}.make_now_utc, "created")
-				l_parameters.put (a_user.status, "status")
-
-				sql_insert (sql_insert_user, l_parameters)
-				if not error_handler.has_error then
-					a_user.set_id (last_inserted_user_id)
-					update_user_roles (a_user)
-				end
-				if not error_handler.has_error then
-					sql_commit_transaction
-				else
-					sql_rollback_transaction
-				end
-				sql_finalize
-			else
-				-- set error
-				error_handler.add_custom_error (-1, "bad request" , "Missing password or email")
-			end
-		end
-
 	new_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.
 		local

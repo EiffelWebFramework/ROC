@@ -1,12 +1,12 @@
 note
 	description: "[
-		API to handle OAUTH storage
+		API to handle temporal User storage
 		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
 deferred class
-	CMS_AUTH_STORAGE_I
+	CMS_TEMPORAL_USER_STORAGE_I
 
 inherit
 	SHARED_LOGGER
@@ -20,8 +20,14 @@ feature -- Error Handling
 
 feature -- Access: Users
 
+	users_count: INTEGER
+			-- Number of pending users
+			--! to be accepted or rejected
+		deferred
+		end
+
 	user_temp_by_id (a_uid: like {CMS_USER}.id; a_consumer_table: READABLE_STRING_GENERAL): detachable CMS_USER
-			-- Retrieve a user by id `a_uid' for the consumer `a_consumer', if aby.
+			-- Retrieve a temporal user by id `a_uid' for the consumer `a_consumer', if aby.
 		deferred
 		end
 
@@ -51,14 +57,33 @@ feature -- Access: Users
 			password: Result /= Void implies (Result.hashed_password /= Void and Result.password = Void)
 		end
 
+	recent_users (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_TEMPORAL_USER]
+			-- List of recent `a_count' temporal users with an offset of `lower'.
+		deferred
+		end
+
+
+	token_by_user_id (a_id: like {CMS_USER}.id): detachable STRING
+			-- Retrieve activation token for user identified with id `a_id', if any.
+		deferred
+		end
+
+
 feature -- New Temp User
+
+	new_user_from_temporal_user (a_user: CMS_TEMPORAL_USER)
+  			-- new user from temporal user `a_user'
+  		require
+  			no_id: not a_user.has_id
+  		deferred
+  		end
 
 	remove_activation (a_token: READABLE_STRING_32)
 			-- Remove activation by token `a_token'.
 		deferred
 		end
 
-	new_temp_user (a_user: CMS_USER)
+	new_temp_user (a_user: CMS_TEMPORAL_USER)
 			-- New temp user `a_user'.
 		require
 			no_id: not a_user.has_id

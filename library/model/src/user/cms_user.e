@@ -80,12 +80,6 @@ feature -- Access
 			--			active
 			--			trashed
 
-	application: detachable STRING_32
-			-- User application
-
-	salt: detachable STRING_32
-			-- User's password salt.		
-
 feature -- Access: helper
 
 	utf_8_name: STRING_8
@@ -223,24 +217,6 @@ feature -- Change element
 	set_last_login_date_now
 		do
 			set_last_login_date (create {DATE_TIME}.make_now_utc)
-		end
-
-	feature -- Element change
-
-	set_application (an_application: like application)
-			-- Assign `application' with `an_application'.
-		do
-			application := an_application
-		ensure
-			application_assigned: application = an_application
-		end
-
-	set_salt (a_salt: like salt)
-			-- Assign `salt' with `a_salt'.
-		do
-			salt := a_salt
-		ensure
-			salt_assigned: salt = a_salt
 		end
 
 feature -- Element change: roles

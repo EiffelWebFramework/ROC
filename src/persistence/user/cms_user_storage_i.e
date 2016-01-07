@@ -104,12 +104,6 @@ feature -- Change: user
 		deferred
 		end
 
-	new_user_from_temporal_user (a_user: CMS_USER)
-		require
-			no_id: not a_user.has_id
-		deferred
-		end
-
 	update_user (a_user: CMS_USER)
 			-- Save user `a_user'.
 		require
