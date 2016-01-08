@@ -1,13 +1,13 @@
 note
-	description: "Summary description for {CMS_TEMPORAL_USER_STORAGE_SQL}."
+	description: "Summary description for {CMS_TEMP_USER_STORAGE_SQL}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_TEMPORAL_USER_STORAGE_SQL
+	CMS_TEMP_USER_STORAGE_SQL
 
 inherit
-	CMS_TEMPORAL_USER_STORAGE_I
+	CMS_TEMP_USER_STORAGE_I
 
 	CMS_PROXY_STORAGE_SQL
 
@@ -113,12 +113,12 @@ feature -- Access User
 			sql_finalize
 		end
 
-	recent_users (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_TEMPORAL_USER]
+	recent_users (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_TEMP_USER]
 			-- <Precursor>
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
-			create {ARRAYED_LIST [CMS_TEMPORAL_USER]} Result.make (0)
+			create {ARRAYED_LIST [CMS_TEMP_USER]} Result.make (0)
 
 			error_handler.reset
 			write_information_log (generator + ".recent_users")
@@ -162,7 +162,7 @@ feature -- Access User
 
 feature {NONE} -- Implementation: User
 
-	fetch_user: detachable CMS_TEMPORAL_USER
+	fetch_user: detachable CMS_TEMP_USER
 		local
 			l_id: INTEGER_64
 			l_name: detachable READABLE_STRING_32
@@ -204,7 +204,7 @@ feature {NONE} -- Implementation: User
 
 feature -- New Temp User
 
-	new_user_from_temporal_user (a_user: CMS_TEMPORAL_USER)
+	new_user_from_temporal_user (a_user: CMS_TEMP_USER)
 			-- <Precursor>
   		local
   			l_parameters: STRING_TABLE [detachable ANY]
@@ -242,7 +242,7 @@ feature -- New Temp User
   			end
   		end
 
-	new_temp_user (a_user: CMS_TEMPORAL_USER)
+	new_temp_user (a_user: CMS_TEMP_USER)
 			-- Add a new temp_user `a_user'.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
@@ -301,7 +301,7 @@ feature -- Remove Activation
 			sql_finalize
 		end
 
-	delete_user (a_user: CMS_USER)
+	delete_user (a_user: CMS_TEMP_USER)
 			-- Delete user `a_user'.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]

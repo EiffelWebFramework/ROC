@@ -1,5 +1,3 @@
-
-DROP TABLE IF EXISTS "auth_temp_users";
 CREATE TABLE `auth_temp_users` (
   `uid` INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
   `name` VARCHAR(100) NOT NULL,
@@ -10,4 +8,6 @@ CREATE TABLE `auth_temp_users` (
   CONSTRAINT `name`
     UNIQUE(`name`)
 );
+
+
 

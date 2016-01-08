@@ -108,7 +108,7 @@ feature	-- Access
 			-- Contact email.
 
 	site_name: IMMUTABLE_STRING_8
-			-- Site name.
+			-- UTF-8 encoded Site name.
 
 	contact_subject_account_evaluation: IMMUTABLE_STRING_8
 	contact_subject_register: IMMUTABLE_STRING_8

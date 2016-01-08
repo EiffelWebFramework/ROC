@@ -4,7 +4,7 @@ note
 	revision: "$Revision$"
 
 class
-	CMS_USER_TEMP_API
+	CMS_TEMP_USER_API
 
 inherit
 	CMS_MODULE_API
@@ -16,7 +16,7 @@ create {CMS_AUTHENTICATION_MODULE}
 
 feature {NONE} -- Initialization
 
-	make_with_storage (a_api: CMS_API; a_auth_storage: CMS_TEMPORAL_USER_STORAGE_I)
+	make_with_storage (a_api: CMS_API; a_auth_storage: CMS_TEMP_USER_STORAGE_I)
 			-- Create an object with api `a_api' and storage `a_auth_storage'.
 		do
 			auth_storage := a_auth_storage
@@ -52,7 +52,7 @@ feature -- Access
 			Result := auth_storage.user_by_activation_token (a_token)
 		end
 
-	recent_users (params: CMS_DATA_QUERY_PARAMETERS): ITERABLE [CMS_TEMPORAL_USER]
+	recent_users (params: CMS_DATA_QUERY_PARAMETERS): ITERABLE [CMS_TEMP_USER]
 			-- List of the `a_rows' most recent users starting from  `a_offset'.
 		do
 			Result := auth_storage.recent_users (params.offset.to_integer_32, params.size.to_integer_32)
@@ -65,7 +65,7 @@ feature -- Access
 
 feature -- Temp User
 
-	new_user_from_temporal_user (a_user: CMS_TEMPORAL_USER)
+	new_user_from_temp_user (a_user: CMS_TEMP_USER)
 			-- Add a new user `a_user'.
 		require
 			no_id: not a_user.has_id
@@ -85,7 +85,7 @@ feature -- Temp User
 			end
 		end
 
-	new_temp_user (a_user: CMS_TEMPORAL_USER)
+	new_temp_user (a_user: CMS_TEMP_USER)
 			-- Add a new user `a_user'.
 		require
 			no_id: not a_user.has_id
@@ -109,7 +109,7 @@ feature -- Temp User
 			auth_storage.remove_activation (a_token)
 		end
 
-	delete_temporary_user (a_user: CMS_USER)
+	delete_temp_user (a_user: CMS_TEMP_USER)
 			-- Delete user `a_user'.
 		require
 			has_id: a_user.has_id
@@ -121,7 +121,7 @@ feature -- Temp User
 
 feature {CMS_MODULE} -- Access: User auth storage.
 
-	auth_storage: CMS_TEMPORAL_USER_STORAGE_I
+	auth_storage: CMS_TEMP_USER_STORAGE_I
 			-- storage interface.
 
 end

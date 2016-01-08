@@ -1,10 +1,10 @@
 note
-	description: "Summary description for {CMS_TEMPORAL_USER}."
+	description: "Summary description for {CMS_TEMP_USER}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_TEMPORAL_USER
+	CMS_TEMP_USER
 
 inherit
 

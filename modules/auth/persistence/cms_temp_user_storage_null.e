@@ -1,14 +1,14 @@
 note
-	description: "Summary description for {CMS_TEMPORAL_USER_STORAGE_NULL}."
+	description: "Summary description for {CMS_TEMP_USER_STORAGE_NULL}."
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	CMS_TEMPORAL_USER_STORAGE_NULL
+	CMS_TEMP_USER_STORAGE_NULL
 
 inherit
 
-	CMS_TEMPORAL_USER_STORAGE_I
+	CMS_TEMP_USER_STORAGE_I
 
 
 feature -- Error handler
@@ -46,10 +46,10 @@ feature -- Access: Users
 		do
 		end
 
-	recent_users (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_TEMPORAL_USER]
+	recent_users (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_TEMP_USER]
 			-- List of recent `a_count' temporal users with an offset of `lower'.
 		do
-			create {ARRAYED_LIST[CMS_TEMPORAL_USER]} Result.make (0)
+			create {ARRAYED_LIST[CMS_TEMP_USER]} Result.make (0)
 		end
 
 	token_by_user_id (a_id: like {CMS_USER}.id): detachable STRING
@@ -59,7 +59,7 @@ feature -- Access: Users
 
 feature -- Temp Users
 
-	new_user_from_temporal_user (a_user: CMS_TEMPORAL_USER)
+	new_user_from_temporal_user (a_user: CMS_TEMP_USER)
 			-- <Precursor>
 		do
   		end
@@ -70,12 +70,12 @@ feature -- Temp Users
 		do
 		end
 
-	new_temp_user (a_user: CMS_TEMPORAL_USER)
+	new_temp_user (a_user: CMS_TEMP_USER)
 			-- <Precursor>
 		do
 		end
 
-	delete_user (a_user: CMS_USER)
+	delete_user (a_user: CMS_TEMP_USER)
 			-- <Precursor>
 		do
 		end

@@ -91,16 +91,16 @@ feature {CMS_API} -- Module Initialization
 			-- <Precursor>
 		local
 			l_auth_api: like auth_api
-			l_user_auth_storage: CMS_TEMPORAL_USER_STORAGE_I
+			l_user_auth_storage: CMS_TEMP_USER_STORAGE_I
 		do
 			Precursor (a_api)
 
 				-- Storage initialization
 			if attached a_api.storage.as_sql_storage as l_storage_sql then
-				create {CMS_TEMPORAL_USER_STORAGE_SQL} l_user_auth_storage.make (l_storage_sql)
+				create {CMS_TEMP_USER_STORAGE_SQL} l_user_auth_storage.make (l_storage_sql)
 			else
 					-- FIXME: in case of NULL storage, should Current be disabled?
-				create {CMS_TEMPORAL_USER_STORAGE_NULL} l_user_auth_storage
+				create {CMS_TEMP_USER_STORAGE_NULL} l_user_auth_storage
 			end
 
 				-- API initialization
@@ -128,7 +128,7 @@ feature {CMS_API} -- Module Initialization
 
 feature {CMS_API} -- Access: API
 
-	auth_api: detachable CMS_USER_TEMP_API
+	auth_api: detachable CMS_TEMP_USER_API
 			-- <Precursor>
 
 feature -- Router
@@ -252,7 +252,7 @@ feature -- Handler
 		local
 			r: CMS_RESPONSE
 			l_user_api: CMS_USER_API
-			u: CMS_TEMPORAL_USER
+			u: CMS_TEMP_USER
 			l_exist: BOOLEAN
 			es: CMS_AUTHENTICATON_EMAIL_SERVICE
 			l_url_activate: STRING
@@ -337,19 +337,19 @@ feature -- Handler
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 				if r.has_permission ("account activate") then
 					if attached {WSF_STRING} req.path_parameter ("token") as l_token then
-						if attached {CMS_TEMPORAL_USER} l_auth_api.user_by_activation_token (l_token.value) as l_user then
+						if attached {CMS_TEMP_USER} l_auth_api.user_by_activation_token (l_token.value) as l_user then
 
 							-- TODO copy the personal information
 							--! to CMS_USER_PROFILE and persist data
 							--! check also CMS_USER.data_items
 
 								-- Delete temporal User
-							l_auth_api.delete_temporary_user (l_user)
+							l_auth_api.delete_temp_user (l_user)
 
 								-- Valid user_id
 							l_user.set_id (0)
 							l_user.mark_active
-							l_auth_api.new_user_from_temporal_user (l_user)
+							l_auth_api.new_user_from_temp_user (l_user)
 							l_auth_api.remove_activation (l_token.value)
 							r.set_main_content ("<p> The account <i>" + l_user.name + "</i> has been activated</p>")
 								-- Send Email
@@ -388,8 +388,8 @@ feature -- Handler
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 				if r.has_permission ("account reject") then
 					if attached {WSF_STRING} req.path_parameter ("token") as l_token then
-						if attached {CMS_USER} l_auth_api.user_by_activation_token (l_token.value) as l_user then
-							l_auth_api.delete_temporary_user (l_user)
+						if attached {CMS_TEMP_USER} l_auth_api.user_by_activation_token (l_token.value) as l_user then
+							l_auth_api.delete_temp_user (l_user)
 							r.set_main_content ("<p> The temporal account for <i>" + l_user.name + "</i> has been removed</p>")
 								-- Send Email
 							if attached l_user.email as l_email then
@@ -432,7 +432,7 @@ feature -- Handler
 					if req.is_post_request_method then
 						if attached {WSF_STRING} req.form_parameter ("email") as l_email then
 							l_user_api := api.user_api
-							if attached {CMS_TEMPORAL_USER} l_auth_api.user_by_email (l_email.value) as l_user then
+							if attached {CMS_TEMP_USER} l_auth_api.user_by_email (l_email.value) as l_user then
 									-- User exist create a new token and send a new email.
 								if l_user.is_active then
 									r.set_value ("The asociated user to the given email " + l_email.value + " , is already active", "is_active")
@@ -593,7 +593,7 @@ feature -- Handler
 		local
 			l_response: CMS_RESPONSE
 			s: STRING
-			u: CMS_TEMPORAL_USER
+			u: CMS_TEMP_USER
 			l_page_helper: CMS_PAGINATION_GENERATOR
 			s_pager: STRING
 			l_count: INTEGER

@@ -6,7 +6,7 @@ note
 	revision: "$Revision$"
 
 deferred class
-	CMS_TEMPORAL_USER_STORAGE_I
+	CMS_TEMP_USER_STORAGE_I
 
 inherit
 	SHARED_LOGGER
@@ -57,7 +57,7 @@ feature -- Access: Users
 			password: Result /= Void implies (Result.hashed_password /= Void and Result.password = Void)
 		end
 
-	recent_users (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_TEMPORAL_USER]
+	recent_users (a_lower: INTEGER; a_count: INTEGER): LIST [CMS_TEMP_USER]
 			-- List of recent `a_count' temporal users with an offset of `lower'.
 		deferred
 		end
@@ -71,7 +71,7 @@ feature -- Access: Users
 
 feature -- New Temp User
 
-	new_user_from_temporal_user (a_user: CMS_TEMPORAL_USER)
+	new_user_from_temporal_user (a_user: CMS_TEMP_USER)
   			-- new user from temporal user `a_user'
   		require
   			no_id: not a_user.has_id
@@ -83,14 +83,14 @@ feature -- New Temp User
 		deferred
 		end
 
-	new_temp_user (a_user: CMS_TEMPORAL_USER)
+	new_temp_user (a_user: CMS_TEMP_USER)
 			-- New temp user `a_user'.
 		require
 			no_id: not a_user.has_id
 		deferred
 		end
 
-	delete_user (a_user: CMS_USER)
+	delete_user (a_user: CMS_TEMP_USER)
 			-- Delete user `a_user'.
 		require
 			has_id: a_user.has_id
