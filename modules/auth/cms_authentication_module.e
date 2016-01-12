@@ -9,14 +9,9 @@ class
 inherit
 
 	CMS_MODULE
-		rename
-			module_api as auth_api
 		redefine
 			setup_hooks,
-			permissions,
-			initialize,
-			install,
-			auth_api
+			permissions
 		end
 
 	CMS_HOOK_AUTO_REGISTER
@@ -84,52 +79,6 @@ feature -- Access: docs
 		do
 			Result := cache_duration = 0
 		end
-
-feature {CMS_API} -- Module Initialization
-
-	initialize (a_api: CMS_API)
-			-- <Precursor>
-		local
-			l_auth_api: like auth_api
-			l_user_auth_storage: CMS_TEMP_USER_STORAGE_I
-		do
-			Precursor (a_api)
-
-				-- Storage initialization
-			if attached a_api.storage.as_sql_storage as l_storage_sql then
-				create {CMS_TEMP_USER_STORAGE_SQL} l_user_auth_storage.make (l_storage_sql)
-			else
-					-- FIXME: in case of NULL storage, should Current be disabled?
-				create {CMS_TEMP_USER_STORAGE_NULL} l_user_auth_storage
-			end
-
-				-- API initialization
-			create l_auth_api.make_with_storage (a_api, l_user_auth_storage)
-			auth_api := l_auth_api
-		ensure then
-			auth_api_set: auth_api /= Void
-		end
-
-	install (api: CMS_API)
-		do
-				-- Schema
-			if attached api.storage.as_sql_storage as l_sql_storage then
-				if not l_sql_storage.sql_table_exists ("auth_temp_users") then
-						--| Schema
-					l_sql_storage.sql_execute_file_script (api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended ("auth_temp_users.sql")), Void)
-					if l_sql_storage.has_error then
-						api.logger.put_error ("Could not initialize database for auth_module", generating_type)
-					end
-				end
-				l_sql_storage.sql_finalize
-				Precursor {CMS_MODULE} (api)
-			end
-		end
-
-feature {CMS_API} -- Access: API
-
-	auth_api: detachable CMS_TEMP_USER_API
-			-- <Precursor>
 
 feature -- Router
 
@@ -261,16 +210,16 @@ feature -- Handler
 			l_captcha_passed: BOOLEAN
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-			if r.has_permission ("account register") and then attached auth_api as l_auth_api then
+			if r.has_permission ("account register") then
 				if req.is_post_request_method then
 					if attached {WSF_STRING} req.form_parameter ("name") as l_name and then attached {WSF_STRING} req.form_parameter ("password") as l_password and then attached {WSF_STRING} req.form_parameter ("email") as l_email and then attached {WSF_STRING} req.form_parameter ("personal_information") as l_personal_information then
 						l_user_api := api.user_api
-						if attached l_user_api.user_by_name (l_name.value) or else attached l_auth_api.user_by_name (l_name.value) then
+						if attached l_user_api.user_by_name (l_name.value) or else attached l_user_api.temp_user_by_name (l_name.value) then
 								-- Username already exist.
 							r.set_value ("User name already exists!", "error_name")
 							l_exist := True
 						end
-						if attached l_user_api.user_by_email (l_email.value) or else attached l_auth_api.user_by_email (l_email.value) then
+						if attached l_user_api.user_by_email (l_email.value) or else attached l_user_api.temp_user_by_email (l_email.value) then
 								-- Emails already exist.
 							r.set_value ("An account is already associated with that email address!", "error_email")
 							l_exist := True
@@ -293,7 +242,7 @@ feature -- Handler
 							u.set_email (l_email.value)
 							u.set_password (l_password.value)
 							u.set_personal_information (l_personal_information.value)
-							l_auth_api.new_temp_user (u)
+							l_user_api.new_temp_user (u)
 
 								-- Create activation token
 							l_token := new_token
@@ -332,49 +281,44 @@ feature -- Handler
 			l_ir: INTERNAL_SERVER_ERROR_CMS_RESPONSE
 			es: CMS_AUTHENTICATON_EMAIL_SERVICE
 		do
-			if attached auth_api as l_auth_api then
-				l_user_api := api.user_api
-				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-				if r.has_permission ("account activate") then
-					if attached {WSF_STRING} req.path_parameter ("token") as l_token then
-						if attached {CMS_TEMP_USER} l_auth_api.user_by_activation_token (l_token.value) as l_user then
+			l_user_api := api.user_api
+			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+			if r.has_permission ("account activate") then
+				if attached {WSF_STRING} req.path_parameter ("token") as l_token then
+					if attached {CMS_TEMP_USER} l_user_api.temp_user_by_activation_token (l_token.value) as l_user then
 
-							-- TODO copy the personal information
-							--! to CMS_USER_PROFILE and persist data
-							--! check also CMS_USER.data_items
+						-- TODO copy the personal information
+						--! to CMS_USER_PROFILE and persist data
+						--! check also CMS_USER.data_items
 
-								-- Delete temporal User
-							l_auth_api.delete_temp_user (l_user)
+							-- Delete temporal User
+						l_user_api.delete_temp_user (l_user)
 
-								-- Valid user_id
-							l_user.set_id (0)
-							l_user.mark_active
-							l_auth_api.new_user_from_temp_user (l_user)
-							l_auth_api.remove_activation (l_token.value)
-							r.set_main_content ("<p> The account <i>" + l_user.name + "</i> has been activated</p>")
-								-- Send Email
-							if attached l_user.email as l_email then
-								create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
-								write_debug_log (generator + ".handle register: send_contact_activation_confirmation_email")
-								es.send_contact_activation_confirmation_email (l_email, "", req.absolute_script_url (""))
-							end
-						else
-								-- the token does not exist, or it was already used.
-							r.set_status_code ({HTTP_CONSTANTS}.bad_request)
-							r.set_main_content ("<p>The token <i>" + l_token.value + "</i> is not valid " + r.link ("Reactivate Account", "account/reactivate", Void) + "</p>")
+							-- Valid user_id
+						l_user.set_id (0)
+						l_user.mark_active
+						l_user_api.new_user_from_temp_user (l_user)
+						l_user_api.remove_activation (l_token.value)
+						r.set_main_content ("<p> The account <i>" + l_user.name + "</i> has been activated</p>")
+							-- Send Email
+						if attached l_user.email as l_email then
+							create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
+							write_debug_log (generator + ".handle register: send_contact_activation_confirmation_email")
+							es.send_contact_activation_confirmation_email (l_email, "", req.absolute_script_url (""))
 						end
-						r.execute
 					else
-						create l_ir.make (req, res, api)
-						l_ir.execute
+							-- the token does not exist, or it was already used.
+						r.set_status_code ({HTTP_CONSTANTS}.bad_request)
+						r.set_main_content ("<p>The token <i>" + l_token.value + "</i> is not valid " + r.link ("Reactivate Account", "account/reactivate", Void) + "</p>")
 					end
-				else
-					create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
 					r.execute
+				else
+					create l_ir.make (req, res, api)
+					l_ir.execute
 				end
 			else
-				create {INTERNAL_SERVER_ERROR_CMS_RESPONSE} r.make (req, res, api)
-				r.execute
+				create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
+					r.execute
 			end
 		end
 
@@ -383,36 +327,33 @@ feature -- Handler
 			r: CMS_RESPONSE
 			l_ir: INTERNAL_SERVER_ERROR_CMS_RESPONSE
 			es: CMS_AUTHENTICATON_EMAIL_SERVICE
+			l_user_api: CMS_USER_API
 		do
-			if attached auth_api as l_auth_api then
-				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-				if r.has_permission ("account reject") then
-					if attached {WSF_STRING} req.path_parameter ("token") as l_token then
-						if attached {CMS_TEMP_USER} l_auth_api.user_by_activation_token (l_token.value) as l_user then
-							l_auth_api.delete_temp_user (l_user)
-							r.set_main_content ("<p> The temporal account for <i>" + l_user.name + "</i> has been removed</p>")
-								-- Send Email
-							if attached l_user.email as l_email then
-								create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
-								write_debug_log (generator + ".handle register: send_contact_activation_reject_email")
-								es.send_contact_activation_reject_email (l_email, "", req.absolute_script_url (""))
-							end
-						else
-								-- the token does not exist, or it was already used.
-							r.set_status_code ({HTTP_CONSTANTS}.bad_request)
-							r.set_main_content ("<p>The token <i>" + l_token.value + "</i> is not valid ")
+			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+			if r.has_permission ("account reject") then
+				if attached {WSF_STRING} req.path_parameter ("token") as l_token then
+					l_user_api := api.user_api
+					if attached {CMS_TEMP_USER} l_user_api.temp_user_by_activation_token (l_token.value) as l_user then
+						l_user_api.delete_temp_user (l_user)
+						r.set_main_content ("<p> The temporal account for <i>" + l_user.name + "</i> has been removed</p>")
+							-- Send Email
+						if attached l_user.email as l_email then
+							create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
+							write_debug_log (generator + ".handle register: send_contact_activation_reject_email")
+							es.send_contact_activation_reject_email (l_email, "", req.absolute_script_url (""))
 						end
-						r.execute
 					else
-						create l_ir.make (req, res, api)
-						l_ir.execute
+							-- the token does not exist, or it was already used.
+						r.set_status_code ({HTTP_CONSTANTS}.bad_request)
+						r.set_main_content ("<p>The token <i>" + l_token.value + "</i> is not valid ")
 					end
-				else
-					create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
 					r.execute
+				else
+					create l_ir.make (req, res, api)
+					l_ir.execute
 				end
 			else
-				create {INTERNAL_SERVER_ERROR_CMS_RESPONSE} r.make (req, res, api)
+				create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
 				r.execute
 			end
 		end
@@ -426,43 +367,38 @@ feature -- Handler
 			l_url_activate: STRING
 			l_url_reject: STRING
 		do
-			if attached auth_api as l_auth_api then
-				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-				if r.has_permission ("account reactivate") then
-					if req.is_post_request_method then
-						if attached {WSF_STRING} req.form_parameter ("email") as l_email then
-							l_user_api := api.user_api
-							if attached {CMS_TEMP_USER} l_auth_api.user_by_email (l_email.value) as l_user then
-									-- User exist create a new token and send a new email.
-								if l_user.is_active then
-									r.set_value ("The asociated user to the given email " + l_email.value + " , is already active", "is_active")
-									r.set_status_code ({HTTP_CONSTANTS}.bad_request)
-								else
-									l_token := new_token
-									l_user_api.new_activation (l_token, l_user.id)
-									l_url_activate := req.absolute_script_url ("/account/activate/" + l_token)
-									l_url_reject := req.absolute_script_url ("/account/reject/" + l_token)
-
-										-- Send Email to webmaster
-									if attached l_user.personal_information as l_personal_information then
-										create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
-										write_debug_log (generator + ".handle register: send_register_email")
-										es.send_account_evaluation (l_user, l_personal_information, l_url_activate, l_url_reject, req.absolute_script_url (""))
-									end
-								end
-							else
-								r.set_value ("The email does not exist or !", "error_email")
-								r.set_value (l_email.value, "email")
+			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+			if r.has_permission ("account reactivate") then
+				if req.is_post_request_method then
+					if attached {WSF_STRING} req.form_parameter ("email") as l_email then
+						l_user_api := api.user_api
+						if attached {CMS_TEMP_USER} l_user_api.temp_user_by_email (l_email.value) as l_user then
+								-- User exist create a new token and send a new email.
+							if l_user.is_active then
+								r.set_value ("The asociated user to the given email " + l_email.value + " , is already active", "is_active")
 								r.set_status_code ({HTTP_CONSTANTS}.bad_request)
+							else
+								l_token := new_token
+								l_user_api.new_activation (l_token, l_user.id)
+								l_url_activate := req.absolute_script_url ("/account/activate/" + l_token)
+								l_url_reject := req.absolute_script_url ("/account/reject/" + l_token)
+										-- Send Email to webmaster
+								if attached l_user.personal_information as l_personal_information then
+									create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
+									write_debug_log (generator + ".handle register: send_register_email")
+									es.send_account_evaluation (l_user, l_personal_information, l_url_activate, l_url_reject, req.absolute_script_url (""))
+								end
 							end
+						else
+							r.set_value ("The email does not exist or !", "error_email")
+							r.set_value (l_email.value, "email")
+							r.set_status_code ({HTTP_CONSTANTS}.bad_request)
 						end
 					end
-				else
-					create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
-					r.execute
 				end
 			else
-				create {INTERNAL_SERVER_ERROR_CMS_RESPONSE} r.make (req, res, api)
+				create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
+				r.execute
 			end
 			r.execute
 		end
@@ -597,6 +533,7 @@ feature -- Handler
 			l_page_helper: CMS_PAGINATION_GENERATOR
 			s_pager: STRING
 			l_count: INTEGER
+			l_user_api: CMS_USER_API
 		do
 				-- At the moment the template are hardcoded, but we can
 				-- get them from the configuration file and load them into
@@ -604,11 +541,11 @@ feature -- Handler
 
 			create {FORBIDDEN_ERROR_CMS_RESPONSE} l_response.make (req, res, api)
 			if
-				l_response.has_permission ("admin registration") and then
-				attached auth_api as l_auth_api
+				l_response.has_permission ("admin registration")
 			then
+				l_user_api := api.user_api
 
-				l_count := l_auth_api.users_count
+				l_count := l_user_api.temp_users_count
 
 				create {GENERIC_VIEW_CMS_RESPONSE} l_response.make (req, res, api)
 
@@ -620,7 +557,7 @@ feature -- Handler
 				end
 
 				create s_pager.make_empty
-				create l_page_helper.make ("admin/pending-registrations/?page={page}&size={size}", l_auth_api.users_count.as_natural_64, 25) -- FIXME: Make this default page size a global CMS settings
+				create l_page_helper.make ("admin/pending-registrations/?page={page}&size={size}", l_user_api.temp_users_count.as_natural_64, 25) -- FIXME: Make this default page size a global CMS settings
 				l_page_helper.get_setting_from_request (req)
 				if l_page_helper.has_upper_limit and then l_page_helper.pages_count > 1 then
 					l_page_helper.append_to_html (l_response, s_pager)
@@ -629,7 +566,7 @@ feature -- Handler
 					end
 				end
 
-				if attached l_auth_api.recent_users (create {CMS_DATA_QUERY_PARAMETERS}.make (l_page_helper.current_page_offset, l_page_helper.page_size)) as lst then
+				if attached l_user_api.temp_recent_users (create {CMS_DATA_QUERY_PARAMETERS}.make (l_page_helper.current_page_offset, l_page_helper.page_size)) as lst then
 					s.append ("<ul class=%"cms-temp-users%">%N")
 					across
 						lst as ic
@@ -648,7 +585,7 @@ feature -- Handler
 							s.append (l_email)
 							s.append ("</li>%N")
 						end
-						if attached l_auth_api.token_by_user_id (u.id) as l_token then
+						if attached l_user_api.token_by_temp_user_id (u.id) as l_token then
 							s.append ("<li>")
 							s.append ("<a href=%"")
 							s.append (req.absolute_script_url ("/account/activate/" + l_token))
