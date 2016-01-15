@@ -669,7 +669,7 @@ feature -- Change: roles and permissions
 		do
 			error_handler.reset
 			write_information_log (generator + ".last_inserted_user_role_id")
-			sql_query (Sql_last_insert_user_role_id, Void)
+			sql_query (sql_last_insert_user_role_id, Void)
 			if not sql_after then
 				Result := sql_read_integer_64 (1).to_integer_32
 				sql_forth
@@ -879,25 +879,25 @@ feature {NONE} -- Implementation: User role
 
 feature {NONE} -- Sql Queries: USER
 
-	Select_users_count: STRING = "SELECT count(*) FROM users;"
+	select_users_count: STRING = "SELECT count(*) FROM users;"
 			-- Number of users.
 
-	Select_users: STRING = "SELECT * FROM users;"
+	select_users: STRING = "SELECT * FROM users;"
 			-- List of users.
 
-	Select_user_by_id: STRING = "SELECT * FROM users WHERE uid =:uid;"
+	select_user_by_id: STRING = "SELECT * FROM users WHERE uid =:uid;"
 			-- Retrieve user by id if exists.
 
-	Select_user_by_name: STRING = "SELECT * FROM users WHERE name =:name;"
+	select_user_by_name: STRING = "SELECT * FROM users WHERE name =:name;"
 			-- Retrieve user by name if exists.
 
-	Sql_select_recent_users: STRING = "SELECT uid, name, password, salt, email, status, created, signed FROM users ORDER BY uid DESC, created DESC LIMIT :rows OFFSET :offset;"
+	sql_select_recent_users: STRING = "SELECT uid, name, password, salt, email, status, created, signed FROM users ORDER BY uid DESC, created DESC LIMIT :rows OFFSET :offset;"
 			-- Retrieve recent users
 
-	Select_user_by_email: STRING = "SELECT uid, name, password, salt, email, status, created, signed FROM users WHERE email =:email;"
+	select_user_by_email: STRING = "SELECT uid, name, password, salt, email, status, created, signed FROM users WHERE email =:email;"
 			-- Retrieve user by email if exists.
 
-	Select_salt_by_username: STRING = "SELECT salt FROM users WHERE name =:name;"
+	select_salt_by_username: STRING = "SELECT salt FROM users WHERE name =:name;"
 			-- Retrieve salt by username if exists.
 
 	sql_insert_user: STRING = "INSERT INTO users (name, password, salt, email, created, status) VALUES (:name, :password, :salt, :email, :created, :status);"
@@ -959,16 +959,16 @@ feature {NONE} -- Sql Queries: USER ACTIVATION
 	sql_insert_activation: STRING = "INSERT INTO users_activations (token, uid, created) VALUES (:token, :uid, :utc_date);"
 			-- SQL insert a new activation :token.
 
-	sql_select_activation_expiration: STRING = "SELECT DATEDIFF(day,created,UTC_DATE()) FROM users_activations where token = :token;"
+	sql_select_activation_expiration: STRING = "SELECT DATEDIFF(day,created,UTC_DATE()) FROM users_activations WHERE token = :token;"
 			-- elapsed time that has passed in days since the token `a_token' was saved.
 
-	sql_select_userid_activation: STRING = "SELECT uid FROM users_activations where token = :token;"
+	sql_select_userid_activation: STRING = "SELECT uid FROM users_activations WHERE token = :token;"
 			-- Retrieve userid given the activation token.
 
-	Select_user_by_activation_token: STRING = "SELECT u.* FROM users as u JOIN users_activations as ua ON ua.uid = u.uid and ua.token = :token;"
+	select_user_by_activation_token: STRING = "SELECT u.* FROM users as u JOIN users_activations as ua ON ua.uid = u.uid and ua.token = :token;"
 			-- Retrieve user by activation token if exist.
 
-	Sql_remove_activation: STRING = "DELETE FROM users_activations WHERE token = :token;"
+	sql_remove_activation: STRING = "DELETE FROM users_activations WHERE token = :token;"
 			-- Remove activation token.
 
 feature {NONE} -- User Password Recovery
@@ -976,13 +976,11 @@ feature {NONE} -- User Password Recovery
 	sql_insert_password: STRING = "INSERT INTO users_password_recovery (token, uid, created) VALUES (:token, :uid, :utc_date);"
 			-- SQL insert a new password recovery :token.
 
-	Sql_remove_password: STRING = "DELETE FROM users_password_recovery WHERE token = :token;"
+	sql_remove_password: STRING = "DELETE FROM users_password_recovery WHERE token = :token;"
 			-- Retrieve password if exist.
 
-	Select_user_by_password_token: STRING = "SELECT u.* FROM users as u JOIN users_password_recovery as ua ON ua.uid = u.uid and ua.token = :token;"
+	select_user_by_password_token: STRING = "SELECT u.* FROM users as u JOIN users_password_recovery as ua ON ua.uid = u.uid and ua.token = :token;"
 			-- Retrieve user by password token if exist.
-
-
 
 feature -- Acess: Temp users
 
@@ -1000,7 +998,6 @@ feature -- Acess: Temp users
 			end
 			sql_finalize
 		end
-
 
 	temp_user_by_id (a_uid: like {CMS_USER}.id; a_consumer: READABLE_STRING_GENERAL): detachable CMS_USER
 			-- <Precursor>
@@ -1317,7 +1314,7 @@ feature {NONE} -- SQL select
 	sql_last_insert_temp_user_id: STRING = "SELECT MAX(uid) FROM auth_temp_users;"
 
 
-	Select_user_auth_temp_by_id: STRING = "SELECT uid, name, password, salt, email, application FROM auth_temp_users as u where uid=:uid;"
+	select_user_auth_temp_by_id: STRING = "SELECT uid, name, password, salt, email, application FROM auth_temp_users as u WHERE uid=:uid;"
 
 
 	sql_insert_temp_user: STRING = "INSERT INTO auth_temp_users (name, password, salt, email, application) VALUES (:name, :password, :salt, :email, :application);"
