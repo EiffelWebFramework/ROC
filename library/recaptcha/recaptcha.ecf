@@ -14,7 +14,7 @@
 		<setting name="console_application" value="true"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="base_extension" location="$ISE_LIBRARY\library\base_extension\base_extension.ecf"/>
-		<library name="http_client_extension" location="$ISE_LIBRARY\unstable\library\web\cms\library\http_client_extension\http_client_extension.ecf"/>
+		<library name="http_client_extension" location="..\http_client_extension\http_client_extension.ecf"/>
 		<library name="json" location="$ISE_LIBRARY\contrib\library\text\parser\json\library\json.ecf" readonly="false"/>
 		<cluster name="recaptcha" location=".\src\" recursive="true">
 		</cluster>
