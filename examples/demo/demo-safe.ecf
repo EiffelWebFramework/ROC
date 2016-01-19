@@ -8,7 +8,7 @@
 			<exclude>/CVS$</exclude>
 			<exclude>/EIFGENs$</exclude>
 		</file_rule>
-		<option debug="true" warning="true" full_class_checking="false" is_attached_by_default="true" is_obsolete_routine_type="true" void_safety="all" syntax="transitional">
+		<option debug="true" warning="true" full_class_checking="false" is_attached_by_default="true" void_safety="all" syntax="transitional">
 			<debug name="dbglog" enabled="true"/>
 		</option>
 		<setting name="executable_name" value="demo"/>
@@ -43,7 +43,7 @@
 		<!--
 		<library name="persistence_store_odbc" location="..\..\library\persistence\store_odbc\store_odbc-safe.ecf"/>
 		<library name="persistence_store_mysql" location="..\..\library\persistence\store_mysql\store_mysql-safe.ecf" />
-		-->
+		-->		
 		<library name="wsf" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf-safe.ecf"/>
 		<library name="wsf_extension" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf_extension-safe.ecf" readonly="false"/>
 	</target>
