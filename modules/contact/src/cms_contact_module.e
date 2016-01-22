@@ -463,7 +463,6 @@ feature {NONE} -- Contact Message
 			p: detachable PATH
 			tpl: CMS_SMARTY_TEMPLATE_BLOCK
 			exp: CMS_STRING_EXPANDER [STRING_8]
-			utf: UTF_CONVERTER
 		do
 			write_debug_log (generator + ".email_html_message for [" + a_message_id + " ]")
 
