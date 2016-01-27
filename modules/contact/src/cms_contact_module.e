@@ -15,7 +15,6 @@ inherit
 			module_api as contact_api
 		redefine
 			setup_hooks,
-			is_installed,
 			install,
 			initialize,
 			contact_api
@@ -53,7 +52,6 @@ feature {NONE} -- Initialization
 			package := "messaging"
 		end
 
-
 feature -- Access
 
 	name: STRING = "contact"
@@ -86,14 +84,6 @@ feature {CMS_API} -- Module Initialization
 
 feature {CMS_API} -- Module management
 
-	is_installed (api: CMS_API): BOOLEAN
-			-- Is Current module installed?
-		local
-			ut: FILE_UTILITIES
-		do
-			Result := ut.directory_path_exists (file_system_storage_path (api))
-		end
-
 	install (api: CMS_API)
 		local
 			retried: BOOLEAN
@@ -102,6 +92,7 @@ feature {CMS_API} -- Module management
 			if not retried then
 				create d.make_with_path (file_system_storage_path (api))
 				d.recursive_create_dir
+				Precursor {CMS_MODULE}(api) -- Marked installed
 			end
 		rescue
 			retried := True
