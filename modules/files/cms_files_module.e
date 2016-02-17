@@ -43,9 +43,14 @@ feature -- Access
 			-- List of permission ids, used by this module, and declared.
 		do
 			Result := Precursor
-			Result.force ("admin files")
-			Result.force ("upload files")
+			Result.force (admin_files_permission)
+			Result.force (upload_files_permission)
+			Result.force (browse_files_permission)
 		end
+
+	admin_files_permission: STRING = "admin files"
+	upload_files_permission: STRING = "upload files"
+	browse_files_permission: STRING = "browse files"
 
 feature {CMS_API} -- Module Initialization
 
@@ -92,7 +97,7 @@ feature -- Access: router
 		do
 			map_uri_template_agent (a_router, "/" + uploads_location, agent execute_upload (?, ?, a_api), Void) -- Accepts any method GET, HEAD, POST, PUT, DELETE, ...
 			map_uri_template_agent (a_router, "/" + uploads_location + "{filename}", agent display_uploaded_file_info (?, ?, a_api), a_router.methods_get)
-			map_uri_template_agent (a_router, "/" + uploads_location + "remove/{filename}", agent remove (?, ?, a_api), a_router.methods_get)
+			map_uri_template_agent (a_router, "/" + uploads_location + "remove/{filename}", agent remove_file (?, ?, a_api), a_router.methods_get)
 		end
 
 	uploads_location: STRING = "upload/"
@@ -109,7 +114,7 @@ feature -- Hooks
 			link: CMS_LOCAL_LINK
 		do
 			-- login in demo did somehow not work
-			if a_response.has_permission ("upload files") then
+			if a_response.has_permission (upload_files_permission) then
 				create link.make ("Upload files", uploads_location)
 				a_menu_system.navigation_menu.extend (link)
 			end
@@ -133,13 +138,17 @@ feature -- Handler
 			fn: READABLE_STRING_32
 		do
 			check req.is_get_request_method end
-			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+			if not api.has_permission (browse_files_permission) then
+				create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
+				r.add_error_message ("You are not allowed to browse CMS files!")
+			elseif attached {WSF_STRING} req.path_parameter ("filename") as p_filename then
+				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 
-				-- add style
-			r.add_style (r.url ("/module/" + name + "/files/css/files.css", Void), Void)
+					-- add style
+				r.add_style (r.url ("/module/" + name + "/files/css/files.css", Void), Void)
 
-			create body.make_empty
-			if attached {WSF_STRING} req.path_parameter ("filename") as p_filename then
+				create body.make_empty
+
 				fn := p_filename.value
 				r.set_page_title ({STRING_32} "File %"" + fn + {STRING_32} "%"")
 				body.append ("<div class=%"uploaded-files%">%N") -- To ease css customization.
@@ -207,9 +216,13 @@ feature -- Handler
 					body.append ("</div>%N") -- Overview
 				end
 				body.append ("</div>%N")
+
+				r.add_to_primary_tabs (create {CMS_LOCAL_LINK}.make ("Uploaded files", uploads_location))
+				r.set_main_content (body)
+			else
+				create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
+				r.set_main_content ("Missing 'filename' field value!")
 			end
-			r.add_to_primary_tabs (create {CMS_LOCAL_LINK}.make ("Uploaded files", uploads_location))
-			r.set_main_content (body)
 			r.execute
 		end
 
@@ -231,7 +244,7 @@ feature -- Handler
 				r.add_javascript_url (r.url ("/module/" + name + "/files/js/dropzone.js", void))
 				r.add_style (r.url ("/module/" + name + "/files/js/dropzone.css", void), void)
 
-				if r.has_permission ("upload files") then
+				if api.has_permission (upload_files_permission) then
 						-- create body
 					body.append ("<p>Please choose some file(s) to upload.</p>")
 
@@ -249,8 +262,11 @@ feature -- Handler
 				end
 
 					-- Build the response.
-
-				append_uploaded_file_album_to (req, api, body)
+				if r.has_permission (browse_files_permission) then
+					append_uploaded_file_album_to (req, api, body)
+				else
+					r.add_warning_message ("You are not allowed to browse files!")
+				end
 
 				r.set_main_content (body)
 			else
@@ -260,7 +276,9 @@ feature -- Handler
 		end
 
 	process_uploaded_files (req: WSF_REQUEST; api: CMS_API; a_output: STRING)
-			-- show all newly uploaded files
+			-- Process http request uploaded files.
+		require
+			has_permission: api.has_permission (upload_files_permission)
 		local
 			l_uploaded_file: CMS_UPLOADED_FILE
 			uf: WSF_UPLOADED_FILE
@@ -406,15 +424,17 @@ feature -- Handler
 			end
 		end
 
-	remove (req: WSF_REQUEST; res: WSF_RESPONSE; api: CMS_API)
+	remove_file (req: WSF_REQUEST; res: WSF_RESPONSE; api: CMS_API)
 		local
 			body: STRING
 			r: CMS_RESPONSE
 			err: BOOLEAN
 		do
-
 			if attached files_api as l_files_api then
-				if attached {WSF_STRING} req.path_parameter ("filename") as p_filename then
+				if not api.has_permission (admin_files_permission) then
+					create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
+					r.add_error_message ("You are not allowed to remove file!")
+				elseif attached {WSF_STRING} req.path_parameter ("filename") as p_filename then
 					create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 
 					l_files_api.delete_file (p_filename.value)
