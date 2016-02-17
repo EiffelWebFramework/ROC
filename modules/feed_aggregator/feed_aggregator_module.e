@@ -346,9 +346,11 @@ feature -- Hook
 			-- Hook execution on collection of menu contained by `a_menu_system'
 			-- for related response `a_response'.
 		do
-			a_menu_system.navigation_menu.extend (create {CMS_LOCAL_LINK}.make ("Feeds", "feed_aggregation/"))
-			if a_response.has_permission (permission__manage_feed_aggregator) then
-				a_menu_system.management_menu.extend (create {CMS_LOCAL_LINK}.make ("Feeds (admin)", "admin/feed_aggregator/"))
+			if a_response.is_authenticated then
+				a_menu_system.navigation_menu.extend (create {CMS_LOCAL_LINK}.make ("Feeds", "feed_aggregation/"))
+				if a_response.has_permission (permission__manage_feed_aggregator) then
+					a_menu_system.management_menu.extend (create {CMS_LOCAL_LINK}.make ("Feeds (admin)", "admin/feed_aggregator/"))
+				end
 			end
 		end
 
