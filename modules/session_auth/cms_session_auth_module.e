@@ -3,8 +3,8 @@ note
 			This module allows the use Session Based Authentication using Cookies to restrict access
 			by looking up users in the given providers.
 		]"
-	date: "$Date: 2016-04-13 10:59:18 +0200 (mer., 13 avr. 2016) $"
-	revision: "$Revision: 98616 $"
+	date: "$Date: 2016-04-27 16:04:18 +0200 (mer., 27 avr. 2016) $"
+	revision: "$Revision: 98643 $"
 
 class
 	CMS_SESSION_AUTH_MODULE
@@ -216,8 +216,12 @@ feature {NONE} -- Implementation: routes
 					api.record_user_login (l_user)
 
 					create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-					if attached {WSF_STRING} req.item ("destination") as p_destination then
-						r.set_redirection (p_destination.url_encoded_value)
+					if
+						attached {WSF_STRING} req.item ("destination") as p_destination and then
+						attached p_destination.value as v and then
+						v.is_valid_as_string_8
+					then
+						r.set_redirection (v.to_string_8)
 					else
 						r.set_redirection ("")
 					end
