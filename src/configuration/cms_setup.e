@@ -2,8 +2,8 @@ note
 	description: "[
 		Class that enable to set basic configuration, application environment, core modules and themes.
 		]"
-	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
-	revision: "$Revision: 96616 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_SETUP
@@ -68,6 +68,13 @@ feature {NONE} -- Initialization
 				create files_location.make_from_string (l_files_dir)
 			else
 				files_location := site_location.extended ("files")
+			end
+
+				-- Location for temp files
+			if attached text_item ("temp-dir") as l_temp_dir then
+				create temp_location.make_from_string (l_temp_dir)
+			else
+				temp_location := site_location.extended ("temp")
 			end
 
 				-- Location for modules folders.
@@ -313,6 +320,10 @@ feature -- Access: Theme
 
 	site_location: PATH
 			-- Path to CMS site root dir.
+
+	temp_location: PATH
+			-- Path to folder used as temporary dir.
+			-- (Mainly for uploaded file).
 
 	files_location: PATH
 			-- Path to public "files" dir.			

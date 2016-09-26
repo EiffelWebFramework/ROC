@@ -1,7 +1,7 @@
 note
 	description: "API for a CMS"
-	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
-	revision: "$Revision: 96616 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_API
@@ -626,6 +626,12 @@ feature -- Environment/ theme
 			-- CMS site location.
 		do
 			Result := setup.site_location
+		end
+
+	temp_location: PATH
+			-- CMS temp folder location.
+		do
+			Result := setup.temp_location
 		end
 
 	files_location: PATH

@@ -230,45 +230,78 @@ feature -- Handler
 		local
 			body: STRING_8
 			r: CMS_RESPONSE
+			i: INTEGER
 		do
-			if req.is_get_head_request_method or req.is_post_request_method then
+			if req.is_get_head_request_method then
+				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 				create body.make_empty
 				body.append ("<h1> Upload files </h1>%N")
 
-				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-
 					-- set style
-				r.add_style (r.url ("/module/" + name + "/files/css/files.css", void), void)
-
-					-- add JS for dropzone
-				r.add_javascript_url (r.url ("/module/" + name + "/files/js/dropzone.js", void))
-				r.add_style (r.url ("/module/" + name + "/files/js/dropzone.css", void), void)
+				r.add_style (r.url ("/module/" + name + "/files/css/files.css", Void), Void)
 
 				if api.has_permission (upload_files_permission) then
-						-- create body
-					body.append ("<p>Please choose some file(s) to upload.</p>")
-
+					body.append ("<p>Please choose file(s) to upload.</p>")
 						-- create form to choose files and upload them
 					body.append ("<div class=%"upload-files%">")
-					body.append ("<form action=%"" + r.url (uploads_location, Void) + "%" class=%"dropzone%">")
-					body.append ("</form>%N")
-					body.append ("<div class=%"center%"><a class=%"button%" href=%""+ r.url (uploads_location, Void) +"%">Upload Files</a></div>")
-					body.append ("</div>")
-					if req.is_post_request_method then
-						process_uploaded_files (req, api, body)
+
+					if attached {WSF_STRING} req.item ("basic_upload") as p and then p.is_case_insensitive_equal ("yes") then
+							-- No dropzone
+						body.append ("<form action=%"" + r.url (uploads_location, Void) + "%" method=%"post%" enctype=%"multipart/form-data%">")
+						body.append ("<input type=%"hidden%" name=%"basic_upload%" value=%"yes%"/>%N")
+						from
+							i := 1
+						until
+							i > 5
+						loop
+							body.append ("<input type=%"file%" name=%"filenames[]%" id=%"filenames[]%" size=%"60%"/><br/>%N")
+							i := i + 1
+						end
+						body.append ("<br/><input type=%"submit%" value=%"Upload File(s)%"/>")
+						body.append ("</form>%N")
+						body.append ("<a href=%""+ r.url (uploads_location, Void) +"?basic_upload=no%">Use advanced file uploading.</a>%N")
+					else
+							-- add JS for dropzone
+						r.add_javascript_url (r.url ("/module/" + name + "/files/js/dropzone.js", Void))
+						r.add_style (r.url ("/module/" + name + "/files/js/dropzone.css", Void), Void)
+
+							-- create form to choose files and upload them
+						body.append ("<form action=%"" + r.url (uploads_location, Void) + "%" class=%"dropzone%">")
+						body.append ("</form>%N")
+
+						body.append ("<a href=%""+ r.url (uploads_location, Void) +"?basic_upload=yes%">Use basic file uploading.</a>%N")
 					end
-				else
-					create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
+					body.append ("</div>")
 				end
 
-					-- Build the response.
-				if r.has_permission (browse_files_permission) then
-					append_uploaded_file_album_to (req, api, body)
-				else
-					r.add_warning_message ("You are not allowed to browse files!")
+				if req.is_get_head_request_method then
+						-- Build the response.
+					if r.has_permission (browse_files_permission) then
+						body.append ("<br/><div class=%"center%"><a class=%"button%" href=%""+ r.url (uploads_location, Void) +"%">Refresh uploaded</a></div>")
+
+						append_uploaded_file_album_to (req, api, body)
+					else
+						r.add_warning_message ("You are not allowed to browse files!")
+					end
 				end
 
 				r.set_main_content (body)
+			elseif req.is_post_request_method then
+				if api.has_permission (upload_files_permission) then
+					create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+					create body.make_empty
+					body.append ("<h1> Upload files </h1>%N")
+					process_uploaded_files (req, api, body)
+					if attached {WSF_STRING} req.item ("basic_upload") as p and then p.is_case_insensitive_equal ("yes") then
+						r.set_redirection (r.url (uploads_location, Void) + "?basic_upload=yes")
+					else
+						r.set_redirection (r.url (uploads_location, Void))
+					end
+					r.set_main_content (body)
+				else
+					create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
+					r.set_main_content ("You are not allowed to upload file!")
+				end
 			else
 				create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
 			end
