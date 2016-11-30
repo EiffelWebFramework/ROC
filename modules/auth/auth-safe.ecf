@@ -7,8 +7,9 @@
 			<exclude>/.svn$</exclude>
 			<exclude>/EIFGENs$</exclude>
 		</file_rule>
-		<option warning="true" full_class_checking="true" is_attached_by_default="true" is_obsolete_routine_type="true" void_safety="all" syntax="standard">
+		<option warning="true" void_safety="all">
 		</option>
+		<setting name="concurrency" value="scoop"/>
 		<library name="apis" location="$ISE_LIBRARY\contrib\library\web\authentication\oauth\cypress\consumer\apis\apis.ecf" readonly="false"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
 		<library name="cms" location="..\..\cms-safe.ecf" readonly="false"/>

@@ -3,10 +3,8 @@
 	<target name="persistence_store_odbc">
 		<description>CMS Eiffel Store ODBC persistence solution</description>
 		<root all_classes="true"/>
-		<option warning="true" is_obsolete_routine_type="false" void_safety="all">
-			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
-		</option>
-		<setting name="console_application" value="true"/>
+		<option warning="true"/>
+		<setting name="concurrency" value="scoop"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
 		<library name="cms" location="..\..\..\cms-safe.ecf"/>
 		<library name="cms_app_env" location="..\..\app_env\app_env-safe.ecf"/>

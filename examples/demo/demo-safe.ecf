@@ -8,11 +8,11 @@
 			<exclude>/CVS$</exclude>
 			<exclude>/EIFGENs$</exclude>
 		</file_rule>
-		<option debug="true" warning="true" full_class_checking="false" is_attached_by_default="true" is_obsolete_routine_type="true" void_safety="all" syntax="transitional">
+		<option debug="true" warning="true" void_safety="all">
 			<debug name="dbglog" enabled="true"/>
 		</option>
 		<setting name="executable_name" value="demo"/>
-		<setting name="concurrency" value="thread"/>
+		<setting name="concurrency" value="scoop"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
 		<library name="cms" location="..\..\cms-safe.ecf" readonly="false">
 			<option>
@@ -72,6 +72,7 @@
 		<setting name="concurrency" value="scoop"/>
 	</target>
 	<target name="demo_standalone_scoop_ssl" extends="demo_standalone_scoop">
+		<setting name="concurrency" value="scoop"/>
 		<variable name="httpd_ssl_enabled" value="true"/>
 		<variable name="libcurl_http_client_disabled" value="true"/>
 		<variable name="net_http_client_disabled" value="false"/>

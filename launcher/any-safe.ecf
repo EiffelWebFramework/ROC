@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-14-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-14-0 http://www.eiffel.com/developers/xml/configuration-1-14-0.xsd" name="launcher" uuid="6FDCA393-AFC3-436B-A58A-870923967C86" library_target="launcher">
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-15-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-15-0 http://www.eiffel.com/developers/xml/configuration-1-15-0.xsd" name="launcher" uuid="6FDCA393-AFC3-436B-A58A-870923967C86" library_target="launcher">
 	<target name="common" abstract="true">
 		<root all_classes="true"/>
+		<setting name="concurrency" value="scoop"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
 		<library name="cms" location="..\cms-safe.ecf"/>
 		<library name="cms_app_env" location="..\library\app_env\app_env-safe.ecf" readonly="false"/>

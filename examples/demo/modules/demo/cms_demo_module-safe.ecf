@@ -7,8 +7,8 @@
 			<exclude>/.svn$</exclude>
 			<exclude>/EIFGENs$</exclude>
 		</file_rule>
-		<option warning="true" full_class_checking="true" is_attached_by_default="true" void_safety="all" syntax="standard">
-		</option>
+		<option warning="true"/>
+		<setting name="concurrency" value="scoop"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
 		<library name="base_extension" location="$ISE_LIBRARY\library\base_extension\base_extension-safe.ecf"/>
 		<library name="cms" location="..\..\..\..\cms-safe.ecf" readonly="false"/>

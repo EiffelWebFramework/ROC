@@ -7,7 +7,8 @@
 			<exclude>/CVS$</exclude>
 			<exclude>/EIFGENs$</exclude>
 		</file_rule>
-		<option warning="true" full_class_checking="true" is_attached_by_default="true" void_safety="all" syntax="standard"/>
+		<option warning="true"/>
+		<setting name="concurrency" value="scoop"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
 		<library name="cms" location="..\..\cms-safe.ecf"/>
 		<library name="cms_model" location="..\..\library\model\cms_model-safe.ecf"/>

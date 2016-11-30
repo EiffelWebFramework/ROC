@@ -7,9 +7,10 @@
 			<exclude>/CVS$</exclude>
 			<exclude>/.svn$</exclude>
 		</file_rule>
-		<option warning="true" full_class_checking="false" is_attached_by_default="true" void_safety="all" syntax="transitional">
+		<option warning="true" void_safety="all">
 			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
 		</option>
+		<setting name="concurrency" value="scoop"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
 		<library name="cms" location="..\..\cms-safe.ecf"/>
 		<library name="cms_app_env" location="..\..\library\app_env\app_env-safe.ecf" readonly="false"/>
