@@ -14,6 +14,20 @@ create
 
 feature -- Access
 
+	aggregations_ids: detachable ITERABLE [READABLE_STRING_GENERAL]
+		local
+			l_table: like internal_aggregations
+		do
+			l_table := internal_aggregations
+			if l_table /= Void then
+				Result := l_table.current_keys
+			elseif attached cms_api.module_configuration_by_name ({FEED_AGGREGATOR_MODULE}.name, "feeds") as cfg then
+				if attached cfg.text_list_item ("ids") as l_ids then
+					Result := l_ids
+				end
+			end
+		end
+
 	aggregations: HASH_TABLE [FEED_AGGREGATION, STRING]
 			-- List of feed aggregations.
 		local
