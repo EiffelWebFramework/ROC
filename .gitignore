@@ -4,4 +4,6 @@ EIFGENs
 *.rc
 *.bak
 *.sqlite
+.*.swo
 Thumbs.db
+*.dll

@@ -143,9 +143,9 @@ feature -- Operation
 
 	new_http_client_session (a_url: READABLE_STRING_8): HTTP_CLIENT_SESSION
 		local
-			cl: LIBCURL_HTTP_CLIENT
+			cl: DEFAULT_HTTP_CLIENT
 		do
-			create cl.make
+			create cl
 			Result := cl.new_session (a_url)
 			Result.set_is_insecure (True)
 		end

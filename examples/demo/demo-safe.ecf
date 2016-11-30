@@ -71,6 +71,12 @@
 	<target name="demo_standalone_scoop" extends="demo_standalone">
 		<setting name="concurrency" value="scoop"/>
 	</target>
+	<target name="demo_standalone_scoop_ssl" extends="demo_standalone_scoop">
+		<variable name="httpd_ssl_enabled" value="true"/>
+		<variable name="libcurl_http_client_disabled" value="true"/>
+		<variable name="net_http_client_disabled" value="false"/>
+		<variable name="netssl_http_client_enabled" value="true"/>
+	</target>
 	<target name="demo_cgi" extends="common">
 		<setting name="concurrency" value="none"/>
 		<library name="cgi_launcher" location="..\..\launcher\cgi-safe.ecf" readonly="false"/>
