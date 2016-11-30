@@ -6,8 +6,8 @@ note
 
 			you can customize APPLICATION_LAUNCHER
 		]"
-	date: "$Date: 2013-06-12 13:55:42 +0200 (mer., 12 juin 2013) $"
-	revision: "$Revision: 36 $"
+	date: "$Date: 2016-11-25 18:20:30 +0100 (ven., 25 nov. 2016) $"
+	revision: "$Revision: 99525 $"
 
 deferred class
 	APPLICATION_LAUNCHER_I [G -> WSF_EXECUTION create make end]
@@ -26,8 +26,6 @@ feature -- Execution
 				launch_standalone (opts)
 			elseif nature = nature_standalone then
 				launch_standalone (opts)
-			elseif nature = nature_nino then
-				launch_nino (opts)
 			elseif nature = nature_cgi then
 				launch_cgi (opts)
 			elseif nature = nature_libfcgi then
@@ -42,7 +40,7 @@ feature {NONE} -- Access
 
 	launcher_nature: detachable READABLE_STRING_8
 			-- Initialize the launcher nature
-			-- either cgi, libfcgi, or nino.
+			-- either cgi, libfcgi, or standalone.
 			--| We could extend with more connector if needed.
 			--| and we could use WSF_DEFAULT_SERVICE_LAUNCHER to configure this at compilation time.
 		local
@@ -56,9 +54,6 @@ feature {NONE} -- Access
 			if ext /= Void then
 				if ext.same_string (nature_standalone) then
 					Result := nature_standalone
-				end
-				if ext.same_string (nature_nino) then
-					Result := nature_nino
 				end
 				if ext.same_string (nature_cgi) then
 					Result := nature_cgi
@@ -77,17 +72,6 @@ feature {NONE} -- standalone
 	launch_standalone (opts: detachable WSF_SERVICE_LAUNCHER_OPTIONS)
 		local
 			launcher: WSF_STANDALONE_SERVICE_LAUNCHER [G]
-		do
-			create launcher.make_and_launch (opts)
-		end
-
-feature {NONE} -- nino		
-
-	nature_nino: STRING = "nino"
-
-	launch_nino (opts: detachable WSF_SERVICE_LAUNCHER_OPTIONS)
-		local
-			launcher: WSF_NINO_SERVICE_LAUNCHER [G]
 		do
 			create launcher.make_and_launch (opts)
 		end
@@ -121,7 +105,4 @@ feature -- Default
 			Result := nature_standalone
 		end
 
-
 end
-
-
