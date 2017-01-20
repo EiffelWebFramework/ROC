@@ -39,6 +39,7 @@
 		<library name="cms_seo_module" location="..\..\modules\seo\seo-safe.ecf" readonly="false"/>
 		<library name="cms_session_auth_module" location="..\..\modules\session_auth\cms_session_auth-safe.ecf" readonly="false"/>
 		<library name="cms_taxnomy_module" location="..\..\modules\taxonomy\taxonomy-safe.ecf" readonly="false"/>
+		<library name="cms_wikitext_module" location="..\..\modules\wikitext\wikitext-safe.ecf" readonly="false"/>
 		<library name="persistence_sqlite3" location="..\..\library\persistence\sqlite3\sqlite3-safe.ecf" readonly="false"/>
 		<!--
 			 By default, commented, since it depends on specific environment settings.

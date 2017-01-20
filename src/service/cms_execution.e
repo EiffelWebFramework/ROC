@@ -264,19 +264,9 @@ feature -- Filters
 
 	setup_filter
 			-- Setup `filter'.
-		local
-			f: WSF_FILTER
 		do
 			api.logger.put_debug (generator + ".setup_filter", Void)
-
-			from
-				f := filter
-			until
-				not attached f.next as l_next
-			loop
-				f := l_next
-			end
-			f.set_next (Current)
+			append_filter (Current)
 		end
 
 feature -- Execution
@@ -331,7 +321,7 @@ feature -- Execution
 		end
 
 note
-	copyright: "2011-2016, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 	source: "[
 			Eiffel Software

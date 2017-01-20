@@ -804,7 +804,7 @@ feature -- Environment/ modules and theme
 
 feature -- Hook	
 
-	export_to (a_export_id_list: detachable ITERABLE [READABLE_STRING_GENERAL]; a_export_parameters: CMS_EXPORT_PARAMETERS; a_response: CMS_RESPONSE)
+	export_to (a_export_id_list: detachable ITERABLE [READABLE_STRING_GENERAL]; a_export_ctx: CMS_EXPORT_CONTEXT; a_response: CMS_RESPONSE)
 			-- <Precursor>.
 		local
 			p: PATH
@@ -816,14 +816,14 @@ feature -- Hook
 		do
 			if attached a_response.has_permissions (<<"admin export", "export core">>) then
 				if a_export_id_list = Void then -- Include everything
-					p := a_export_parameters.location.extended ("core")
+					p := a_export_ctx.location.extended ("core")
 					create d.make_with_path (p)
 					if not d.exists then
 						d.recursive_create_dir
 					end
 
 						-- path_aliases export.
-					a_export_parameters.log ("Exporting path_aliases")
+					a_export_ctx.log ("Exporting path_aliases")
 					create jo.make_empty
 					across storage.path_aliases as ic loop
 						jo.put_string (ic.item, ic.key)
@@ -835,7 +835,7 @@ feature -- Hook
 
 						-- custom_values export.					
 					if attached storage.custom_values as lst then
-						a_export_parameters.log ("Exporting custom_values")
+						a_export_ctx.log ("Exporting custom_values")
 						create ja.make_empty
 						across
 							lst as ic
@@ -857,7 +857,7 @@ feature -- Hook
 					end
 
 						-- users export.
-					a_export_parameters.log ("Exporting users")
+					a_export_ctx.log ("Exporting users")
 					create jo.make_empty
 
 					create jobj.make_empty
@@ -1016,7 +1016,7 @@ feature {NONE} -- Implementation: current user
 		end
 
 note
-	copyright: "2011-2016, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
 
