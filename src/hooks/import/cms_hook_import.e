@@ -11,7 +11,7 @@ inherit
 
 feature -- Hook	
 
-	import_from (a_impot_id_list: detachable ITERABLE [READABLE_STRING_GENERAL]; a_import_ctx: CMS_IMPORT_CONTEXT; a_response: CMS_RESPONSE)
+	import_from (a_import_id_list: detachable ITERABLE [READABLE_STRING_GENERAL]; a_import_ctx: CMS_IMPORT_CONTEXT; a_response: CMS_RESPONSE)
 			-- Import data identified by `a_import_id_list',
 			-- or import all data if `a_import_id_list' is Void.
 		deferred

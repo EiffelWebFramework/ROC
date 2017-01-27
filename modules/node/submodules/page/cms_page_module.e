@@ -233,14 +233,13 @@ feature -- Hooks
 			-- Import data identified by `a_import_id_list',
 			-- or import all data if `a_import_id_list' is Void.
 		local
-			p: PATH
+			l_id: STRING_32
+			p, fp: PATH
 			d: DIRECTORY
-			f: PLAIN_TEXT_FILE
-			s: STRING
-			jp: JSON_PARSER
 			loc: READABLE_STRING_8
 			l_parentable_list: ARRAYED_LIST [TUPLE [page: CMS_PAGE; parent: CMS_PAGE]]
 			l_new_pages: STRING_TABLE [CMS_PAGE] -- indexed by link location, if any.
+			l_entity: detachable CMS_PAGE
 		do
 			if
 				attached node_api as l_node_api and then
@@ -263,65 +262,60 @@ feature -- Hooks
 							d.entries as ic
 						loop
 							if attached ic.item.extension as ext and then ext.same_string_general ("json") then
-								create f.make_with_path (p.extended_path (ic.item))
-								if f.exists and then f.is_access_readable then
-									f.open_read
-									from
-										create s.make (0)
-									until
-										f.exhausted or f.end_of_file
-									loop
-										f.read_stream (1_024)
-										s.append (f.last_string)
-									end
-									f.close
-									create jp.make_with_string (s)
-									jp.parse_content
-									if jp.is_valid and then attached jp.parsed_json_object as j then
-										if
-											attached json_string_item (j, "type") as l_type and then
-											l_type.same_string_general (l_node_type.name)
-										then
-											if attached json_to_node_page (l_node_type, j, l_node_api) as l_page then
-												if l_page.is_published then
-													if l_page.author = Void then
-															-- FIXME!!!
-														l_page.set_author (l_page_api.cms_api.user)
-														a_import_ctx.log (l_node_type.name + " %"" + f.path.utf_8_name + "%" WARNING (Author is unknown!)")
-													end
-													if attached l_page.author as l_author then
+								l_id := ic.item.name
+								l_id.remove_tail (ext.count + 1)
+								fp := p.extended_path (ic.item)
+								if attached json_object_from_location (fp) as j then
+									if
+										attached json_string_item (j, "type") as l_type and then
+										l_type.same_string_general (l_node_type.name)
+									then
+										l_entity := json_to_node_page (l_node_type, j, l_node_api)
+										if l_entity /= Void then
+											if l_entity.is_published then
+												if l_entity.author = Void then
+														-- FIXME!!!
+													l_entity.set_author (l_page_api.cms_api.user)
+													a_import_ctx.log (l_node_type.name + " %"" + fp.utf_8_name + "%" WARNING (Author is unknown!)")
+												end
+												if attached l_entity.author as l_author then
+													if
+														attached l_page_api.pages_with_title (l_entity.title) as l_pages and then
+														not l_pages.is_empty
+													then
+															-- Page Already exists!
+															-- FIXME/TODO
+														l_entity := l_pages.first
+														a_import_ctx.log (l_node_type.name + " %"" + fp.utf_8_name + "%" skipped (already exists for user #" + l_author.id.out + ")!")
+													else
 														if
-															attached l_page_api.pages_with_title (l_page.title) as l_pages and then
-															not l_pages.is_empty
+															attached l_entity.parent as l_parent and then
+															not l_parent.has_id
 														then
-																-- Page Already exists!
-																-- FIXME/TODO
-															a_import_ctx.log (l_node_type.name + " %"" + f.path.utf_8_name + "%" skipped (already exists for user #" + l_author.id.out + ")!")
-														else
-															if
-																attached l_page.parent as l_parent and then
-																not l_parent.has_id
-															then
-																l_parentable_list.extend ([l_page, l_parent])
-																l_page.set_parent (Void)
-															end
-															l_page_api.save_page (l_page)
-															l_new_pages.force (l_page, l_node_api.node_path (l_page))
-															a_import_ctx.log (l_node_type.name + " %"" + f.path.utf_8_name + "%" imported as "+ l_page.id.out +" for user #" + l_author.id.out + ".")
-															if attached {CMS_LOCAL_LINK} l_page.link as l_link then
-																loc := l_node_api.node_path (l_page)
-																if not l_link.location.starts_with_general ("node/") then
-																	l_page_api.cms_api.set_path_alias (loc, l_link.location, False)
-																	l_new_pages.force (l_page, l_link.location)
-																end
+															l_parentable_list.extend ([l_entity, l_parent])
+															l_entity.set_parent (Void)
+														end
+														l_page_api.save_page (l_entity)
+														apply_taxonomy_to_node (j, l_entity, l_page_api.cms_api)
+														l_new_pages.force (l_entity, l_node_api.node_path (l_entity))
+														a_import_ctx.log (l_node_type.name + " %"" + fp.utf_8_name + "%" imported as "+ l_entity.id.out +" for user #" + l_author.id.out + ".")
+														if attached {CMS_LOCAL_LINK} l_entity.link as l_link then
+															loc := l_node_api.node_path (l_entity)
+															if not l_link.location.starts_with_general ("node/") then
+																l_page_api.cms_api.set_path_alias (loc, l_link.location, False)
+																l_new_pages.force (l_entity, l_link.location)
 															end
 														end
-													else
-														a_import_ctx.log (l_node_type.name + " %"" + f.path.utf_8_name + "%" skipped (Author is unknown!)")
+													end
+													if l_entity /= Void and then l_entity.has_id then
+															-- Support for comments
+														import_comments_file_for_entity (p.extended (l_id).extended ("comments.json"), l_entity, l_node_api.cms_api, a_import_ctx)
 													end
 												else
-													a_import_ctx.log (l_node_type.name + " %"" + f.path.utf_8_name + "%" skipped (Status is Not Published!)")
+													a_import_ctx.log (l_node_type.name + " %"" + fp.utf_8_name + "%" skipped (Author is unknown!)")
 												end
+											else
+												a_import_ctx.log (l_node_type.name + " %"" + fp.utf_8_name + "%" skipped (Status is Not Published!)")
 											end
 										end
 									end
@@ -331,14 +325,13 @@ feature -- Hooks
 						across
 							l_parentable_list as ic
 						loop
-							if attached ic.item.page as l_page then
-								update_page_parent (l_page, ic.item.parent, l_new_pages)
-								if attached l_page.parent as l_parent then
-									a_import_ctx.log (l_node_type.name + " #" + l_page.id.out + " assigned to parent #" + l_parent.id.out)
-									l_page_api.save_page (l_page)
-								else
-									a_import_ctx.log (l_node_type.name + " #" + l_page.id.out + " : unable to find parent!")
-								end
+							l_entity := ic.item.page
+							update_page_parent (l_entity, ic.item.parent, l_new_pages)
+							if attached l_entity.parent as l_parent then
+								a_import_ctx.log (l_node_type.name + " #" + l_entity.id.out + " assigned to parent #" + l_parent.id.out)
+								l_page_api.save_page (l_entity)
+							else
+								a_import_ctx.log (l_node_type.name + " #" + l_entity.id.out + " : unable to find parent!")
 							end
 						end
 					end

@@ -241,12 +241,11 @@ feature -- Hooks
 			-- Import data identified by `a_import_id_list',
 			-- or import all data if `a_import_id_list' is Void.
 		local
-			p: PATH
+			p,fp: PATH
 			d: DIRECTORY
-			f: PLAIN_TEXT_FILE
-			s: STRING
-			jp: JSON_PARSER
 			loc: STRING
+			l_id: STRING_32
+			l_entity: detachable CMS_BLOG
 		do
 			if
 				attached node_api as l_node_api and then
@@ -267,51 +266,51 @@ feature -- Hooks
 							d.entries as ic
 						loop
 							if attached ic.item.extension as ext and then ext.same_string_general ("json") then
-								create f.make_with_path (p.extended_path (ic.item))
-								if f.exists and then f.is_access_readable then
-									f.open_read
-									from
-										create s.make (0)
-									until
-										f.exhausted or f.end_of_file
-									loop
-										f.read_stream (1_024)
-										s.append (f.last_string)
-									end
-									f.close
-									create jp.make_with_string (s)
-									jp.parse_content
-									if jp.is_valid and then attached jp.parsed_json_object as j then
-										if
-											attached json_string_item (j, "type") as l_type and then
-											l_type.same_string_general (l_node_type.name)
-										then
-											if attached json_to_node_blog (l_node_type, j, l_node_api) as l_blog then
-												if l_blog.is_published then
-													if attached l_blog.author as l_author then
-														if
-															attached l_blog_api.blogs_by_title (l_author, l_blog.title) as l_blogs and then
-															not l_blogs.is_empty
-														then
-																-- Blog Already exists!
-																-- FIXME/TODO
-															a_import_ctx.log (l_node_type.name + " %"" + f.path.utf_8_name + "%" skipped (already exists for user #" + l_author.id.out + ")!")
-														else
-															a_import_ctx.log (l_node_type.name + " %"" + f.path.utf_8_name + "%" imported for user #" + l_author.id.out + ".")
-															l_blog_api.save_blog (l_blog)
-															if attached {CMS_LOCAL_LINK} l_blog.link as l_link then
-																loc := l_node_api.node_path (l_blog)
-																if not l_link.location.starts_with_general ("node/") then
-																	l_blog_api.cms_api.set_path_alias (loc, l_link.location, False)
-																end
+								l_id := ic.item.name
+								l_id.remove_tail (ext.count + 1)
+								fp := p.extended_path (ic.item)
+								if attached json_object_from_location (fp) as j then
+									if
+										attached json_string_item (j, "type") as l_type and then
+										l_type.same_string_general (l_node_type.name)
+									then
+										l_entity := json_to_node_blog (l_node_type, j, l_node_api)
+										if l_entity /= Void then
+											if l_entity.is_published then
+												if l_entity.author = Void then
+														-- FIXME!!!
+													l_entity.set_author (l_blog_api.cms_api.user)
+													a_import_ctx.log (l_node_type.name + " %"" + fp.utf_8_name + "%" WARNING (Author is unknown!)")
+												end
+												if attached l_entity.author as l_author then
+													if
+														attached l_blog_api.blogs_by_title (l_author, l_entity.title) as l_blogs and then
+														not l_blogs.is_empty
+													then
+															-- Blog Already exists!
+															-- FIXME/TODO
+														l_entity := l_blogs.first
+														a_import_ctx.log (l_node_type.name + " %"" + fp.utf_8_name + "%" skipped (already exists for user #" + l_author.id.out + ")!")
+													else
+														a_import_ctx.log (l_node_type.name + " %"" + fp.utf_8_name + "%" imported for user #" + l_author.id.out + ".")
+														l_blog_api.save_blog (l_entity)
+														apply_taxonomy_to_node (j, l_entity, l_blog_api.cms_api)
+														if attached {CMS_LOCAL_LINK} l_entity.link as l_link then
+															loc := l_node_api.node_path (l_entity)
+															if not l_link.location.starts_with_general ("node/") then
+																l_blog_api.cms_api.set_path_alias (loc, l_link.location, False)
 															end
 														end
-													else
-														a_import_ctx.log (l_node_type.name + " %"" + f.path.utf_8_name + "%" skipped (Author is unknown!)")
+													end
+													if l_entity /= Void and then l_entity.has_id then
+															-- Support for comments
+														import_comments_file_for_entity (p.extended (l_id).extended ("comments.json"), l_entity, l_node_api.cms_api, a_import_ctx)
 													end
 												else
-													a_import_ctx.log (l_node_type.name + " %"" + f.path.utf_8_name + "%" skipped (Status is Not Published!)")
+													a_import_ctx.log (l_node_type.name + " %"" + fp.utf_8_name + "%" skipped (Author is unknown!)")
 												end
+											else
+												a_import_ctx.log (l_node_type.name + " %"" + fp.utf_8_name + "%" skipped (Status is Not Published!)")
 											end
 										end
 									end

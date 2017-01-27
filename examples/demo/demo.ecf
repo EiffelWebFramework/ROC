@@ -24,6 +24,7 @@
 		<library name="cms_auth_module" location="..\..\modules\auth\auth-safe.ecf" readonly="false"/>
 		<library name="cms_basic_auth_module" location="..\..\modules\basic_auth\basic_auth-safe.ecf" readonly="false"/>
 		<library name="cms_blog_module" location="..\..\modules\blog\cms_blog_module-safe.ecf" readonly="false"/>
+		<library name="cms_comments_module" location="..\..\modules\comments\comments-safe.ecf" readonly="false"/>
 		<library name="cms_contact_module" location="..\..\modules\contact\contact-safe.ecf" readonly="false"/>
 		<library name="cms_custom_block_module" location="..\..\modules\custom_block\custom_block-safe.ecf" readonly="false"/>
 		<library name="cms_demo_module" location="modules\demo\cms_demo_module-safe.ecf" readonly="false"/>

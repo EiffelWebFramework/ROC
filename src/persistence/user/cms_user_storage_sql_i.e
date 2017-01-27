@@ -95,7 +95,7 @@ feature -- Access: user
 			sql_finalize
 		end
 
-	user_by_email (a_email: like {CMS_USER}.email): detachable CMS_USER
+	user_by_email (a_email: READABLE_STRING_GENERAL): detachable CMS_USER
 			-- User for the given email `a_email', if any.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]

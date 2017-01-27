@@ -19,7 +19,7 @@ feature -- Access
 		local
 			jo: JSON_OBJECT
 			ja: JSON_ARRAY
-			j, jterm: JSON_OBJECT
+			jterm: JSON_OBJECT
 		do
 			create Result.make_empty
 			Result.put_string (n.content_type, "type")

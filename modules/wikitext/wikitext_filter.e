@@ -40,10 +40,10 @@ feature -- Conversion
 				if s32.is_valid_as_string_8 then
 					l_wikitext := s32.as_string_8
 				else
-					l_wikitext := utf.utf_32_string_to_utf_8_string_8 (s32)
+					l_wikitext := adapted_text (s32)
 				end
 			else
-				l_wikitext := utf.utf_32_string_to_utf_8_string_8 (a_text)
+				l_wikitext := adapted_text (a_text)
 			end
 			create wk.make_from_string (l_wikitext)
 			if attached wk.structure as st then
@@ -58,8 +58,19 @@ feature -- Conversion
 --				elseif attached {STRING_32} a_text as s32 then
 --					s32.wipe_out
 --				end
-				a_text.append (html)
+				if attached {STRING_32} a_text as a_unicode_text then
+					a_text.append (utf.utf_8_string_8_to_string_32 (html))
+				else
+					a_text.append (html)
+				end
 			end
+		end
+
+	adapted_text (s: READABLE_STRING_32): STRING_8
+		local
+			utf: UTF_CONVERTER
+		do
+			Result := utf.utf_32_string_to_utf_8_string_8 (s)
 		end
 
 end

@@ -28,7 +28,7 @@ feature -- Access: user
 			Result := storage.user_by_name (a_username)
 		end
 
-	user_by_email (a_email: READABLE_STRING_32): detachable CMS_USER
+	user_by_email (a_email: READABLE_STRING_GENERAL): detachable CMS_USER
 			-- User by email `a_email', if any.
 		do
 			Result := storage.user_by_email (a_email)

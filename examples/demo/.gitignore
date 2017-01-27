@@ -1,2 +1,4 @@
 site/db/*
 site/files/*
+site/export/*
+site/import/*

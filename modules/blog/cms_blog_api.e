@@ -43,7 +43,7 @@ feature {NONE} -- Initialization
 
 				--| For test reasons this is 2, so we don't have to create a lot of blog entries.
 				--| TODO: Set to bigger constant.
-			entries_per_page := 2
+			entries_per_page := 6
 
 --			initialize_node_types
 		end

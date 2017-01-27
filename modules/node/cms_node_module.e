@@ -27,10 +27,6 @@ inherit
 
 	CMS_TAXONOMY_HOOK
 
---	CMS_HOOK_EXPORT
-
---	CMS_EXPORT_NODE_UTILITIES
-
 create
 	make
 
