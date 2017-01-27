@@ -23,17 +23,13 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_setup: CMS_SETUP)
+	make
 			-- Create Current module, disabled by default.
 		do
 			version := "1.0"
 			description := "Wikitext module"
 			package := "filter"
-			config := a_setup
 		end
-
-	config: CMS_SETUP
-			-- Node configuration.
 
 feature -- Access
 
