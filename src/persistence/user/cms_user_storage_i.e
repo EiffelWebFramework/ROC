@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {CMS_USER_STORAGE_I}."
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_USER_STORAGE_I
@@ -101,6 +101,13 @@ feature -- Change: user
 			-- New user `a_user'.
 		require
 			no_id: not a_user.has_id
+		deferred
+		end
+
+	update_username (a_user: CMS_USER; a_new_username: READABLE_STRING_32)
+			-- Update username of `a_user' to `a_new_username`.
+		require
+			has_id: a_user.has_id
 		deferred
 		end
 
@@ -281,7 +288,6 @@ feature -- New Temp User
 			has_id: a_user.has_id
 		deferred
 		end
-
 
 note
 	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
