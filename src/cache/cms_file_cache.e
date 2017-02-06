@@ -1,7 +1,7 @@
 note
 	description: "Cache using a local file."
-	date: "$Date: 2015-09-24 18:24:06 +0200 (jeu., 24 sept. 2015) $"
-	revision: "$Revision: 97926 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_FILE_CACHE [G -> ANY]

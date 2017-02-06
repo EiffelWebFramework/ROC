@@ -1,7 +1,7 @@
 note
 	description: "Abstract interface for cache of value conforming to formal {G}."
-	date: "$Date: 2014-12-03 16:12:08 +0100 (mer., 03 déc. 2014) $"
-	revision: "$Revision: 96232 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_CACHE [G -> ANY]

@@ -1,7 +1,7 @@
 note
 	description: "Handler to process CMS installation process."
-	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
-	revision: "$Revision: 96616 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_ADMIN_INSTALL_HANDLER

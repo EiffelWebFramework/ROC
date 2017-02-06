@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {CMS_HTML_PAGE}."
 	author: ""
-	date: "$Date: 2015-02-16 20:14:19 +0100 (lun., 16 févr. 2015) $"
-	revision: "$Revision: 96643 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_HTML_PAGE

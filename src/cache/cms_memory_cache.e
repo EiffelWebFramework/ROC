@@ -1,7 +1,7 @@
 note
 	description: "Cache relying on memory."
-	date: "$Date: 2014-12-03 16:57:00 +0100 (mer., 03 déc. 2014) $"
-	revision: "$Revision: 96234 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_MEMORY_CACHE [G -> ANY]

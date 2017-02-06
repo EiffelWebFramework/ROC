@@ -2,9 +2,9 @@ note
 	description: "[
 			Interface responsible to instantiate CMS_STORAGE_STORE_ODBC object.
 		]"
-	author: "$Author: jfiat $"
-	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
-	revision: "$Revision: 96616 $"
+	author: "$Author$"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_STORAGE_STORE_ODBC_BUILDER

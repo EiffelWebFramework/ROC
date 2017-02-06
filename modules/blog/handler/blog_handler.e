@@ -1,7 +1,7 @@
 note
 	description: "Request handler related to /blogs and /blogs/?page={page}. Displays all posts in the blog."
 	contributor: "Dario Bösch <daboesch@student.ethz.ch>"
-	date: "$Date: 2015-05-18 13:49:00 +0100 (lun., 18 mai 2015) $"
+	date: "$Date$"
 	revision: "$9661667$"
 
 class

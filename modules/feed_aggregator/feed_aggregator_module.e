@@ -1,7 +1,7 @@
 note
 	description: "CMS module bringing support for feed aggregation."
-	date: "$Date: 2016-12-21 15:17:16 +0100 (mer., 21 déc. 2016) $"
-	revision: "$Revision: 99686 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	FEED_AGGREGATOR_MODULE

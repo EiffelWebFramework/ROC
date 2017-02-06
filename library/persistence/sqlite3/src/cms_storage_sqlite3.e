@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {CMS_STORAGE_MYSQL}."
-	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
-	revision: "$Revision: 96596 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_STORAGE_SQLITE3

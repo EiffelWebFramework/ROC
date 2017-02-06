@@ -4,7 +4,7 @@ note
 			For instance, a web url.
 		]"
 	date: "$Date$"
-	revision: "$Revision: 95883 $"
+	revision: "$Revision$"
 
 class
 	CMS_EXTERNAL_LINK

@@ -6,8 +6,8 @@ note
 
 			you can customize APPLICATION_LAUNCHER
 		]"
-	date: "$Date: 2016-11-25 18:20:30 +0100 (ven., 25 nov. 2016) $"
-	revision: "$Revision: 99525 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	APPLICATION_LAUNCHER_I [G -> WSF_EXECUTION create make end]

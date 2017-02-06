@@ -3,8 +3,8 @@ note
 			This module allows the use of HTTP Basic Authentication to restrict access
 			by looking up users in the given providers.
 		]"
-	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
-	revision: "$Revision: 96596 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_BASIC_AUTH_MODULE

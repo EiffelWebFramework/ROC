@@ -2,9 +2,9 @@ note
 	description: "[
 			Testing suite for CONFIG_READER .
 		]"
-	author: "$Author: jfiat $"
-	date: "$Date: 2014-12-18 16:37:11 +0100 (jeu., 18 déc. 2014) $"
-	revision: "$Revision: 96383 $"
+	author: "$Author$"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	TEST_CONFIG_READER_SET

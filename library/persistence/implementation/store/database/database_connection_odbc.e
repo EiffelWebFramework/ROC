@@ -1,7 +1,7 @@
 note
 	description: "Object that handle a database connection for ODBC"
-	date: "$Date: 2014-11-13 12:23:47 -0300 (ju., 13 nov. 2014) $"
-	revision: "$Revision: 96085 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	DATABASE_CONNECTION_ODBC

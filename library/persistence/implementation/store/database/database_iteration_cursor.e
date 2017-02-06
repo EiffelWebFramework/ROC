@@ -1,7 +1,7 @@
 note
 	description: "External iteration cursor for {DATABASE_HANDLER}"
-	date: "$Date: 2014-08-20 15:21:15 -0300 (mi., 20 ago. 2014) $"
-	revision: "$Revision: 95678 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	DATABASE_ITERATION_CURSOR [G]

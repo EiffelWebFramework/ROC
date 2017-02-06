@@ -1,7 +1,7 @@
 note
 	description: "Interface for accessing blog contents from the database."
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_BLOG_STORAGE_I

@@ -1,7 +1,7 @@
 note
 	description: "Basic Email Service"
-	date: "$Date: 2015-04-30 05:45:25 -0300 (ju. 30 de abr. de 2015) $"
-	revision: "$Revision: 97218 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	EMAIL_SERVICE

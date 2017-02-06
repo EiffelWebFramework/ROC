@@ -1,7 +1,7 @@
 ﻿note
 	description: "Database configuration"
-	date: "$Date: 2014-08-20 15:21:15 -0300 (mi., 20 ago. 2014) $"
-	revision: "$Revision: 95678 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	DATABASE_CONFIG

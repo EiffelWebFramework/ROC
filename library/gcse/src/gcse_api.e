@@ -4,8 +4,8 @@ note
 		Example call:
 		GET https://www.googleapis.com/customsearch/v1?key=INSERT_YOUR_API_KEY&cx=017576662512468239146:omuauf_lfve&q=lectures
 	]"
-	date: "$Date: 2015-10-09 08:11:07 -0300 (vi., 09 oct. 2015) $"
-	revision: "$Revision: 97973 $"
+	date: "$Date$"
+	revision: "$Revision$"
 	EIS: "name=Google Custom Search Engine", "src=https://developers.google.com/custom-search/json-api/v1/using_rest", "protocol=uri"
 
 class

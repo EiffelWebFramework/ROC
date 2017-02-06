@@ -1,6 +1,6 @@
 note
 	description: "Displays all posts (pages with type blog). It's possible to list posts by user."
-	date: "$Date: 2015-05-22 15:13:00 +0100 (lun., 18 mai 2015) $"
+	date: "$Date$"
 	revision: "$Revision 96616$"
 
 class

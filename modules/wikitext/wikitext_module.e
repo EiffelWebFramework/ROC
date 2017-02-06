@@ -1,7 +1,7 @@
 note
 	description: "CMS module that bring support for path aliases."
-	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
-	revision: "$Revision: 96616 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	WIKITEXT_MODULE

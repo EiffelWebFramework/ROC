@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {SMARTY_CMS_HTML_PAGE_INSPECTOR}."
 	author: ""
-	date: "$Date: 2015-02-16 20:14:19 +0100 (lun., 16 févr. 2015) $"
-	revision: "$Revision: 96643 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	SMARTY_CMS_HTML_PAGE_INSPECTOR

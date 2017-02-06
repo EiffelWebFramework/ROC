@@ -1,7 +1,7 @@
 note
 	description: "Abstract class describing a generic theme"
-	date: "$Date: 2015-05-20 11:48:26 +0200 (mer., 20 mai 2015) $"
-	revision: "$Revision: 97327 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_THEME

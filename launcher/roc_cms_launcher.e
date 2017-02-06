@@ -2,8 +2,8 @@ note
 	description: "[
 				Reusable ROC CMS launcher.
 			]"
-	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
-	revision: "$Revision: 96596 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	ROC_CMS_LAUNCHER [G -> CMS_EXECUTION create make end]

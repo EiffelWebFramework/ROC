@@ -1,7 +1,7 @@
 note
 	description : "test application root class"
-	date        : "$Date: 2015-01-14 15:37:57 -0300 (mi. 14 de ene. de 2015) $"
-	revision    : "$Revision: 96458 $"
+	date        : "$Date$"
+	revision    : "$Revision$"
 
 class
 	APPLICATION

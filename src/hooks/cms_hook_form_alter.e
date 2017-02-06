@@ -2,7 +2,7 @@ note
 	description: "[
 			Hook providing a way to alter a form.
 		]"
-	date: "$Date: 2014-11-13 16:23:47 +0100 (jeu., 13 nov. 2014) $"
+	date: "$Date$"
 
 deferred class
 	CMS_HOOK_FORM_ALTER

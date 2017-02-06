@@ -2,8 +2,8 @@ note
 	description: "[
 			Template to be used with missing theme.
 		]"
-	date: "$Date: 2014-11-19 20:00:19 +0100 (mer., 19 nov. 2014) $"
-	revision: "$Revision: 96123 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	MISSING_CMS_TEMPLATE

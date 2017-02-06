@@ -2,8 +2,8 @@ note
 	description: "[
 				Interface representing a USER in the CMS system.
 			]"
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_USER
@@ -277,6 +277,6 @@ invariant
 	id_or_name_set: id > 0 or else not name.is_whitespace
 
 note
-	copyright: "2011-2016, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
+	copyright: "2011-2017, Javier Velilla, Jocelyn Fiat, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

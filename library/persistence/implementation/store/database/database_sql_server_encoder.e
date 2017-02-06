@@ -1,7 +1,7 @@
 note
 	description: "Help to encode sql queries, to prevent sql injections."
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date$"
+	revision: "$Revision$"
 	EIS: "SQL server injection", "src=http://blogs.msdn.com/b/raulga/archive/2007/01/04/dynamic-sql-sql-injection.aspx", "protocol=url"
 
 expanded class

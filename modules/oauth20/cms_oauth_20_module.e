@@ -2,8 +2,8 @@
 	description: "[
 			Generic OAuth Module supporting authentication using different providers.
 		]"
-	date: "$Date: 2015-05-20 06:50:50 -0300 (mi. 20 de may. de 2015) $"
-	revision: "$Revision: 97328 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_OAUTH_20_MODULE

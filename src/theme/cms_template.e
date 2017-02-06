@@ -2,8 +2,8 @@ note
 	description: "[
 		Abstract interface for a CMS Template, as part of the theme design.
 		]"
-	date: "$Date: 2014-11-20 15:03:29 +0100 (jeu., 20 nov. 2014) $"
-	revision: "$Revision: 96138 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_TEMPLATE

@@ -1,8 +1,8 @@
 note
 	description : "Objects that ..."
-	author      : "$Author: jfiat $"
-	date        : "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
-	revision    : "$Revision: 96616 $"
+	author      : "$Author$"
+	date        : "$Date$"
+	revision    : "$Revision$"
 
 class
 	CMS_NULL_LOGGER

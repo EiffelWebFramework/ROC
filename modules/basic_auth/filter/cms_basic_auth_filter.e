@@ -2,8 +2,8 @@ note
 	description: "[
 		Processes a HTTP request's BASIC authorization headers, putting the result into the execution variable user.
 		]"
-	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 févr. 2015) $"
-	revision: "$Revision: 96616 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_BASIC_AUTH_FILTER

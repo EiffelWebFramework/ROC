@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {CMS_FORMATS}."
-	date: "$Date: 2014-11-13 16:23:47 +0100 (jeu., 13 nov. 2014) $"
-	revision: "$Revision: 96085 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_FORMATS

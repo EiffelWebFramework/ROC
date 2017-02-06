@@ -2,8 +2,8 @@ note
 	description: "[
 			Module that provides Search Engine Optimization.
 		]"
-	date: "$Date: 2016-01-08 22:43:12 +0100 (ven., 08 janv. 2016) $"
-	revision: "$Revision: 98369 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_SEO_MODULE

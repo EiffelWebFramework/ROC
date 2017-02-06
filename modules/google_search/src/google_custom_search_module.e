@@ -2,8 +2,8 @@ note
 	description: "[
 			Module providing Google Custom Search functionality.
 		]"
-	date: "$Date: 2015-10-09 20:50:01 -0300 (vi. 09 de oct. de 2015) $"
-	revision: "$Revision: 97982 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	GOOGLE_CUSTOM_SEARCH_MODULE

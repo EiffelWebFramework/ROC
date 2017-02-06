@@ -1,8 +1,8 @@
 note
 	description: "Extends the WSF form textarea with features to add a WYSIWIG editor."
 	author: "Dario Bösch <daboesch@student.ethz.ch"
-	date: "$Date: 2015-05-23 16:02:55 +0100 (Sat, 23 May 2015) $"
-	revision: "$Revision: 96616 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_FORM_TEXTAREA

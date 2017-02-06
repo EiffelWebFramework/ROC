@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {INTERNAL_SERVER_ERROR_CMS_RESPONSE}."
-	date: "$Date: 2014-12-19 14:17:32 +0100 (ven., 19 déc. 2014) $"
-	revision: "$Revision: 96402 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	INTERNAL_SERVER_ERROR_CMS_RESPONSE

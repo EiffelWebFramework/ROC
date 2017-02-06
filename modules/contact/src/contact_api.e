@@ -1,7 +1,7 @@
 note
 	description: "API for the contact module."
-	date: "$Date: 2015-05-22 23:00:09 +0200 (ven., 22 mai 2015) $"
-	revision: "$Revision: 97349 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CONTACT_API

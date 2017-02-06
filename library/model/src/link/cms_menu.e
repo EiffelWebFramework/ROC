@@ -3,8 +3,8 @@ note
 				Abstraction to represent a MENU in the CMS system.
 				It has items as sub menu/link.
 			]"
-	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
-	revision: "$Revision: 96596 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_MENU

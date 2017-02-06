@@ -1,7 +1,7 @@
 note
 	description: "Object that represents Logger configuration settings"
-	date: "$Date: 2015-02-03 19:11:23 +0100 (mar., 03 févr. 2015) $"
-	revision: "$Revision: 96575 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	LOGGER_CONFIGURATION

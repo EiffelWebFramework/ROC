@@ -1,6 +1,6 @@
 note
 	description: "Summary description for {CMS_MENU_BLOCK}."
-	date: "$Date: 2014-11-14 20:11:17 +0100 (ven., 14 nov. 2014) $"
+	date: "$Date$"
 
 class
 	CMS_MENU_BLOCK

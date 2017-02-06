@@ -8,7 +8,7 @@ note
 
 		]"
 	contributor: "Dario Bösch <daboesch@student.ethz.ch>"
-	date: "$Date: 2015-05-22 15:13:00 +0100 (lun., 18 mai 2015) $"
+	date: "$Date$"
 	revision: "$Revision 96616$"
 	fixme: "redesign pagination... see CMS_PAGINATION_GENERATOR."
 

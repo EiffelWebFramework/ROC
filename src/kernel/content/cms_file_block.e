@@ -2,8 +2,8 @@ note
 	description: "[
 			CMS block with file content.
 		]"
-	date: "$Date: 2014-12-05 22:39:27 +0100 (ven., 05 déc. 2014) $"
-	revision: "$Revision: 96260 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_FILE_BLOCK

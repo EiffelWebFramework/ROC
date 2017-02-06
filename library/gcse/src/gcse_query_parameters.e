@@ -148,8 +148,8 @@ note
 					"i": include
 					sort	string	The sort expression to apply to the results.
 ]"
-	date: "$Date: 2015-10-08 07:51:29 -0300 (ju., 08 oct. 2015) $"
-	revision: "$Revision: 97966 $"
+	date: "$Date$"
+	revision: "$Revision$"
 	EIS: "GCSE parameters", "src=https://developers.google.com/custom-search/json-api/v1/reference/cse/list", "protocol=URI"
 
 class

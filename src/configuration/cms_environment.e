@@ -7,8 +7,8 @@ note
 						- documentation 
 						- themes
 			]"
-	date: "$Date: 2015-03-09 19:25:49 +0100 (lun., 09 mars 2015) $"
-	revision: "$Revision: 96797 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_ENVIRONMENT

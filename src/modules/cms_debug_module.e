@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {CMS_DEBUG_MODULE}."
-	date: "$Date: 2014-12-18 16:47:20 +0100 (jeu., 18 déc. 2014) $"
-	revision: "$Revision: 96384 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_DEBUG_MODULE

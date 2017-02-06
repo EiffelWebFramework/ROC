@@ -2,8 +2,8 @@ note
 	description: "[
 			Hook providing a way to alter the value table for a response.
 		]"
-	date: "$Date: 2014-11-13 16:23:47 +0100 (jeu., 13 nov. 2014) $"
-	revision: "$Revision: 96085 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_HOOK_VALUE_TABLE_ALTER

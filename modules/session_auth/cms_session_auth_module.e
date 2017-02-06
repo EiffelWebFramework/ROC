@@ -3,8 +3,8 @@ note
 			This module allows the use Session Based Authentication using Cookies to restrict access
 			by looking up users in the given providers.
 		]"
-	date: "$Date: 2016-04-27 16:04:18 +0200 (mer., 27 avr. 2016) $"
-	revision: "$Revision: 98643 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_SESSION_AUTH_MODULE

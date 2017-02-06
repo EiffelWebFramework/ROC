@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {STORAGE_TEST_SET}."
 	author: ""
-	date: "$Date: 2015-01-27 19:15:02 +0100 (mar., 27 janv. 2015) $"
-	revision: "$Revision: 96542 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	STORAGE_TEST_SET

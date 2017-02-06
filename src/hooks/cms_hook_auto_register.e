@@ -5,8 +5,8 @@ note
 			registered, otherwise, each descendant has to add it to the cms service
 			itself.
 		]"
-	date: "$Date: 2014-11-13 19:34:00 +0100 (jeu., 13 nov. 2014) $"
-	revision: "$Revision: 96086 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_HOOK_AUTO_REGISTER

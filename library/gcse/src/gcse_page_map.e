@@ -16,8 +16,8 @@ note
 		    ]
 		   }		
 	]"
-	date: "$Date: 2015-10-09 08:11:07 -0300 (vi., 09 oct. 2015) $"
-	revision: "$Revision: 97973 $"
+	date: "$Date$"
+	revision: "$Revision$"
 	EIS: "name=PageMaps", "src=https://developers.google.com/custom-search/docs/structured_data#pagemaps", "protocol=url"
 
 class

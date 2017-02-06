@@ -1,6 +1,6 @@
 note
 	description: "Describe content to be placed inside Regions."
-	date: "$Date: 2015-01-30 19:37:02 +0100 (ven., 30 janv. 2015) $"
+	date: "$Date$"
 
 deferred class
 	CMS_BLOCK

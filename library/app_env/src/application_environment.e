@@ -11,8 +11,8 @@ note
 				- templates (html, Collection+JSON, ...)
 				- ...
 		]"
-	date: "$Date: 2015-02-05 10:25:53 +0100 (jeu., 05 févr. 2015) $"
-	revision: "$Revision: 96584 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	APPLICATION_ENVIRONMENT

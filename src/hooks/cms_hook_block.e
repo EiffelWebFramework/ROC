@@ -2,8 +2,8 @@ note
 	description: "[
 				Hook providing a way to provide blocks.
 		]"
-	date: "$Date: 2014-11-19 20:00:19 +0100 (mer., 19 nov. 2014) $"
-	revision: "$Revision: 96123 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CMS_HOOK_BLOCK

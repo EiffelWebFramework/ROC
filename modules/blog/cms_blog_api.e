@@ -1,7 +1,7 @@
 note
 	description: "API to handle nodes of type blog. Extends the node API."
-	date: "$Date: 2015-05-21 14:46:00 +0100$"
-	revision: "$Revision: 96616 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_BLOG_API

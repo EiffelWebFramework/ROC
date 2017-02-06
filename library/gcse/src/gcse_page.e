@@ -1,7 +1,7 @@
 note
 	description: "Represent metadata describing the query for the current set of results."
-	date: "$Date: 2015-10-09 08:11:07 -0300 (vi., 09 oct. 2015) $"
-	revision: "$Revision: 97973 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	GCSE_PAGE

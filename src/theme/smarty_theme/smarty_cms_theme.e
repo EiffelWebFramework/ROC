@@ -1,7 +1,7 @@
 note
 	description: "Smarty template CMS theme."
-	date: "$Date: 2015-02-09 22:29:56 +0100 (lun., 09 févr. 2015) $"
-	revision: "$Revision: 96596 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	SMARTY_CMS_THEME

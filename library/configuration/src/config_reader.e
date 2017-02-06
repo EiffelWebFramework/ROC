@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {CONFIG_READER}."
 	author: ""
-	date: "$Date: 2014-12-18 16:37:11 +0100 (jeu., 18 déc. 2014) $"
-	revision: "$Revision: 96383 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 deferred class
 	CONFIG_READER

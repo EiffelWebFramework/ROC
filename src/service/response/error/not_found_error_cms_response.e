@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {NOT_FOUND_ERROR_CMS_RESPONSE}."
-	date: "$Date: 2014-11-13 19:34:00 +0100 (jeu., 13 nov. 2014) $"
-	revision: "$Revision: 96086 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	NOT_FOUND_ERROR_CMS_RESPONSE

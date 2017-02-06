@@ -1,7 +1,7 @@
 note
 	description: "Cache for value conforming to formal {G}, and implemented using local file."
-	date: "$Date: 2014-10-30 12:13:25 +0100 (jeu., 30 oct. 2014) $"
-	revision: "$Revision: 96016 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_FILE_OBJECT_CACHE [G -> ANY]

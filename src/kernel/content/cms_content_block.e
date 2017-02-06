@@ -1,7 +1,7 @@
 note
 	description: "CMS_BLOCK implemented with a `content' associated with a specific `format'."
-	date: "$Date: 2014-11-18 10:13:13 +0100 (mar., 18 nov. 2014) $"
-	revision: "$Revision: 96110 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_CONTENT_BLOCK

@@ -2,9 +2,9 @@ note
 	description: "[
 			Module that provide contact us web form functionality.
 		]"
-	author: "$Author: jfiat $"
-	date: "$Date: 2016-01-08 22:43:12 +0100 (ven., 08 janv. 2016) $"
-	revision: "$Revision: 98369 $"
+	author: "$Author$"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_CONTACT_MODULE

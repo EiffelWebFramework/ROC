@@ -4,8 +4,8 @@ note
 		Example call:
 		https://www.google.com/recaptcha/api/siteverify?secret=your_secret&response=response_string&remoteip=user_ip_address
 	]"
-	date: "$Date: 2015-01-28 11:44:15 -0300 (mi. 28 de ene. de 2015) $"
-	revision: "$Revision: 96551 $"
+	date: "$Date$"
+	revision: "$Revision$"
 	EIS: "name=RECAPTCHA", "src=https://developers.google.com/recaptcha/", "protocol=uri"
 	EIS: "name=RECAPTCHA API verify", "src=https://developers.google.com/recaptcha/docs/verify", "protocol=uri"
 

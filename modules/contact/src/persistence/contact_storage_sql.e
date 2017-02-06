@@ -2,8 +2,8 @@ note
 	description: "[
 			Contact message storage based on SQL statements.
 		]"
-	date: "$Date: 2015-02-13 13:08:13 +0100 (ven., 13 fÃ©vr. 2015) $"
-	revision: "$Revision: 96616 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CONTACT_STORAGE_SQL

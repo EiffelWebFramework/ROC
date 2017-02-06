@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {CMS_PAGE_TEMPLATE}."
-	date: "$Date: 2015-01-14 16:13:47 +0100 (mer., 14 janv. 2015) $"
-	revision: "$Revision: 96454 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	SMARTY_CMS_PAGE_TEMPLATE

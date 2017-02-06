@@ -1,7 +1,7 @@
 note
 	description: "Common ancestor for all module apis."
-	date: "$Date: 2015-02-13 14:54:27 +0100 (ven., 13 févr. 2015) $"
-	revision: "$Revision: 96620 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CMS_MODULE_API

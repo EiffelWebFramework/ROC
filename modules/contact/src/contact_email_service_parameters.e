@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {CONTACT_EMAIL_SERVICE_PARAMETERS}."
-	date: "$Date: 2015-07-03 19:04:52 +0200 (ven., 03 juil. 2015) $"
-	revision: "$Revision: 97646 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	CONTACT_EMAIL_SERVICE_PARAMETERS
