@@ -52,6 +52,8 @@ feature -- CMS modules
 			a_setup.register_module (create {CMS_OAUTH_20_MODULE}.make)
 			a_setup.register_module (create {CMS_OPENID_MODULE}.make)
 			a_setup.register_module (create {CMS_SESSION_AUTH_MODULE}.make)
+			
+				-- User
 
 				-- Nodes
 			a_setup.register_module (create {CMS_NODE_MODULE}.make)
