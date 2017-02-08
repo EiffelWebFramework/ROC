@@ -11,8 +11,13 @@ class
 inherit
 
 	CMS_MODULE
+		redefine
+			setup_hooks
+		end
 
 	CMS_HOOK_BLOCK_HELPER
+
+	CMS_HOOK_VALUE_TABLE_ALTER
 
 	SHARED_EXECUTION_ENVIRONMENT
 		export
@@ -50,12 +55,36 @@ feature -- Router
 		do
 			create m.make_trailing_slash_ignored ("/gcse", create {WSF_URI_AGENT_HANDLER}.make (agent handle_search (a_api, ?, ?)))
 			a_router.map (m, a_router.methods_head_get)
-		end			
+		end
 
-feature -- Recaptcha
+feature -- Hooks configuration
+
+	setup_hooks (a_hooks: CMS_HOOK_CORE_MANAGER)
+			-- Module hooks configuration.
+		do
+			a_hooks.subscribe_to_value_table_alter_hook (Current)
+		end
+
+	value_table_alter (a_value: CMS_VALUE_TABLE; a_response: CMS_RESPONSE)
+			-- <Precursor>
+		local
+			l_url: STRING
+			l_url_name: READABLE_STRING_GENERAL
+		do
+			if
+				attached {WSF_STRING} a_response.request.query_parameter ("q") as l_query and then
+				not l_query.value.is_empty
+			then
+				a_value.force (l_query.value, "google_search")
+			else
+				a_value.force (Void, "google_search")
+			end
+		end
+
+feature -- GCSE Keys
 
 	gcse_secret_key (api: CMS_API): detachable READABLE_STRING_8
-			-- Get recaptcha security key.
+			-- Get google custom search security key.
 		local
 			utf: UTF_CONVERTER
 		do
@@ -70,7 +99,7 @@ feature -- Recaptcha
 		end
 
 	gcse_cx_key (api: CMS_API): detachable READABLE_STRING_8
-			-- Get recaptcha security key.
+			-- Get google custom search cx key.
 		local
 			utf: UTF_CONVERTER
 		do
