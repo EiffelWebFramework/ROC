@@ -50,12 +50,12 @@ set TMP_CONTRIB_DIR=%TMP_TARGET_DIR%\contrib
 set TMP_UNSTABLE_DIR=%TMP_TARGET_DIR%\unstable
 
 echo Install ROC as CMS ewf
-%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\cms\launcher
-%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\cms\library
-%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\cms\src
-%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\cms\doc
-%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\cms\modules
-%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\cms\examples
+%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\launcher
+%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\library
+%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\src
+%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\doc
+%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\modules
+%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\examples
 
 %COPYCMD% %TMP_DIR%\launcher	%TMP_UNSTABLE_DIR%\library\web\cms\launcher
 %COPYCMD% %TMP_DIR%\library	%TMP_UNSTABLE_DIR%\library\web\cms\library
