@@ -38,6 +38,7 @@
 		<library name="cms_openid_module" location="..\..\modules\openid\openid-safe.ecf" readonly="false"/>
 		<library name="cms_recent_changes_module" location="..\..\modules\recent_changes\recent_changes-safe.ecf" readonly="false"/>
 		<library name="cms_seo_module" location="..\..\modules\seo\seo-safe.ecf" readonly="false"/>
+		<library name="cms_sitemap_module" location="..\..\modules\sitemap\sitemap-safe.ecf" readonly="false"/>
 		<library name="cms_session_auth_module" location="..\..\modules\session_auth\cms_session_auth-safe.ecf" readonly="false"/>
 		<library name="cms_taxnomy_module" location="..\..\modules\taxonomy\taxonomy-safe.ecf" readonly="false"/>
 		<library name="cms_wikitext_module" location="..\..\modules\wikitext\wikitext-safe.ecf" readonly="false"/>
