@@ -153,6 +153,11 @@ feature -- Access: Node
 			Result := node_storage.nodes_count
 		end
 
+	nodes_of_type_count (a_content_type: CMS_CONTENT_TYPE): NATURAL_64
+		do
+			Result := node_storage.nodes_of_type_count (a_content_type)
+		end
+
 	nodes: LIST [CMS_NODE]
 			-- List of nodes.
 		do
@@ -177,6 +182,12 @@ feature -- Access: Node
 			-- List of most recent nodes according to `params.offset' and `params.size'.
 		do
 			Result := node_storage.recent_nodes (params.offset.to_integer_32, params.size.to_integer_32)
+		end
+
+	recent_nodes_of_type (a_content_type: CMS_CONTENT_TYPE; params: CMS_DATA_QUERY_PARAMETERS): ITERABLE [CMS_NODE]
+			-- Most recent `a_content_type` nodes according to `params.offset' and `params.size'.
+		do
+			Result := node_storage.recent_nodes_of_type (a_content_type, params.offset.to_integer_32, params.size.to_integer_32)
 		end
 
 	recent_node_changes_before (params: CMS_DATA_QUERY_PARAMETERS; a_date: DATE_TIME): ITERABLE [CMS_NODE]

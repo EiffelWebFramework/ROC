@@ -159,7 +159,6 @@ feature {NONE} -- Create a new node
 			end
 		end
 
-
 	delete_node (a_node: CMS_NODE; a_type: CMS_NODE_TYPE [CMS_NODE]; b: STRING_8)
 		local
 			f: like new_edit_form
@@ -187,7 +186,7 @@ feature {NONE} -- Create a new node
 					f.append_to_html (wsf_theme, b)
 				end
 			else
-				--
+				b.append ("ERROR: node is not in the trash!")
 			end
 		end
 
@@ -381,7 +380,7 @@ feature -- Form
 			create f.make (a_url, a_name)
 
 			f.extend_html_text ("<br/>")
-			f.extend_html_text ("<legend>Are you sure you want to delete?</legend>")
+			f.extend_html_text ("<legend>Are you sure you want to delete? (impossible to undo)</legend>")
 
 				-- TODO check if we need to check for has_permissions!!
 			if
@@ -400,46 +399,42 @@ feature -- Form
 				ts.set_formmethod ("GET")
 				f.extend (ts)
 			end
-			f.extend_html_text ("<br/>")
-			f.extend_html_text ("<legend>Do you want to restore the current node?</legend>")
-			if
-				a_node /= Void and then
-				a_node.id > 0
-			then
-				create ts.make ("op")
-				ts.set_default_value ("Restore")
-				ts.set_formaction ("/node/"+a_node.id.out+"/delete")
-				ts.set_formmethod ("POST")
-				fixme ("[
-					ts.set_default_value (translation ("Restore"))
-					]")
-				f.extend (ts)
-			end
 			Result := f
 		end
 
-
-	new_trash_form (a_node: detachable CMS_NODE; a_url: READABLE_STRING_8; a_name: STRING; a_node_type: CMS_NODE_TYPE [CMS_NODE]): CMS_FORM
-			-- Create a web form named `a_name' for node `a_node' (if set), using form action url `a_url', and for type of node `a_node_type'.
+	new_trash_form (a_node: CMS_NODE; a_url: READABLE_STRING_8; a_name: STRING; a_node_type: CMS_NODE_TYPE [CMS_NODE]): CMS_FORM
+			-- Create a web form named `a_name' for node `a_node', using form action url `a_url', and for type of node `a_node_type'.
 		local
 			f: CMS_FORM
 			ts: WSF_FORM_SUBMIT_INPUT
 		do
 			create f.make (a_url, a_name)
+			f.set_method_post
 
 			f.extend_html_text ("<br/>")
-			f.extend_html_text ("<legend>Are you sure you want to trash the current node?</legend>")
-			if
-				a_node /= Void and then
-				a_node.id > 0
-			then
+			if a_node.is_trashed then
+				f.extend_html_text ("<legend>Are you sure you want to restore the current node?</legend>")
 				create ts.make ("op")
-				ts.set_default_value ("Trash")
+				ts.set_default_value ("Restore")
+				ts.set_formaction ("/node/" + a_node.id.out + "/trash")
+				ts.set_formmethod ("POST")
 				fixme ("[
 					ts.set_default_value (translation ("Trash"))
 					]")
-				f.extend (ts)
+			else
+				f.extend_html_text ("<legend>Are you sure you want to trash the current node?</legend>")
+				create ts.make ("op")
+				ts.set_default_value ("Trash")
+				ts.set_formaction ("/node/" + a_node.id.out + "/trash")
+				ts.set_formmethod ("POST")
+
+				fixme ("[
+					ts.set_default_value (translation ("Trash"))
+					]")
+
 			end
+
+			f.extend (ts)
 			Result := f
 		end
 

@@ -291,8 +291,11 @@ feature -- Output
 				a_response.add_to_primary_tabs (lnk)
 
 				if a_node.status = {CMS_NODE_API}.trashed then
-					create lnk.make ("Delete", l_node_api.node_path (a_node) + "/delete")
+					create lnk.make ("Restore", l_node_api.node_path (a_node) + "/trash")
 					lnk.set_weight (2)
+					a_response.add_to_primary_tabs (lnk)
+					create lnk.make ("Delete", l_node_api.node_path (a_node) + "/delete")
+					lnk.set_weight (3)
 					a_response.add_to_primary_tabs (lnk)
 				elseif a_node.has_id then
 						-- Node in {{CMS_NODE_API}.published} or {CMS_NODE_API}.not_published} status.
@@ -320,7 +323,17 @@ feature -- Output
 			if is_teaser then
 				a_output.append (" cms-teaser")
 			end
-			a_output.append ("cms-node node-" + a_node.content_type + "%">")
+			a_output.append ("cms-node node-" + a_node.content_type)
+			if a_node.is_published then
+				a_output.append (" cms-status-published")
+			elseif a_node.is_trashed then
+				a_output.append (" cms-status-trashed")
+			elseif a_node.is_not_published then
+				a_output.append (" cms-status-unpublished")
+			else
+				a_output.append (" cms-status-" + a_node.status.out)
+			end
+			a_output.append ("%">")
 
 			a_output.append ("<div class=%"info%"> ")
 			if attached a_node.author as l_author then
