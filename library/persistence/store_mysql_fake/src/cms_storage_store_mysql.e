@@ -7,7 +7,7 @@ class
 	CMS_STORAGE_STORE_MYSQL
 
 inherit
-	CMS_STORAGE_STORE_NULL
+	CMS_STORAGE_NULL
 
 create
 	make
