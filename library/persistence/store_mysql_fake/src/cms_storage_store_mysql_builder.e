@@ -1,0 +1,31 @@
+note
+	description: "[
+		Interface responsible to instantiate CMS_STORAGE_STORE_MYSQL object.
+	]"
+	author: "$Author$"
+	date: "$Date$"
+	revision: "$Revision$"
+
+class 
+	CMS_STORAGE_STORE_MYSQL_BUILDER
+
+inherit
+	CMS_STORAGE_STORE_SQL_BUILDER
+
+create 
+	make
+
+feature {NONE} 
+
+	make
+		do
+		end
+	
+feature 
+
+	storage (a_setup: CMS_SETUP; a_error_handler: ERROR_HANDLER): detachable CMS_STORAGE_STORE_MYSQL
+		do
+			a_error_handler.add_custom_error (0, "Could not connect to the MySQL storage", Void)
+		end
+	
+end -- class CMS_STORAGE_STORE_MYSQL_BUILDER
