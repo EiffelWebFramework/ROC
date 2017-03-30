@@ -70,10 +70,10 @@ feature -- Settings change
 
 feature -- Conversion
 
-	filter (a_text: STRING_8)
+	filter (a_text: STRING_GENERAL)
 			-- [video:url width:X height:Y]
 		local
-			l_new: detachable STRING
+			l_new: detachable STRING_GENERAL
 			i,p,q,diff: INTEGER
 		do
 			from
@@ -88,7 +88,7 @@ feature -- Conversion
 					if l_new /= Void then
 						diff := l_new.count - (q - p + 1)
 						i := i + diff
-						a_text.replace_substring (l_new, p, q)
+						replace_substring (a_text, l_new, p, q)
 					else
 						i := q + 1
 					end
@@ -99,23 +99,23 @@ feature -- Conversion
 			end
 		end
 
-	to_embedded_video_code (a_text: STRING_8; a_lower, a_upper: INTEGER): detachable STRING
+	to_embedded_video_code (a_text: STRING_GENERAL; a_lower, a_upper: INTEGER): detachable STRING_GENERAL
 		require
 			a_lower < a_upper
 			a_text.substring (a_lower, a_lower + 7).same_string ("[video:")
-			a_text.ends_with_general ("]")
+			a_text.ends_with ("]")
 		local
 			i,j,n: INTEGER
-			s,k,v: STRING_8
-			l_url, l_att: STRING_8
-			l_width, l_height, l_extra: detachable STRING
+			s,k,v: STRING_GENERAL
+			l_url, l_att: STRING_GENERAL
+			l_width, l_height, l_extra: detachable STRING_GENERAL
 		do
 			s := a_text.substring (a_lower + 7, a_upper - 1)
 			s.left_adjust
 			i := next_space_position (s, 1)
 			if i > 0 then
 				l_url := s.head (i - 1)
-				s.remove_head (i)
+				remove_head (s, i)
 				s.left_adjust
 				from
 					n := s.count
@@ -128,7 +128,7 @@ feature -- Conversion
 						k := s.head (j - 1)
 						k.left_adjust
 						k.right_adjust
-						s.remove_head (j)
+						remove_head (s, j)
 						s.left_adjust
 						i := 1
 						n := s.count
@@ -137,13 +137,13 @@ feature -- Conversion
 							v := s.head (j - 1)
 							v.left_adjust
 							v.right_adjust
-							s.remove_head (j)
+							remove_head (s, j)
 							s.left_adjust
 						else
 							v := s.substring (i, n)
 							v.left_adjust
 							v.right_adjust
-							s.wipe_out
+							wipe_out (s)
 						end
 						n := s.count
 						i := 1
@@ -177,40 +177,46 @@ feature -- Conversion
 						l_height := default_height.out
 					end
 				end
-				create l_att.make_empty
+				create {STRING_8} l_att.make_empty
 				if l_width /= Void then
 					if not l_att.is_empty then
-						l_att.append_character (' ')
+						append_character (l_att, ' ')
 					end
 					l_att.append ("width=%"")
 					l_att.append (l_width)
-					l_att.append_character ('%"')
+					append_character (l_att, '%"')
 				end
 				if l_height /= Void then
 					if not l_att.is_empty then
-						l_att.append_character (' ')
+						append_character (l_att, ' ')
 					end
 					l_att.append ("height=%"")
 					l_att.append (l_height)
-					l_att.append_character ('%"')
+					append_character (l_att, '%"')
 				end
 				if l_extra /= Void and then not l_extra.is_empty then
 					if not l_att.is_empty and not l_extra[1].is_space then
-						l_att.append_character (' ')
+						append_character (l_att, ' ')
 					end
 					l_att.append (l_extra)
 				end
 
-				if attached template as tpl then
-					create Result.make_from_string (tpl)
-					Result.replace_substring_all ("$url", l_url)
-					Result.replace_substring_all ("$att", l_att)
+				if attached {STRING_8} a_text then
+					create {STRING_8} Result.make_empty
 				else
-					create Result.make_from_string ("<iframe src=%"")
+					create {STRING_32} Result.make_empty
+				end
+
+				if attached template as tpl then
+					Result.append (tpl)
+					replace_substring_all (Result, "$url", l_url)
+					replace_substring_all (Result, "$att", l_att)
+				else
+					Result.append ("<iframe src=%"")
 					Result.append (l_url)
-					Result.append_character ('%"')
+					append_character (Result, '%"')
 					if not l_att.is_empty then
-						Result.append_character (' ')
+						append_character (Result, ' ')
 					end
 					Result.append (l_att)
 					Result.append ("></iframe>")
@@ -218,7 +224,7 @@ feature -- Conversion
 			end
 		end
 
-	next_space_position (a_text: STRING; a_start_index: INTEGER): INTEGER
+	next_space_position (a_text: READABLE_STRING_GENERAL; a_start_index: INTEGER): INTEGER
 		local
 			n: INTEGER
 		do
@@ -235,23 +241,52 @@ feature -- Conversion
 			end
 		end
 
-	next_non_space_position (a_text: STRING; a_start_index: INTEGER): INTEGER
-		local
-			n: INTEGER
+feature {NONE} -- Implementation
+
+	replace_substring (a_text: STRING_GENERAL; s: READABLE_STRING_GENERAL; start_index, end_index: INTEGER_32)
 		do
-			from
-				Result := a_start_index
-				n := a_text.count
-			until
-				not a_text[Result].is_space or Result > n
-			loop
-				Result := Result + 1
-			end
-			if Result > n then
-				Result := 0
+			if attached {STRING_8} a_text as s8 then
+				s8.replace_substring (s.to_string_8, start_index, end_index)
+			elseif attached {STRING_32} s as s32 then
+				s32.replace_substring (s.as_string_32, start_index, end_index)
 			end
 		end
 
-invariant
+	replace_substring_all (s: STRING_GENERAL; a_old: READABLE_STRING_8; a_new: STRING_GENERAL)
+		do
+			if attached {STRING_8} s as s8 then
+				s8.replace_substring_all (a_old, a_new.to_string_8)
+			elseif attached {STRING_32} s as s32 then
+				s32.replace_substring_all (a_old, a_new)
+			end
+		end
+
+	append_character (s: STRING_GENERAL; c: CHARACTER)
+		do
+			s.append_code (c.natural_32_code)
+		end
+
+	wipe_out (s: STRING_GENERAL)
+		do
+			if attached {STRING_8} s as s8 then
+				s8.wipe_out
+			elseif attached {STRING_32} s as s32 then
+				s32.wipe_out
+			else
+				s.keep_tail (0)
+			end
+		end
+
+	remove_head (s: STRING_GENERAL; n: INTEGER)
+		do
+			if attached {STRING_8} s as s8 then
+				s8.remove_head (n)
+			elseif attached {STRING_32} s as s32 then
+				s32.remove_head (n)
+			else
+				s.keep_tail (s.count - n)
+			end
+		end
+
 
 end
