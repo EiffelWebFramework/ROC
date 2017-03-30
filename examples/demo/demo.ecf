@@ -42,6 +42,7 @@
 		<library name="cms_sitemap_module" location="..\..\modules\sitemap\sitemap-safe.ecf" readonly="false"/>
 		<library name="cms_session_auth_module" location="..\..\modules\session_auth\cms_session_auth-safe.ecf" readonly="false"/>
 		<library name="cms_taxnomy_module" location="..\..\modules\taxonomy\taxonomy-safe.ecf" readonly="false"/>
+		<library name="embedded_video_module" location="..\..\modules\embedded_video\embedded_video-safe.ecf" readonly="false"/>
 		<library name="cms_wikitext_module" location="..\..\modules\wikitext\wikitext-safe.ecf" readonly="false"/>
 		<library name="persistence_sqlite3" location="..\..\library\persistence\sqlite3\sqlite3-safe.ecf" readonly="false"/>
 		<!--

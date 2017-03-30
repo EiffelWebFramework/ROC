@@ -161,7 +161,7 @@ feature -- Settings: router
 
 				-- Configure root of api handler.
 			l_router.set_base_url (l_api.administration_path (Void))
-			
+
 				-- Include routes from modules.
 			across
 				modules as ic
@@ -244,7 +244,7 @@ feature -- Request execution
 	initialize_site_execution
 			-- Initialize for site execution.
 		do
-			api.setup_hooks
+			api.initialize_execution
 			setup_router
 		end
 
@@ -252,7 +252,7 @@ feature -- Request execution
 			-- Initialize for administration execution.	
 		do
 			api.switch_to_administration_mode
-			api.setup_hooks
+			api.initialize_execution
 			setup_router_for_administration
 		end
 
