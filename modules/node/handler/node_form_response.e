@@ -260,7 +260,7 @@ feature -- Form
 			l_node_path: READABLE_STRING_8
 			l_path_alias, l_existing_path_alias, l_auto_path_alias: detachable READABLE_STRING_8
 		do
-			fixme ("Refactor code per operation: Preview, Save/Publish/UnPublish")
+			-- Potential operations : Preview, Save/Publish/UnPublish")
 			l_preview := attached {WSF_STRING} fd.item ("op") as l_op and then l_op.same_string (preview_submit_label)
 			if not l_preview then
 				l_op_save := True
