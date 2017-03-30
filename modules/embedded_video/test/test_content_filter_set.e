@@ -29,6 +29,30 @@ feature -- Test routines
 			assert ("expected iframe with video", text.same_string (expected_text))
 		end
 
+	test_video_filter_01_multi
+			-- New test routine
+		local
+			f: VIDEO_CONTENT_FILTER
+			text: STRING
+			expected_text: STRING
+		do
+			text := "[
+					[video:https://www.youtube.com/embed/jBMOSSnCMCk]
+					and [video:https://www.youtube.com/embed/jBMOSSnCMCk]
+					and [video:https://www.youtube.com/embed/jBMOSSnCMCk]
+					done
+				]"
+			expected_text := "[
+					<iframe src="https://www.youtube.com/embed/jBMOSSnCMCk" width="420" height="315"></iframe>
+					and <iframe src="https://www.youtube.com/embed/jBMOSSnCMCk" width="420" height="315"></iframe>
+					and <iframe src="https://www.youtube.com/embed/jBMOSSnCMCk" width="420" height="315"></iframe>
+					done
+				]"
+			create f
+			f.filter (text)
+			assert ("expected iframe with video", text.same_string (expected_text))
+		end
+
 
 	test_video_filter_02
 			-- New test routine
