@@ -15,7 +15,7 @@ inherit
 
 feature -- Test routines
 
-	test_video_filter
+	test_video_filter_01
 			-- New test routine
 		local
 			f: VIDEO_CONTENT_FILTER
@@ -23,88 +23,88 @@ feature -- Test routines
 			expected_text: STRING
 		do
 			text := "[video:https://www.youtube.com/embed/jBMOSSnCMCk]"
-			expected_text := "<iframe width=%"420%" height=%"315%"%Nsrc=%"https://www.youtube.com/embed/jBMOSSnCMCk%">%N</iframe>"
+			expected_text := "<iframe src=%"https://www.youtube.com/embed/jBMOSSnCMCk%" width=%"420%" height=%"315%"></iframe>"
 			create f
 			f.filter (text)
 			assert ("expected iframe with video", text.same_string (expected_text))
 		end
 
 
-	test_video_filter_2
+	test_video_filter_02
 			-- New test routine
 		local
 			f: VIDEO_CONTENT_FILTER
 			text: STRING
 			expected_text: STRING
 		do
-			text := "[ video :  https://www.youtube.com/embed/jBMOSSnCMCk   ]"
-			expected_text := "<iframe width=%"420%" height=%"315%"%Nsrc=%"https://www.youtube.com/embed/jBMOSSnCMCk%">%N</iframe>"
+			text := "[video:  https://www.youtube.com/embed/jBMOSSnCMCk   ]"
+			expected_text := "<iframe src=%"https://www.youtube.com/embed/jBMOSSnCMCk%" width=%"420%" height=%"315%"></iframe>"
 			create f
 			f.filter (text)
 			assert ("expected iframe with video", text.same_string (expected_text))
 		end
 
 
-	test_video_filter_3
+	test_video_filter_03
 			-- New test routine
 		local
 			f: VIDEO_CONTENT_FILTER
 			text: STRING
 			expected_text: STRING
 		do
-			text := "[ video :https://www.youtube.com/embed/jBMOSSnCMCk   ]"
-			expected_text := "<iframe width=%"420%" height=%"315%"%Nsrc=%"https://www.youtube.com/embed/jBMOSSnCMCk%">%N</iframe>"
+			text := "[video:https://www.youtube.com/embed/jBMOSSnCMCk   ]"
+			expected_text := "<iframe src=%"https://www.youtube.com/embed/jBMOSSnCMCk%" width=%"420%" height=%"315%"></iframe>"
 			create f
 			f.filter (text)
 			assert ("expected iframe with video", text.same_string (expected_text))
 		end
 
 
-	test_video_filter_4
+	test_video_filter_04
 			-- New test routine
 		local
 			f: VIDEO_CONTENT_FILTER
 			text: STRING
 			expected_text: STRING
 		do
-			text := "[ video :https://www.youtube.com/embed/jBMOSSnCMCk   height:425]"
-			expected_text := "<iframe width=%"420%" height=%"425%"%Nsrc=%"https://www.youtube.com/embed/jBMOSSnCMCk%">%N</iframe>"
+			text := "[video:https://www.youtube.com/embed/jBMOSSnCMCk   height:425]"
+			expected_text := "<iframe src=%"https://www.youtube.com/embed/jBMOSSnCMCk%" width=%"420%" height=%"425%"></iframe>"
 			create f
 			f.filter (text)
 			assert ("expected iframe with video", text.same_string (expected_text))
 		end
 
 
-	test_video_filter_5
+	test_video_filter_05
 			-- New test routine
 		local
 			f: VIDEO_CONTENT_FILTER
 			text: STRING
 			expected_text: STRING
 		do
-			text := "[ video :https://www.youtube.com/embed/jBMOSSnCMCk   height :  425]"
-			expected_text := "<iframe width=%"420%" height=%"425%"%Nsrc=%"https://www.youtube.com/embed/jBMOSSnCMCk%">%N</iframe>"
+			text := "[video:https://www.youtube.com/embed/jBMOSSnCMCk   height :  425]"
+			expected_text := "<iframe src=%"https://www.youtube.com/embed/jBMOSSnCMCk%" width=%"420%" height=%"425%"></iframe>"
 			create f
 			f.filter (text)
 			assert ("expected iframe with video", text.same_string (expected_text))
 		end
 
 
-	test_video_filter_6
+	test_video_filter_06
 			-- New test routine
 		local
 			f: VIDEO_CONTENT_FILTER
 			text: STRING
 			expected_text: STRING
 		do
-			text := "[ video :https://www.youtube.com/embed/jBMOSSnCMCk   height :  425 width:   425]"
-			expected_text := "<iframe width=%"425%" height=%"425%"%Nsrc=%"https://www.youtube.com/embed/jBMOSSnCMCk%">%N</iframe>"
+			text := "[video:https://www.youtube.com/embed/jBMOSSnCMCk   height :  425 width:   425]"
+			expected_text := "<iframe src=%"https://www.youtube.com/embed/jBMOSSnCMCk%" width=%"425%" height=%"425%"></iframe>"
 			create f
 			f.filter (text)
 			assert ("expected iframe with video", text.same_string (expected_text))
 		end
 
-	test_video_filter_7
+	test_video_filter_07
 			-- New test routine
 		local
 			f: VIDEO_CONTENT_FILTER
@@ -112,43 +112,13 @@ feature -- Test routines
 			expected_text: STRING
 		do
 			text := "[video:https://www.youtube.com/embed/jBMOSSnCMCk height:425 width:425]"
-			expected_text := "<iframe width=%"425%" height=%"425%"%Nsrc=%"https://www.youtube.com/embed/jBMOSSnCMCk%">%N</iframe>"
+			expected_text := "<iframe src=%"https://www.youtube.com/embed/jBMOSSnCMCk%" width=%"425%" height=%"425%"></iframe>"
 			create f
 			f.filter (text)
 			assert ("expected iframe with video", text.same_string (expected_text))
 		end
 
-
-	test_video_filter_8
-			-- New test routine
-		local
-			f: VIDEO_CONTENT_FILTER
-			text: STRING
-			expected_text: STRING
-		do
-			text := "[height:425 width:425 video:https://www.youtube.com/embed/jBMOSSnCMCk ]"
-			expected_text := "<iframe width=%"425%" height=%"425%"%Nsrc=%"https://www.youtube.com/embed/jBMOSSnCMCk%">%N</iframe>"
-			create f
-			f.filter (text)
-			assert ("expected iframe with video", text.same_string (expected_text))
-		end
-
-
-	test_video_filter_9
-			-- New test routine
-		local
-			f: VIDEO_CONTENT_FILTER
-			text: STRING
-			expected_text: STRING
-		do
-			text := "[ width:425  video:https://www.youtube.com/embed/jBMOSSnCMCk  height:425]"
-			expected_text := "<iframe width=%"425%" height=%"425%"%Nsrc=%"https://www.youtube.com/embed/jBMOSSnCMCk%">%N</iframe>"
-			create f
-			f.filter (text)
-			assert ("expected iframe with video", text.same_string (expected_text))
-		end
-
-	test_video_filter_10
+	test_video_filter_08
 			-- New test routine
 		local
 			f: VIDEO_CONTENT_FILTER
@@ -156,14 +126,27 @@ feature -- Test routines
 			expected_text: STRING
 		do
 			text := "[ wrong:425  video:https://www.youtube.com/embed/jBMOSSnCMCk  height:425]"
-			expected_text := "<iframe width=%"420%" height=%"425%"%Nsrc=%"https://www.youtube.com/embed/jBMOSSnCMCk%">%N</iframe>"
+			expected_text := "[ wrong:425  video:https://www.youtube.com/embed/jBMOSSnCMCk  height:425]"
 			create f
 			f.filter (text)
 			assert ("expected iframe with video", text.same_string (expected_text))
 		end
 
+	test_video_filter_09
+			-- New test routine
+		local
+			f: VIDEO_CONTENT_FILTER
+			text: STRING
+			expected_text: STRING
+		do
+			text := "[video:https://www.youtube.com/embed/jBMOSSnCMCk  height:425 foo:bar foo=bar foobar frameborder=%"0%" allowfullscreen]"
+			expected_text := "<iframe src=%"https://www.youtube.com/embed/jBMOSSnCMCk%" width=%"420%" height=%"425%" foo=bar foobar frameborder=%"0%" allowfullscreen></iframe>"
+			create f
+			f.filter (text)
+			assert ("expected iframe with video", text.same_string (expected_text))
+		end
 
-	test_video_filter_11
+	test_video_filter_10
 			-- New test routine
 		local
 			f: VIDEO_CONTENT_FILTER
@@ -177,6 +160,24 @@ feature -- Test routines
 			assert ("expected iframe with video", text.same_string (expected_text))
 		end
 
+	test_video_filter_tpl_01
+			-- New test routine
+		local
+			f: VIDEO_CONTENT_FILTER
+			text: STRING
+			expected_text: STRING
+		do
+			text := "[video:https://www.youtube.com/embed/jBMOSSnCMCk  height:425 foo:bar foo=bar foobar]"
+			create f
+			f.set_template ("<iframe src=%"$url%" $att allowfullscreen></iframe>")
+			f.set_default_width (500)
+			f.set_default_height (400)
+
+			expected_text := "<iframe src=%"https://www.youtube.com/embed/jBMOSSnCMCk%" width=%"500%" height=%"425%" foo=bar foobar allowfullscreen></iframe>"
+
+			f.filter (text)
+			assert ("expected iframe with video", text.same_string (expected_text))
+		end
 
 end
 

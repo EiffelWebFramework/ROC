@@ -1,7 +1,7 @@
 @echo off
 setlocal
 set TMP_EXCLUDE=%~dp0.install_ROC-copydir-exclude
-set COPYCMD= xcopy /EXCLUDE:%TMP_EXCLUDE% /I /E /Y 
+set COPYCMD= xcopy /EXCLUDE:%TMP_EXCLUDE% /I /E /Y /C
 set TMP_DIR=%~dp0..
 set SAFE_RMDIR=rd /q/s
 set SAFE_RM=del
@@ -63,7 +63,7 @@ echo Install ROC as CMS ewf
 %COPYCMD% %TMP_DIR%\doc	%TMP_UNSTABLE_DIR%\library\web\cms\doc
 %COPYCMD% %TMP_DIR%\modules	%TMP_UNSTABLE_DIR%\library\web\cms\modules
 %COPYCMD% %TMP_DIR%\examples	%TMP_UNSTABLE_DIR%\library\web\cms\examples
-
+echo TOOLS
 %COPYCMD% %TMP_DIR%\tools	%TMP_UNSTABLE_DIR%\library\web\cms\tools
 %SAFE_RM% %TMP_UNSTABLE_DIR%\library\web\cms\tools\install.bat
 %SAFE_RM% %TMP_UNSTABLE_DIR%\library\web\cms\tools\safe_md.bat
