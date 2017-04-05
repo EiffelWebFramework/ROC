@@ -86,7 +86,7 @@ feature -- CMS modules
 
 				-- Miscellanious
 			a_setup.register_module (create {CMS_MESSAGING_MODULE}.make)
-			a_setup.register_module (create {GOOGLE_CUSTOM_SEARCH_MODULE}.make)
+			a_setup.register_module (create {GOOGLE_CUSTOM_SEARCH_MODULE_20}.make)
 			a_setup.register_module (create {CMS_CUSTOM_BLOCK_MODULE}.make)
 			a_setup.register_module (create {CMS_DEBUG_MODULE}.make)
 			a_setup.register_module (create {CMS_DEMO_MODULE}.make)

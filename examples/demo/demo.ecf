@@ -32,6 +32,7 @@
 		<library name="cms_feed_aggregator_module" location="..\..\modules\feed_aggregator\feed_aggregator-safe.ecf" readonly="false"/>
 		<library name="cms_files_module" location="..\..\modules\files\files-safe.ecf" readonly="false"/>
 		<library name="cms_google_search_module" location="..\..\modules\google_search\google_search-safe.ecf" readonly="false" use_application_options="true"/>
+		<library name="cms_google_search_20_module" location="..\..\modules\google_search_20\google_search_20-safe.ecf" readonly="false" use_application_options="true"/>
 		<library name="cms_messaging_module" location="..\..\modules\messaging\messaging-safe.ecf" readonly="false"/>
 		<library name="cms_model" location="..\..\library\model\cms_model-safe.ecf" readonly="false"/>
 		<library name="cms_node_module" location="..\..\modules\node\node-safe.ecf" readonly="false"/>
