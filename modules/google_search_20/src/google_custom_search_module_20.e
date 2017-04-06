@@ -9,7 +9,6 @@ class
 	GOOGLE_CUSTOM_SEARCH_MODULE_20
 
 inherit
-
 	CMS_MODULE
 		redefine
 			setup_hooks
@@ -19,7 +18,7 @@ inherit
 
 	REFACTORING_HELPER
 
-	CMS_HOOK_RESPONSE_ALTER
+	CMS_HOOK_BLOCK
 
 	CMS_HOOK_BLOCK_HELPER
 
@@ -64,13 +63,13 @@ feature -- Router
 feature -- GCSE Keys
 
 	gcse_cx_key (api: CMS_API): detachable READABLE_STRING_8
-			-- Get google custom search cx key.
+			-- Get google custom search engine id.
 		local
 			utf: UTF_CONVERTER
 		do
 			if attached api.module_configuration (Current, Void) as cfg then
 				if
-					attached cfg.text_item ("gcse.cx") as l_gcse_cx_key and then
+					attached cfg.text_item ("gcse.search_engine_id") as l_gcse_cx_key and then
 					not l_gcse_cx_key.is_empty
 				then
 					Result := utf.utf_32_string_to_utf_8_string_8 (l_gcse_cx_key)
@@ -83,6 +82,8 @@ feature -- Handler
 	handle_search (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			r: CMS_RESPONSE
+			l_script: STRING
+			b: CMS_CONTENT_BLOCK
 		do
 			write_debug_log (generator + ".handle_search")
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
@@ -95,9 +96,16 @@ feature -- Handler
 				then
 					r.set_value (l_query.value, "cms_search_query")
 					if
-						attached smarty_template_block (Current, "search", api) as l_tpl_block
+						attached smarty_template_block (Current, "gcse_search_results", api) as l_tpl_block
 					then
 						r.add_block (l_tpl_block, "content")
+
+						if attached gcse_cx_key (api) as l_ctx then
+							create l_script.make_from_string (gcse_20_script)
+							l_script.replace_substring_all ("#CX_VALUE", l_ctx)
+							create b.make_raw ("gcse2_js", Void, "<script>%N" + l_script + "%N</script>", Void)
+							r.add_block (b, "footer")
+						end
 					end
 				end
 			else
@@ -105,7 +113,6 @@ feature -- Handler
 			end
 			r.execute
 		end
-
 
 feature -- Hooks configuration
 
@@ -115,18 +122,25 @@ feature -- Hooks configuration
 			auto_subscribe_to_hooks (a_hooks)
 		end
 
-	response_alter (a_response: CMS_RESPONSE)
-			-- <Precursor>
-		local
-			l_script: STRING
+	block_list: ITERABLE [like {CMS_BLOCK}.name]
 		do
-			if attached gcse_cx_key (a_response.api) as l_ctx then
-				create l_script.make_from_string (gcse_20_script)
-				l_script.replace_substring_all ("#CX_VALUE", l_ctx)
-				a_response.add_javascript_content (l_script)
-			end
+			Result := <<"gcse_search_form">>
 		end
 
+	get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+		do
+			if a_block_id.is_case_insensitive_equal_general ("gcse_search_form") then
+				if a_response.request.is_get_request_method then
+					if attached smarty_template_block (Current, a_block_id, a_response.api) as l_tpl_block then
+						a_response.add_block (l_tpl_block, "search")
+					else
+						debug ("cms")
+							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
+						end
+					end
+				end
+			end
+		end
 
 feature {NONE} -- Implementation
 
@@ -134,9 +148,9 @@ feature {NONE} -- Implementation
 			  (function() {
 			    var cx = '#CX_VALUE';
 			    var gcse = document.createElement('script'); gcse.type = 'text/javascript'; gcse.async = true;
-			    gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
-			        '//www.google.com/cse/cse.js?cx=' + cx;
-			    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(gcse, s);
+			    gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//www.google.com/cse/cse.js?cx=' + cx;
+			    var s = document.getElementsByTagName('script')[0]; 
+			    s.parentNode.insertBefore(gcse, s);
 			  })();
 			]"
 end
