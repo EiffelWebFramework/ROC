@@ -91,6 +91,9 @@ feature -- CMS modules
 			a_setup.register_module (create {CMS_DEBUG_MODULE}.make)
 			a_setup.register_module (create {CMS_DEMO_MODULE}.make)
 
+				-- Dev
+			a_setup.register_module (create {MASQUERADE_AUTH_MODULE}.make)
+
 		end
 
 end
