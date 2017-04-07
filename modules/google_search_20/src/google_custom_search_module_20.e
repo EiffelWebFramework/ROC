@@ -130,7 +130,7 @@ feature -- Hooks configuration
 	get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
 		do
 			if a_block_id.is_case_insensitive_equal_general ("gcse_search_form") then
-				if a_response.request.is_get_request_method then
+				if attached gcse_cx_key (a_response.api) as cx then
 					if attached smarty_template_block (Current, a_block_id, a_response.api) as l_tpl_block then
 						a_response.add_block (l_tpl_block, "search")
 					else
@@ -138,6 +138,8 @@ feature -- Hooks configuration
 							a_response.add_warning_message ("Error with block [" + a_block_id + "]")
 						end
 					end
+				else
+						-- missing setting.
 				end
 			end
 		end
