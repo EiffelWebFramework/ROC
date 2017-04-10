@@ -481,7 +481,8 @@ feature -- Handler
 							r.set_status_code ({HTTP_CONSTANTS}.internal_server_error)
 							r.set_main_content ("<p>ERROR: User activation failed for <i>" + html_encoded (l_user.name) + "</i>!</p>")
 						end
-					else							-- the token does not exist, or it was already used.
+					else
+							-- the token does not exist, or it was already used.
 						r.set_status_code ({HTTP_CONSTANTS}.bad_request)
 						r.set_main_content ("<p>The token <i>" + l_token.value + "</i> is not valid " + r.link ("Reactivate Account", "account/reactivate", Void) + "</p>")
 					end
