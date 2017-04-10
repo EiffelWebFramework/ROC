@@ -54,6 +54,7 @@ echo Install ROC as CMS ewf
 %SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\library
 %SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\src
 %SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\doc
+%SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\dev_modules
 %SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\modules
 %SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\examples
 
@@ -62,6 +63,7 @@ echo Install ROC as CMS ewf
 %COPYCMD% %TMP_DIR%\src	%TMP_UNSTABLE_DIR%\library\web\cms\src
 %COPYCMD% %TMP_DIR%\doc	%TMP_UNSTABLE_DIR%\library\web\cms\doc
 %COPYCMD% %TMP_DIR%\modules	%TMP_UNSTABLE_DIR%\library\web\cms\modules
+%COPYCMD% %TMP_DIR%\dev_modules	%TMP_UNSTABLE_DIR%\library\web\cms\dev_modules
 %COPYCMD% %TMP_DIR%\examples	%TMP_UNSTABLE_DIR%\library\web\cms\examples
 echo TOOLS
 %COPYCMD% %TMP_DIR%\tools	%TMP_UNSTABLE_DIR%\library\web\cms\tools
