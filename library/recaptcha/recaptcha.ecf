@@ -3,19 +3,18 @@
 	<target name="recaptcha">
 		<root all_classes="true"/>
 			<file_rule>
-				<exclude>/.git$</exclude>
+				<exclude>/\.git$</exclude>
 				<exclude>/EIFGENs$</exclude>
 				<exclude>/CVS$</exclude>
-				<exclude>/.svn$</exclude>
+				<exclude>/\.svn$</exclude>
 			</file_rule>
 		<option warning="true" void_safety="none">
-			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
 		</option>
-		<setting name="console_application" value="true"/>
+		<setting name="concurrency" value="scoop"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
-		<library name="base_extension" location="$ISE_LIBRARY\library\base_extension\base_extension.ecf"/>
 		<library name="http_client_extension" location="..\http_client_extension\http_client_extension.ecf"/>
-		<library name="json" location="$ISE_LIBRARY\contrib\library\text\parser\json\library\json.ecf" readonly="false"/>
+		<library name="json" location="$ISE_LIBRARY\contrib\library\text\parser\json\library\json.ecf"/>
+		<library name="uri" location="$ISE_LIBRARY\library\text\uri\uri.ecf"/>
 		<cluster name="recaptcha" location=".\src\" recursive="true">
 		</cluster>
 	</target>

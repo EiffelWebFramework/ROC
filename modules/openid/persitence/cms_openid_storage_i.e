@@ -37,7 +37,7 @@ feature -- Access: Consumers
 		deferred
 		end
 
-	openid_consumer_by_name (a_name: READABLE_STRING_8): detachable CMS_OPENID_CONSUMER
+	openid_consumer_by_name (a_name: READABLE_STRING_GENERAL): detachable CMS_OPENID_CONSUMER
 			-- Retrieve a consumer by name `a_name', if any.
 		deferred
 		end
@@ -49,6 +49,6 @@ feature -- Change: User Oauth2
 		deferred
 		end
 
-	
+
 
 end

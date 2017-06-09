@@ -98,8 +98,7 @@ feature -- Handle
 							m.header.put_content_type_text_html
 							res.send (m)
 						else
-							create {NOT_FOUND_ERROR_CMS_RESPONSE} r.make (req, res, a_api)
-							r.execute
+							a_api.response_api.send_not_found (Void, req, res)
 						end
 					else
 						create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_api)
@@ -143,8 +142,7 @@ feature -- Handle
 						r.execute
 					end
 				else
-					create {NOT_FOUND_ERROR_CMS_RESPONSE} r.make (req, res, a_api)
-					r.execute
+					a_api.response_api.send_not_found (Void, req, res)
 				end
 			else
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_api)
@@ -199,7 +197,6 @@ feature -- Hook
 			-- List of block names, managed by current object.
 		local
 			res: ARRAYED_LIST [like {CMS_BLOCK}.name]
-			utf_conv: UTF_CONVERTER
 		do
 			if
 				attached feed_aggregator_api as l_feed_api and then
@@ -209,7 +206,7 @@ feature -- Hook
 				across
 					l_aggs as ic
 				loop
-					res.force ("?feed." + utf_conv.utf_32_string_to_utf_8_string_8 (ic.item))
+					res.force ("?feed." + utf_8_encoded (ic.item))
 				end
 			else
 				create res.make (0)

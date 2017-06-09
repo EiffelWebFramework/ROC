@@ -65,6 +65,7 @@ feature -- Access
 			Result.force ("account reject")
 			Result.force ("account reactivate")
 			Result.force ("change own username")
+			Result.force ("view user")
 		end
 
 feature {CMS_EXECUTION} -- Administration
@@ -123,6 +124,8 @@ feature -- Router
 			a_router.handle ("/account/new-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_new_password(a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle ("/account/reset-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password(a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle ("/account/change/{field}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_change_field (a_api, ?, ?)), a_router.methods_get_post)
+
+			a_router.handle ("/user/{uid}", create {CMS_USER_HANDLER}.make (a_api), a_router.methods_get)
 		end
 
 feature -- Hooks configuration
@@ -382,7 +385,7 @@ feature -- Handler
 								l_exist := True
 							end
 							if attached recaptcha_secret_key (api) as l_recaptcha_key then
-								if attached {WSF_STRING} req.form_parameter ("g-recaptcha-response") as l_recaptcha_response and then is_captcha_verified (l_recaptcha_key, l_recaptcha_response.value) then
+								if attached {WSF_STRING} req.form_parameter ("g-recaptcha-response") as l_recaptcha_response and then is_captcha_verified (l_recaptcha_key, l_recaptcha_response.url_encoded_value) then
 									l_captcha_passed := True
 								else
 										--| Bad or missing captcha
@@ -428,15 +431,13 @@ feature -- Handler
 							r.set_status_code ({HTTP_CONSTANTS}.bad_request)
 						end
 					else
-						create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
-						r.set_main_content ("There were issue with your application, invalid or missing values.")
+						api.response_api.send_bad_request ("There were issue with your application, invalid or missing values.", req, res)
 					end
 				end
+				r.execute
 			else
-				create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
-				r.set_main_content ("You can also contact the webmaster to ask for an account.")
+				api.response_api.send_permissions_access_denied ("You can also contact the webmaster to ask for an account.", Void, req, res)
 			end
-			r.execute
 		end
 
 	handle_activation (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
@@ -500,8 +501,7 @@ feature -- Handler
 					l_ir.execute
 				end
 			else
-				create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
-				r.execute
+				api.response_api.send_access_denied (Void, req, res)
 			end
 		end
 
@@ -536,8 +536,7 @@ feature -- Handler
 					l_ir.execute
 				end
 			else
-				create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
-				r.execute
+				api.response_api.send_access_denied (Void, req, res)
 			end
 		end
 
@@ -551,8 +550,8 @@ feature -- Handler
 			l_url_reject: STRING
 			l_email: READABLE_STRING_8
 		do
-			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-			if r.has_permission ("account reactivate") then
+			if api.has_permission ("account reactivate") then
+				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 				if req.is_post_request_method then
 					if attached {WSF_STRING} req.form_parameter ("email") as p_email then
 						if p_email.value.is_valid_as_string_8 then
@@ -587,11 +586,10 @@ feature -- Handler
 						end
 					end
 				end
-			else
-				create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
 				r.execute
+			else
+				api.response_api.send_access_denied (Void, req, res)
 			end
-			r.execute
 		end
 
 	handle_new_password (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
@@ -700,7 +698,7 @@ feature -- Handler
 				l_fieldname := p_field.url_encoded_value
 			end
 			if l_fieldname = Void then
-				create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
+				api.response_api.send_bad_request (Void, req, res)
 			else
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 
@@ -814,8 +812,8 @@ feature -- Handler
 					end
 					r.set_main_content (b)
 				end
+				r.execute
 			end
-			r.execute
 		end
 
 	block_list: ITERABLE [like {CMS_BLOCK}.name]
@@ -1118,36 +1116,30 @@ feature -- Access: configuration
 
 	form_registration_application_description (api: CMS_API): detachable READABLE_STRING_8
 			-- Get recaptcha security key.
-		local
-			utf: UTF_CONVERTER
 		do
 			if attached api.module_configuration (Current, Void) as cfg then
 				if attached cfg.text_item ("forms.registration.application_description") as l_desc and then not l_desc.is_whitespace then
-					Result := utf.utf_32_string_to_utf_8_string_8 (l_desc)
+					Result := api.utf_8_encoded (l_desc)
 				end
 			end
 		end
 
 	recaptcha_secret_key (api: CMS_API): detachable READABLE_STRING_8
 			-- Get recaptcha security key.
-		local
-			utf: UTF_CONVERTER
 		do
 			if attached api.module_configuration (Current, Void) as cfg then
 				if attached cfg.text_item ("recaptcha.secret_key") as l_recaptcha_key and then not l_recaptcha_key.is_empty then
-					Result := utf.utf_32_string_to_utf_8_string_8 (l_recaptcha_key)
+					Result := api.utf_8_encoded (l_recaptcha_key)
 				end
 			end
 		end
 
 	recaptcha_site_key (api: CMS_API): detachable READABLE_STRING_8
 			-- Get recaptcha security key.
-		local
-			utf: UTF_CONVERTER
 		do
 			if attached api.module_configuration (Current, Void) as cfg then
 				if attached cfg.text_item ("recaptcha.site_key") as l_recaptcha_key and then not l_recaptcha_key.is_empty then
-					Result := utf.utf_32_string_to_utf_8_string_8 (l_recaptcha_key)
+					Result := api.utf_8_encoded (l_recaptcha_key)
 				end
 			end
 		end
