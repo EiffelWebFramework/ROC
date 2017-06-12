@@ -362,79 +362,78 @@ feature -- Handler
 			l_captcha_passed: BOOLEAN
 			l_email: READABLE_STRING_8
 		do
-			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
-			if r.has_permission ("account register") then
-				if req.is_post_request_method then
-					if
-						attached {WSF_STRING} req.form_parameter ("name") as l_name and then
-						attached {WSF_STRING} req.form_parameter ("password") as l_password and then
-						attached {WSF_STRING} req.form_parameter ("email") as p_email and then
-						attached {WSF_STRING} req.form_parameter ("personal_information") as l_personal_information
-					then
-						if p_email.value.is_valid_as_string_8 then
-							l_email := p_email.value.to_string_8
-							l_user_api := api.user_api
-							if attached l_user_api.user_by_name (l_name.value) or else attached l_user_api.temp_user_by_name (l_name.value) then
-									-- Username already exist.
-								r.set_value ("User name already exists!", "error_name")
-								l_exist := True
-							end
-							if attached l_user_api.user_by_email (l_email) or else attached l_user_api.temp_user_by_email (l_email) then
-									-- Email already exists.
-								r.set_value ("An account is already associated with that email address!", "error_email")
-								l_exist := True
-							end
-							if attached recaptcha_secret_key (api) as l_recaptcha_key then
-								if attached {WSF_STRING} req.form_parameter ("g-recaptcha-response") as l_recaptcha_response and then is_captcha_verified (l_recaptcha_key, l_recaptcha_response.url_encoded_value) then
-									l_captcha_passed := True
-								else
-										--| Bad or missing captcha
-									l_captcha_passed := False
-								end
-							else
-									--| reCaptcha is not setup, so no verification
+			if
+				api.has_permission ("account register") and then
+				req.is_post_request_method
+			then
+				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+				if
+					attached {WSF_STRING} req.form_parameter ("name") as l_name and then
+					attached {WSF_STRING} req.form_parameter ("password") as l_password and then
+					attached {WSF_STRING} req.form_parameter ("email") as p_email and then
+					attached {WSF_STRING} req.form_parameter ("personal_information") as l_personal_information
+				then
+					if p_email.value.is_valid_as_string_8 then
+						l_email := p_email.value.to_string_8
+						l_user_api := api.user_api
+						if attached l_user_api.user_by_name (l_name.value) or else attached l_user_api.temp_user_by_name (l_name.value) then
+								-- Username already exist.
+							r.set_value ("User name already exists!", "error_name")
+							l_exist := True
+						end
+						if attached l_user_api.user_by_email (l_email) or else attached l_user_api.temp_user_by_email (l_email) then
+								-- Email already exists.
+							r.set_value ("An account is already associated with that email address!", "error_email")
+							l_exist := True
+						end
+						if attached recaptcha_secret_key (api) as l_recaptcha_key then
+							if attached {WSF_STRING} req.form_parameter ("g-recaptcha-response") as l_recaptcha_response and then is_captcha_verified (l_recaptcha_key, l_recaptcha_response.url_encoded_value) then
 								l_captcha_passed := True
-							end
-							if not l_exist then
-									-- New temp user
-								create u.make (l_name.value)
-								u.set_email (l_email)
-								u.set_password (l_password.value)
-								u.set_personal_information (l_personal_information.value)
-								l_user_api.new_temp_user (u)
-
-									-- Create activation token
-								l_token := new_token
-								l_user_api.new_activation (l_token, u.id)
-								l_url_activate := req.absolute_script_url ("/account/activate/" + l_token)
-								l_url_reject := req.absolute_script_url ("/account/reject/" + l_token)
-
-									-- Send Email to webmaster
-								create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
-								write_debug_log (generator + ".handle register: send_register_email")
-								es.send_account_evaluation (u, l_personal_information.value, l_url_activate, l_url_reject, req.absolute_script_url (""))
-
-									-- Send Email to user
-								create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
-								write_debug_log (generator + ".handle register: send_contact_email")
-								es.send_contact_email (l_email, u, req.absolute_script_url (""))
 							else
-								r.set_value (l_name.value, "name")
-								r.set_value (l_email, "email")
-								r.set_value (l_personal_information.value, "personal_information")
-								r.set_status_code ({HTTP_CONSTANTS}.bad_request)
+									--| Bad or missing captcha
+								l_captcha_passed := False
 							end
 						else
+								--| reCaptcha is not setup, so no verification
+							l_captcha_passed := True
+						end
+						if not l_exist then
+								-- New temp user
+							create u.make (l_name.value)
+							u.set_email (l_email)
+							u.set_password (l_password.value)
+							u.set_personal_information (l_personal_information.value)
+							l_user_api.new_temp_user (u)
+								-- Create activation token
+							l_token := new_token
+							l_user_api.new_activation (l_token, u.id)
+							l_url_activate := req.absolute_script_url ("/account/activate/" + l_token)
+							l_url_reject := req.absolute_script_url ("/account/reject/" + l_token)
+								-- Send Email to webmaster
+							create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
+							write_debug_log (generator + ".handle register: send_register_email")
+							es.send_account_evaluation (u, l_personal_information.value, l_url_activate, l_url_reject, req.absolute_script_url (""))
+
+								-- Send Email to user
+							create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (api))
+							write_debug_log (generator + ".handle register: send_contact_email")
+							es.send_contact_email (l_email, u, req.absolute_script_url (""))
+						else
 							r.set_value (l_name.value, "name")
-							r.set_value (p_email.value, "email")
+							r.set_value (l_email, "email")
 							r.set_value (l_personal_information.value, "personal_information")
 							r.set_status_code ({HTTP_CONSTANTS}.bad_request)
 						end
 					else
-						api.response_api.send_bad_request ("There were issue with your application, invalid or missing values.", req, res)
+						r.set_value (l_name.value, "name")
+						r.set_value (p_email.value, "email")
+						r.set_value (l_personal_information.value, "personal_information")
+						r.set_status_code ({HTTP_CONSTANTS}.bad_request)
 					end
+					r.execute
+				else
+					api.response_api.send_bad_request ("There were issue with your application, invalid or missing values.", req, res)
 				end
-				r.execute
 			else
 				api.response_api.send_permissions_access_denied ("You can also contact the webmaster to ask for an account.", Void, req, res)
 			end

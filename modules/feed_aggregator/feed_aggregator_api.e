@@ -35,6 +35,8 @@ feature -- Access
 			l_feed_id: READABLE_STRING_32
 			l_title: detachable READABLE_STRING_GENERAL
 			l_locations: detachable STRING_TABLE [READABLE_STRING_8]
+			loc_name: READABLE_STRING_GENERAL
+			loc: READABLE_STRING_8
 			l_table: like internal_aggregations
 		do
 			l_table := internal_aggregations
@@ -102,6 +104,19 @@ feature -- Access
 										agg.include_category (cats_ic.item)
 									end
 								end
+								across
+									l_locations as locs_ic
+								loop
+									loc_name := locs_ic.key
+									loc := locs_ic.item
+									if attached cfg.text_list_item ({STRING_32} "feeds." + l_feed_id + {STRING_32} ".categories." + loc_name.as_string_32) as l_loc_cats then
+										across
+											l_loc_cats as cats_ic
+										loop
+											agg.include_category_per_feed (cats_ic.item, loc)
+										end
+									end
+								end
 							end
 						end
 					end
@@ -138,11 +153,42 @@ feature -- Operation
 
 	aggregation_feed (agg: FEED_AGGREGATION): detachable FEED
 			-- Feed from aggregation `agg'.
+		local
+			loc: READABLE_STRING_8
+			lst: LIST [FEED_ITEM]
 		do
 			across
 				agg.locations as ic
 			loop
-				if attached feed (ic.item) as f then
+				loc := ic.item
+				if attached feed (loc) as f then
+					lst := f.items
+					if agg.has_category_filter_for_location (loc) then
+							-- Note: it also check the global filter.
+						from
+							lst.start
+						until
+							lst.after
+						loop
+							if agg.is_included_for_location (lst.item, loc) then
+								lst.forth
+							else
+								lst.remove
+							end
+						end
+					elseif agg.has_category_filter then
+						from
+							lst.start
+						until
+							lst.after
+						loop
+							if agg.is_included (lst.item) then
+								lst.forth
+							else
+								lst.remove
+							end
+						end
+					end
 					if Result /= Void then
 						if f /= Void then
 							Result := Result + f
@@ -151,6 +197,9 @@ feature -- Operation
 						Result := f
 					end
 				end
+			end
+			if Result /= Void then
+				Result.set_date (create {DATE_TIME}.make_now_utc)
 			end
 		end
 

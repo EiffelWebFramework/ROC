@@ -227,10 +227,10 @@ $(document).ready(function() {
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 				r.values.force ("messaging", "messaging")
 				r.set_main_content (new_html_messaging_form (r, api))
+				r.execute
 			else
-				create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make_with_permissions (req, res, api, <<"use messaging", "message any user">>)
+				api.response_api.send_permissions_access_denied (Void, <<"use messaging", "message any user">>, req, res)
 			end
-			r.execute
 		end
 
 	handle_post_messaging (api: CMS_API; req: WSF_REQUEST; res: WSF_RESPONSE)
@@ -313,10 +313,10 @@ $(document).ready(function() {
 					end
 				end
 				r.set_main_content (s)
+				r.execute
 			else
-				create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make_with_permissions (req, res, api, <<"message any user">>)
+				api.response_api.send_permissions_access_denied (Void, <<"message any user">>, req, res)
 			end
-			r.execute
 		end
 
 feature {NONE} -- Helpers
