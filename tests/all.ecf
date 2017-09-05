@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-16-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-16-0 http://www.eiffel.com/developers/xml/configuration-1-16-0.xsd" name="all" uuid="C8FBADFC-FC8D-43F4-AA09-55304BC9342A">
+	<description>Integration project including many lib</description>
+	<target name="all">
+		<root all_classes="true"/>
+		<file_rule>
+			<exclude>/.git$</exclude>
+			<exclude>/.svn$</exclude>
+			<exclude>/EIFGENs$</exclude>
+		</file_rule>
+		<option warning="true" full_class_checking="true" is_attached_by_default="true" is_obsolete_routine_type="true" syntax="standard">
+		</option>
+		<capability>
+			<concurrency support="none"/>
+			<void_safety support="transitional" use="transitional"/>
+		</capability>
+		<library name="app_env" location="..\library\app_env\app_env.ecf" readonly="false"/>
+		<library name="auth_module" location="..\modules\auth\auth.ecf" readonly="false"/>
+		<library name="basic_auth" location="..\modules\basic_auth\basic_auth.ecf" readonly="false"/>
+		<library name="cms" location="..\cms.ecf" readonly="false"/>
+		<library name="cms_blog_module" location="..\examples\demo\modules\blog\cms_blog_module.ecf" readonly="false"/>
+		<library name="cms_demo_module" location="..\examples\demo\modules\demo\cms_demo_module.ecf" readonly="false"/>
+		<library name="cms_model" location="..\library\model\cms_model.ecf" readonly="false"/>
+		<library name="config" location="..\library\configuration\config.ecf" readonly="false"/>
+		<library name="config_tests" location="..\library\configuration\tests\config_tests.ecf" readonly="false"/>
+		<library name="demo" location="..\examples\demo\demo.ecf" readonly="false"/>
+		<library name="email_service" location="..\library\email\email.ecf" readonly="false"/>
+		<library name="node" location="..\modules\node\node.ecf" readonly="false"/>
+		<library name="oauth_module" location="..\modules\oauth20\oauth20.ecf" readonly="false"/>
+		<library name="persistence_store_odbc" location="..\library\persistence\store_odbc\store_odbc.ecf" readonly="false"/>
+		<library name="store_mysql" location="..\library\persistence\store_mysql\store_mysql.ecf" readonly="false"/>
+		<library name="tests_store_odbc" location="..\library\persistence\store_odbc\tests\tests.ecf" readonly="false"/>
+	</target>
+	<target name="all_windows" extends="all">
+		<description>Compiling as Windows , on other platforms than Windows</description>
+		<root all_classes="true"/>
+		<setting name="platform" value="windows"/>
+	</target>
+	<target name="all_unix" extends="all">
+		<description>Compiling as UNIX , on other platforms than Unix</description>
+		<root all_classes="true"/>
+		<setting name="platform" value="unix"/>
+	</target>
+</system>
