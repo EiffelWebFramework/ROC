@@ -7,7 +7,6 @@ class
 	NOT_FOUND_ERROR_CMS_RESPONSE
 
 inherit
-
 	CMS_RESPONSE
 		redefine
 			custom_prepare
@@ -36,7 +35,7 @@ feature -- Execution
 			set_main_content ("<em>The requested page %"" + request.request_uri + "%"could not be found.</em>")
 		end
 note
-	copyright: "2011-2016, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
 
