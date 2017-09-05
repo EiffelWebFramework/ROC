@@ -18,18 +18,15 @@
 		<library name="auth_module" location="..\modules\auth\auth.ecf" readonly="false"/>
 		<library name="basic_auth" location="..\modules\basic_auth\basic_auth.ecf" readonly="false"/>
 		<library name="cms" location="..\cms.ecf" readonly="false"/>
-		<library name="cms_blog_module" location="..\examples\demo\modules\blog\cms_blog_module.ecf" readonly="false"/>
 		<library name="cms_demo_module" location="..\examples\demo\modules\demo\cms_demo_module.ecf" readonly="false"/>
 		<library name="cms_model" location="..\library\model\cms_model.ecf" readonly="false"/>
 		<library name="config" location="..\library\configuration\config.ecf" readonly="false"/>
-		<library name="config_tests" location="..\library\configuration\tests\config_tests.ecf" readonly="false"/>
 		<library name="demo" location="..\examples\demo\demo.ecf" readonly="false"/>
 		<library name="email_service" location="..\library\email\email.ecf" readonly="false"/>
 		<library name="node" location="..\modules\node\node.ecf" readonly="false"/>
 		<library name="oauth_module" location="..\modules\oauth20\oauth20.ecf" readonly="false"/>
 		<library name="persistence_store_odbc" location="..\library\persistence\store_odbc\store_odbc.ecf" readonly="false"/>
 		<library name="store_mysql" location="..\library\persistence\store_mysql\store_mysql.ecf" readonly="false"/>
-		<library name="tests_store_odbc" location="..\library\persistence\store_odbc\tests\tests.ecf" readonly="false"/>
 	</target>
 	<target name="all_windows" extends="all">
 		<description>Compiling as Windows , on other platforms than Windows</description>
