@@ -104,6 +104,19 @@ feature -- Query
 			end
 		end
 
+	real_user_display_name (u: CMS_USER): READABLE_STRING_32
+			-- Display name for user `u`.
+		do
+			if
+				attached {CMS_PARTIAL_USER} u as l_partial and then
+				attached user_by_id (l_partial.id) as l_user
+			then
+				Result := user_display_name (l_user)
+			else
+				Result := user_display_name (u)
+			end
+		end
+
 feature -- Access: user
 
 	user_by_id (a_id: like {CMS_USER}.id): detachable CMS_USER

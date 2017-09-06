@@ -562,8 +562,15 @@ feature -- Helpers: URLs
 feature -- Helpers: html links
 
 	user_display_name (u: CMS_USER): READABLE_STRING_32
+			-- User profile name or name.
 		do
 			Result := user_api.user_display_name (u)
+		end
+
+	real_user_display_name (u: CMS_USER): READABLE_STRING_32
+			-- Real user profile name or name, even if `u` has only user `id` value.
+		do
+			Result := user_api.real_user_display_name (u)
 		end
 
 feature -- Settings
