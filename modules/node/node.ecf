@@ -3,15 +3,10 @@
 	<target name="node">
 		<root all_classes="true"/>
 		<file_rule>
-			<exclude>/.svn$</exclude>
+			<exclude>/\.svn$</exclude>
 			<exclude>/CVS$</exclude>
 			<exclude>/EIFGENs$</exclude>
 		</file_rule>
-		<option warning="true">
-		</option>
-		<capability>
-			<concurrency support="scoop" use="scoop"/>
-		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="cms" location="..\..\cms.ecf"/>
 		<library name="cms_comments_module" location="..\..\modules\comments\comments.ecf" readonly="false"/>

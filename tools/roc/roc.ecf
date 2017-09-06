@@ -8,14 +8,13 @@
 		<setting name="console_application" value="true"/>
 		<capability>
 			<concurrency support="none"/>
-			<void_safety support="all" use="all"/>
 		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="config" location="..\..\library\configuration\config.ecf"/>
 		<library name="encoding" location="$ISE_LIBRARY\library\encoding\encoding.ecf"/>
 		<cluster name="roc" location=".\" recursive="true">
 			<file_rule>
-				<exclude>/.svn$</exclude>
+				<exclude>/\.svn$</exclude>
 				<exclude>/CVS$</exclude>
 				<exclude>/EIFGENs$</exclude>
 			</file_rule>

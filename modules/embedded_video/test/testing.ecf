@@ -3,12 +3,10 @@
 	<target name="embedded_video_testing">
 		<root class="ANY" feature="default_create"/>
 		<file_rule>
-			<exclude>/.git$</exclude>
-			<exclude>/.svn$</exclude>
+			<exclude>/\.git$</exclude>
+			<exclude>/\.svn$</exclude>
 			<exclude>/EIFGENs$</exclude>
 		</file_rule>
-		<option warning="true">
-		</option>
 		<capability>
 			<concurrency support="none"/>
 		</capability>

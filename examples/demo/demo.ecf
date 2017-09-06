@@ -4,7 +4,7 @@
 	<target name="common" abstract="true">
 		<root class="DEMO_CMS_SERVER" feature="make_and_launch"/>
 		<file_rule>
-			<exclude>/.svn$</exclude>
+			<exclude>/\.svn$</exclude>
 			<exclude>/CVS$</exclude>
 			<exclude>/EIFGENs$</exclude>
 		</file_rule>
@@ -12,10 +12,6 @@
 			<debug name="dbglog" enabled="true"/>
 		</option>
 		<setting name="executable_name" value="demo"/>
-		<capability>
-			<concurrency support="scoop" use="scoop"/>
-			<void_safety support="all" use="all"/>
-		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="cms" location="..\..\cms.ecf" readonly="false">
 			<option>
