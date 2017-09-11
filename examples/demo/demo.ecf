@@ -42,6 +42,11 @@
 		<library name="embedded_video_module" location="..\..\modules\embedded_video\embedded_video.ecf" readonly="false"/>
 		<library name="masquerade_auth_module" location="..\..\dev_modules\masquerade_auth\masquerade_auth.ecf" readonly="false"/>
 		<library name="persistence_sqlite3" location="..\..\library\persistence\sqlite3\sqlite3.ecf" readonly="false"/>
+		<!--
+			 By default, commented, since it depends on specific environment settings.
+		<library name="persistence_store_odbc" location="..\..\library\persistence\store_odbc\store_odbc.ecf"/>
+		<library name="persistence_store_mysql" location="..\..\library\persistence\store_mysql\store_mysql.ecf" />
+		-->
 		<library name="wsf" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf.ecf"/>
 		<library name="wsf_extension" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf_extension.ecf" readonly="false"/>
 	</target>
@@ -53,34 +58,28 @@
 		<cluster name="src" location=".\src\" recursive="true"/>
 	</target>
 	<target name="demo_standalone" extends="common">
-		<option debug="true">
-			<debug name="dbglog" enabled="true"/>
-		</option>
-		<capability>
-			<concurrency support="scoop" use="scoop"/>
-		</capability>
 		<variable name="httpd_ssl_disabled" value="true"/>
 		<library name="standalone_launcher" location="..\..\launcher\standalone.ecf" readonly="false"/>
 		<cluster name="src" location=".\src\" recursive="true"/>
 	</target>
 	<target name="demo_standalone_none" extends="demo_standalone">
 		<capability>
-			<concurrency support="none" use="none"/>
+			<concurrency use="none"/>
 		</capability>
 	</target>
 	<target name="demo_standalone_mt" extends="demo_standalone">
 		<capability>
-			<concurrency support="thread" use="thread"/>
+			<concurrency use="thread"/>
 		</capability>
 	</target>
 	<target name="demo_standalone_scoop" extends="demo_standalone">
 		<capability>
-			<concurrency support="scoop" use="scoop"/>
+			<concurrency use="scoop"/>
 		</capability>
 	</target>
 	<target name="demo_standalone_scoop_ssl" extends="demo_standalone_scoop">
 		<capability>
-			<concurrency support="scoop" use="scoop"/>
+			<concurrency use="scoop"/>
 		</capability>
 		<variable name="httpd_ssl_enabled" value="true"/>
 		<variable name="libcurl_http_client_disabled" value="true"/>
@@ -89,14 +88,14 @@
 	</target>
 	<target name="demo_cgi" extends="common">
 		<capability>
-			<concurrency support="none" use="none"/>
+			<concurrency use="none"/>
 		</capability>
 		<library name="cgi_launcher" location="..\..\launcher\cgi.ecf" readonly="false"/>
 		<cluster name="src" location=".\src\" recursive="true"/>
 	</target>
 	<target name="demo_libfcgi" extends="common">
 		<capability>
-			<concurrency support="none" use="none"/>
+			<concurrency use="none"/>
 		</capability>
 		<library name="libfcgi_launcher" location="..\..\launcher\libfcgi.ecf" readonly="false"/>
 		<cluster name="src" location=".\src\" recursive="true"/>
