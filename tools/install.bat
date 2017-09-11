@@ -21,13 +21,13 @@ if -%ISE_LIBRARY%- == -- set ISE_LIBRARY=%ISE_EIFFEL%
 if -%EIFFEL_LIBRARY%- == -- set EIFFEL_LIBRARY=%ISE_LIBRARY%
 echo 1: using $EIFFEL_LIBRARY=%EIFFEL_LIBRARY%
 echo 2: using $ISE_LIBRARY=%ISE_LIBRARY%
-echo 3: using current directory=%CD%\ewf
+echo 3: using current directory=%CD%\roc
 CHOICE /C 123q /M " > selection:"
 if .%ERRORLEVEL%. == .1. goto use_eiffel_library
 if .%ERRORLEVEL%. == .2. goto use_ise_library
 if .%ERRORLEVEL%. == .3. goto use_current_dir
 echo No target directory were specified, you can pass it using the command line
-echo Usage: install_ewf {target_directory}
+echo Usage: install_roc {target_directory}
 echo Bye ...
 goto end
 
@@ -42,14 +42,14 @@ set TMP_TARGET_DIR=%ISE_LIBRARY%
 goto start
 
 :use_current_dir
-set TMP_TARGET_DIR=%CD%\ewf
+set TMP_TARGET_DIR=%CD%\roc
 goto start
 
 :start
 set TMP_CONTRIB_DIR=%TMP_TARGET_DIR%\contrib
 set TMP_UNSTABLE_DIR=%TMP_TARGET_DIR%\unstable
 
-echo Install ROC as CMS ewf
+echo Install ROC as CMS library
 %SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\launcher
 %SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\library
 %SAFE_RMDIR% %TMP_UNSTABLE_DIR%\library\web\cms\src
