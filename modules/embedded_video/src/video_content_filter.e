@@ -5,8 +5,8 @@ note
 		Full syntax:
 			[video:url width:X height:Y]
 	]"
-	date: "$Date: 2015-07-18 13:53:56 +0200 (sam., 18 juil. 2015) $"
-	revision: "$Revision: 97737 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	VIDEO_CONTENT_FILTER

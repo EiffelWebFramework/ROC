@@ -2,8 +2,8 @@ note
 	description: "[
 		Module that allows you to embed videos from YouTube and Vimeo in a web page.
 	]"
-	date: "$Date: 2015-07-16 15:57:08 +0200 (jeu., 16 juil. 2015) $"
-	revision: "$Revision: 97722 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	EMBEDDED_VIDEO_MODULE

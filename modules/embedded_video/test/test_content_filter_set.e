@@ -3,8 +3,8 @@ note
 		Eiffel tests that can be executed by testing tool.
 	]"
 	author: "EiffelStudio test wizard"
-	date: "$Date: 2015-07-10 13:38:10 +0200 (ven., 10 juil. 2015) $"
-	revision: "$Revision: 97687 $"
+	date: "$Date$"
+	revision: "$Revision$"
 	testing: "type/manual"
 
 class

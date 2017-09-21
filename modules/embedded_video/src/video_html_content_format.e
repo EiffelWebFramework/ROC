@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {VIDEO_HTML_CONTENT_FORMAT}."
 	author: ""
-	date: "$Date: 2015-07-10 13:38:10 +0200 (ven., 10 juil. 2015) $"
-	revision: "$Revision: 97687 $"
+	date: "$Date$"
+	revision: "$Revision$"
 
 class
 	VIDEO_HTML_CONTENT_FORMAT
