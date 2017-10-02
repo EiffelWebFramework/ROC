@@ -41,13 +41,10 @@ feature -- Execution
 			elseif api.has_permission ("account register") then
 				rep.add_link ("register", Void, api.webapi_path ("/account/register"))
 			end
-
-				-- If query has "router=yes", display basic information about router mapping.
-				-- Note: this may change in the future
 			if
-				attached router as l_router and then
 				attached req.query_parameter ("router") as p_router and then
-				p_router.same_string ("yes")
+				p_router.same_string ("yes") and then
+				attached router as l_router
 			then
 				create j.make_empty
 				create vis
@@ -78,6 +75,9 @@ feature -- Execution
 					end(?, j))
 				vis.process_router (l_router)
 				rep.add_string_field ("routing", j.representation)
+--				vis.on_mapping_actions.extend (agent (i_mapping: WSF_ROUTER_MAPPING; i_json: JSON_OBJECT)
+--					do
+--					end(?, j))
 			end
 			rep.add_self (req.percent_encoded_path_info)
 			rep.execute
