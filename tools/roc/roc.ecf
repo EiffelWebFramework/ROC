@@ -7,7 +7,7 @@
 		</option>
 		<setting name="console_application" value="true"/>
 		<capability>
-			<concurrency support="none"/>
+			<concurrency use="none"/>
 		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="config" location="..\..\library\configuration\config.ecf"/>
