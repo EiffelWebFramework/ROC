@@ -63,12 +63,12 @@ feature -- Access
 			-- List of permission ids, used by this module, and declared.
 		do
 			Result := Precursor
-			Result.force ("use basic_auth")
+			Result.force (perm_use_basic_auth)
 		end
 
 	perm_use_basic_auth: STRING = "use basic_auth"
 
-feature -- Access: auth strategy	
+feature -- Access: auth strategy
 
 	login_title: STRING = "Basic Auth"
 			-- Module specific login title.
@@ -93,7 +93,7 @@ feature -- Access: auth strategy
 feature {CMS_API} -- Access: API
 
 	oauth20_api: detachable CMS_AUTH_API_I
-			-- <Precursor>			
+			-- <Precursor>
 
 feature -- Access: filter
 
