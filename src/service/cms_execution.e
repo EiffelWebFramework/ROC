@@ -49,6 +49,10 @@ feature {NONE} -- Initialization
 			setup_storage (l_setup)
 			setup_modules (l_setup)
 			create api.make (l_setup, request)
+			if api.has_error then
+				response.put_error ("ROC: Error during API initialization!")
+				response.put_error (api.utf_8_encoded (api.string_representation_of_errors))
+			end
 			modules := api.enabled_modules
 
 			initialize_cms
@@ -91,7 +95,7 @@ feature -- Factory
 		deferred
 		end
 
-feature -- Access	
+feature -- Access
 
 	api: CMS_API
 			-- API service.
@@ -357,7 +361,7 @@ feature -- Request execution
 		end
 
 	initialize_administration_execution
-			-- Initialize for administration execution.	
+			-- Initialize for administration execution.
 		do
 			api.switch_to_administration_mode
 			api.initialize_execution
@@ -387,6 +391,7 @@ feature -- Filters
 		local
 			f, l_filter: detachable WSF_FILTER
 			l_api: like api
+			fut: FILE_UTILITIES
 		do
 			l_api := api
 			l_api.logger.put_debug (generator + ".create_filter", Void)
@@ -396,6 +401,12 @@ feature -- Filters
 			create {CMS_MAINTENANCE_FILTER} f.make (Void, l_api)
 			f.set_next (l_filter)
 			l_filter := f
+
+			if fut.file_exists (".debug") then
+				create {WSF_DEBUG_FILTER} f
+				f.set_next (l_filter)
+				l_filter := f
+			end
 
 --			 	-- Error Filter
 --			create {CMS_ERROR_FILTER} f.make (api)
