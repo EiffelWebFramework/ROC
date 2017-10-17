@@ -8,8 +8,7 @@
 			<exclude>/EIFGENs$</exclude>
 		</file_rule>
 		<capability>
-			<concurrency support="none" use="none"/>
-			<void_safety support="transitional" use="transitional"/>
+			<concurrency use="none"/>
 		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="config" location="..\config.ecf" readonly="false"/>

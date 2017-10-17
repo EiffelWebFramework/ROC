@@ -3,11 +3,11 @@
 	<target name="tests_store_odbc">
 		<root class="APPLICATION" feature="make"/>
 		<option warning="true">
-			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+			<assertions supplier_precondition="true"/>
 		</option>
 		<capability>
 			<concurrency support="thread" use="thread"/>
-			<void_safety support="conformance" use="conformance"/>
+			<void_safety support="conformance"/>
 		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="cms" location="..\..\..\..\cms.ecf" readonly="false"/>
