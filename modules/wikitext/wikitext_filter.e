@@ -20,7 +20,39 @@ feature -- Access
 
 	title: STRING_8 = "Wikitext renderer"
 
-	help: STRING = "Wikitext rendered as HTML"
+	help: STRING = "[
+		Wikitext rendered as HTML
+		
+		formatting: ''italics'', '''bold''', and '''''both'''''
+		link:  	[[WikiName|Title ...]] , [https://example.com Title ...]
+		
+		sections: ==Level 2 ==
+		          ===Level 3 ===
+		          ====Level 4 ====
+		          (=Level 1= is for page titles)
+				  
+		List:     * One
+		          * Two
+		          ** Two point one
+		          * Three
+						
+		Numbered list:  # One
+		                # Two
+		                ## Two point one
+		                # Three
+						
+		Code:   use `inline code`, or 
+		        ```
+		           multi lines code
+		        ```
+		        (use ```lang ...``` to provide a lang such as eiffel, shell, ...)
+		
+		Indenting:
+		        :first indent
+		        ::second indent
+				
+		For more, see https://en.wikipedia.org/wiki/Help:Cheatsheet
+	]"
 
 	description: STRING_8 = "Render Wikitext as HTML."
 
@@ -28,6 +60,7 @@ feature -- Conversion
 
 	filter (a_text: STRING_GENERAL)
 		local
+			wp: WIKI_PAGE
 			wk: WIKI_CONTENT_TEXT
 			utf: UTF_CONVERTER
 			l_wikitext: STRING_8
@@ -47,18 +80,19 @@ feature -- Conversion
 			end
 			l_wikitext.prune_all ('%R') -- FIXME: remove later once the wikitext parser handle "%R" and empty line.
 			create wk.make_from_string (l_wikitext)
-			if attached wk.structure as st then
-				create html.make (l_wikitext.count)
-				create vis.make (html)
-				vis.code_aliases.extend ("eiffel")
-				vis.code_aliases.extend ("e")
-				st.process (vis)
-				a_text.set_count (0)
-				if attached {STRING_32} a_text as a_unicode_text then
-					a_text.append (utf.utf_8_string_8_to_string_32 (html))
-				else
-					a_text.append (html)
-				end
+			create wp.make_with_title ("")
+			wp.set_text (wk)
+			create html.make (l_wikitext.count)
+			create vis.make (html)
+			vis.set_is_auto_toc_enabled (True)
+			vis.code_aliases.extend ("eiffel")
+			vis.code_aliases.extend ("e")
+			wp.process (vis)
+			a_text.set_count (0)
+			if attached {STRING_32} a_text as a_unicode_text then
+				a_text.append (utf.utf_8_string_8_to_string_32 (html))
+			else
+				a_text.append (html)
 			end
 		end
 

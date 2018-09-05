@@ -20,10 +20,7 @@ feature -- Forms ...
 			ta, sum: CMS_FORM_TEXTAREA
 			tselect: WSF_FORM_SELECT
 			opt: WSF_FORM_SELECT_OPTION
-			cms_format: CMS_EDITOR_CONTENT_FORMAT
 		do
-			create cms_format
-
 			create ti.make ("title")
 			ti.enable_required
 			ti.set_label ("Title")
@@ -40,11 +37,12 @@ feature -- Forms ...
 			tselect.set_label ("Format for content (and summary)")
 			tselect.set_is_required (True)
 
+
 				-- Main Content
 			create ta.make ("content")
 			ta.set_rows (10)
 			ta.set_cols (70)
-			ta.show_as_editor_if_selected (tselect, cms_format.name)
+			ta.show_as_editor_if_selected (tselect, {CMS_EDITOR_CONTENT_FORMAT}.name)
 			if a_node /= Void then
 				ta.set_text_value (a_node.content)
 			end
@@ -57,7 +55,7 @@ feature -- Forms ...
 			sum.set_rows (3)
 			sum.set_cols (70)
 				-- if cms_html is selected
-			sum.show_as_editor_if_selected (tselect, cms_format.name)
+			sum.show_as_editor_if_selected (tselect, {CMS_EDITOR_CONTENT_FORMAT}.name)
 			if a_node /= Void then
 				sum.set_text_value (a_node.summary)
 			end
@@ -78,14 +76,16 @@ feature -- Forms ...
 			across
 				 content_type.available_formats as c
 			loop
-				create opt.make (c.item.name, c.item.title)
-				if attached c.item.html_help as f_help then
-					opt.set_description ("<ul>" + f_help + "</ul>")
+				if cms_api.has_permission_to_use_format (c.item) then
+					create opt.make (c.item.name, c.item.title)
+					if attached c.item.html_help as f_help then
+						opt.set_description ("<ul>" + f_help + "</ul>")
+					end
+					tselect.add_option (opt)
 				end
-				tselect.add_option (opt)
 			end
-			if a_node /= Void and then attached a_node.format as l_format then
-				tselect.set_text_by_value (l_format)
+			if a_node /= Void and then attached a_node.format as l_node_format then
+				tselect.set_text_by_value (l_node_format)
 			end
 
 			fset.extend (tselect)
@@ -413,21 +413,13 @@ feature -- Output
 			if is_teaser then
 				if attached a_node.summary as l_summary then
 					a_output.append ("<p class=%"summary%">")
-					if attached cms_api.format (a_node.format) as f then
-						append_formatted_content_to (l_summary, f, a_output)
-					else
-						append_formatted_content_to (l_summary, cms_api.formats.default_format, a_output)
-					end
+					cms_api.append_text_formatted_to (a_node.format, l_summary, a_output)
 					a_output.append ("</p>")
 				end
 			else
 				if attached a_node.content as l_content then
 					a_output.append ("<p class=%"content%">")
-					if attached cms_api.format (a_node.format) as f then
-						append_formatted_content_to (l_content, f, a_output)
-					else
-						append_formatted_content_to (l_content, cms_api.formats.default_format, a_output)
-					end
+					cms_api.append_text_formatted_to (a_node.format, l_content, a_output)
 					a_output.append ("</p>")
 				end
 

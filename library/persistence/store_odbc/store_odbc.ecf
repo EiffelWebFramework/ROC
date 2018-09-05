@@ -18,9 +18,9 @@
 		<cluster name="common" location="..\implementation\store\" recursive="true"/>
 		<cluster name="persistence_store_odbc" location=".\src\" recursive="true">
 			<file_rule>
-				<exclude>/\.svn$</exclude>
 				<exclude>/CVS$</exclude>
 				<exclude>/EIFGENs$</exclude>
+				<exclude>/\.svn$</exclude>
 			</file_rule>
 		</cluster>
 	</target>

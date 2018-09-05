@@ -3,10 +3,10 @@
 	<target name="gcse">
 		<root all_classes="true"/>
 		<file_rule>
-			<exclude>/\.git$</exclude>
-			<exclude>/\.svn$</exclude>
 			<exclude>/CVS$</exclude>
 			<exclude>/EIFGENs$</exclude>
+			<exclude>/\.git$</exclude>
+			<exclude>/\.svn$</exclude>
 		</file_rule>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="http_client_extension" location="..\http_client_extension\http_client_extension.ecf" readonly="false"/>

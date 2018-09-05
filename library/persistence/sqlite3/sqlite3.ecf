@@ -3,10 +3,10 @@
 	<target name="persistence_sqlite3">
 		<root all_classes="true"/>
 		<file_rule>
-			<exclude>/\.git$</exclude>
-			<exclude>/\.svn$</exclude>
 			<exclude>/CVS$</exclude>
 			<exclude>/EIFGENs$</exclude>
+			<exclude>/\.git$</exclude>
+			<exclude>/\.svn$</exclude>
 		</file_rule>
 		<library name="app_env" location="..\..\app_env\app_env.ecf"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>

@@ -283,6 +283,12 @@ feature -- Access: Site
 			Result := utf.utf_32_string_to_utf_8_string_8 (site_name)
 		end
 
+	site_front_page_properties: detachable STRING_TABLE [READABLE_STRING_32]
+			-- Optional site properties.
+		do
+			Result := text_table_item ("site.front.property")
+		end
+
 	site_properties: detachable STRING_TABLE [READABLE_STRING_32]
 			-- Optional site properties.
 		do
@@ -360,8 +366,7 @@ feature -- Settings
 		do
 			if is_theme_valid (site_theme_name) then
 				set_theme (site_theme_name)
-			else
-					-- Keep previous theme!
+			-- else Keep previous theme!
 			end
 		end
 
@@ -378,8 +383,7 @@ feature -- Settings
 		do
 			if is_theme_valid (administration_theme_name) then
 				set_theme (administration_theme_name)
-			else
-					-- Keep previous theme!
+			-- else Keep previous theme!
 			end
 		end
 
@@ -524,7 +528,7 @@ feature -- Access: storage
 				to_implement ("Workaround code, persistence layer does not implement yet this kind of error handling.")
 					-- error handling.
 				create l_message.make (1024)
-				if attached ((create {EXCEPTION_MANAGER}).last_exception) as l_exception then
+				if attached (create {EXCEPTION_MANAGER}).last_exception as l_exception then
 					if attached l_exception.description as l_description then
 						l_message.append (l_description.as_string_32)
 						l_message.append ("%N%N")
@@ -573,6 +577,6 @@ feature -- Element change
 		end
 
 note
-	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2018, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

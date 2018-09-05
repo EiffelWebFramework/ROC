@@ -2,7 +2,7 @@ note
 	description: "[
 			Module that provides messenger functionality.
 		]"
-	author: "$Author$"
+	author: "$Author: jfiat $"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -316,19 +316,6 @@ $(document).ready(function() {
 				r.execute
 			else
 				api.response_api.send_permissions_access_denied (Void, <<"message any user">>, req, res)
-			end
-		end
-
-feature {NONE} -- Helpers
-
-	form_parameters_as_string (req: WSF_REQUEST): STRING
-		do
-			create Result.make_empty
-			across req.form_parameters as ic loop
-				Result.append (ic.item.key)
-				Result.append_character ('=')
-				Result.append_string (ic.item.string_representation)
-				Result.append_character ('%N')
 			end
 		end
 

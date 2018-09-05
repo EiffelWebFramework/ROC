@@ -14,9 +14,9 @@
 		<library name="testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
 		<cluster name="test" location=".\" recursive="true">
 			<file_rule>
-				<exclude>/\.svn$</exclude>
 				<exclude>/CVS$</exclude>
 				<exclude>/EIFGENs$</exclude>
+				<exclude>/\.svn$</exclude>
 			</file_rule>
 		</cluster>
 	</target>

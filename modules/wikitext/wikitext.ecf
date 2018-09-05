@@ -3,9 +3,9 @@
 	<target name="wikitext">
 		<root all_classes="true"/>
 		<file_rule>
-			<exclude>/\.svn$</exclude>
 			<exclude>/CVS$</exclude>
 			<exclude>/EIFGENs$</exclude>
+			<exclude>/\.svn$</exclude>
 		</file_rule>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="cms" location="..\..\cms.ecf"/>

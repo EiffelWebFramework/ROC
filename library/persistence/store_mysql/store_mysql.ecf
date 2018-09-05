@@ -22,10 +22,10 @@
 		</cluster>
 		<cluster name="persistence_store_mysql" location=".\src\" recursive="true">
 			<file_rule>
-				<exclude>/\.git$</exclude>
-				<exclude>/\.svn$</exclude>
 				<exclude>/CVS$</exclude>
 				<exclude>/EIFGENs$</exclude>
+				<exclude>/\.git$</exclude>
+				<exclude>/\.svn$</exclude>
 			</file_rule>
 		</cluster>
 	</target>

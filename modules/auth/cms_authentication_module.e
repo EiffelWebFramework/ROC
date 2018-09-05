@@ -76,9 +76,7 @@ feature -- Access
 		do
 			Result := Precursor
 			Result.force ("account register")
-			Result.force ("account activate")
-			Result.force ("account reject")
-			Result.force ("account reactivate")
+			Result.force ("account auto activate")
 			Result.force ("edit own account")
 			Result.force ("change own username")
 			Result.force ("change own password")
@@ -145,10 +143,6 @@ feature -- Router
 			a_router.handle ("/" + roc_logout_location, create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout(a_api, ?, ?)), a_router.methods_head_get)
 			a_router.handle ("/account/roc-register", create {WSF_URI_AGENT_HANDLER}.make (agent handle_register(a_api, ?, ?)), a_router.methods_get_post)
 
-			a_router.handle ("/account/activate/{token}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_activation(a_api, ?, ?)), a_router.methods_head_get)
-			a_router.handle ("/account/reject/{token}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_reject(a_api, ?, ?)), a_router.methods_head_get)
-			a_router.handle ("/account/reactivate", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reactivation(a_api, ?, ?)), a_router.methods_get_post)
-
 			a_router.handle ("/account/new-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_new_password(a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle ("/account/reset-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password(a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle ("/account/change/{field}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_change_field (a_api, ?, ?)), a_router.methods_get_post)
@@ -173,7 +167,7 @@ feature -- Hooks configuration
 			l_url_name: READABLE_STRING_GENERAL
 		do
 			if attached {WSF_STRING} a_response.request.item ("destination") as p_destination then
-				l_destination := p_destination.value
+				l_destination := secured_url_content (p_destination.value)
 			else
 				l_destination := a_response.location
 			end
@@ -398,7 +392,7 @@ feature -- Handler
 					-- FIXME: find better solution to support a default login system.
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
 				if attached {WSF_STRING} req.item ("destination") as l_destination then
-					r.set_redirection ("account/auth/roc-session-login?destination=" + l_destination.url_encoded_value)
+					r.set_redirection ("account/auth/roc-session-login?destination=" + secured_url_content (l_destination.url_encoded_value))
 				else
 					r.set_redirection ("account/auth/roc-session-login")
 				end
@@ -409,7 +403,7 @@ feature -- Handler
 					-- FIXME: find better solution to support a default login system.
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
 				if attached {WSF_STRING} req.item ("destination") as l_destination then
-					r.set_redirection ("account/auth/roc-basic-login?destination=" + l_destination.url_encoded_value)
+					r.set_redirection ("account/auth/roc-basic-login?destination=" + secured_url_content (l_destination.url_encoded_value))
 				else
 					r.set_redirection ("account/auth/roc-basic-login")
 				end
@@ -434,7 +428,7 @@ feature -- Handler
 			end
 				-- Do not try to redirect to previous page or destination!
 --			if attached {WSF_STRING} req.query_parameter ("destination") as l_destination then
---				loc.append ("?destination=" + l_destination.url_encoded_value)
+--				loc.append ("?destination=" + secured_html_content (l_destination.url_encoded_value))
 --			end
 			r.set_redirection (loc)
 			r.execute
@@ -485,7 +479,7 @@ feature -- Handler
 								l_exist := True
 							end
 							if attached recaptcha_secret_key (a_auth_api.cms_api) as l_recaptcha_key then
-								if attached {WSF_STRING} req.form_parameter ("g-recaptcha-response") as l_recaptcha_response and then is_captcha_verified (l_recaptcha_key, l_recaptcha_response.url_encoded_value) then
+								if attached {WSF_STRING} req.form_parameter ("g-recaptcha-response") as l_recaptcha_response and then is_captcha_verified (l_recaptcha_key, l_recaptcha_response.value) then
 									l_captcha_passed := True
 								else
 										--| Bad or missing captcha
@@ -528,132 +522,6 @@ feature -- Handler
 				end
 			else
 				a_auth_api.cms_api.response_api.send_permissions_access_denied ("You can also contact the webmaster to ask for an account.", Void, req, res)
-			end
-		end
-
-	handle_activation (a_auth_api: CMS_AUTHENTICATION_API; req: WSF_REQUEST; res: WSF_RESPONSE)
-		local
-			r: CMS_RESPONSE
-			l_user_api: CMS_USER_API
-		do
-			if a_auth_api.cms_api.has_permission ("account activate") then
-				l_user_api := a_auth_api.cms_api.user_api
-				if attached {WSF_STRING} req.path_parameter ("token") as l_token then
-					if attached {CMS_TEMP_USER} l_user_api.temp_user_by_activation_token (l_token.value) as l_temp_user then
-						create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
-						a_auth_api.activate_user (l_temp_user, l_token.value)
-						if
-							not a_auth_api.has_error and then
-							attached l_user_api.user_by_name (l_temp_user.name) as l_new_user
-						then
-							r.set_main_content ("<p> The account <i>" + a_auth_api.cms_api.user_html_link (l_new_user) + "</i> has been activated</p>")
-						else
-								-- Failure!!!
-							r.set_status_code ({HTTP_CONSTANTS}.internal_server_error)
-							r.set_main_content ("<p>ERROR: User activation failed for <i>" + html_encoded (l_temp_user.name) + "</i>!</p>")
-							if attached l_user_api.error_handler.as_single_error as err then
-								r.add_error_message (html_encoded (err.string_representation))
-							end
-						end
-					else							-- the token does not exist, or it was already used.
-						create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
-
-						r.set_status_code ({HTTP_CONSTANTS}.bad_request)
-						r.set_main_content ("<p>The token <i>" + l_token.value + "</i> is not valid " + r.link ("Reactivate Account", "account/reactivate", Void) + "</p>")
-					end
-					r.execute
-				else
-					(create {INTERNAL_SERVER_ERROR_CMS_RESPONSE}.make (req, res, a_auth_api.cms_api)).execute
-				end
-			else
-				a_auth_api.cms_api.response_api.send_access_denied (Void, req, res)
-			end
-		end
-
-	handle_reject (a_auth_api: CMS_AUTHENTICATION_API; req: WSF_REQUEST; res: WSF_RESPONSE)
-		local
-			r: CMS_RESPONSE
-			es: CMS_AUTHENTICATION_EMAIL_SERVICE
-			l_ir: INTERNAL_SERVER_ERROR_CMS_RESPONSE
-			l_user_api: CMS_USER_API
-		do
-			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
-			if r.has_permission ("account reject") then
-				if attached {WSF_STRING} req.path_parameter ("token") as l_token then
-					l_user_api := a_auth_api.cms_api.user_api
-					if attached {CMS_TEMP_USER} l_user_api.temp_user_by_activation_token (l_token.value) as l_user then
-						l_user_api.delete_temp_user (l_user)
-						r.set_main_content ("<p> The temporal account for <i>" + html_encoded (l_user.name) + "</i> has been removed</p>")
-							-- Send Email
-						if attached l_user.email as l_email then
-							create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (a_auth_api.cms_api))
-							write_debug_log (generator + ".handle register: send_contact_activation_reject_email")
-							es.send_contact_activation_reject_email (l_email, l_user, req.absolute_script_url (""))
-						end
-					else
-							-- the token does not exist, or it was already used.
-						r.set_status_code ({HTTP_CONSTANTS}.bad_request)
-						r.set_main_content ("<p>The token <i>" + l_token.value + "</i> is not valid ")
-					end
-					r.execute
-				else
-					create l_ir.make (req, res, a_auth_api.cms_api)
-					l_ir.execute
-				end
-			else
-				a_auth_api.cms_api.response_api.send_access_denied (Void, req, res)
-			end
-		end
-
-	handle_reactivation (a_auth_api: CMS_AUTHENTICATION_API; req: WSF_REQUEST; res: WSF_RESPONSE)
-		local
-			r: CMS_RESPONSE
-			es: CMS_AUTHENTICATION_EMAIL_SERVICE
-			l_user_api: CMS_USER_API
-			l_token: STRING
-			l_url_activate: STRING
-			l_url_reject: STRING
-			l_email: READABLE_STRING_8
-		do
-			if a_auth_api.cms_api.has_permission ("account reactivate") then
-				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
-				if req.is_post_request_method then
-					if attached {WSF_STRING} req.form_parameter ("email") as p_email then
-						if p_email.value.is_valid_as_string_8 then
-							l_email := p_email.value.to_string_8
-							l_user_api := a_auth_api.cms_api.user_api
-							if attached {CMS_TEMP_USER} l_user_api.temp_user_by_email (l_email) as l_user then
-									-- User exist create a new token and send a new email.
-								if l_user.is_active then
-									r.set_value ("The asociated user to the given email " + l_email + " , is already active", "is_active")
-									r.set_status_code ({HTTP_CONSTANTS}.bad_request)
-								else
-									l_token := a_auth_api.new_token
-									l_user_api.new_activation (l_token, l_user.id)
-									l_url_activate := req.absolute_script_url ("/account/activate/" + l_token)
-									l_url_reject := req.absolute_script_url ("/account/reject/" + l_token)
-											-- Send Email to webmaster
-									if attached l_user.personal_information as l_personal_information then
-										create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (a_auth_api.cms_api))
-										write_debug_log (generator + ".handle register: send_register_email")
-										es.send_account_evaluation (l_user, l_personal_information, l_url_activate, l_url_reject, req.absolute_script_url (""))
-									end
-								end
-							else
-								r.set_value ("The email does not exist !", "error_email")
-								r.set_value (l_email, "email")
-								r.set_status_code ({HTTP_CONSTANTS}.bad_request)
-							end
-						else
-							r.set_value ("The email is not valid!", "error_email")
-							r.set_value (p_email.value, "email")
-							r.set_status_code ({HTTP_CONSTANTS}.bad_request)
-						end
-					end
-				end
-				r.execute
-			else
-				a_auth_api.cms_api.response_api.send_access_denied (Void, req, res)
 			end
 		end
 
@@ -1195,12 +1063,12 @@ feature -- Response Alter
 
 feature {NONE} -- Implementation
 
-	is_captcha_verified (a_secret, a_response: READABLE_STRING_8): BOOLEAN
+	is_captcha_verified (a_secret: READABLE_STRING_8; a_response: READABLE_STRING_GENERAL): BOOLEAN
 		local
 			api: RECAPTCHA_API
 			l_errors: STRING
 		do
-			write_debug_log (generator + ".is_captcha_verified with response: [" + a_response + "]")
+			write_debug_log (generator + ".is_captcha_verified with response: [" + utf_8_encoded (a_response) + "]")
 			create api.make (a_secret, a_response)
 			Result := api.verify
 			if not Result and then attached api.errors as l_api_errors then

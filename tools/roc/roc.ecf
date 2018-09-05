@@ -14,9 +14,9 @@
 		<library name="encoding" location="$ISE_LIBRARY\library\encoding\encoding.ecf"/>
 		<cluster name="roc" location=".\" recursive="true">
 			<file_rule>
-				<exclude>/\.svn$</exclude>
 				<exclude>/CVS$</exclude>
 				<exclude>/EIFGENs$</exclude>
+				<exclude>/\.svn$</exclude>
 			</file_rule>
 		</cluster>
 	</target>

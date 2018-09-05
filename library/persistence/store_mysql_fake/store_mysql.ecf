@@ -15,9 +15,9 @@
 		<library name="time" location="$ISE_LIBRARY\library\time\time.ecf"/>
 		<cluster name="persistence_store_mysql_fake" location=".\src\" recursive="true">
 			<file_rule>
-				<exclude>/\.svn$</exclude>
 				<exclude>/CVS$</exclude>
 				<exclude>/EIFGENs$</exclude>
+				<exclude>/\.svn$</exclude>
 			</file_rule>
 		</cluster>
 	</target>

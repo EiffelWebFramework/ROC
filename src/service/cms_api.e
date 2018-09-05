@@ -177,6 +177,7 @@ feature {NONE} -- Initialize
 			l_filters.extend (create {LINE_BREAK_TO_HTML_CONTENT_FILTER})
 			l_filters.extend (create {URL_CONTENT_FILTER})
 			l_filters.extend (create {HTML_CONTENT_FILTER})
+			l_filters.extend (create {SECURITY_HTML_CONTENT_FILTER})
 
 
 				-- Initialize built-in formats
@@ -200,7 +201,7 @@ feature {NONE} -- Initialize
 				l_formats.extend (new_format ("full_html", "Full HTML", <<{URL_CONTENT_FILTER}.name>>))
 
 					-- filtered_html: url + html_filter + line_break_converter
-				l_formats.extend (new_format ("filtered_html", "Filtered HTML", <<{URL_CONTENT_FILTER}.name, {HTML_CONTENT_FILTER}.name, {LINE_BREAK_TO_HTML_CONTENT_FILTER}.name>>))
+				l_formats.extend (new_format ("filtered_html", "Filtered HTML", <<{URL_CONTENT_FILTER}.name, {HTML_CONTENT_FILTER}.name, {LINE_BREAK_TO_HTML_CONTENT_FILTER}.name, {SECURITY_HTML_CONTENT_FILTER}.name>>))
 
 					-- CMS Editor!
 				l_formats.extend (new_format ("cms_editor", "CMS HTML content", Void))
@@ -701,9 +702,51 @@ feature -- Filters and Formats
 			-- Available content formats.
 
 	format (a_format_name: detachable READABLE_STRING_GENERAL): detachable CMS_FORMAT
-			-- Content format name `a_format_name' if any.
+			-- Content format named `a_format_name' if any.
 		do
 			Result := formats.item (a_format_name)
+		end
+
+	append_text_formatted_to (a_format_name: detachable READABLE_STRING_GENERAL; a_text: READABLE_STRING_GENERAL; a_output: STRING_GENERAL)
+			-- Append `a_text`  to `a_output`, formatted with format named `a_format_name` or using `formats.default_format`.
+		do
+			if attached secured_format (a_format_name) then
+
+			end
+			if attached format (a_format_name) as ft then
+				ft.append_formatted_to (a_text, a_output)
+			else
+				formats.default_format.append_formatted_to (a_text, a_output)
+			end
+		end
+
+	formatted_text (a_format_name: detachable READABLE_STRING_GENERAL; a_text: READABLE_STRING_GENERAL): STRING_GENERAL
+			-- Append `a_text`  to `a_output`, formatted with format named `a_format_name` or using `formats.default_format`.
+		do
+			if attached {READABLE_STRING_8} a_text as s8 then
+				create {STRING_8} Result.make (a_text.count)
+			else
+				create {STRING_32} Result.make (a_text.count)
+			end
+			append_text_formatted_to (a_format_name, a_text, Result)
+		end
+
+	secured_format (a_format_name: detachable READABLE_STRING_GENERAL): CMS_FORMAT
+			-- Content format named `a_format_name` (if any) chained with security vulnerability filter.
+		do
+			Result := format (a_format_name)
+			if Result = Void then
+				if attached {CMS_FORMAT} formats.default_format as dft then
+					Result := dft
+				else
+					create Result.make_from_format (formats.default_format)
+				end
+			end
+			if not Result.has_filter_by_name ({SECURITY_HTML_CONTENT_FILTER}.name) then
+				create Result.make ("secured format", Void)
+				Result.import_filters_from_format (Result)
+				Result.add_filter (create {SECURITY_HTML_CONTENT_FILTER})
+			end
 		end
 
 	new_format (a_name: READABLE_STRING_8; a_title: READABLE_STRING_8; a_filter_names: detachable ITERABLE [READABLE_STRING_GENERAL]): CMS_FORMAT
@@ -965,6 +1008,13 @@ feature -- Permissions system
 			loop
 				Result := user_has_permission (a_user, ic.item)
 			end
+		end
+
+	has_permission_to_use_format (a_format: CONTENT_FORMAT): BOOLEAN
+			-- Anonymous or user `user` has permission to use content format `a_format`?
+		do
+					-- See `CMS_CORE_MODULE.use_format_permission_name (...)`
+			Result := has_permission ("use format " + a_format.name)
 		end
 
 feature -- Query: module
@@ -1607,7 +1657,7 @@ feature {NONE} -- Implementation: current user
 		end
 
 note
-	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2018, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
 

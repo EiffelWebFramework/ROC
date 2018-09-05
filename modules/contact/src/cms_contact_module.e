@@ -2,7 +2,7 @@ note
 	description: "[
 			Module that provide contact us web form functionality.
 		]"
-	author: "$Author$"
+	author: "$Author: jfiat $"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -182,6 +182,7 @@ feature -- Hooks
 							l_tpl_block.set_value (l_recaptcha_site_key, "recaptcha_site_key")
 						end
 						a_response.add_block (l_tpl_block, "content")
+							-- WARNING: may be an issue with block caching.
 						a_response.add_style (a_response.module_resource_url (Current, "/files/css/contact.css", Void), Void)
 					else
 						debug ("cms")
@@ -312,7 +313,7 @@ feature -- Hooks
 
 					write_debug_log (generator + ".handle_post_contact: send notification email")
 
-					e := api.new_email (l_params.admin_email, "Notification Contact", email_html_message ("notification", r, vars))
+					e := api.new_email (l_params.admin_email, "Contact message from " + html_encoded (l_name.value) + " (" + html_encoded (l_contact_email_address) + ")" , email_html_message ("notification", r, vars))
 					e.set_from_address (l_params.admin_email)
 					e.add_header_line ("MIME-Version:1.0")
 					e.add_header_line ("Content-Type: text/html; charset=utf-8")
@@ -409,9 +410,9 @@ feature {NONE} -- Helpers
 		do
 			create Result.make_empty
 			across req.form_parameters as ic loop
-				Result.append (ic.item.key)
+				Result.append (utf_8_encoded (ic.item.key))
 				Result.append_character ('=')
-				Result.append_string (ic.item.string_representation)
+				Result.append_string (utf_8_encoded (ic.item.string_representation))
 				Result.append_character ('%N')
 			end
 		end
@@ -495,12 +496,12 @@ feature {NONE} -- Contact Message
 
 feature {NONE} -- Google recaptcha uri template
 
-	is_captcha_verified (a_secret, a_response: READABLE_STRING_8): BOOLEAN
+	is_captcha_verified (a_secret: READABLE_STRING_8; a_response: READABLE_STRING_GENERAL): BOOLEAN
 		local
 			api: RECAPTCHA_API
 			l_errors: STRING
 		do
-			write_debug_log (generator + ".is_captcha_verified with response: [" + a_response + "]")
+			write_debug_log (generator + ".is_captcha_verified with response: [" + utf_8_encoded (a_response) + "]")
 			create api.make (a_secret, a_response)
 			Result := api.verify
 			if not Result and then attached api.errors as l_api_errors then

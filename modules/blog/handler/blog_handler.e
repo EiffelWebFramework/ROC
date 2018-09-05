@@ -226,7 +226,6 @@ feature -- HTML Output
 				l_title.append (" (Page " + page_number.out + " of " + pages_count.out + ")")
 			end
 			a_page.set_title (l_title)
---			a_output.append ("<h2>" + l_title + "</h2>")
 		end
 
 	append_user_related_html_to (a_page: CMS_RESPONSE; a_output: STRING)
@@ -277,11 +276,7 @@ feature -- HTML Output
 			if attached n.summary as l_summary and then not l_summary.is_whitespace then
 				lnk := blog_api.node_api.node_link (n)
 				a_output.append ("<p class=%"blog_list_summary%">")
-				if attached api.format (n.format) as f then
-					f.append_formatted_to (l_summary, a_output)
-				else
-					api.formats.default_format.append_formatted_to (l_summary, a_output)
-				end
+				api.append_text_formatted_to (n.format, l_summary, a_output)
 				a_output.append ("<br />")
 				a_output.append (page.link ("See more...", lnk.location, Void))
 				a_output.append ("</p>")
