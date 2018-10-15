@@ -4,11 +4,11 @@
 	<target name="common" abstract="true">
 		<root class="DEMO_CMS_SERVER" feature="make_and_launch"/>
 		<file_rule>
-			<exclude>/\.svn$</exclude>
 			<exclude>/CVS$</exclude>
 			<exclude>/EIFGENs$</exclude>
+			<exclude>/\.svn$</exclude>
 		</file_rule>
-		<option debug="true" warning="true">
+		<option debug="true" warning="true" manifest_array_type="mismatch_warning">
 			<debug name="dbglog" enabled="true"/>
 		</option>
 		<setting name="executable_name" value="demo"/>
@@ -42,11 +42,6 @@
 		<library name="embedded_video_module" location="..\..\modules\embedded_video\embedded_video.ecf" readonly="false"/>
 		<library name="masquerade_auth_module" location="..\..\dev_modules\masquerade_auth\masquerade_auth.ecf" readonly="false"/>
 		<library name="persistence_sqlite3" location="..\..\library\persistence\sqlite3\sqlite3.ecf" readonly="false"/>
-		<!--
-			 By default, commented, since it depends on specific environment settings.
-		<library name="persistence_store_odbc" location="..\..\library\persistence\store_odbc\store_odbc.ecf"/>
-		<library name="persistence_store_mysql" location="..\..\library\persistence\store_mysql\store_mysql.ecf" />
-		-->
 		<library name="wsf" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf.ecf"/>
 		<library name="wsf_extension" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf_extension.ecf" readonly="false"/>
 	</target>
@@ -96,6 +91,14 @@
 		</capability>
 		<library name="libfcgi_launcher" location="..\..\launcher\libfcgi.ecf" readonly="false"/>
 		<cluster name="src" location=".\src\" recursive="true"/>
+	</target>
+	<target name="demo_libfcgi_with_mysql" extends="demo_libfcgi">
+		<library name="persistence_store_mysql" location="..\..\library\persistence\store_mysql\store_mysql.ecf"/>
+		<override name="setup-mysql" location="setup\mysql\" recursive="true"/>
+	</target>
+	<target name="demo_standalone_with_mysql" extends="demo_standalone">
+		<library name="persistence_store_mysql" location="..\..\library\persistence\store_mysql\store_mysql.ecf"/>
+		<override name="setup-mysql" location="setup\mysql\" recursive="true"/>
 	</target>
 	<target name="demo" extends="demo_standalone">
 	</target>
