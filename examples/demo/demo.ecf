@@ -8,7 +8,7 @@
 			<exclude>/EIFGENs$</exclude>
 			<exclude>/\.svn$</exclude>
 		</file_rule>
-		<option debug="true" warning="true" manifest_array_type="mismatch_warning">
+		<option debug="true" warning="true">
 			<debug name="dbglog" enabled="true"/>
 		</option>
 		<setting name="executable_name" value="demo"/>
