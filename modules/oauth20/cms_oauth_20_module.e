@@ -96,17 +96,17 @@ feature {CMS_API} -- Module management
 				l_sql_storage.sql_execute_file_script (api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended ("install.sql")), Void)
 
 				if l_sql_storage.has_error then
-					api.report_error ("[" + name + "]: installation failed!", l_sql_storage.error_handler.as_string_representation)
+					api.report_error ("[" + name + "]: installation failed (install)!", l_sql_storage.error_handler.as_string_representation)
 				else
 						-- TODO workaround.
 					l_sql_storage.sql_execute_file_script (api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended ("data.sql")), Void)
 					if l_sql_storage.has_error then
-						api.report_error ("[" + name + "]: installation failed!", l_sql_storage.error_handler.as_string_representation)
+						api.report_error ("[" + name + "]: installation failed (data)!", l_sql_storage.error_handler.as_string_representation)
 					else
 							-- TODO workaround, until we have an admin module
 						l_sql_storage.sql_query ("SELECT name FROM oauth2_consumers;", Void)
 						if l_sql_storage.has_error then
-							api.report_error ("[" + name + "]: installation failed!", l_sql_storage.error_handler.as_string_representation)
+							api.report_error ("[" + name + "]: installation failed (oauth2_consumers)!", l_sql_storage.error_handler.as_string_representation)
 						else
 							from
 								l_sql_storage.sql_start
