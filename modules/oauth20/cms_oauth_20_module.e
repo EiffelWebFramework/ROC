@@ -170,7 +170,7 @@ feature -- Router
 				a_router.handle ("/account/auth/login-with-oauth/{" + oauth_callback_path_parameter + "}",
 						create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_login_with_oauth (a_api, l_oauth_api, ?, ?)),
 						a_router.methods_get_post)
-				a_router.handle ("/account/auth/oauth-callback/{" + oauth_callback_path_parameter + "}",
+				a_router.handle (oauth_callback_path + "{" + oauth_callback_path_parameter + "}",
 						create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_callback_oauth (a_api, l_oauth_api, ?, ?)),
 						a_router.methods_get_post)
 				a_router.handle ("/account/auth/oauth-associate",
@@ -184,6 +184,8 @@ feature -- Router
 
 	oauth_callback_path_parameter: STRING = "callback"
 			-- Callback path parameter.	
+
+	oauth_callback_path: STRING = "/account/auth/oauth-callback/"
 
 	oauth_code_query_parameter: STRING = "code"
 			-- Code query parameter, specific to OAuth protocol.
