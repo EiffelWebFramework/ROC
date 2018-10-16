@@ -24,11 +24,12 @@ create
 
 feature {NONE} -- Initialize
 
-	make (a_setup: CMS_SETUP; req: WSF_REQUEST)
+	make (a_setup: CMS_SETUP; req: WSF_REQUEST; resp: WSF_RESPONSE)
 			-- Create the API service with a setup `a_setup'
-			-- and request `req'.
+			-- and request `req', response `resp`.
 		do
 			request := req
+			response := resp
 			setup := a_setup
 			create error_handler.make
 			create {CMS_ENV_LOGGER} logger.make
@@ -646,6 +647,10 @@ feature {NONE} -- Access: request
 			-- Associated http request.
 			--| note: here for the sole purpose of CMS_API.
 
+	response: WSF_RESPONSE
+			-- Associated http response.
+			--| note: here for the sole purpose of CMS_API, mainly to report error.
+
 feature -- Content
 
 	content_types: ARRAYED_LIST [CMS_CONTENT_TYPE]
@@ -819,25 +824,35 @@ feature -- Logging
 			end
 
 			inspect a_level
-				when {CMS_LOG}.level_emergency then
-					logger.put_alert (m, Void)
-				when {CMS_LOG}.level_alert then
-					logger.put_alert (m, Void)
-				when {CMS_LOG}.level_critical then
-					logger.put_critical (m, Void)
-				when {CMS_LOG}.level_error then
-					logger.put_error (m, Void)
-				when {CMS_LOG}.level_warning then
-					logger.put_warning (m, Void)
-				when {CMS_LOG}.level_notice then
-					logger.put_information (m, Void)
-				when {CMS_LOG}.level_info then
-					logger.put_information (m, Void)
-				when {CMS_LOG}.level_debug then
-					logger.put_debug (m, Void)
-				else
-					logger.put_debug (m, Void)
+			when {CMS_LOG}.level_emergency then
+				response.put_error (m)
+				logger.put_alert (m, Void)
+			when {CMS_LOG}.level_alert then
+				response.put_error (m)
+				logger.put_alert (m, Void)
+			when {CMS_LOG}.level_critical then
+				response.put_error (m)
+				logger.put_critical (m, Void)
+			when {CMS_LOG}.level_error then
+				response.put_error (m)
+				logger.put_error (m, Void)
+			when {CMS_LOG}.level_warning then
+				logger.put_warning (m, Void)
+			when {CMS_LOG}.level_notice then
+				logger.put_information (m, Void)
+			when {CMS_LOG}.level_info then
+				logger.put_information (m, Void)
+			when {CMS_LOG}.level_debug then
+				response.put_error (m)
+				logger.put_debug (m, Void)
+			else
+				logger.put_debug (m, Void)
 			end
+		end
+
+	log_error (a_category: READABLE_STRING_8; a_message: READABLE_STRING_8; a_link: detachable CMS_LINK)
+		do
+			log (a_category, a_message, {CMS_LOG}.level_error, a_link)
 		end
 
 	log_debug (a_category: READABLE_STRING_8; a_message: READABLE_STRING_8; a_link: detachable CMS_LINK)
