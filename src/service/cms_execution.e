@@ -52,6 +52,9 @@ feature {NONE} -- Initialization
 			if api.has_error then
 				response.put_error ("ROC: Error during API initialization!")
 				response.put_error (api.utf_8_encoded (api.string_representation_of_errors))
+			elseif attached api.storage.error_handler.as_single_error as err then
+				response.put_error ("ROC: Error during Storage initialization!")
+				response.put_error (api.utf_8_encoded (err.string_representation))
 			end
 			modules := api.enabled_modules
 
@@ -505,7 +508,7 @@ feature -- Execution
 		end
 
 note
-	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2018, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 	source: "[
 			Eiffel Software

@@ -69,6 +69,8 @@ feature {NONE} -- Initialize
 				storage := l_storage
 			else
 				create {CMS_STORAGE_NULL} storage
+				storage.error_handler.append (error_handler)
+				error_handler.remove_all_errors
 			end
 
 				-- Keep enable modules list.
@@ -322,7 +324,9 @@ feature {CMS_ACCESS} -- Module management
 			-- Install CMS or uninstalled module which are enabled.
 		local
 			l_module: CMS_MODULE
+			l_tmp_err_handler: ERROR_HANDLER
 		do
+			create l_tmp_err_handler.make_with_id ("cms_api.install_all_modules")
 			across
 				setup.modules as ic
 			loop
@@ -333,7 +337,14 @@ feature {CMS_ACCESS} -- Module management
 					-- if this is installed or not...
 				if l_module.is_enabled and not l_module.is_installed (Current) then
 					install_module (l_module)
+					if has_error then
+						l_tmp_err_handler.append (error_handler)
+						reset_error
+					end
 				end
+			end
+			if l_tmp_err_handler.has_error then
+				error_handler.append (l_tmp_err_handler)
 			end
 		end
 
@@ -350,7 +361,7 @@ feature {CMS_ACCESS} -- Module management
 			module_not_installed: not is_module_installed (m)
 		do
 			m.install (Current)
-			if m.is_enabled then
+			if not has_error and then m.is_enabled then
 				m.initialize (Current)
 			end
 		end
@@ -1267,6 +1278,12 @@ feature -- Element Change: Error
 			-- Reset error handler.
 		do
 			error_handler.reset
+		end
+
+	report_error (a_name: STRING_8; a_message: detachable READABLE_STRING_GENERAL)
+			-- Report a custom error.
+		do
+			error_handler.add_custom_error (-1, a_name, a_message)
 		end
 
 feature {NONE}-- Implementation
