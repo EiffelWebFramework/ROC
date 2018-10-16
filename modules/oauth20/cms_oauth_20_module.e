@@ -96,17 +96,17 @@ feature {CMS_API} -- Module management
 				l_sql_storage.sql_execute_file_script (api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended ("install.sql")), Void)
 
 				if l_sql_storage.has_error then
-					api.log_error (generating_type, "Could not initialize database for module [" + name + "]", Void)
+					api.report_error (generating_type, "Could not initialize database for module [" + name + "]")
 				else
 						-- TODO workaround.
 					l_sql_storage.sql_execute_file_script (api.module_resource_location (Current, (create {PATH}.make_from_string ("scripts")).extended ("data.sql")), Void)
 					if l_sql_storage.has_error then
-						api.log_error (generating_type, "Could not initialize oauth2_consumers for module [" + name + "]", Void)
+						api.report_error (generating_type, "Could not initialize oauth2_consumers for module [" + name + "]")
 					else
 							-- TODO workaround, until we have an admin module
 						l_sql_storage.sql_query ("SELECT name FROM oauth2_consumers;", Void)
 						if l_sql_storage.has_error then
-							api.log_error (generating_type, "Could not initialize database for different consumers", Void)
+							api.report_error (generating_type, "Could not initialize database for different consumers")
 						else
 							from
 								l_sql_storage.sql_start
