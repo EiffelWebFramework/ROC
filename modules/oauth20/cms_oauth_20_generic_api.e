@@ -68,20 +68,19 @@ feature -- Access
 			l_result: STRING_8
 		do
 			if attached config.scope as l_scope then
-				create l_result.make_from_string (authorize_url + scoped_authorize_url)
-				l_result.replace_substring_all ("$CLIENT_ID", config.api_key.as_string_8)
+				create Result.make_from_string (authorize_url + scoped_authorize_url)
+				Result.replace_substring_all ("$CLIENT_ID", config.api_key.as_string_8)
 				if attached config.callback as l_callback then
-					l_result.replace_substring_all ("$REDIRECT_URI", (create {OAUTH_ENCODER}).encoded_string (l_callback.as_string_8))
+					Result.replace_substring_all ("$REDIRECT_URI", (create {OAUTH_ENCODER}).encoded_string (l_callback.as_string_8))
 				end
 				if attached config.callback as l_callback then
-					l_result.replace_substring_all ("$SCOPE", (create {OAUTH_ENCODER}).encoded_string (l_scope.as_STRING_8))
-					Result := l_result
+					Result.replace_substring_all ("$SCOPE", (create {OAUTH_ENCODER}).encoded_string (l_scope.as_STRING_8))
 				end
 			else
-				create l_result.make_from_string (authorize_url + scoped_authorize_url)
-				l_result.replace_substring_all ("$CLIENT_ID", config.api_key.as_string_8)
+				create Result.make_from_string (authorize_url + scoped_authorize_url)
+				Result.replace_substring_all ("$CLIENT_ID", config.api_key.as_string_8)
 				if attached config.callback as l_callback then
-					l_result.replace_substring_all ("$REDIRECT_URI", (create {OAUTH_ENCODER}).encoded_string (l_callback.as_string_8))
+					Result.replace_substring_all ("$REDIRECT_URI", (create {OAUTH_ENCODER}).encoded_string (l_callback.as_string_8))
 				end
 			end
 		end
