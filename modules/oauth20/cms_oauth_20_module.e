@@ -339,17 +339,15 @@ feature -- OAuth2 Login with Provider
 				if attached l_oauth.authorization_url as l_authorization_url then
 					create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 					r.set_redirection (l_authorization_url)
-					r.execute
 				else
 					create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
 					r.set_main_content ("Bad request")
-					r.execute
 				end
 			else
 				create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
 				r.set_main_content ("Bad request")
-				r.execute
 			end
+			r.execute
 		end
 
 	handle_callback_oauth (api: CMS_API; a_oauth_api: CMS_OAUTH_20_API; req: WSF_REQUEST; res: WSF_RESPONSE)
@@ -428,9 +426,13 @@ feature -- OAuth2 Login with Provider
 						end
 					end
 					r.set_redirection (r.front_page_url)
-					r.execute
+				else
+					create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
 				end
+			else
+				create {BAD_REQUEST_ERROR_CMS_RESPONSE} r.make (req, res, api)
 			end
+			r.execute
 		end
 
 	handle_associate (api: CMS_API; a_oauth_api: CMS_OAUTH_20_API; req: WSF_REQUEST; res: WSF_RESPONSE)
