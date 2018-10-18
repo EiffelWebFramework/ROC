@@ -414,7 +414,7 @@ feature {NONE} -- User OAuth2
 					`access_token` TEXT  NOT NULL,
 					`created` DATETIME NOT NULL,
 					`details` TEXT NOT NULL,
-					`id` TEXT NOT NULL,
+					`id` VARCHAR (250) NOT NULL,
 					CONSTRAINT `uid`
 						UNIQUE(`uid`),
 					CONSTRAINT `id`
