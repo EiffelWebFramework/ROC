@@ -64,6 +64,10 @@ feature -- Change: User Oauth2
 		do
 		end
 
+	delete_oauth_consumer (a_cons: CMS_OAUTH_20_CONSUMER)
+		do
+		end
+
 	new_user_oauth2 (a_token: READABLE_STRING_GENERAL; a_user_profile: READABLE_STRING_GENERAL; a_user: CMS_USER; a_oauth_id: READABLE_STRING_GENERAL; a_consumer_table: READABLE_STRING_GENERAL)
 			-- Add a new user with oauth2  authentication.
 		do

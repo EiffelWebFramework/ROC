@@ -57,7 +57,7 @@ feature -- Handle
 			if a_api.has_permission (perm_admin_oauth2) then
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_api)
 				create s.make_empty
-				s.append ("<h1>Consumers</h1>")
+				s.append ("<h2>Existing consumers</h2>")
 				create l_existing_cons.make_caseless (0)
 				if attached module.oauth20_api as l_oauth20_api then
 					s.append ("<ul>")
@@ -77,6 +77,9 @@ feature -- Handle
 					attached a_api.module_resource_location (module, create {PATH}.make_from_string ("data")) as dir_p and then
 					attached fut.file_names (dir_p.name) as lst
 				then
+					s.append ("<h2>Setup predefined consumers</h2>")
+
+					s.append ("<ul>")
 					across
 						lst as ic
 					loop
@@ -86,51 +89,75 @@ feature -- Handle
 							attached p.extension as ext and then ext.is_case_insensitive_equal_general ("ini") and then
 							not l_existing_cons.has (ic.item)
 						then
-							create cfg.make_from_file (dir_p.extended_path (p))
-							if not cfg.has_error then
-								create cons.default_create
-								v32 := cfg.text_item ("name")
-								if v32 /= Void then
-									cons.set_name (v32)
-								end
-								v := cfg.utf_8_text_item ("scope")
-								if v /= Void then
-									cons.set_scope (v)
-								end
-								v := cfg.utf_8_text_item ("authorize_url")
-								if v /= Void then
-									cons.set_authorize_url (v)
-								end
-								v := cfg.utf_8_text_item ("callback_name")
-								if v /= Void then
-									cons.set_callback_name (v)
-								end
-								v := cfg.utf_8_text_item ("endpoint")
-								if v /= Void then
-									cons.set_endpoint (v)
-								end
-								v := cfg.utf_8_text_item ("extractor")
-								if v /= Void then
-									cons.set_extractor (v)
-								end
-								v := cfg.utf_8_text_item ("protected_resource_url")
-								if v /= Void then
-									cons.set_protected_resource_url (v)
-								end
-								s.append ("<h1>setup "+  html_encoded (cons.name) +"</h1>")
-								f := new_consumer_form (req.percent_encoded_path_info, req, cons)
-								f.append_to_html (r.wsf_theme, s)
+							cons := predefined_consumer_from_path (dir_p.extended_path (p), a_api)
+							if cons /= Void then
+--								s.append ("<hr/><h2>setup "+  html_encoded (cons.name) +"</h2>")
+--								f := new_consumer_form (req.percent_encoded_path_info, req, cons)
+--								f.append_to_html (r.wsf_theme, s)
+								s.append ("<li><a href=%"" + a_api.url (a_api.administration_path ("oauth20/" + url_encoded (cons.name)), Void) + "%">")
+								s.append (html_encoded (cons.name))
+								s.append ("</a></li>")
 							end
 						end
 					end
+					s.append ("</ul>")
 				end
-				s.append ("<h1>New consumer</h1>")
+				s.append ("<h2>New consumer</h2>")
 				f := new_consumer_form (req.percent_encoded_path_info, req, create {CMS_OAUTH_20_CONSUMER})
 				f.append_to_html (r.wsf_theme, s)
 				r.set_main_content (s)
 				r.execute
 			else
 				a_api.response_api.send_access_denied (Void, req, res)
+			end
+		end
+
+	predefined_consumer (a_consumer_name: READABLE_STRING_GENERAL; api: CMS_API): detachable CMS_OAUTH_20_CONSUMER
+		local
+			p: PATH
+		do
+			p := api.module_resource_location (module, (create {PATH}.make_from_string ("data")).extended (a_consumer_name).appended_with_extension ("ini"))
+			Result := predefined_consumer_from_path (p, api)
+		end
+
+	predefined_consumer_from_path (a_path: PATH; api: CMS_API): detachable CMS_OAUTH_20_CONSUMER
+		local
+			fut: FILE_UTILITIES
+			cfg: INI_CONFIG
+			v: READABLE_STRING_8
+			v32: READABLE_STRING_32
+		do
+			create cfg.make_from_file (a_path)
+			if not cfg.has_error then
+				create Result
+				v32 := cfg.text_item ("name")
+				if v32 /= Void then
+					Result.set_name (v32)
+				end
+				v := cfg.utf_8_text_item ("scope")
+				if v /= Void then
+					Result.set_scope (v)
+				end
+				v := cfg.utf_8_text_item ("authorize_url")
+				if v /= Void then
+					Result.set_authorize_url (v)
+				end
+				v := cfg.utf_8_text_item ("callback_name")
+				if v /= Void then
+					Result.set_callback_name (v)
+				end
+				v := cfg.utf_8_text_item ("endpoint")
+				if v /= Void then
+					Result.set_endpoint (v)
+				end
+				v := cfg.utf_8_text_item ("extractor")
+				if v /= Void then
+					Result.set_extractor (v)
+				end
+				v := cfg.utf_8_text_item ("protected_resource_url")
+				if v /= Void then
+					Result.set_protected_resource_url (v)
+				end
 			end
 		end
 
@@ -157,13 +184,18 @@ feature -- Handle
 						check is_put_request_method: req.is_put_request_method end
 						l_consumer_name := p_consumer.value
 					end
-					if
-						l_consumer_name /= Void and then
-						l_oauth20_api /= Void
-					then
-						cons := l_oauth20_api.oauth_consumer_by_name (l_consumer_name)
+					if l_consumer_name /= Void then
+						if l_oauth20_api /= Void and then attached l_oauth20_api.oauth_consumer_by_name (l_consumer_name) as l_existing_cons then
+							cons := l_existing_cons
+						elseif attached predefined_consumer (l_consumer_name, a_api) as l_pred_cons then
+							cons := l_pred_cons
+						else
+							create cons
+							cons.set_name (l_consumer_name)
+						end
 					else
 						create cons
+						check not_possible: False end
 					end
 					if cons /= Void then
 						l_is_protect_predefined_fields := cons.has_id
@@ -171,8 +203,15 @@ feature -- Handle
 						create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_api)
 						r.add_to_primary_tabs (a_api.administration_link ("Consumers", "oauth20/"))
 						create s.make_empty
-						s.append ("<h1>Consumer %"" + a_api.html_encoded (cons.name) + "%"</h1>")
+						if l_is_protect_predefined_fields then
+							s.append ("<h2>Update consumer %"" + a_api.html_encoded (cons.name) + "%"</h2>")
+						else
+							s.append ("<h2>Setup new consumer %"" + a_api.html_encoded (cons.name) + "%"</h2>")
+						end
 						f := new_consumer_form (req.percent_encoded_path_info, req, cons)
+						if l_is_protect_predefined_fields then
+							f.extend (create {WSF_FORM_SUBMIT_INPUT}.make_with_text ("op", "Delete"))
+						end
 
 						if req.is_get_head_request_method then
 							f.append_to_html (r.wsf_theme, s)
@@ -209,8 +248,14 @@ feature -- Handle
 											if attached fd.string_item ("scope") as l_scope then
 												i_cons.set_scope (utf_8_encoded (l_scope))
 											end
-											i_oauth20_api.save_oauth_consumer (i_cons)
-											l_output.append ("<p>Consumer saved...</p>")
+											if attached fd.string_item ("op") as l_op and then l_op.same_string ("Confirm Delete") then
+												i_oauth20_api.delete_oauth_consumer (i_cons)
+											elseif attached fd.string_item ("op") as l_op and then l_op.same_string ("Delete") then
+												fd.form.extend (create {WSF_FORM_SUBMIT_INPUT}.make_with_text ("op", "Confirm Delete"))
+											else
+												i_oauth20_api.save_oauth_consumer (i_cons)
+												l_output.append ("<p>Consumer "+ html_encoded (i_cons.name) + " saved...</p>")
+											end
 										end
 									end(?, cons, l_oauth20_api, s)
 								);
