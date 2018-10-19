@@ -289,6 +289,7 @@ feature -- Hooks
 				create l_cookie.make (a_oauth20_api.session_token, "DELETED")
 				l_cookie.set_path ("/")
 				l_cookie.set_max_age (0) --| Remove cookie
+				l_cookie.set_expiration_date (create {DATE_TIME}.make_from_epoch (0))
 				res.add_cookie (l_cookie)
 				api.unset_current_user (req)
 			else
@@ -398,6 +399,7 @@ feature -- OAuth2 Login with Provider
 			dt: DATE_TIME
 			f: CMS_FORM
 			s: STRING
+			l_max_age: INTEGER
 		do
 			if
 				attached {WSF_STRING} req.path_parameter (oauth_callback_path_parameter) as l_callback and then
@@ -443,13 +445,21 @@ feature -- OAuth2 Login with Provider
 							end
 						else
 							create l_cookie.make (a_oauth_api.session_token, l_access_token.token)
-							if l_access_token.expires_in > 0 then
-								l_cookie.set_max_age (l_access_token.expires_in)
-								create dt.make_now_utc
-								dt.second_add (l_access_token.expires_in)
-								l_cookie.set_expiration_date (dt)
-							end
 							l_cookie.set_path ("/")
+							l_max_age := l_access_token.expires_in
+							if l_max_age <= 0 then
+								if attached api.setup.string_8_item ("auth.session.max_age") as s_max_age and then s_max_age.is_integer then
+									l_max_age := s_max_age.to_integer
+								else
+									l_max_age := 86400 --| one day: 24(h) *60(min) *60(sec)
+								end
+								if l_max_age > 0 then
+									l_cookie.set_max_age (l_max_age)
+									create dt.make_now_utc
+									dt.second_add (l_max_age)
+									l_cookie.set_expiration_date (dt)
+								end
+							end
 
 							if
 								attached l_auth.user_email as l_email and then
@@ -674,7 +684,7 @@ feature -- Registration
 							local
 								cons: CMS_OAUTH_20_CONSUMER
 								l_user: CMS_USER
-								i: INTEGER
+								l_max_age: INTEGER
 								l_cookie: WSF_COOKIE
 								dt: DATE_TIME
 								es: CMS_AUTHENTICATION_EMAIL_SERVICE
@@ -716,15 +726,23 @@ feature -- Registration
 												i_oauth20_api.cms_api.set_user (l_user)
 												i_oauth20_api.cms_api.record_user_login (l_user)
 
-												i := l_expires_in.to_integer
 												create l_cookie.make (i_oauth20_api.session_token, l_access_token)
-												if i > 0 then
-													l_cookie.set_max_age (i)
-													create dt.make_now_utc
-													dt.second_add (i)
-													l_cookie.set_expiration_date (dt)
-												end
 												l_cookie.set_path ("/")
+												l_max_age := l_expires_in.to_integer
+												if l_max_age <= 0 then
+													if attached i_oauth20_api.cms_api.setup.string_8_item ("auth.session.max_age") as s_max_age and then s_max_age.is_integer then
+														l_max_age := s_max_age.to_integer
+													else
+														l_max_age := 86400 --| one day: 24(h) *60(min) *60(sec)
+													end
+													if l_max_age > 0 then
+														l_cookie.set_max_age (l_max_age)
+														create dt.make_now_utc
+														dt.second_add (l_max_age)
+														l_cookie.set_expiration_date (dt)
+													end
+												end
+
 												i_res.add_cookie (l_cookie)
 												i_r.set_redirection (i_oauth20_api.cms_api.absolute_url ("/account", Void))
 
