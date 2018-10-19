@@ -405,12 +405,12 @@ feature -- OAuth2 Login with Provider
 					attached l_auth.user_profile as l_user_profile
 				then
 						-- extract user email
-					if attached l_auth.user_id as l_id then
-						l_oauth_id := l_id
+					if attached l_auth.user_login as l_login then
+						l_oauth_id := l_login
 					elseif attached l_auth.user_email as l_email then
 						l_oauth_id := l_email
-					elseif attached l_auth.user_login as l_login then
-						l_oauth_id := l_login
+					elseif attached l_auth.user_id as l_id then
+						l_oauth_id := l_id
 					end
 					if l_oauth_id /= Void then
 							-- check if the user exist
