@@ -8,6 +8,7 @@ RUN apt-get update 										\
 			curl bzip2 make gcc git-core 				\
 			apache2 libapache2-mod-fcgid libfcgi-dev 	\
 			sqlite3 libsqlite3-dev					 	\
+			default-libmysqlclient-dev \
         && rm -rf /var/lib/apt/lists/*
 
 #--no-install-recommends 	\

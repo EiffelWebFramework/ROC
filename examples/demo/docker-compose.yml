@@ -1,0 +1,49 @@
+version: '3.1'
+services:
+    roc_web:
+        build: .
+        restart: always
+        depends_on:
+          - roc_mysql
+        links:
+          - roc_mysql
+        volumes:
+          - ./docker-inc/site/config:/home/eifweb/www/html/site/config
+          - ./docker-inc/site/db:/home/eifweb/www/html/site/db
+        environment:
+            MYSQL_HOSTNAME: roc_mysql
+            MYSQL_USER: rocuser
+            MYSQL_PASSWORD: roc123
+            MYSQL_DATABASE: rocdb_123
+        ports:
+        - "8080:80"
+        privileged: true
+    
+    roc_mysql:
+        image: mysql:5.7
+        hostname: roc_mysql
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        ports:
+        - "3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: sql123
+            MYSQL_USER: rocuser
+            MYSQL_PASSWORD: roc123
+            MYSQL_DATABASE: rocdb_123
+        volumes:
+        - ./docker-inc/site/mysql:/var/lib/mysql
+        - ./docker-inc/site/mysql-backup:/mnt/backup
+
+
+    roc_phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        restart: always
+        depends_on:
+          - roc_mysql
+        links:
+          - roc_mysql
+        environment:
+            PMA_HOST: roc_mysql
+        ports:
+          - "8081:80"
