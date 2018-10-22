@@ -9,7 +9,6 @@ RUN apt-get update 										\
 			apache2 libapache2-mod-fcgid libfcgi-dev 	\
 			sqlite3 libsqlite3-dev					 	\
 			default-libmysqlclient-dev					\
-			dos2unix 									\
         && rm -rf /var/lib/apt/lists/*
 
 #--no-install-recommends 	\
@@ -36,7 +35,6 @@ COPY docker-inc/files/build_service_fcgi $HOME/build_service_fcgi
 USER root
 RUN chown eifweb:eifweb $HOME/build_service_fcgi && chmod 755 $HOME/build_service_fcgi 
 USER eifweb
-#RUN dos2unix $HOME/build_service_fcgi
 RUN ls -la $HOME && $HOME/build_service_fcgi $HOME/www
 
 USER root
