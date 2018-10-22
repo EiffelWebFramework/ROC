@@ -8,7 +8,8 @@ RUN apt-get update 										\
 			curl bzip2 make gcc git-core 				\
 			apache2 libapache2-mod-fcgid libfcgi-dev 	\
 			sqlite3 libsqlite3-dev					 	\
-			default-libmysqlclient-dev \
+			default-libmysqlclient-dev					\
+			dos2unix 									\
         && rm -rf /var/lib/apt/lists/*
 
 #--no-install-recommends 	\
@@ -31,16 +32,17 @@ WORKDIR $HOME
 RUN mkdir $WEBDIR
 
 #Build the debug EiffelWeb example and copy the executable to $HOME/
-COPY ./docker-inc/files/build_service_fcgi $HOME/build_service_fcgi
+COPY docker-inc/files/build_service_fcgi $HOME/build_service_fcgi
 USER root
-RUN chown eifweb:eifweb $HOME/build_service_fcgi && chmod 700 $HOME/build_service_fcgi
+RUN chown eifweb:eifweb $HOME/build_service_fcgi && chmod 755 $HOME/build_service_fcgi 
 USER eifweb
-RUN $HOME/build_service_fcgi $HOME/www
+#RUN dos2unix $HOME/build_service_fcgi
+RUN ls -la $HOME && $HOME/build_service_fcgi $HOME/www
 
 USER root
-COPY ./docker-inc/files/httpd.conf /etc/apache2/sites-enabled/000-default.conf
-ADD ./docker-inc/files/html $WEBDIR/html
-ADD ./site $WEBDIR/html/site
+COPY docker-inc/files/httpd.conf /etc/apache2/sites-enabled/000-default.conf
+ADD docker-inc/files/html $WEBDIR/html
+ADD site $WEBDIR/html/site
 RUN mkdir $WEBDIR/html/theme	\
 	&& mkdir $WEBDIR/html/site/www \
 	&& ln -s $WEBDIR/html/site/files files \
@@ -50,6 +52,6 @@ RUN mkdir $WEBDIR/html/theme	\
 
 #Setup apache as foreground (for docker purpose)
 RUN mkdir -p /etc/service/apache
-ADD ./docker-inc/files/apache.sh /etc/service/apache/run
+ADD docker-inc/files/apache.sh /etc/service/apache/run
 RUN chmod +x /etc/service/apache/run
 ENTRYPOINT ["/etc/service/apache/run"]
