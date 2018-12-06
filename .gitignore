@@ -7,3 +7,4 @@ EIFGENs
 .*.swo
 Thumbs.db
 *.dll
+examples/demo/docker-inc/site/mysql/*
