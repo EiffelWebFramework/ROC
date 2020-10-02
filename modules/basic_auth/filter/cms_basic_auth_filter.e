@@ -43,10 +43,14 @@ feature -- Basic operations
 							-- req.set_execution_variable ("security_content", create SECURITY_CONTEXT.make (l_user))
 							-- other authentication filters (OpenID, etc) should implement the same approach.
 						end
-						set_current_user (l_user)
+						if l_user.is_active then
+							set_current_user (l_user)
+						else
+							set_current_inactive_user (l_user)
+						end
 					end
 				else
-					api.logger.put_error (generator + ".execute login_valid failed for: " + l_auth_login, Void)
+					api.logger.put_error (generator + ".execute login_valid failed for: " + {UTF_CONVERTER}.utf_32_string_to_utf_8_string_8 (l_auth_login), Void)
 				end
 			end
 			execute_next (req, res)

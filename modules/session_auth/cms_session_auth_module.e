@@ -19,12 +19,16 @@ inherit
 			setup_hooks,
 			initialize,
 			install,
+			permissions,
+			has_permission_to_use_authentication,
 			session_api
 		end
 
 	CMS_WITH_WEBAPI
 
 	CMS_HOOK_BLOCK
+
+	CMS_HOOK_AUTHENTICATION
 
 create
 	make
@@ -42,6 +46,23 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	name: STRING = "session_auth"
+
+	permissions: LIST [READABLE_STRING_8]
+			-- List of permission ids, used by this module, and declared.
+		do
+			Result := Precursor
+			Result.force (perm_use_session_auth)
+		end
+
+	perm_use_session_auth: STRING = "use session_auth"
+
+	has_permission_to_use_authentication (api: CMS_API): BOOLEAN
+		do
+			Result := api.has_permission (perm_use_session_auth)
+			if not Result then
+				Result := attached api.setup.text_item ("modules." + name + ".login") as s and then s.is_case_insensitive_equal ("on")
+			end
+		end
 
 feature {CMS_API} -- Module Initialization			
 
@@ -80,6 +101,10 @@ feature {CMS_API} -- Module management
 					api.report_error ("[" + name + "]: installation failed!", l_sql_storage.error_handler.as_string_representation)
 				else
 					Precursor {CMS_AUTH_MODULE_I} (api) -- Mark it as installed.
+					if attached api.user_api.anonymous_user_role as ano then
+						ano.add_permission (perm_use_session_auth)
+						api.user_api.save_user_role (ano)
+					end
 				end
 			end
 		end
@@ -91,7 +116,7 @@ feature {CMS_EXECUTION} -- Administration
 			create Result.make (Current)
 		end
 
-feature {CMS_API, CMS_MODULE_WEBAPI} -- Access: API
+feature {CMS_API, CMS_MODULE_API, CMS_MODULE} -- Access: API
 
 	session_api: detachable CMS_SESSION_API
 			-- <Precursor>	
@@ -207,7 +232,7 @@ feature {NONE} -- Implementation: routes
 				l_password := p_password.value
 				l_user := api.user_api.user_with_credential (l_username_or_email, l_password)
 				if l_user /= Void then
-					if attached {CMS_TEMP_USER} l_user as l_temp_user then
+					if not l_user.is_active or attached {CMS_TEMP_USER} l_user as l_temp_user then
 						create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 						if attached smarty_template_login_block (req, Current, "login", api) as l_tpl_block then
 							l_tpl_block.set_value (l_username_or_email, "username")
@@ -256,9 +281,26 @@ feature -- Hooks configuration
 		do
 			Precursor (a_hooks)
 			a_hooks.subscribe_to_block_hook (Current)
+			a_hooks.subscribe_to_hook (Current, {CMS_HOOK_AUTHENTICATION})
 		end
 
 feature -- Hooks
+
+	get_login_redirection (a_response: CMS_RESPONSE; a_destination_url: detachable READABLE_STRING_8)
+		local
+			loc: READABLE_STRING_8
+		do
+			if has_permission_to_use_authentication (a_response.api) then
+				loc := a_response.redirection
+				if loc = Void or else loc.has_substring ("basic") then
+					if a_destination_url /= Void then
+						a_response.set_redirection (login_location + "?destination=" + secured_url_content (a_destination_url))
+					else
+						a_response.set_redirection (login_location)
+					end
+				end
+			end
+		end
 
 	block_list: ITERABLE [like {CMS_BLOCK}.name]
 		do

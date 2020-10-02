@@ -34,6 +34,25 @@ feature -- Element change
 			add_link ("self", Void, a_href)
 		end
 
+feature -- Fields / json
+
+	import_json_object (a_json: READABLE_STRING_8)
+		local
+			jp: JSON_PARSER
+		do
+			create jp.make_with_string (a_json)
+			jp.parse_content
+			if jp.is_valid and jp.is_parsed then
+				if attached jp.parsed_json_object as jo then
+					across
+						jo as ic
+					loop
+						resource.put (ic.item, ic.key)
+					end
+				end
+			end
+		end
+
 feature -- Fields		
 
 --	add_field (a_name: READABLE_STRING_GENERAL; a_value: detachable ANY)
@@ -78,7 +97,7 @@ feature -- Fields
 
 feature -- Links				
 
-	add_link (rel: READABLE_STRING_8; a_attname: detachable READABLE_STRING_8 ; a_att_href: READABLE_STRING_8)
+	add_link (rel: READABLE_STRING_GENERAL; a_attname: detachable READABLE_STRING_8 ; a_att_href: READABLE_STRING_8)
 		local
 			lnks: JSON_OBJECT
 			lnk: JSON_OBJECT
@@ -98,7 +117,7 @@ feature -- Links
 			lnks.put (lnk, rel)
 		end
 
-	add_templated_link (rel: READABLE_STRING_8; a_attname: detachable READABLE_STRING_8; a_att_href: READABLE_STRING_8)
+	add_templated_link (rel: READABLE_STRING_GENERAL; a_attname: detachable READABLE_STRING_8; a_att_href: READABLE_STRING_8)
 		local
 			lnks: JSON_OBJECT
 			lnk: JSON_OBJECT
@@ -124,7 +143,7 @@ feature -- Execution
 	process
 		local
 			m: WSF_PAGE_RESPONSE
-			j: READABLE_STRING_8
+			j: STRING_8
 			utf: UTF_CONVERTER
 		do
 			j := resource.representation
@@ -165,6 +184,6 @@ feature {NONE} -- Implementation factory
 invariant
 
 note
-	copyright: "2011-2018, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2020, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-16-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-16-0 http://www.eiffel.com/developers/xml/configuration-1-16-0.xsd" name="demo" uuid="3643E657-BCBE-46AA-931B-71EAEA877A18" library_target="demo">
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-18-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-18-0 http://www.eiffel.com/developers/xml/configuration-1-18-0.xsd" name="demo" uuid="3643E657-BCBE-46AA-931B-71EAEA877A18" library_target="demo">
 	<description>Example/demo for Eiffel ROC CMS library</description>
 	<target name="common" abstract="true">
 		<root class="DEMO_CMS_SERVER" feature="make_and_launch"/>
@@ -42,6 +42,11 @@
 		<library name="embedded_video_module" location="..\..\modules\embedded_video\embedded_video.ecf" readonly="false"/>
 		<library name="masquerade_auth_module" location="..\..\dev_modules\masquerade_auth\masquerade_auth.ecf" readonly="false"/>
 		<library name="persistence_sqlite3" location="..\..\library\persistence\sqlite3\sqlite3.ecf" readonly="false"/>
+		<!--
+			 By default, commented, since it depends on specific environment settings.
+		<library name="persistence_store_odbc" location="..\..\library\persistence\store_odbc\store_odbc.ecf"/>
+		<library name="persistence_store_mysql" location="..\..\library\persistence\store_mysql\store_mysql.ecf" />
+		-->
 		<library name="wsf" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf.ecf"/>
 		<library name="wsf_extension" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\wsf\wsf_extension.ecf" readonly="false"/>
 	</target>

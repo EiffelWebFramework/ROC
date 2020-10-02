@@ -107,7 +107,7 @@ feature -- HTTP Methods
 								ct := ic.item.content
 								s.append ("<li class=%""+ ct.content_type +"%">")
 								if attached ct.link as lnk then
-									l_page.append_link_to_html (lnk.title, lnk.location, Void, s)
+									l_page.append_cms_link_to_html (lnk, Void, s)
 								end
 								if attached api.content_type_webform_manager_by_name (ct.content_type) as l_wfm then
 									l_wfm.append_content_as_html_to (ct, True, s, l_page)
@@ -145,7 +145,7 @@ feature -- HTTP Methods
 						end
 					else
 						if taxonomy_api.error_handler.has_error then
-							l_page.add_error_message ({STRING_32} "Query error: " + taxonomy_api.error_handler.as_string_representation)
+							l_page.add_error_message ("Query error: " + html_encoded (taxonomy_api.error_handler.as_string_representation))
 						end
 						s.append ("No entity found.")
 					end

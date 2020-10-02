@@ -45,8 +45,11 @@ feature -- Access
 		        ```
 		           multi lines code
 		        ```
-		        (use ```lang ...``` to provide a lang such as eiffel, shell, ...)
-		
+		        use ```lang ... ``` to declare the language: replace "lang" by eiffel, shell, xml, ...
+		        ```eiffel
+		        	class EIFFEL ...
+		        ```
+		        		
 		Indenting:
 		        :first indent
 		        ::second indent
@@ -64,14 +67,14 @@ feature -- Conversion
 			wk: WIKI_CONTENT_TEXT
 			utf: UTF_CONVERTER
 			l_wikitext: STRING_8
-			vis: WIKI_XHTML_GENERATOR
+			vis: WIKITEXT_FILTER_XHTML_GENERATOR
 			html: STRING
 		do
 			if attached {STRING_8} a_text as s8 then
 				l_wikitext := s8
 			elseif attached {STRING_32} a_text as s32 then
 				if s32.is_valid_as_string_8 then
-					l_wikitext := s32.as_string_8
+					l_wikitext := s32.to_string_8
 				else
 					l_wikitext := adapted_text (s32)
 				end

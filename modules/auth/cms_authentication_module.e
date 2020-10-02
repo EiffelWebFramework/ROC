@@ -11,6 +11,7 @@ inherit
 		rename
 			module_api as auth_api
 		redefine
+			install,
 			initialize,
 			setup_hooks,
 			permissions,
@@ -28,6 +29,9 @@ inherit
 	CMS_HOOK_VALUE_TABLE_ALTER
 
 	CMS_HOOK_BLOCK
+		redefine
+			setup_block
+		end
 
 	CMS_HOOK_BLOCK_HELPER
 
@@ -67,6 +71,15 @@ feature {CMS_API} -- Initialization
 			Precursor (api)
 		end
 
+	install (api: CMS_API)
+		do
+			Precursor (api)
+			if attached api.user_api.authenticated_user_role as l_auth_role then
+				l_auth_role.add_permission (perm_view_own_account)
+				api.user_api.save_user_role (l_auth_role)
+			end
+		end
+
 feature -- Access
 
 	name: STRING = "auth"
@@ -75,15 +88,23 @@ feature -- Access
 			-- List of permission ids, used by this module, and declared.
 		do
 			Result := Precursor
-			Result.force ("account register")
+			Result.force (perm_account_register)
 			Result.force ("account auto activate")
-			Result.force ("edit own account")
+			Result.force (perm_view_own_account)
+			Result.force (perm_edit_own_account)
 			Result.force ("change own username")
 			Result.force ("change own password")
-			Result.force ("view users")
+			Result.force (perm_view_users)
 		end
 
 	auth_api: detachable CMS_AUTHENTICATION_API
+
+	perm_view_own_account: STRING = "view own account"
+	perm_edit_own_account: STRING = "edit own account"
+
+	perm_view_users: STRING = "view users"
+
+	perm_account_register: STRING = "account register"
 
 feature {CMS_EXECUTION} -- Administration
 
@@ -116,9 +137,19 @@ feature -- Access: docs
 
 feature -- Router
 
+	roc_register_location: STRING = "account/roc-register"
+
 	roc_login_location: STRING = "account/roc-login"
 
 	roc_logout_location: STRING = "account/roc-logout"
+
+	roc_account_location: STRING = "account"
+
+	roc_new_password_location: STRING = "account/new-password"
+
+	roc_reset_password_location: STRING = "account/reset-password"
+
+	roc_reactivate_location: STRING = "account/reactivate"
 
 	setup_router (a_router: WSF_ROUTER; a_api: CMS_API)
 			-- <Precursor>
@@ -132,20 +163,20 @@ feature -- Router
 		local
 			m: WSF_URI_MAPPING
 		do
-			create m.make_trailing_slash_ignored ("/account", create {WSF_URI_AGENT_HANDLER}.make (agent handle_account (a_api, ?, ?)))
+			create m.make_trailing_slash_ignored ("/" + roc_account_location, create {WSF_URI_AGENT_HANDLER}.make (agent handle_account (a_api, ?, ?)))
 			a_router.map (m, a_router.methods_head_get)
 
-			create m.make_trailing_slash_ignored ("/account/edit", create {WSF_URI_AGENT_HANDLER}.make (agent handle_edit_account (a_api, ?, ?)))
+			create m.make_trailing_slash_ignored ("/" + roc_account_location + "/edit", create {WSF_URI_AGENT_HANDLER}.make (agent handle_edit_account (a_api, ?, ?)))
 			a_router.map (m, a_router.methods_head_get)
 
 
 			a_router.handle ("/" + roc_login_location, create {WSF_URI_AGENT_HANDLER}.make (agent handle_login(a_api, ?, ?)), a_router.methods_head_get)
 			a_router.handle ("/" + roc_logout_location, create {WSF_URI_AGENT_HANDLER}.make (agent handle_logout(a_api, ?, ?)), a_router.methods_head_get)
-			a_router.handle ("/account/roc-register", create {WSF_URI_AGENT_HANDLER}.make (agent handle_register(a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle ("/" + roc_register_location, create {WSF_URI_AGENT_HANDLER}.make (agent handle_register(a_api, ?, ?)), a_router.methods_get_post)
 
-			a_router.handle ("/account/new-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_new_password(a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle ("/account/reset-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password(a_api, ?, ?)), a_router.methods_get_post)
-			a_router.handle ("/account/change/{field}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_change_field (a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle ("/" + roc_new_password_location, create {WSF_URI_AGENT_HANDLER}.make (agent handle_new_password(a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle ("/" + roc_reset_password_location, create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password(a_api, ?, ?)), a_router.methods_get_post)
+			a_router.handle ("/" + roc_account_location + "/change/{field}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_change_field (a_api, ?, ?)), a_router.methods_get_post)
 		end
 
 feature -- Hooks configuration
@@ -199,13 +230,17 @@ feature -- Hooks configuration
 			lnk: CMS_LOCAL_LINK
 		do
 			if attached a_response.user as u then
-				create lnk.make (u.name, "account")
-				lnk.set_weight (97)
-				a_menu_system.primary_menu.extend (lnk)
+				if a_response.has_permission (perm_view_own_account) then
+					create lnk.make (a_response.api.translation ("Your Account", Void), "account")
+						-- it could also use the display username
+					-- create lnk.make (u.name, "account")
 
-				create lnk.make ("Logout", roc_logout_location)
+					lnk.set_weight (97)
+					a_menu_system.primary_menu.extend (lnk)
+				end
+				create lnk.make (a_response.api.translation ("Logout", Void), roc_logout_location)
 			else
-				create lnk.make ("Login", roc_login_location)
+				create lnk.make (a_response.api.translation ("Login", Void), roc_login_location)
 			end
 			lnk.set_weight (98)
 			if
@@ -259,10 +294,22 @@ feature -- Handler
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
 			create b.make_empty
+			if r.is_authenticated then
+				if r.has_permission (perm_edit_own_account) then
+					create lnk.make ("View", "account/")
+					lnk.set_weight (1)
+					r.add_to_primary_tabs (lnk)
+
+					create lnk.make ("Edit", "account/edit")
+					lnk.set_weight (2)
+					r.add_to_primary_tabs (lnk)
+				end
+			end
+
 			l_user := r.user
 			create f.make (r.location, view_account_form_id)
 			if attached smarty_template_block (Current, "account_info", a_auth_api.cms_api) as l_tpl_block then
-				l_tpl_block.set_weight (-10)
+				l_tpl_block.set_weight (-1)
 				r.add_block (l_tpl_block, "content")
 			else
 				debug ("cms")
@@ -294,25 +341,22 @@ feature -- Handler
 				end
 			end
 
-			if r.is_authenticated then
-				create lnk.make ("View", "account/")
-				lnk.set_weight (1)
-				r.add_to_primary_tabs (lnk)
-
-				if r.has_permission ("edit own account") then
-					create lnk.make ("Edit", "account/edit")
-					lnk.set_weight (2)
-					r.add_to_primary_tabs (lnk)
-				end
-			end
-
 			a_auth_api.cms_api.hooks.invoke_form_alter (f, Void, r)
 			f.append_to_html (r.wsf_theme, b)
 
 			r.set_main_content (b)
 
 			if l_user = Void then
-				r.set_redirection (roc_login_location)
+				if
+					attached {WSF_STRING} req.item ("destination") as l_destination and then
+					attached l_destination.value as v and then
+					v.is_valid_as_string_8
+				then
+					r.set_redirection (roc_login_location + "?destination=" + secured_url_content (v.to_string_8))
+				else
+					r.set_redirection (roc_login_location)
+				end
+--				r.set_redirection (roc_login_location)
 			end
 			r.execute
 		end
@@ -325,13 +369,13 @@ feature -- Handler
 			lnk: CMS_LOCAL_LINK
 			l_form: CMS_FORM
 		do
-			if a_auth_api.cms_api.has_permission ("edit own account") then
+			if a_auth_api.cms_api.has_permission (perm_edit_own_account) then
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
 				create b.make_empty
 				l_user := r.user
 				create l_form.make (r.location, edit_account_form_id)
 				if attached smarty_template_block (Current, "account_edit", a_auth_api.cms_api) as l_tpl_block then
-					l_tpl_block.set_weight (-10)
+					l_tpl_block.set_weight (-1)
 					r.add_block (l_tpl_block, "content")
 				else
 					debug ("cms")
@@ -388,38 +432,17 @@ feature -- Handler
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
 				r.set_redirection ("account")
 				r.execute
-			elseif attached a_auth_api.cms_api.module_by_name ("session_auth") then
-					-- FIXME: find better solution to support a default login system.
-				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
-				if
-					attached {WSF_STRING} req.item ("destination") as l_destination and then
-					attached l_destination.value as v and then
-					v.is_valid_as_string_8
-				then
-					r.set_redirection ("account/auth/roc-session-login?destination=" + secured_url_content (v.to_string_8))
-				else
-					r.set_redirection ("account/auth/roc-session-login")
-				end
-
-				r.execute
-
-			elseif attached a_auth_api.cms_api.module_by_name ("basic_auth") then
-					-- FIXME: find better solution to support a default login system.
-				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
-
-				if
-					attached {WSF_STRING} req.item ("destination") as l_destination and then
-					attached l_destination.value as v and then
-					v.is_valid_as_string_8
-				then
-					r.set_redirection ("account/auth/roc-basic-login?destination=" + secured_url_content (v.to_string_8))
-				else
-					r.set_redirection ("account/auth/roc-basic-login")
-				end
-
-				r.execute
 			else
 				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
+				if
+					attached {WSF_STRING} req.item ("destination") as l_destination and then
+					attached l_destination.value as v and then
+					v.is_valid_as_string_8
+				then
+					a_auth_api.invoke_get_login_redirection (r, v.to_string_8)
+				else
+					a_auth_api.invoke_get_login_redirection (r, Void)
+				end
 				r.execute
 			end
 		end
@@ -430,8 +453,8 @@ feature -- Handler
 			loc: STRING
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_auth_api.cms_api)
-			if attached auth_strategy (req) as l_auth_strategy then
-				loc := l_auth_strategy
+			if attached auth_strategy (req) as l_auth_strategy and then l_auth_strategy.is_valid_as_string_8 then
+				loc := l_auth_strategy.to_string_8
 			else
 				loc := ""
 			end
@@ -483,17 +506,7 @@ feature -- Handler
 								r.set_value ("An account is already associated with that email address!", "error_email")
 								l_exist := True
 							end
-							if attached recaptcha_secret_key (a_auth_api.cms_api) as l_recaptcha_key then
-								if attached {WSF_STRING} req.form_parameter ("g-recaptcha-response") as l_recaptcha_response and then is_captcha_verified (l_recaptcha_key, l_recaptcha_response.value) then
-									l_captcha_passed := True
-								else
-										--| Bad or missing captcha
-									l_captcha_passed := False
-								end
-							else
-									--| reCaptcha is not setup, so no verification
-								l_captcha_passed := True
-							end
+							l_captcha_passed := is_form_captcha_verified (req, a_auth_api.cms_api)
 							if l_captcha_passed and then not l_exist then
 									-- New temp user
 								create u.make (l_name)
@@ -549,7 +562,7 @@ feature -- Handler
 								-- User exist create a new token and send a new email.
 							l_token := a_auth_api.new_token
 							l_user_api.new_password (l_token, l_user.id)
-							l_url := req.absolute_script_url ("/account/reset-password?token=" + l_token)
+							l_url := req.absolute_script_url ("/"+ roc_reset_password_location + "?token=" + l_token)
 
 								-- Send Email
 							create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (a_auth_api.cms_api))
@@ -573,7 +586,7 @@ feature -- Handler
 							-- User exist create a new token and send a new email.
 						l_token := a_auth_api.new_token
 						l_user_api.new_password (l_token, l_user.id)
-						l_url := req.absolute_script_url ("/account/reset-password?token=" + l_token)
+						l_url := req.absolute_script_url ("/" + roc_reset_password_location + "?token=" + l_token)
 
 							-- Send Email
 						create es.make (create {CMS_AUTHENTICATION_EMAIL_SERVICE_PARAMETERS}.make (a_auth_api.cms_api))
@@ -599,7 +612,7 @@ feature -- Handler
 			if attached {WSF_STRING} req.query_parameter ("token") as l_token then
 				r.set_value (l_token.value, "token")
 				if l_user_api.user_by_password_token (l_token.value) = Void then
-					r.set_value ("The token " + l_token.value + " is not valid, " + r.link ("click here", "account/new-password", Void) + " to generate a new token.", "error_token")
+					r.set_value ({STRING_32} "The token " + l_token.value + " is not valid, " + r.link ("click here", "account/new-password", Void) + " to generate a new token.", "error_token")
 					r.set_status_code ({HTTP_CONSTANTS}.bad_request)
 				end
 			end
@@ -764,15 +777,28 @@ feature -- Handler
 			loc: READABLE_STRING_8
 		do
 			loc := a_response.location
-			if a_block_id.is_case_insensitive_equal_general ("register") and then loc.starts_with ("account/roc-register") then
+			if a_block_id.is_case_insensitive_equal_general ("register") and then loc.starts_with (roc_register_location) then
 				get_block_view_register (a_block_id, a_response)
-			elseif a_block_id.is_case_insensitive_equal_general ("reactivate") and then loc.starts_with ("account/reactivate") then
+			elseif a_block_id.is_case_insensitive_equal_general ("reactivate") and then loc.starts_with (roc_reactivate_location) then
 				get_block_view_reactivate (a_block_id, a_response)
-			elseif a_block_id.is_case_insensitive_equal_general ("new_password") and then loc.starts_with ("account/new-password") then
+			elseif a_block_id.is_case_insensitive_equal_general ("new_password") and then loc.starts_with (roc_new_password_location) then
 				get_block_view_new_password (a_block_id, a_response)
-			elseif a_block_id.is_case_insensitive_equal_general ("reset_password") and then loc.starts_with ("account/reset-password") then
+			elseif a_block_id.is_case_insensitive_equal_general ("reset_password") and then loc.starts_with (roc_reset_password_location) then
 				get_block_view_reset_password (a_block_id, a_response)
 			end
+		end
+
+	setup_block (a_block: CMS_BLOCK; a_response: CMS_RESPONSE)
+			-- Setup block `a_block` and perform additional setup on `a_response` if needed
+			-- (such as linking with css, js, ...).
+			--| To be redefined if needed.
+		do
+--			if
+--				a_block.name.is_case_insensitive_equal_general ("register")
+--			then
+--				a_response.add_javascript_url ("https://www.google.com/recaptcha/api.js")
+--			end
+			a_response.add_javascript_url ("https://www.google.com/recaptcha/api.js")
 		end
 
 	new_change_username_form (a_response: CMS_RESPONSE): CMS_FORM
@@ -900,7 +926,15 @@ feature {NONE} -- Block views
 --						l_tpl_block.set_value (a_response.values.item ("email"), "email")
 --						l_tpl_block.set_value (a_response.values.item ("name"), "name")
 						l_tpl_block.set_value (form_registration_application_description (a_response.api), "application_description")
-						if attached recaptcha_site_key (a_response.api) as l_recaptcha_site_key then
+						l_tpl_block.set_value ("roccms-user-register", "form_id")
+						if attached recaptcha_site_html ("roccms-user-register", a_response.api) as l_recaptcha_site_html then
+							l_tpl_block.set_value (l_recaptcha_site_html, "recaptcha_site_html")
+						end
+						if
+							attached recaptcha_config (a_response.api) as cfg and then
+							attached cfg.site_key as l_recaptcha_site_key
+						then
+								-- Backward compatiblity
 							l_tpl_block.set_value (l_recaptcha_site_key, "recaptcha_site_key")
 						end
 						a_response.add_block (l_tpl_block, "content")
@@ -1029,7 +1063,7 @@ feature {NONE} -- Block views
 feature -- Access: configuration
 
 	form_registration_application_description (api: CMS_API): detachable READABLE_STRING_8
-			-- Get recaptcha security key.
+			-- Application description value for the form.
 		do
 			if attached api.module_configuration (Current, Void) as cfg then
 				if attached cfg.text_item ("forms.registration.application_description") as l_desc and then not l_desc.is_whitespace then
@@ -1038,23 +1072,44 @@ feature -- Access: configuration
 			end
 		end
 
-	recaptcha_secret_key (api: CMS_API): detachable READABLE_STRING_8
-			-- Get recaptcha security key.
+	recaptcha_action: STRING = "register"
+
+	recaptcha_config (api: CMS_API): detachable RECAPTCHA_CONFIG
 		do
 			if attached api.module_configuration (Current, Void) as cfg then
-				if attached cfg.text_item ("recaptcha.secret_key") as l_recaptcha_key and then not l_recaptcha_key.is_empty then
-					Result := api.utf_8_encoded (l_recaptcha_key)
+				if
+					attached cfg.text_item ("recaptcha.version") as v and then
+					not v.is_empty
+				then
+					create Result.make_with_version (api.utf_8_encoded (v))
+				else
+					create Result.make
+				end
+				if
+					attached cfg.text_item ("recaptcha.secret_key") as k and then
+					not k.is_empty
+				then
+					Result.set_secret_key (api.utf_8_encoded (k))
+				end
+				if
+					attached cfg.text_item ("recaptcha.site_key") as k and then
+					not k.is_empty
+				then
+					Result.set_site_key (api.utf_8_encoded (k))
 				end
 			end
 		end
 
-	recaptcha_site_key (api: CMS_API): detachable READABLE_STRING_8
-			-- Get recaptcha security key.
+	recaptcha_site_html (a_form_id: READABLE_STRING_8; api: CMS_API): detachable READABLE_STRING_8
+		local
+			l_client: RECAPTCHA_CLIENT
 		do
-			if attached api.module_configuration (Current, Void) as cfg then
-				if attached cfg.text_item ("recaptcha.site_key") as l_recaptcha_key and then not l_recaptcha_key.is_empty then
-					Result := api.utf_8_encoded (l_recaptcha_key)
-				end
+			if
+				attached recaptcha_config (api) as cfg and then
+				attached cfg.site_key as l_recaptcha_site_key
+			then
+				create l_client.make (cfg, l_recaptcha_site_key)
+				Result := l_client.client_html (a_form_id, recaptcha_action)
 			end
 		end
 
@@ -1062,26 +1117,47 @@ feature -- Response Alter
 
 	response_alter (a_response: CMS_RESPONSE)
 		do
-			a_response.add_javascript_url ("https://www.google.com/recaptcha/api.js")
 			a_response.add_style (a_response.module_resource_url (Current, "/files/css/auth.css", Void), Void)
 		end
 
 feature {NONE} -- Implementation
 
-	is_captcha_verified (a_secret: READABLE_STRING_8; a_response: READABLE_STRING_GENERAL): BOOLEAN
+	is_form_captcha_verified (req: WSF_REQUEST; api: CMS_API): BOOLEAN
+		do
+			if
+				attached recaptcha_config (api) as cfg and then
+				attached cfg.secret_key as l_secret_key
+			then
+				if attached {WSF_STRING} req.form_parameter ("g-recaptcha-response") as l_recaptcha_response then
+					Result := is_captcha_verified (cfg, l_secret_key, l_recaptcha_response.value)
+				else
+						--| missing captcha
+				end
+			else
+					--| reCaptcha is not setup, so no verification
+				Result := True
+			end
+		end
+
+	is_captcha_verified (cfg: RECAPTCHA_CONFIG; a_secret: READABLE_STRING_8; a_response: READABLE_STRING_GENERAL): BOOLEAN
 		local
 			api: RECAPTCHA_API
 			l_errors: STRING
 		do
 			write_debug_log (generator + ".is_captcha_verified with response: [" + utf_8_encoded (a_response) + "]")
 			create api.make (a_secret, a_response)
-			Result := api.verify
-			if not Result and then attached api.errors as l_api_errors then
+			if cfg.is_version_3 then
+				Result := api.verify_score (0.5, recaptcha_action)
+			else
+				Result := api.verify
+			end
+			if
+				not Result and then
+				attached api.errors as l_api_errors
+			then
 				create l_errors.make_empty
 				l_errors.append_character ('%N')
-				across
-					l_api_errors as ic
-				loop
+				across l_api_errors as ic loop
 					l_errors.append (ic.item)
 					l_errors.append_character ('%N')
 				end

@@ -353,7 +353,7 @@ feature -- Access: Site
 		local
 			s_max_age: READABLE_STRING_8
 		do
-			s_max_age := string_8_item ("auth." + a_auth + ".max_age")
+			s_max_age := string_8_item ({STRING_32} "auth." + a_auth + {STRING_32} ".max_age")
 			if s_max_age = Void then
 				s_max_age := string_8_item ("auth.max_age")
 			end
@@ -367,7 +367,7 @@ feature -- Access: Site
 	site_auth_token (a_auth: READABLE_STRING_GENERAL): detachable READABLE_STRING_8
 			-- token for cookie related to session based authentication.
 		do
-			Result := string_8_item ("auth." + a_auth + ".token")
+			Result := string_8_item ({STRING_32} "auth." + a_auth.to_string_32 + {STRING_32} ".token")
 			if Result = Void then
 				Result := string_8_item ("auth.token")
 			end
@@ -559,11 +559,9 @@ feature -- Access: storage
 		deferred
 		end
 
-	storage_configuration_driver: detachable READABLE_STRING_32
+	storage_configuration: detachable DATABASE_CONFIGURATION
 		do
-			if attached (create {APPLICATION_JSON_CONFIGURATION_HELPER}).new_database_configuration (environment.application_config_path) as l_database_config then
-				Result := l_database_config.driver
-			end
+			Result := (create {APPLICATION_JSON_CONFIGURATION_HELPER}).new_database_configuration (environment.application_config_path)
 		end
 
 	storage (a_error_handler: ERROR_HANDLER): detachable CMS_STORAGE
@@ -572,35 +570,42 @@ feature -- Access: storage
 			-- initialization.
 		local
 			retried: BOOLEAN
-			l_message: STRING
+			l_message: STRING_32
 		do
 			if not retried then
-				to_implement ("Refactor database setup")
+				debug
+					to_implement ("Refactor database setup")
+				end
 				if
-					attached storage_configuration_driver as l_db_driver and then
-					attached storage_drivers.item (l_db_driver) as l_builder
+					attached storage_configuration as l_db_cfg and then
+					attached storage_drivers.item (l_db_cfg.driver) as l_builder
 				then
-					Result := l_builder.storage (Current, a_error_handler)
+					Result := l_builder.storage (l_db_cfg, Current, a_error_handler)
+					if Result = Void and not a_error_handler.has_error then
+						a_error_handler.add_custom_error (0, "Database storage not found", l_message)
+					end
+				elseif not a_error_handler.has_error then
+					a_error_handler.add_custom_error (0, "Database driver not found", l_message)
 				end
 			else
-				to_implement ("Workaround code, persistence layer does not implement yet this kind of error handling.")
+				debug
+					to_implement ("Workaround code, persistence layer does not implement yet this kind of error handling.")
+				end
 					-- error handling.
 				create l_message.make (1024)
 				if attached (create {EXCEPTION_MANAGER}).last_exception as l_exception then
 					if attached l_exception.description as l_description then
-						l_message.append (l_description.as_string_32)
-						l_message.append ("%N%N")
+						l_message.append (l_description)
 					elseif attached l_exception.trace as l_trace then
 						l_message.append (l_trace)
-						l_message.append ("%N%N")
 					else
-						l_message.append (l_exception.out)
-						l_message.append ("%N%N")
+						l_message.append_string_general (l_exception.out)
 					end
 				else
-					l_message.append ("The application crash without available information")
-					l_message.append ("%N%N")
+					l_message.append_string_general ("The application crash without available information")
 				end
+				l_message.append_character ('%N')
+				l_message.append_character ('%N')
 				a_error_handler.add_custom_error (0, " Database Connection ", l_message)
 			end
 		rescue
@@ -635,6 +640,6 @@ feature -- Element change
 		end
 
 note
-	copyright: "2011-2018, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2020, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

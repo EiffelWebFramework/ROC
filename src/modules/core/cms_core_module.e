@@ -139,7 +139,7 @@ feature -- Security
 			Result.force ("admin path_alias")
 			Result.force ("edit path_alias")
 			Result.force ("use access_token")
-			Result.force ("view users")
+			Result.force (perm_view_users)
 			if attached cms_api as l_cms_api then
 				across
 					l_cms_api.formats as ic
@@ -148,6 +148,8 @@ feature -- Security
 				end
 			end
 		end
+
+	perm_view_users: STRING = "view users"
 
 	use_format_permission_name (a_format: CONTENT_FORMAT): STRING
 		do
@@ -193,8 +195,8 @@ feature -- Hook
 					across
 						l_profile as ic
 					loop
-						create tf.make_with_text (ic.key.to_string_32, ic.item)
-						tf.set_label (ic.key.to_string_32)
+						create tf.make_with_text (ic.key.to_string_8, ic.item) -- TODO: the key should be basic string 8, check if this is true.
+						tf.set_label (html_encoded (ic.key.to_string_32))
 						a_form.extend (tf)
 					end
 				end
@@ -202,7 +204,7 @@ feature -- Hook
 		end
 
 note
-	copyright: "2011-2018, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2020, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 	source: "[
 			Eiffel Software

@@ -16,6 +16,29 @@ inherit
 create
 	make
 
+
+feature -- Hook: new user hook
+
+	subscribe_to_user_management_hook (h: CMS_HOOK_USER_MANAGEMENT)
+			-- Add `h' as subscriber of value table alter hooks CMS_HOOK_USER_MANAGEMENT.
+		do
+			subscribe_to_hook (h, {CMS_HOOK_USER_MANAGEMENT})
+		end
+
+	invoke_new_user (a_user: CMS_USER)
+			-- Invoke new_user hook for user `a_user'.
+		do
+			if attached subscribers ({CMS_HOOK_USER_MANAGEMENT}) as lst then
+				across
+					lst as ic
+				loop
+					if attached {CMS_HOOK_USER_MANAGEMENT} ic.item as h then
+						h.new_user (a_user)
+					end
+				end
+			end
+		end
+
 feature -- Hook: value alter
 
 	subscribe_to_value_table_alter_hook (h: CMS_HOOK_VALUE_TABLE_ALTER)
@@ -209,6 +232,9 @@ feature -- Hook: block
 									l_origin_block := a_response.blocks.item (bl)
 									if l_origin_block = Void then
 										h.get_block_view (bl, a_response)
+										if attached a_response.blocks.item (bl) as l_block then
+											h.setup_block (l_block, a_response)
+										end
 										l_origin_block := a_response.blocks.item (bl)
 										if l_origin_block /= Void then
 												-- Previously, it was not included.
@@ -339,6 +365,6 @@ feature -- Hook: import
 
 
 note
-	copyright: "2011-2018, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2020, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

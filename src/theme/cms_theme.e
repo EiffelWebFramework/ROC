@@ -159,6 +159,7 @@ feature {NONE} -- Implementation
 				if lnk.is_expanded then
 					cl.append ("expanded ")
 				end
+				cl := lnk.extended_css_class (cl).to_string_8
 				if cl.is_empty then
 					s.append ("<li>")
 				else
@@ -186,7 +187,7 @@ feature {NONE} -- Implementation
 		end
 
 note
-	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2020, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 	source: "[
 			Eiffel Software

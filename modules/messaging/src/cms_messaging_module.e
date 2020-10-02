@@ -284,8 +284,7 @@ $(document).ready(function() {
 									l_email_title := resolved_template_text (api, l_title, l_user)
 									l_email_messg := resolved_template_text (api, l_message, l_user)
 
-
-									e := api.new_email (l_user_email, l_email_title, l_email_messg)
+									e := api.new_html_email (l_user_email, l_email_title, l_email_messg)
 
 									s.append (" <pre>")
 									s.append (e.message)
@@ -317,7 +316,7 @@ $(document).ready(function() {
 
 feature {NONE} -- Contact Message
 
-	resolved_template_text (api: CMS_API; a_text: READABLE_STRING_GENERAL; a_target_user: detachable CMS_USER): STRING_8
+	resolved_template_text (api: CMS_API; a_text: READABLE_STRING_GENERAL; a_target_user: detachable CMS_USER): READABLE_STRING_8
 		local
 			smt: CMS_SMARTY_TEMPLATE_TEXT
 		do

@@ -64,7 +64,7 @@ feature -- Operation
 		local
 			l_sql_params: STRING_TABLE [READABLE_STRING_8]
 			i,j,n: INTEGER
-			s: STRING
+			s: READABLE_STRING_8
 		do
 			create l_sql_params.make_caseless (0)
 			from
@@ -107,7 +107,7 @@ feature -- Operation
 					if l_sql_params.has (ic.key) then
 						l_sql_params.remove (ic.key)
 					else
-						error_handler.add_custom_error (-1, "useless value", "value for unexpected parameter [" + ic.key + "]")
+						error_handler.add_custom_error (-1, "useless value", {STRING_32} "value for unexpected parameter [" + ic.key.to_string_32 + "]")
 					end
 				end
 				across
@@ -118,7 +118,7 @@ feature -- Operation
 			end
 		end
 
-	sql_query (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
+	sql_query (a_sql_statement: READABLE_STRING_8; a_params: detachable STRING_TABLE [detachable ANY])
 			-- Execute sql query `a_sql_statement' with optional parameters `a_params'.
 		deferred
 		end
@@ -128,44 +128,50 @@ feature -- Operation
 		deferred
 		end
 
-	sql_insert (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
+	sql_insert (a_sql_statement: READABLE_STRING_8; a_params: detachable STRING_TABLE [detachable ANY])
 			-- Execute sql insert `a_sql_statement' with optional parameters `a_params'.
 		deferred
 		end
 
-	sql_modify (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
+	sql_modify (a_sql_statement: READABLE_STRING_8; a_params: detachable STRING_TABLE [detachable ANY])
 			-- Execute sql modify `a_sql_statement' with optional parameters `a_params'.
 		deferred
 		end
 
-	sql_delete (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
+	sql_delete (a_sql_statement: READABLE_STRING_8; a_params: detachable STRING_TABLE [detachable ANY])
 			-- Execute sql delete `a_sql_statement' with optional parameters `a_params'.
 		deferred
 		end
 
-	sql_finalize_query (a_sql_statement: STRING)
+	sql_finalize_query (a_sql_statement: READABLE_STRING_8)
 		do
 			sql_finalize_statement (a_sql_statement)
 		end
 
-	sql_finalize_insert (a_sql_statement: STRING)
+	sql_finalize_insert (a_sql_statement: READABLE_STRING_8)
 		do
 			sql_finalize_statement (a_sql_statement)
 		end
 
-	sql_finalize_modify (a_sql_statement: STRING)
+	sql_finalize_modify (a_sql_statement: READABLE_STRING_8)
 		do
 			sql_finalize_statement (a_sql_statement)
 		end
 
-	sql_finalize_delete (a_sql_statement: STRING)
+	sql_finalize_delete (a_sql_statement: READABLE_STRING_8)
 		do
 			sql_finalize_statement (a_sql_statement)
 		end
 
-	sql_finalize_statement (a_sql_statement: STRING)
+	sql_finalize_statement (a_sql_statement: READABLE_STRING_8)
 		do
 			sql_finalize
+			if
+				has_error and then
+				attached api as l_cms_api
+			then
+				l_cms_api.log_error ("database", generator + "." + l_cms_api.html_encoded (error_handler.as_string_representation) + "%N<p>SQL=%""+  l_cms_api.html_encoded (a_sql_statement) +"%"</p>", Void)
+			end
 		end
 
 feature -- Helper
@@ -207,7 +213,7 @@ feature -- Helper
 			err: BOOLEAN
 			err_msg: STRING_32
 			cl: CELL [INTEGER]
-			l_sql: STRING
+			l_sql: READABLE_STRING_8
 		do
 			reset_error
 			sql_begin_transaction
@@ -256,7 +262,7 @@ feature -- Helper
 	sql_table_exists (a_table_name: READABLE_STRING_8): BOOLEAN
 			-- Does table `a_table_name' exists?
 		local
-			l_sql: STRING
+			l_sql: READABLE_STRING_8
 		do
 			reset_error
 			l_sql := "SELECT count(*) FROM " + a_table_name + " ;"
@@ -270,7 +276,7 @@ feature -- Helper
 	sql_table_items_count (a_table_name: READABLE_STRING_8): INTEGER_64
 			-- Number of items in table `a_table_name'?
 		local
-			l_sql: STRING
+			l_sql: READABLE_STRING_8
 		do
 			reset_error
 			l_sql := "SELECT count(*) FROM " + a_table_name + " ;"
@@ -350,7 +356,7 @@ feature -- Access
 		deferred
 		end
 
-	sql_read_string (a_index: INTEGER): detachable STRING
+	sql_read_string_8, sql_read_string (a_index: INTEGER): detachable READABLE_STRING_8
 			-- Retrieved value at `a_index' position in `item'.
 		local
 			l_item: like sql_item
@@ -372,7 +378,7 @@ feature -- Access
 			end
 		end
 
-	sql_read_string_32 (a_index: INTEGER): detachable STRING_32
+	sql_read_string_32 (a_index: INTEGER): detachable READABLE_STRING_32
 			-- Retrieved value at `a_index' position in `item'.
 		local
 			l_item: like sql_item
@@ -415,14 +421,35 @@ feature -- Access
 
 feature -- Conversion
 
-	sql_statement (a_statement: STRING): STRING
+	sql_statement (a_statement: READABLE_STRING_8): READABLE_STRING_8
 			-- Statement normalized for underlying SQL database.
 		deferred
 		end
 
+feature -- Parameters helpers
+
+	sql_parameters (nb: INTEGER; d: detachable ITERABLE [TUPLE [name: READABLE_STRING_GENERAL; value: detachable ANY]]): STRING_TABLE [detachable ANY]
+		do
+			create Result.make (nb)
+			if d /= Void then
+				sql_append_parameters (d, Result)
+			end
+		end
+
+	sql_append_parameters (d: ITERABLE [TUPLE [name: READABLE_STRING_GENERAL; value: detachable ANY]]; a_params: STRING_TABLE [detachable ANY])
+		do
+			across
+				d as ic
+			loop
+				if attached ic.item as l_item then
+					a_params.put (l_item.value, l_item.name)
+				end
+			end
+		end
+
 feature {NONE} -- Implementation
 
-	next_sql_statement (a_script: STRING; a_start_index: INTEGER; a_offset: CELL [INTEGER]): detachable STRING
+	next_sql_statement (a_script: STRING; a_start_index: INTEGER; a_offset: CELL [INTEGER]): detachable STRING_8
 		local
 			i,j,n: INTEGER
 			c: CHARACTER
@@ -511,6 +538,6 @@ feature {NONE} -- Implementation
 		end
 
 note
-	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2020, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

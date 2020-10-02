@@ -21,7 +21,7 @@ feature -- Core
 		deferred
 		end
 
-	based_path (p: STRING): STRING
+	based_path (p: READABLE_STRING_8): STRING
 			-- Path `p' in the context of the `base_url'
 		do
 			if attached base_url as l_base_url then
@@ -35,7 +35,7 @@ feature -- Core
 					end
 				end
 			else
-				Result := p
+				Result := p.to_string_8
 			end
 		end
 
@@ -55,6 +55,11 @@ feature -- Link
 		do
 			create Result.make (32)
 			append_link_with_raw_text_to_html (a_raw_text, a_path, opts, Result)
+		end
+
+	append_cms_link_to_html (lnk: CMS_LINK; opts: detachable CMS_API_OPTIONS; a_html: STRING_8)
+		do
+			append_link_to_html (lnk.title, lnk.location, opts, a_html)
 		end
 
 	append_link_to_html (a_text: detachable READABLE_STRING_GENERAL; a_path: READABLE_STRING_8; opts: detachable CMS_API_OPTIONS; a_html: STRING_8)
@@ -101,7 +106,7 @@ feature -- Link
 
 feature -- Url
 
-	absolute_url (a_path: STRING; opts: detachable CMS_API_OPTIONS): STRING
+	absolute_url (a_path: READABLE_STRING_8; opts: detachable CMS_API_OPTIONS): STRING_8
 		local
 			l_opts: detachable CMS_API_OPTIONS
 		do
@@ -113,14 +118,15 @@ feature -- Url
 			Result := url (a_path, l_opts)
 		end
 
-	url (a_path: READABLE_STRING_8; opts: detachable CMS_API_OPTIONS): STRING
+	url (a_path: READABLE_STRING_8; opts: detachable CMS_API_OPTIONS): STRING_8
 			-- URL for path `a_path' and optional parameters from `opts'.
 			--| Options `opts' could be
 			--|  - absolute: True|False	=> return absolute url
 			--|  - query: string		=> append "?query"
 			--|  - fragment: string		=> append "#fragment"
 		local
-			q,f: detachable STRING_8
+			q: detachable STRING_8
+			f: detachable READABLE_STRING_8
 			l_abs: BOOLEAN
 		do
 			l_abs := False
@@ -129,7 +135,7 @@ feature -- Url
 				l_abs := opts.boolean_item ("absolute", l_abs)
 				if attached opts.item ("query") as l_query then
 					if attached {READABLE_STRING_8} l_query as s_value then
-						q := s_value
+						q := s_value.to_string_8
 					elseif attached {ITERABLE [TUPLE [key, value: READABLE_STRING_GENERAL]]} l_query as lst then
 						create q.make_empty
 						across
@@ -168,16 +174,18 @@ feature -- Url
 						end
 					end
 				else
-					Result := a_path
+					Result := a_path.to_string_8
 				end
 			else
 				Result := based_path (a_path)
 			end
 			if q /= Void then
-				Result.append ("?" + q)
+				Result.append_character ('?')
+				Result.append (q)
 			end
 			if f /= Void then
-				Result.append ("#" + f)
+				Result.append_character ('#')
+				Result.append (f)
 			end
 		end
 
@@ -193,6 +201,6 @@ feature -- Url
 		end
 
 note
-	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	copyright: "2011-2020, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
 	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
