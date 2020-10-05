@@ -5,6 +5,9 @@ before_script:
     - source ./eiffel.rc      
     - echo `ec -version`
     - cd $current_dir
+    - git clone --depth 1 https://github.com/EiffelSoftware/libraries.git
+    - export EIFFEL_SRC=$current_dir/libraries/Src
+    - export ISE_LIBRARY=EIFFEL_SRC
     - echo Check projects compilation status...
 branches:
   only:
