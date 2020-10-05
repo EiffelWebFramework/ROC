@@ -7,7 +7,7 @@ before_script:
     - cd $current_dir
     - git clone --depth 1 https://github.com/EiffelSoftware/libraries.git .es-libs
     - export EIFFEL_SRC=$current_dir/.es-libs/Src
-    - export ISE_LIBRARY=EIFFEL_SRC
+    - export ISE_LIBRARY=$EIFFEL_SRC
     - echo Check projects compilation status...
     - echo "[$current_dir/.es-libs]" > .compile_all_ignore
 branches:
