@@ -5,16 +5,17 @@ before_script:
     - source ./eiffel.rc      
     - echo `ec -version`
     - cd $current_dir
-    - git clone --depth 1 https://github.com/EiffelSoftware/libraries.git
-    - export EIFFEL_SRC=$current_dir/libraries/Src
+    - git clone --depth 1 https://github.com/EiffelSoftware/libraries.git .es-libs
+    - export EIFFEL_SRC=$current_dir/.es-libs/Src
     - export ISE_LIBRARY=EIFFEL_SRC
     - echo Check projects compilation status...
+    - echo "[$current_dir/.es-libs]" > .compile_all_ignore
 branches:
   only:
   - master
   - develop
   - v1
   
-script: compile_all -ecb -melt -list_failures -log_verbose -clean -options dotnet=false
+script: compile_all -ecb -melt -list_failures -log_verbose -clean -options dotnet=false -ignore $current_dir/.compile_all_ignore
 group: stable
 os: linux
